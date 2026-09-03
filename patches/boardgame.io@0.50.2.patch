@@ -1,0 +1,106 @@
+diff --git a/dist/boardgameio.es.js b/dist/boardgameio.es.js
+index d6bda465802ac8ca2b2c8e2ac21fd3341bdb3095..b276261412bbb1e35afaec01d0661a0ce25f8faa 100644
+--- a/dist/boardgameio.es.js
++++ b/dist/boardgameio.es.js
+@@ -13888,10 +13888,12 @@ const getFilterPlayerView = (game) => (playerID, payload) => {
+         case 'sync': {
+             const [matchID, syncInfo] = payload.args;
+             const filteredState = applyPlayerView(game, playerID, syncInfo.state);
++            const filteredInitialState = applyPlayerView(game, playerID, syncInfo.initialState);
+             const log = redactLog(syncInfo.log, playerID);
+             const newSyncInfo = {
+                 ...syncInfo,
+                 state: filteredState,
++                initialState: filteredInitialState,
+                 log,
+             };
+             return {
+diff --git a/dist/boardgameio.js b/dist/boardgameio.js
+index deea92d5649d7b6af12b0eaeb1fa67d342435f29..97a7afa8ade5745209d24874b0443e76f1d4065d 100644
+--- a/dist/boardgameio.js
++++ b/dist/boardgameio.js
+@@ -13895,10 +13895,12 @@ const getFilterPlayerView = (game) => (playerID, payload) => {
+         case 'sync': {
+             const [matchID, syncInfo] = payload.args;
+             const filteredState = applyPlayerView(game, playerID, syncInfo.state);
++            const filteredInitialState = applyPlayerView(game, playerID, syncInfo.initialState);
+             const log = redactLog(syncInfo.log, playerID);
+             const newSyncInfo = {
+                 ...syncInfo,
+                 state: filteredState,
++                initialState: filteredInitialState,
+                 log,
+             };
+             return {
+diff --git a/dist/cjs/filter-player-view-a8eeb11e.js b/dist/cjs/filter-player-view-a8eeb11e.js
+index 707efb964012c97d30085b67af36a2ac8bd51e26..b54cd24051b7ac2eb07252d39f3f7626c04ba2d5 100644
+--- a/dist/cjs/filter-player-view-a8eeb11e.js
++++ b/dist/cjs/filter-player-view-a8eeb11e.js
+@@ -38,10 +38,12 @@ const getFilterPlayerView = (game) => (playerID, payload) => {
+         case 'sync': {
+             const [matchID, syncInfo] = payload.args;
+             const filteredState = applyPlayerView(game, playerID, syncInfo.state);
++            const filteredInitialState = applyPlayerView(game, playerID, syncInfo.initialState);
+             const log = redactLog(syncInfo.log, playerID);
+             const newSyncInfo = {
+                 ...syncInfo,
+                 state: filteredState,
++                initialState: filteredInitialState,
+                 log,
+             };
+             return {
+diff --git a/dist/cjs/server.js b/dist/cjs/server.js
+index e6848d4a594e3019a521a26fccea7d440da18162..6d8bae04e708109bdb6fb9f258ee1f50c92f80c3 100644
+--- a/dist/cjs/server.js
++++ b/dist/cjs/server.js
+@@ -3707,10 +3707,12 @@ const getFilterPlayerView = (game) => (playerID, payload) => {
+         case 'sync': {
+             const [matchID, syncInfo] = payload.args;
+             const filteredState = applyPlayerView(game, playerID, syncInfo.state);
++            const filteredInitialState = applyPlayerView(game, playerID, syncInfo.initialState);
+             const log = redactLog(syncInfo.log, playerID);
+             const newSyncInfo = {
+                 ...syncInfo,
+                 state: filteredState,
++                initialState: filteredInitialState,
+                 log,
+             };
+             return {
+diff --git a/dist/esm/filter-player-view-43ed49b0.js b/dist/esm/filter-player-view-43ed49b0.js
+index 906c3dfe6c1295048f9497fc7ae0c63635dccb6d..fe9de191fe8b6ef13ce7734ac4a3afdca3d62f25 100644
+--- a/dist/esm/filter-player-view-43ed49b0.js
++++ b/dist/esm/filter-player-view-43ed49b0.js
+@@ -36,10 +36,12 @@ const getFilterPlayerView = (game) => (playerID, payload) => {
+         case 'sync': {
+             const [matchID, syncInfo] = payload.args;
+             const filteredState = applyPlayerView(game, playerID, syncInfo.state);
++            const filteredInitialState = applyPlayerView(game, playerID, syncInfo.initialState);
+             const log = redactLog(syncInfo.log, playerID);
+             const newSyncInfo = {
+                 ...syncInfo,
+                 state: filteredState,
++                initialState: filteredInitialState,
+                 log,
+             };
+             return {
+diff --git a/src/master/filter-player-view.ts b/src/master/filter-player-view.ts
+index 8aec6480611a2d79f143fb0f43fbd272a3d53220..8cb930eb87de164758bb4adf537c514b4c787d83 100644
+--- a/src/master/filter-player-view.ts
++++ b/src/master/filter-player-view.ts
+@@ -48,10 +48,16 @@ export const getFilterPlayerView =
+       case 'sync': {
+         const [matchID, syncInfo] = payload.args;
+         const filteredState = applyPlayerView(game, playerID, syncInfo.state);
++        const filteredInitialState = applyPlayerView(
++          game,
++          playerID,
++          syncInfo.initialState
++        );
+         const log = redactLog(syncInfo.log, playerID);
+         const newSyncInfo = {
+           ...syncInfo,
+           state: filteredState,
++          initialState: filteredInitialState,
+           log,
+         };
+         return {
