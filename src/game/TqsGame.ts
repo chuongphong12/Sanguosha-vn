@@ -88,6 +88,26 @@ export const TqsGame: Game<TqsGameState> = {
       true,
     ),
 
+    timeoutPrompt: authoritative(({ G, random }, promptID: number) => {
+      const prompt = G.prompt;
+      if (
+        prompt &&
+        prompt.id === promptID &&
+        prompt.kind === "card-response" &&
+        prompt.reason === "nullification"
+      ) {
+        answerCardPrompt(
+          G,
+          prompt.responderID,
+          promptID,
+          { kind: "pass" },
+          shuffleFrom(random),
+        );
+      } else {
+        return INVALID_MOVE;
+      }
+    }, true),
+
     discardCards: authoritative(
       ({ G, playerID, random }, cardIDs: string[]) => {
         if (!discardCardHand(G, playerID, cardIDs, shuffleFrom(random)))
