@@ -744,7 +744,7 @@ export class MainScreen extends Container {
 
       const panel = new Graphics()
         .roundRect(centerX - panelW / 2, panelY, panelW, panelH, 8)
-        .fill({ color: COLORS.paperDark, alpha: 0.9 })
+        .fill({ color: COLORS.black, alpha: 0.85 })
         .stroke({ color: COLORS.gold, width: 2 });
       this.content.addChild(panel);
 
@@ -753,8 +753,8 @@ export class MainScreen extends Container {
         centerX,
         panelY + 20,
         24,
-        COLORS.red,
-        0,
+        COLORS.gold,
+        0.5,
         "center",
       );
 
@@ -774,12 +774,12 @@ export class MainScreen extends Container {
         text: skillsText.trim().normalize("NFC"),
         style: {
           fontFamily: GAME_FONT_FAMILY,
-          fontSize: 16,
-          fill: COLORS.paper,
+          fontSize: 18,
+          fill: COLORS.white,
           align: "left",
           wordWrap: true,
           wordWrapWidth: panelW - 40,
-          lineHeight: 22,
+          lineHeight: 24,
         },
       });
       skillsLabel.anchor.set(0, 0);
