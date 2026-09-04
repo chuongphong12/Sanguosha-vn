@@ -11,7 +11,11 @@ import {
   getVirtualConversions,
 } from "../../../game/cardEngine";
 import { CARD_DEFINITIONS } from "../../../game/catalog/cards";
-import { GENERALS_BY_ID, hasLordSkill } from "../../../game/catalog/generals";
+import {
+  GENERALS_BY_ID,
+  hasLordSkill,
+  SKILLS,
+} from "../../../game/catalog/generals";
 import type {
   CardDefinition,
   CardResponsePrompt,
@@ -69,6 +73,7 @@ export class MainScreen extends Container {
   private state: MatchClientState = null;
   private selectedCardIDs = new Set<string>();
   private selectedTargetIDs: PlayerID[] = [];
+  private selectedCandidateID: string | null = null;
   private selectedZoneChoices: ZoneCardChoice[] = [];
   private selectedPromptPlayerIDs: PlayerID[] = [];
   private lastPromptID: number | null = null;
@@ -193,6 +198,20 @@ export class MainScreen extends Container {
     this.drawSeats(G);
     this.drawLog(G);
     this.drawPrivateArea(G);
+
+    // Overlay for General Selection
+    const viewer = G.players[this.match!.currentViewerID];
+    const canSelectGeneral =
+      !viewer.generalSelected &&
+      viewer.generalCandidates.length > 0 &&
+      ((G.status === "lord-selection" &&
+        this.match!.currentViewerID === G.lordID) ||
+        (G.status === "general-selection" &&
+          this.match!.currentViewerID !== G.lordID));
+
+    if (canSelectGeneral) {
+      this.drawGeneralCandidates(G, viewer.generalCandidates);
+    }
   }
 
   private drawBackground(): void {
@@ -510,7 +529,13 @@ export class MainScreen extends Container {
       ((G.status === "lord-selection" && viewerID === G.lordID) ||
         (G.status === "general-selection" && viewerID !== G.lordID));
     if (canSelectGeneral) {
-      this.drawGeneralCandidates(G, player.generalCandidates, top + 42);
+      this.addText(
+        "Hãy chọn Võ Tướng",
+        this.viewportWidth / 2,
+        top + 20,
+        24,
+        COLORS.gold,
+      );
       return;
     }
 
@@ -633,41 +658,139 @@ export class MainScreen extends Container {
   private drawGeneralCandidates(
     G: TqsPlayerViewState,
     candidates: string[],
-    y: number,
   ): void {
-    this.addText("Chọn Võ Tướng", 34, y, 16, COLORS.paperDark, 0, "left");
+    const centerY = this.viewportHeight / 2;
+    const centerX = this.viewportWidth / 2;
     const viewer = G.players[this.match!.currentViewerID];
-    const includesLordSkill =
-      viewer.role === "lord" && candidates.some(hasLordSkill);
-    const buttonGap = 8;
-    const availableWidth = this.viewportWidth - 68;
-    const buttonWidth = Math.min(
-      180,
-      (availableWidth - buttonGap * (candidates.length - 1)) /
-        candidates.length,
+
+    // Dim the background
+    const bg = new Graphics()
+      .rect(0, 0, this.viewportWidth, this.viewportHeight)
+      .fill({ color: COLORS.black, alpha: 0.7 });
+    bg.eventMode = "static"; // Block clicks to underlying UI
+    this.content.addChild(bg);
+
+    this.addText(
+      "CHỌN VÕ TƯỚNG",
+      centerX,
+      centerY - 250,
+      32,
+      COLORS.gold,
+      0,
+      "center",
     );
+
+    const gap = 40;
+    const cardW = 140;
+    const cardH = 196; // Standard ratio
+    const totalW = candidates.length * cardW + (candidates.length - 1) * gap;
+    const startX = centerX - totalW / 2 + cardW / 2;
+
     candidates.forEach((generalID, index) => {
-      const general = GENERALS_BY_ID[generalID];
-      const lordSkillLabel = hasLordSkill(generalID)
-        ? viewer.role === "lord"
-          ? "\nChủ Công Kỹ"
-          : ""
-        : "";
-      const x = 34 + index * (buttonWidth + buttonGap);
+      const isSelected = this.selectedCandidateID === generalID;
+      const x = startX + index * (cardW + gap);
+      const y = centerY - 100;
+
+      const cardContainer = new Container();
+      cardContainer.position.set(x, y);
+      cardContainer.eventMode = "static";
+      cardContainer.cursor = "pointer";
+      cardContainer.on("pointerdown", () => {
+        if (this.selectedCandidateID !== generalID) {
+          this.selectedCandidateID = generalID;
+          this.render();
+        }
+      });
+
+      // Frame / Selection Border
+      const frame = new Graphics()
+        .roundRect(-cardW / 2 - 4, -cardH / 2 - 4, cardW + 8, cardH + 8, 8)
+        .fill(isSelected ? COLORS.gold : COLORS.paperDark)
+        .stroke({ color: isSelected ? COLORS.red : COLORS.black, width: 2 });
+      cardContainer.addChild(frame);
+
+      // Portrait
+      let texture = Assets.get<Texture>(generalID);
+      if (!texture) texture = Assets.get<Texture>("unknown");
+      const sprite = new Sprite(texture);
+      sprite.width = cardW;
+      sprite.height = cardH;
+      sprite.anchor.set(0.5);
+      // mask
+      const mask = new Graphics()
+        .roundRect(-cardW / 2, -cardH / 2, cardW, cardH, 4)
+        .fill(0xffffff);
+      sprite.mask = mask;
+      cardContainer.addChild(mask);
+      cardContainer.addChild(sprite);
+
+      this.content.addChild(cardContainer);
+    });
+
+    if (this.selectedCandidateID) {
+      const general = GENERALS_BY_ID[this.selectedCandidateID];
+
+      // Info Panel
+      const panelW = 600;
+      const panelH = 150;
+      const panelY = centerY + 90;
+
+      const panel = new Graphics()
+        .roundRect(centerX - panelW / 2, panelY, panelW, panelH, 8)
+        .fill({ color: COLORS.paperDark, alpha: 0.9 })
+        .stroke({ color: COLORS.gold, width: 2 });
+      this.content.addChild(panel);
+
+      this.addText(
+        `${general.name} - Thể Lực: ${general.maxHP}`,
+        centerX,
+        panelY + 20,
+        24,
+        COLORS.red,
+        0,
+        "center",
+      );
+
+      let skillsText = "";
+      general.skillIDs.forEach((skillID) => {
+        const skill = SKILLS[skillID];
+        if (skill) {
+          skillsText += `[${skill.name}]\n`;
+        }
+      });
+      if (hasLordSkill(general.id) && viewer.role === "lord") {
+        skillsText +=
+          "\n[Chủ Công Kỹ] Tướng này có Chủ Công Kỹ, thích hợp làm Chủ Công.";
+      }
+
+      this.addText(
+        skillsText,
+        centerX,
+        panelY + 60,
+        16,
+        COLORS.paper,
+        panelW - 40,
+        "center",
+      );
+
+      // Confirm Button
       this.addButton(
-        `${general.name}\nThể Lực ${general.maxHP}${lordSkillLabel}`,
-        x + buttonWidth / 2,
-        y + (includesLordSkill ? 88 : 68),
-        buttonWidth,
-        70,
-        () => this.match!.move("selectGeneral", generalID),
+        "Xác Nhận",
+        centerX,
+        panelY + panelH + 40,
+        180,
+        50,
+        () => {
+          const selected = this.selectedCandidateID;
+          this.selectedCandidateID = null; // Clear state
+          this.match!.move("selectGeneral", selected!);
+        },
         COLORS.red,
         COLORS.paper,
         false,
-        { fontSize: 14, fontWeight: "700", paddingX: 12, paddingY: 10 },
+        { fontSize: 20, fontWeight: "700" },
       );
-    });
-    void G;
+    }
   }
 
   private drawActions(G: TqsPlayerViewState, viewerID: PlayerID): void {
