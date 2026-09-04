@@ -16,7 +16,7 @@ export function layoutActionRow(
   } = {},
 ): ActionRowLayout {
   const rightInset = options.rightInset ?? 34;
-  const bottomInset = options.bottomInset ?? 30;
+  const bottomInset = options.bottomInset ?? 280;
   const gap = options.gap ?? 8;
   const buttonHeight = options.buttonHeight ?? 48;
   const gapWidth = Math.max(0, buttonWidths.length - 1) * gap;
