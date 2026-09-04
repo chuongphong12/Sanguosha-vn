@@ -1,4 +1,4 @@
-import { Server } from "boardgame.io/server";
+import { Server, Origins } from "boardgame.io/server";
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { TqsGame } from "../src/game/TqsGame";
@@ -8,7 +8,7 @@ const roomPasswords = new Map<string, string>();
 
 const server = Server({
   games: [TqsGame],
-  origins: ["*"],
+  origins: [Origins.LOCALHOST, /^https?:\/\//],
 });
 
 const originalPost = server.router.post.bind(server.router);
