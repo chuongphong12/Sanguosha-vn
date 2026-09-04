@@ -19,7 +19,7 @@ export class LobbyUI {
     this.backendUrl =
       new URLSearchParams(window.location.search).get("backend") ||
       (import.meta as any).env?.VITE_BACKEND_URL ||
-      `http://${window.location.hostname}:8000`;
+      `https://tqs-server.onrender.com`;
     this.lobbyClient = new LobbyClient({ server: this.backendUrl });
     if (!this.container) {
       this.createDOM(onJoinMatch, onPlayOffline);
@@ -282,7 +282,7 @@ export class LobbyUI {
     this.backendUrl =
       new URLSearchParams(window.location.search).get("backend") ||
       (import.meta as any).env?.VITE_BACKEND_URL ||
-      `http://${window.location.hostname}:8000`;
+      `https://tqs-server.onrender.com`;
     this.lobbyClient = new LobbyClient({ server: this.backendUrl });
     try {
       const data = password ? { password } : {};

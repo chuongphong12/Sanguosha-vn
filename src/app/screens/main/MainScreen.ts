@@ -12,7 +12,6 @@ import {
 } from "../../../game/cardEngine";
 import { CARD_DEFINITIONS } from "../../../game/catalog/cards";
 import { GENERALS_BY_ID, hasLordSkill } from "../../../game/catalog/generals";
-import { ROLE_NAMES } from "../../../game/catalog/roles";
 import type {
   CardDefinition,
   CardResponsePrompt,
@@ -22,9 +21,8 @@ import type {
   TurnStep,
   ZoneCardChoice,
 } from "../../../game/model";
-import { CardView } from "../../ui/CardView";
-import { PlayerAvatar } from "../../ui/PlayerAvatar";
-import { EQUIP_ICON_ALIAS } from "../../ui/assetAliases";
+import { Dashboard } from "../../ui/Dashboard";
+import { SeatView } from "../../ui/SeatView";
 import { getEquipmentSlotViews } from "../../ui/equipmentView";
 import { layoutActionRow } from "../../ui/layout";
 import { fitScale } from "../../ui/textLayout";
@@ -213,12 +211,7 @@ export class MainScreen extends Container {
       .rect(18, 18, this.viewportWidth - 36, this.viewportHeight - 36)
       .stroke({ color: COLORS.gold, width: 1, alpha: 0.55 });
     this.content.addChild(background);
-    this.addTextureSprite(
-      "table",
-      this.viewportWidth,
-      this.viewportHeight,
-      0.14,
-    );
+    this.addTextureSprite("table", this.viewportWidth, this.viewportHeight, 0.8);
   }
 
   private addTextureSprite(
@@ -369,256 +362,76 @@ export class MainScreen extends Container {
   }
 
   private drawSeats(G: TqsPlayerViewState): void {
-    const top = 190;
-    const gap = 14;
-    const panelWidth = (this.viewportWidth - 74) / 2;
-    const panelHeight = 116;
+    const viewerID = this.match!.currentViewerID;
 
-    G.seatOrder.forEach((playerID, index) => {
-      const player = G.players[playerID];
-      const x = 30 + (index % 2) * (panelWidth + gap);
-      const y = top + Math.floor(index / 2) * (panelHeight + gap);
+    // Sort opponents starting from the next seat
+    const opponents: string[] = [];
+    const viewerIndex = G.seatOrder.indexOf(viewerID);
+    for (let i = 1; i < G.seatOrder.length; i++) {
+      opponents.push(G.seatOrder[(viewerIndex + i) % G.seatOrder.length]);
+    }
+
+    // Determine positions
+    const centerX = this.viewportWidth / 2;
+    const centerY = this.viewportHeight / 2 - 40;
+    const radiusX = this.viewportWidth / 2 - 140;
+    const radiusY = this.viewportHeight / 2 - 180;
+
+    opponents.forEach((playerID, index) => {
+      const isActor = this.requiredActorID(G) === playerID;
       const targetOrder = this.selectedTargetIDs.indexOf(playerID);
       const selected = targetOrder >= 0;
       const selectableTarget = selected || this.canSelectTarget(G, playerID);
-      const isActor = this.requiredActorID(G) === playerID;
-      const hasEquipmentGrid = panelWidth >= 620;
-      const equipmentGridWidth = hasEquipmentGrid
-        ? Math.min(420, panelWidth * 0.48)
-        : 0;
-      const playerInfoWidth = hasEquipmentGrid
-        ? panelWidth - equipmentGridWidth - 44
-        : panelWidth - 32;
-      const color = player.alive ? COLORS.ink : 0x332d28;
-      const panel = this.addPanel(
-        x,
-        y,
-        panelWidth,
-        panelHeight,
-        color,
-        selected ? COLORS.redBright : isActor ? COLORS.gold : COLORS.muted,
-        selected ? 3 : 1,
-      );
-      panel.eventMode = player.alive && selectableTarget ? "static" : "none";
-      panel.cursor = player.alive && selectableTarget ? "pointer" : "default";
-      panel.on("pointertap", () => {
-        if (selectableTarget) {
-          if (selected) {
-            const selectedCardID = [...this.selectedCardIDs][0];
-            const selectedCardName = selectedCardID
-              ? G.cards[selectedCardID]?.definitionID
-              : undefined;
-            if (selectedCardName === "borrowed-sword")
-              this.selectedTargetIDs.splice(targetOrder);
-            else this.selectedTargetIDs.splice(targetOrder, 1);
-          } else {
-            const maximum = this.maximumTargets(G);
-            if (this.selectedTargetIDs.length < maximum)
-              this.selectedTargetIDs.push(playerID);
+
+      const seat = new SeatView(G, playerID, {
+        selected,
+        isActor,
+        onTap: () => {
+          if (selectableTarget) {
+            if (selected) {
+              const selectedCardID = [...this.selectedCardIDs][0];
+              const selectedCardName = selectedCardID
+                ? G.cards[selectedCardID]?.definitionID
+                : undefined;
+              if (selectedCardName === "borrowed-sword")
+                this.selectedTargetIDs.splice(targetOrder);
+              else this.selectedTargetIDs.splice(targetOrder, 1);
+            } else {
+              const maximum = this.maximumTargets(G);
+              if (this.selectedTargetIDs.length < maximum)
+                this.selectedTargetIDs.push(playerID);
+            }
+            this.render();
           }
-          this.render();
-        }
+        },
       });
 
-      const publicRole = player.roleRevealed || G.status === "ended";
-      const role =
-        publicRole && player.role
-          ? ROLE_NAMES[player.role]
-          : "Thân Phận chưa công khai";
-      const publicGeneralID =
-        playerID === G.lordID || G.status === "playing" || G.status === "ended"
-          ? player.generalID
-          : null;
-      const general = publicGeneralID
-        ? GENERALS_BY_ID[publicGeneralID]?.name
-        : player.generalSelected
-          ? "Đã chọn Võ Tướng"
-          : "Chưa chọn Võ Tướng";
-      this.addText(
-        `P${player.seat + 1} · ${general}`,
-        x + 16,
-        y + 14,
-        18,
-        COLORS.paper,
-        0,
-        "left",
-        0,
-        playerInfoWidth,
-      );
-      this.addText(
-        role,
-        x + 16,
-        y + 42,
-        13,
-        publicRole && player.role ? COLORS.gold : COLORS.muted,
-        0,
-        "left",
-        0,
-        playerInfoWidth,
-      );
-      this.addText(
-        publicGeneralID
-          ? `Thể Lực: ${player.hp}/${player.maxHP} · Bài Trên Tay: ${player.hand.length}`
-          : player.generalSelected
-            ? "Đã hoàn tất lựa chọn bí mật"
-            : "Đang chuẩn bị",
-        x + 16,
-        y + 70,
-        14,
-        player.alive ? COLORS.paperDark : COLORS.muted,
-        0,
-        "left",
-        0,
-        playerInfoWidth,
-      );
-      if (hasEquipmentGrid) {
-        const judgementLabel =
-          player.judgement.length > 0
-            ? `Phán Xét: ${player.judgement
-                .map(
-                  (cardID) =>
-                    `【${CARD_DEFINITIONS[G.cards[cardID].definitionID].name}】`,
-                )
-                .join(" · ")}`
-            : "Phán Xét: Trống";
-        this.addText(
-          judgementLabel,
-          x + 16,
-          y + 94,
-          10,
-          player.judgement.length > 0 ? COLORS.paperDark : COLORS.muted,
-          0,
-          "left",
-          0,
-          playerInfoWidth,
-        );
+      seat.eventMode = selectableTarget ? "static" : "none";
+      seat.cursor = selectableTarget ? "pointer" : "default";
+
+      // Calculate angle (spread evenly across the top arc from 0 to PI)
+      let angle = Math.PI / 2; // Default 1 opponent (Top)
+      if (opponents.length > 1) {
+        // 0 is right, PI is left. We want left to right, so PI to 0
+        angle = Math.PI - (index / (opponents.length - 1)) * Math.PI;
       }
-      this.drawEquipmentSlots(
-        G,
-        player.equipment,
-        player.judgement,
-        x,
-        y,
-        panelWidth,
-        equipmentGridWidth,
+
+      seat.position.set(
+        centerX + Math.cos(angle) * radiusX - 50,
+        centerY - Math.sin(angle) * radiusY - 60,
       );
+
       if (selected) {
         this.addText(
           String(targetOrder + 1),
-          x + panelWidth - 22,
-          y + 18,
-          14,
+          seat.x + 80,
+          seat.y + 18,
+          20,
           COLORS.white,
         );
       }
-      if (!player.alive)
-        this.addText(
-          "ĐÃ TỬ TRẬN",
-          x + panelWidth - 18,
-          y + 90,
-          12,
-          COLORS.redBright,
-          1,
-          "right",
-        );
-    });
-  }
 
-  private drawEquipmentSlots(
-    G: TqsPlayerViewState,
-    equipment: TqsPlayerViewState["players"][PlayerID]["equipment"],
-    judgement: string[],
-    panelX: number,
-    panelY: number,
-    panelWidth: number,
-    gridWidth: number,
-  ): void {
-    const slots = getEquipmentSlotViews(G.cards, equipment);
-    if (gridWidth === 0) {
-      const equipped = slots.filter((slot) => slot.cardID);
-      const summary =
-        equipped.length > 0
-          ? `Trang Bị: ${equipped.map((slot) => slot.cardName).join(" · ")}`
-          : "Trang Bị: Chưa có";
-      const compactSummary =
-        judgement.length > 0
-          ? `${summary} · Phán Xét: ${judgement
-              .map(
-                (cardID) =>
-                  `【${CARD_DEFINITIONS[G.cards[cardID].definitionID].name}】`,
-              )
-              .join(" · ")}`
-          : summary;
-      this.addText(
-        compactSummary,
-        panelX + 16,
-        panelY + 94,
-        10,
-        equipped.length > 0 ? COLORS.paperDark : COLORS.muted,
-        0,
-        "left",
-        0,
-        panelWidth - 32,
-      );
-      return;
-    }
-
-    const gap = 8;
-    const slotWidth = (gridWidth - gap) / 2;
-    const slotHeight = 42;
-    const startX = panelX + panelWidth - gridWidth - 12;
-    const startY = panelY + 12;
-
-    slots.forEach((slot, index) => {
-      const x = startX + (index % 2) * (slotWidth + gap);
-      const y = startY + Math.floor(index / 2) * (slotHeight + 8);
-      const base = this.addPanel(
-        x,
-        y,
-        slotWidth,
-        slotHeight,
-        slot.cardID ? 0x2c2119 : 0x191512,
-        slot.cardID ? COLORS.gold : COLORS.muted,
-      );
-      base.eventMode = "none";
-      const card = slot.cardID ? G.cards[slot.cardID] : null;
-      const iconAlias = card ? EQUIP_ICON_ALIAS[card.definitionID] : null;
-      const iconTexture = iconAlias
-        ? (Assets.get<Texture>(iconAlias) ?? null)
-        : null;
-      if (iconTexture) {
-        const icon = new Sprite(iconTexture);
-        icon.position.set(x + 2, y + 2);
-        icon.width = slotWidth - 4;
-        icon.height = slotHeight - 4;
-        icon.alpha = 0.72;
-        icon.eventMode = "none";
-        this.content.addChild(icon);
-      }
-      const label = this.addText(
-        slot.label,
-        x + 9,
-        y + 7,
-        9,
-        slot.cardID ? COLORS.gold : COLORS.muted,
-        0,
-        "left",
-        0,
-        slotWidth - 18,
-      );
-      label.eventMode = "none";
-      const cardName = this.addText(
-        slot.cardLabel,
-        x + 9,
-        y + 22,
-        11,
-        slot.cardID ? COLORS.paper : COLORS.muted,
-        0,
-        "left",
-        0,
-        slotWidth - 18,
-      );
-      cardName.eventMode = "none";
+      this.content.addChild(seat);
     });
   }
 
@@ -663,7 +476,8 @@ export class MainScreen extends Container {
   private drawPrivateArea(G: TqsPlayerViewState): void {
     const viewerID = this.match!.currentViewerID;
     const player = G.players[viewerID];
-    const top = 600;
+    const top = this.viewportHeight - 250;
+
     const requiredActorID = this.requiredActorID(G);
     if (
       !this.match!.isRemote &&
@@ -674,26 +488,6 @@ export class MainScreen extends Container {
       this.drawHandoff(G, requiredActorID, top);
       return;
     }
-    const avatarHeight = Math.max(
-      76,
-      Math.min(110, this.viewportHeight - top - 170),
-    );
-    const avatarWidth = (avatarHeight * 100) / 122;
-    const handLeft = 50 + avatarWidth;
-    const role = player.role
-      ? ROLE_NAMES[player.role]
-      : "Thân Phận chưa xác định";
-    this.addText(
-      `P${player.seat + 1} · ${role}`,
-      34,
-      top,
-      18,
-      player.role === "lord" ? COLORS.gold : COLORS.paper,
-      0,
-      "left",
-      0,
-      handLeft - 42,
-    );
 
     const canSelectGeneral =
       !player.generalSelected &&
@@ -706,7 +500,6 @@ export class MainScreen extends Container {
     }
 
     if (G.status !== "playing" && G.status !== "ended") {
-      const requiredActorID = this.requiredActorID(G);
       const instruction = requiredActorID
         ? `Hãy chuyển sang góc nhìn của P${G.players[requiredActorID].seat + 1} để chọn Võ Tướng.`
         : "Đang chờ các người chơi hoàn tất việc chọn Võ Tướng.";
@@ -724,15 +517,50 @@ export class MainScreen extends Container {
       return;
     }
 
-    const avatar = new PlayerAvatar(player, {
-      width: avatarWidth,
-      height: avatarHeight,
-      isActiveActor: G.turn.activePlayerID === viewerID,
-    });
-    avatar.position.set(34, top + 22);
-    this.content.addChild(avatar);
+    const dashboard = new Dashboard(G, viewerID, {
+      viewportWidth: this.viewportWidth,
+      selectedCardIDs: this.selectedCardIDs,
+      handPage: this.handPage,
+      onCardTap: (cardID: string) => {
+        if (G.turn.step === "discard") {
+          if (this.selectedCardIDs.has(cardID))
+            this.selectedCardIDs.delete(cardID);
+          else this.selectedCardIDs.add(cardID);
+        } else {
+          const viewerWeaponID = player.equipment.weapon;
+          const promptAllowsSpear =
+            G.prompt?.kind === "card-response" &&
+            G.prompt.response === "slash" &&
+            G.prompt.allowSerpentSpear;
+          const playAllowsSpear =
+            !G.prompt &&
+            this.serpentSpearMode &&
+            viewerWeaponID !== undefined &&
+            G.cards[viewerWeaponID]?.definitionID === "serpent-spear";
+          const multiSelect = promptAllowsSpear || playAllowsSpear;
 
-    this.drawHand(G, viewerID, top, handLeft);
+          if (this.selectedCardIDs.has(cardID)) {
+            this.selectedCardIDs.delete(cardID);
+          } else {
+            if (!multiSelect) this.selectedCardIDs.clear();
+            else if (this.selectedCardIDs.size >= 2) return;
+            this.selectedCardIDs.add(cardID);
+          }
+          if (this.virtualAs === "slash" && this.selectedCardIDs.size === 0) {
+            this.virtualAs = null;
+          }
+        }
+        this.render();
+      },
+      onPageChange: (page: number) => {
+        this.handPage = page;
+        this.render();
+      },
+    });
+
+    dashboard.position.set(30, top);
+    this.content.addChild(dashboard);
+
     this.drawActions(G, viewerID);
   }
 
@@ -825,184 +653,6 @@ export class MainScreen extends Container {
       );
     });
     void G;
-  }
-
-  private drawHand(
-    G: TqsPlayerViewState,
-    viewerID: PlayerID,
-    y: number,
-    handLeft: number,
-  ): void {
-    const hand = G.players[viewerID].hand;
-    const equipmentCardIDs = this.getEquipmentConversionCardIDs(G, viewerID);
-    this.addText(
-      hand.length === 0 && equipmentCardIDs.length > 0
-        ? "TRANG BỊ DÙNG NHƯ LÁ KHÁC"
-        : equipmentCardIDs.length > 0
-          ? "BÀI TRÊN TAY · TRANG BỊ"
-          : "BÀI TRÊN TAY",
-      handLeft,
-      y,
-      12,
-      COLORS.gold,
-      0,
-      "left",
-      1.5,
-    );
-    const cardsPerPage = Math.max(1, 6 - equipmentCardIDs.length);
-    const pageCount = Math.max(1, Math.ceil(hand.length / cardsPerPage));
-    this.handPage = Math.min(this.handPage, pageCount - 1);
-    const visibleHand = hand.slice(
-      this.handPage * cardsPerPage,
-      (this.handPage + 1) * cardsPerPage,
-    );
-    const cardGap = 6;
-    const equipmentGap =
-      visibleHand.length > 0 && equipmentCardIDs.length > 0 ? 12 : 0;
-    const visibleCardCount = visibleHand.length + equipmentCardIDs.length;
-    const availableWidth = this.viewportWidth - handLeft - 34;
-    const maximumCardHeight = Math.max(
-      76,
-      Math.min(100, this.viewportHeight - y - 170),
-    );
-    const cardWidth = Math.min(
-      (maximumCardHeight * 93) / 130,
-      (availableWidth -
-        equipmentGap -
-        cardGap * Math.max(0, visibleCardCount - 1)) /
-        Math.max(1, visibleCardCount),
-    );
-    const cardHeight = (cardWidth * 130) / 93;
-    visibleHand.forEach((cardID, index) => {
-      const card = G.cards[cardID];
-      if (!card) return;
-      const selected = this.selectedCardIDs.has(cardID);
-      const cardView = new CardView(card, {
-        selected,
-        width: cardWidth,
-        height: cardHeight,
-        onTap: () => {
-          if (G.turn.step === "discard") {
-            if (selected) this.selectedCardIDs.delete(cardID);
-            else this.selectedCardIDs.add(cardID);
-          } else {
-            const viewerWeaponID = G.players[viewerID].equipment.weapon;
-            const promptAllowsSpear =
-              G.prompt?.kind === "card-response" &&
-              G.prompt.response === "slash" &&
-              G.prompt.allowSerpentSpear;
-            const playAllowsSpear =
-              !G.prompt &&
-              this.serpentSpearMode &&
-              viewerWeaponID !== undefined &&
-              G.cards[viewerWeaponID]?.definitionID === "serpent-spear";
-            const multiSelect =
-              promptAllowsSpear ||
-              playAllowsSpear ||
-              this.pendingSkill === "zhi-heng" ||
-              this.pendingSkill === "ren-de" ||
-              this.pendingSkill === "jie-yin";
-            if (multiSelect) {
-              if (selected) this.selectedCardIDs.delete(cardID);
-              else if (
-                this.pendingSkill === "zhi-heng" ||
-                this.pendingSkill === "ren-de" ||
-                this.selectedCardIDs.size < 2
-              )
-                this.selectedCardIDs.add(cardID);
-            } else {
-              this.selectedCardIDs = selected ? new Set() : new Set([cardID]);
-            }
-            this.selectedTargetIDs = [];
-          }
-          this.render();
-        },
-      });
-      cardView.position.set(
-        handLeft + index * (cardWidth + cardGap),
-        y + 22 - (selected ? 9 : 0),
-      );
-      this.content.addChild(cardView);
-    });
-    const equipmentLeft =
-      handLeft + visibleHand.length * (cardWidth + cardGap) + equipmentGap;
-    this.drawEquipmentConversions(
-      G,
-      equipmentCardIDs,
-      equipmentLeft,
-      y,
-      cardWidth,
-      cardHeight,
-    );
-    if (pageCount > 1) {
-      this.drawPager(
-        y - 4,
-        this.handPage,
-        pageCount,
-        (page) => {
-          this.handPage = page;
-          this.render();
-        },
-        handLeft + availableWidth / 2,
-      );
-    }
-  }
-
-  private getEquipmentConversionCardIDs(
-    G: TqsPlayerViewState,
-    viewerID: PlayerID,
-  ): string[] {
-    const prompt = G.prompt;
-    const respondingHere =
-      prompt?.kind === "card-response" &&
-      prompt.responderID === viewerID &&
-      !prompt.forbidCard;
-    const playingHere =
-      !prompt &&
-      G.turn.step === "play" &&
-      G.turn.activePlayerID === viewerID &&
-      !this.pendingSkill;
-    if (!respondingHere && !playingHere) return [];
-    const equipment = G.players[viewerID].equipment;
-    const equipCardIDs = Object.values(equipment).filter(
-      (cardID): cardID is string => Boolean(cardID),
-    );
-    return equipCardIDs.filter((cardID) =>
-      respondingHere
-        ? canRespondWithCard(G, viewerID, cardID, prompt.response)
-        : getVirtualConversions(G, viewerID, cardID).length > 0,
-    );
-  }
-
-  private drawEquipmentConversions(
-    G: TqsPlayerViewState,
-    cardIDs: string[],
-    x: number,
-    y: number,
-    cardWidth: number,
-    cardHeight: number,
-  ): void {
-    if (cardIDs.length === 0) return;
-    cardIDs.forEach((cardID, index) => {
-      const card = G.cards[cardID];
-      if (!card) return;
-      const selected = this.selectedCardIDs.has(cardID);
-      const cardView = new CardView(card, {
-        selected,
-        width: cardWidth,
-        height: cardHeight,
-        onTap: () => {
-          this.selectedCardIDs = selected ? new Set() : new Set([cardID]);
-          this.selectedTargetIDs = [];
-          this.render();
-        },
-      });
-      cardView.position.set(
-        x + index * (cardWidth + 6),
-        y + 22 - (selected ? 9 : 0),
-      );
-      this.content.addChild(cardView);
-    });
   }
 
   private drawActions(G: TqsPlayerViewState, viewerID: PlayerID): void {
