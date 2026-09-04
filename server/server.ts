@@ -1,4 +1,5 @@
-import { Origins, Server } from "boardgame.io/server";
+import { Server } from "boardgame.io/server";
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { TqsGame } from "../src/game/TqsGame";
 
@@ -20,7 +21,9 @@ const originalPost = server.router.post.bind(server.router);
       const pwd = ctx.request.body?.setupData?.password;
       if (matchID && pwd) {
         roomPasswords.set(matchID, pwd);
-        const fetched = await (server as any).db.fetch(matchID, { metadata: true });
+        const fetched = await (server as any).db.fetch(matchID, {
+          metadata: true,
+        });
         if (fetched.metadata) {
           delete fetched.metadata.setupData.password;
           fetched.metadata.setupData.hasPassword = true;

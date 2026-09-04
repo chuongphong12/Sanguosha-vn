@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { LobbyClient } from "boardgame.io/client";
 
 export class LobbyUI {
@@ -15,7 +16,10 @@ export class LobbyUI {
     ) => void,
     onPlayOffline: () => void,
   ) {
-    this.backendUrl = new URLSearchParams(window.location.search).get("backend") || (import.meta as any).env?.VITE_BACKEND_URL || `http://${window.location.hostname}:8000`;
+    this.backendUrl =
+      new URLSearchParams(window.location.search).get("backend") ||
+      (import.meta as any).env?.VITE_BACKEND_URL ||
+      `http://${window.location.hostname}:8000`;
     this.lobbyClient = new LobbyClient({ server: this.backendUrl });
     if (!this.container) {
       this.createDOM(onJoinMatch, onPlayOffline);
@@ -152,15 +156,18 @@ export class LobbyUI {
         const password = inputPass.value;
 
         try {
-          const created = await this.lobbyClient.createMatch("tam-quoc-sat-standard-2013", {
-            numPlayers: 4,
-            setupData: {
-              roomName,
-              hasPassword: isPrivate,
-              password: isPrivate ? password : null,
+          const created = await this.lobbyClient.createMatch(
+            "tam-quoc-sat-standard-2013",
+            {
+              numPlayers: 4,
+              setupData: {
+                roomName,
+                hasPassword: isPrivate,
+                password: isPrivate ? password : null,
+              },
+              unlisted: false, // We show it but require password
             },
-            unlisted: false, // We show it but require password
-          });
+          );
 
           // Auto join
           modalCreate.classList.add("hidden");
@@ -191,7 +198,9 @@ export class LobbyUI {
     listDiv.innerHTML = "<p>Đang thám thính...</p>";
 
     try {
-      const result = await this.lobbyClient.listMatches("tam-quoc-sat-standard-2013");
+      const result = await this.lobbyClient.listMatches(
+        "tam-quoc-sat-standard-2013",
+      );
       const matches = result.matches;
 
       if (matches.length === 0) {
@@ -270,23 +279,33 @@ export class LobbyUI {
       serverUrl?: string,
     ) => void,
   ) {
-    this.backendUrl = new URLSearchParams(window.location.search).get("backend") || (import.meta as any).env?.VITE_BACKEND_URL || `http://${window.location.hostname}:8000`;
+    this.backendUrl =
+      new URLSearchParams(window.location.search).get("backend") ||
+      (import.meta as any).env?.VITE_BACKEND_URL ||
+      `http://${window.location.hostname}:8000`;
     this.lobbyClient = new LobbyClient({ server: this.backendUrl });
     try {
       const data = password ? { password } : {};
       // Fetch current seats
-      const result = await this.lobbyClient.getMatch("tam-quoc-sat-standard-2013", matchID);
+      const result = await this.lobbyClient.getMatch(
+        "tam-quoc-sat-standard-2013",
+        matchID,
+      );
       const emptySeat = result.players.find((p) => !p.name);
       if (!emptySeat) {
         alert("Phòng đã đầy!");
         return;
       }
 
-      const joined = await this.lobbyClient.joinMatch("tam-quoc-sat-standard-2013", matchID, {
-        playerID: emptySeat.id.toString(),
-        playerName: this.playerName,
-        data,
-      });
+      const joined = await this.lobbyClient.joinMatch(
+        "tam-quoc-sat-standard-2013",
+        matchID,
+        {
+          playerID: emptySeat.id.toString(),
+          playerName: this.playerName,
+          data,
+        },
+      );
 
       this.hide();
       onJoinMatch(
@@ -297,10 +316,18 @@ export class LobbyUI {
       );
     } catch (err: unknown) {
       console.error(err);
-      if (err && typeof err === "object" && "response" in err && (err as any).response?.status === 401) {
+      if (
+        err &&
+        typeof err === "object" &&
+        "response" in err &&
+        (err as any).response?.status === 401
+      ) {
         alert("Sai khẩu lệnh!");
       } else {
-        alert("Không thể tiến vào phòng! " + (err instanceof Error ? err.message : String(err)));
+        alert(
+          "Không thể tiến vào phòng! " +
+            (err instanceof Error ? err.message : String(err)),
+        );
       }
     }
   }
