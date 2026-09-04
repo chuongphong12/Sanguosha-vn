@@ -211,7 +211,12 @@ export class MainScreen extends Container {
       .rect(18, 18, this.viewportWidth - 36, this.viewportHeight - 36)
       .stroke({ color: COLORS.gold, width: 1, alpha: 0.55 });
     this.content.addChild(background);
-    this.addTextureSprite("table", this.viewportWidth, this.viewportHeight, 0.8);
+    this.addTextureSprite(
+      "table",
+      this.viewportWidth,
+      this.viewportHeight,
+      0.8,
+    );
   }
 
   private addTextureSprite(
@@ -371,12 +376,6 @@ export class MainScreen extends Container {
       opponents.push(G.seatOrder[(viewerIndex + i) % G.seatOrder.length]);
     }
 
-    // Determine positions
-    const centerX = this.viewportWidth / 2;
-    const centerY = this.viewportHeight / 2 - 40;
-    const radiusX = this.viewportWidth / 2 - 140;
-    const radiusY = this.viewportHeight / 2 - 180;
-
     opponents.forEach((playerID, index) => {
       const isActor = this.requiredActorID(G) === playerID;
       const targetOrder = this.selectedTargetIDs.indexOf(playerID);
@@ -409,17 +408,27 @@ export class MainScreen extends Container {
       seat.eventMode = selectableTarget ? "static" : "none";
       seat.cursor = selectableTarget ? "pointer" : "default";
 
-      // Calculate angle (spread evenly across the top arc from 0 to PI)
-      let angle = Math.PI / 2; // Default 1 opponent (Top)
-      if (opponents.length > 1) {
-        // 0 is right, PI is left. We want left to right, so PI to 0
-        angle = Math.PI - (index / (opponents.length - 1)) * Math.PI;
+      let px = 0;
+      let py = 0;
+      const seatW = 140;
+      
+      if (opponents.length === 1) {
+        px = this.viewportWidth / 2 - seatW / 2;
+        py = 80;
+      } else if (opponents.length === 2) {
+        if (index === 0) { px = this.viewportWidth - seatW - 40; py = 120; }
+        else { px = 40; py = 120; }
+      } else if (opponents.length === 3) {
+        if (index === 0) { px = this.viewportWidth - seatW - 40; py = this.viewportHeight / 2 - 140; } // Right
+        else if (index === 1) { px = this.viewportWidth / 2 - seatW / 2; py = 60; } // Top
+        else { px = 40; py = this.viewportHeight / 2 - 140; } // Left
+      } else {
+        // Fallback for more players: spread across top edge
+        px = 40 + (index * (this.viewportWidth - seatW - 80)) / (opponents.length - 1);
+        py = 80;
       }
 
-      seat.position.set(
-        centerX + Math.cos(angle) * radiusX - 50,
-        centerY - Math.sin(angle) * radiusY - 60,
-      );
+      seat.position.set(px, py);
 
       if (selected) {
         this.addText(
@@ -436,22 +445,19 @@ export class MainScreen extends Container {
   }
 
   private drawLog(G: TqsPlayerViewState): void {
-    const y = 466;
-    const height = 114;
-    this.addPanel(
-      30,
-      y,
-      this.viewportWidth - 60,
-      height,
-      0x181411,
-      COLORS.muted,
-    );
-    this.addText("DIỄN BIẾN", 46, y + 14, 12, COLORS.gold, 0, "left", 1.5);
-    const entries = G.log.slice(-4);
+    const height = 140;
+    const width = 360;
+    const y = this.viewportHeight - 250 - height - 10;
+    const x = 20;
+
+    this.addPanel(x, y, width, height, 0x181411, COLORS.gold, 0.75);
+
+    this.addText("DIỄN BIẾN", x + 16, y + 14, 13, COLORS.gold, 0, "left", 2);
+    const entries = G.log.slice(-5);
     if (entries.length === 0) {
       this.addText(
         "Chưa có diễn biến nào.",
-        46,
+        x + 16,
         y + 44,
         13,
         COLORS.muted,
@@ -463,12 +469,14 @@ export class MainScreen extends Container {
     entries.forEach((entry, index) => {
       this.addText(
         entry.message,
-        46,
-        y + 36 + index * 18,
+        x + 16,
+        y + 36 + index * 20,
         12,
-        COLORS.paperDark,
+        COLORS.paper,
         0,
         "left",
+        0,
+        width - 32,
       );
     });
   }
