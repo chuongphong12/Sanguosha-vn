@@ -68,6 +68,7 @@ export interface SkillDefinition {
   id: string;
   name: string;
   chineseName: string;
+  description: string;
   lordSkill?: boolean;
   lockedSkill?: boolean;
 }

@@ -739,7 +739,7 @@ export class MainScreen extends Container {
 
       // Info Panel
       const panelW = 600;
-      const panelH = 150;
+      const panelH = 200;
       const panelY = centerY + 90;
 
       const panel = new Graphics()
@@ -762,23 +762,29 @@ export class MainScreen extends Container {
       general.skillIDs.forEach((skillID) => {
         const skill = SKILLS[skillID];
         if (skill) {
-          skillsText += `[${skill.name}]\n`;
+          skillsText += `[${skill.name}]: ${skill.description || ""}\n\n`;
         }
       });
       if (hasLordSkill(general.id) && viewer.role === "lord") {
         skillsText +=
-          "\n[Chủ Công Kỹ] Tướng này có Chủ Công Kỹ, thích hợp làm Chủ Công.";
+          "[Chủ Công Kỹ] Tướng này có Chủ Công Kỹ, thích hợp làm Chủ Công.\n";
       }
 
-      this.addText(
-        skillsText,
-        centerX,
-        panelY + 60,
-        16,
-        COLORS.paper,
-        panelW - 40,
-        "center",
-      );
+      const skillsLabel = new Text({
+        text: skillsText.trim().normalize("NFC"),
+        style: {
+          fontFamily: GAME_FONT_FAMILY,
+          fontSize: 16,
+          fill: COLORS.paper,
+          align: "left",
+          wordWrap: true,
+          wordWrapWidth: panelW - 40,
+          lineHeight: 22,
+        },
+      });
+      skillsLabel.anchor.set(0, 0);
+      skillsLabel.position.set(centerX - panelW / 2 + 20, panelY + 45);
+      this.content.addChild(skillsLabel);
 
       // Confirm Button
       this.addButton(
