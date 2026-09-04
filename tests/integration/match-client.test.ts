@@ -1,9 +1,9 @@
 import { afterEach, describe, expect, it } from "vitest";
 
-import { LocalMatch } from "../../src/client/LocalMatch";
+import { MatchClient } from "../../src/client/MatchClient";
 import { GENERALS_BY_ID } from "../../src/game/catalog/generals";
 
-let match: LocalMatch | undefined;
+let match: MatchClient | undefined;
 
 afterEach(() => {
   match?.destroy();
@@ -12,7 +12,10 @@ afterEach(() => {
 
 describe("local hot-seat match", () => {
   it("selects generals through four filtered clients and starts the match", async () => {
-    match = new LocalMatch(4, `integration-${Date.now()}`);
+    match = new MatchClient({
+      numPlayers: 4,
+      matchID: `integration-${Date.now()}`,
+    });
     await expect.poll(() => match!.state).not.toBeNull();
 
     const initial = match.state!.G;

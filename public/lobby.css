@@ -1,0 +1,215 @@
+/* Cổ trang Tam Quốc Sát Theme */
+#lobby-ui {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: #120F0D;
+  color: #fff;
+  font-family: 'Noto Serif', serif;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  z-index: 1000;
+  overflow: hidden;
+}
+
+#lobby-ui.hidden {
+  display: none;
+}
+
+.lobby-header {
+  margin-top: 40px;
+  text-align: center;
+  text-shadow: 2px 2px 4px #000;
+}
+
+.lobby-title {
+  font-size: 48px;
+  color: #d4af37;
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 4px;
+  border-bottom: 2px solid #8b0000;
+  padding-bottom: 10px;
+}
+
+.lobby-content {
+  flex: 1;
+  width: 90%;
+  max-width: 800px;
+  margin-top: 30px;
+  display: flex;
+  flex-direction: column;
+}
+
+.room-list {
+  flex: 1;
+  overflow-y: auto;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 20px;
+  padding: 10px;
+}
+
+/* Lệnh Bài */
+.room-card {
+  background: linear-gradient(135deg, #4a1c1c 0%, #2a0808 100%);
+  border: 2px solid #8b0000;
+  border-radius: 8px;
+  padding: 15px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.5);
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+  position: relative;
+}
+
+.room-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 16px rgba(0,0,0,0.7);
+  border-color: #d4af37;
+}
+
+.room-title {
+  font-size: 20px;
+  color: #d4af37;
+  margin: 0 0 10px 0;
+  font-weight: bold;
+}
+
+.room-meta {
+  font-size: 14px;
+  color: #ccc;
+  display: flex;
+  justify-content: space-between;
+}
+
+.room-private-icon {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  font-size: 16px;
+}
+
+/* Actions */
+.lobby-actions {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  padding: 20px 0 40px 0;
+}
+
+.btn-ancient {
+  background: linear-gradient(to bottom, #8b0000, #4a0000);
+  border: 2px solid #d4af37;
+  color: #d4af37;
+  padding: 12px 30px;
+  font-size: 18px;
+  font-family: 'Noto Serif', serif;
+  font-weight: bold;
+  border-radius: 4px;
+  cursor: pointer;
+  text-shadow: 1px 1px 2px #000;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.5);
+  transition: all 0.2s;
+}
+
+.btn-ancient:hover {
+  background: linear-gradient(to bottom, #a00000, #5a0000);
+  transform: scale(1.05);
+}
+
+.btn-ancient.btn-secondary {
+  background: linear-gradient(to bottom, #333, #111);
+  border-color: #888;
+  color: #ddd;
+}
+
+.btn-ancient.btn-secondary:hover {
+  background: linear-gradient(to bottom, #444, #222);
+}
+
+/* Modal */
+.modal-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+}
+
+.modal-overlay.hidden {
+  display: none;
+}
+
+.modal-content {
+  background-color: #2a110a;
+  border: 3px solid #d4af37;
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+  width: 90%;
+  max-width: 400px;
+  text-align: center;
+}
+
+.modal-content h2 {
+  color: #d4af37;
+  margin-top: 0;
+  border-bottom: 1px solid #8b0000;
+  padding-bottom: 10px;
+}
+
+.input-ancient {
+  width: 100%;
+  padding: 10px;
+  margin: 10px 0;
+  background: #1a0a05;
+  border: 1px solid #d4af37;
+  color: #fff;
+  font-family: 'Noto Serif', serif;
+  font-size: 16px;
+  box-sizing: border-box;
+  border-radius: 4px;
+}
+
+.input-ancient:focus {
+  outline: none;
+  border-color: #ffcc00;
+  box-shadow: 0 0 5px rgba(212, 175, 55, 0.5);
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
+}
+
+.modal-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 10px 0;
+  font-size: 16px;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #1a0a05;
+}
+::-webkit-scrollbar-thumb {
+  background: #8b0000;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #d4af37;
+}

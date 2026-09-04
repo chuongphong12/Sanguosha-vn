@@ -1,47 +1,76 @@
 import { Client } from "boardgame.io/client";
-import { Local } from "boardgame.io/multiplayer";
+import { Local, SocketIO } from "boardgame.io/multiplayer";
 
 import { TqsGame } from "../game/TqsGame";
 import type { PlayerID, TqsGameState, TqsPlayerViewState } from "../game/model";
 
-type ClientOptions = Parameters<typeof Client<TqsGameState>>[0];
-type Transport = NonNullable<ClientOptions["multiplayer"]>;
 type LocalClient = ReturnType<typeof Client<TqsGameState>>;
 type AuthoritativeClientState = ReturnType<LocalClient["getState"]>;
-export type LocalMatchState =
+
+export type MatchClientState =
   | null
   | (Omit<NonNullable<AuthoritativeClientState>, "G"> & {
       G: TqsPlayerViewState;
     });
-type StateListener = (state: LocalMatchState) => void;
 
-export class LocalMatch {
+type StateListener = (state: MatchClientState) => void;
+
+export interface MatchConfig {
+  numPlayers?: number;
+  matchID?: string;
+  mode?: "local" | "remote";
+  playerID?: PlayerID; // Required for remote
+  serverUrl?: string; // Required for remote
+  credentials?: string; // Required if joining via lobby
+}
+
+export class MatchClient {
   private readonly clients = new Map<PlayerID, LocalClient>();
   private viewerID: PlayerID = "0";
   private unsubscribeViewer?: () => void;
+  public readonly isRemote: boolean;
 
-  constructor(
-    numPlayers = 4,
-    matchID = "local-match",
-    /**
-     * Optional boardgame.io transport. Pass `SocketIO({ server })` to point
-     * the same screen code at a remote master; defaults to the local master
-     * for hot-seat play.
-     */
-    multiplayer?: Transport,
-  ) {
-    for (let index = 0; index < numPlayers; index += 1) {
-      const playerID = String(index);
+  constructor(config: MatchConfig = {}) {
+    const {
+      numPlayers = 4,
+      matchID = "local-match",
+      mode = "local",
+      playerID,
+      serverUrl,
+      credentials,
+    } = config;
+
+    this.isRemote = mode === "remote";
+
+    if (this.isRemote) {
+      if (!playerID) throw new Error("Cần playerID cho chế độ remote");
+      this.viewerID = playerID;
       const client = Client<TqsGameState>({
         game: TqsGame,
         numPlayers,
         matchID,
         playerID,
-        multiplayer: multiplayer ?? Local(),
+        credentials,
+        multiplayer: SocketIO({ server: serverUrl }),
         debug: false,
       });
       client.start();
       this.clients.set(playerID, client);
+    } else {
+      // Local hotseat mode
+      for (let index = 0; index < numPlayers; index += 1) {
+        const id = String(index);
+        const client = Client<TqsGameState>({
+          game: TqsGame,
+          numPlayers,
+          matchID,
+          playerID: id,
+          multiplayer: Local(),
+          debug: false,
+        });
+        client.start();
+        this.clients.set(id, client);
+      }
     }
   }
 
@@ -53,7 +82,7 @@ export class LocalMatch {
     return this.viewerID;
   }
 
-  public get state(): LocalMatchState {
+  public get state(): MatchClientState {
     return this.asPlayerView(this.getClient(this.viewerID).getState());
   }
 
@@ -69,6 +98,7 @@ export class LocalMatch {
   }
 
   public switchViewer(playerID: PlayerID, listener: StateListener): void {
+    if (this.isRemote) return; // Cannot switch viewer in remote mode
     this.getClient(playerID);
     this.viewerID = playerID;
     this.unsubscribeViewer?.();
@@ -96,8 +126,7 @@ export class LocalMatch {
     return client;
   }
 
-  // boardgame.io types playerView as the authoritative G type in 0.50.2.
-  private asPlayerView(state: AuthoritativeClientState): LocalMatchState {
-    return state as LocalMatchState;
+  private asPlayerView(state: AuthoritativeClientState): MatchClientState {
+    return state as MatchClientState;
   }
 }

@@ -3,6 +3,7 @@ import { Assets } from "pixi.js";
 
 import type { Faction, PlayerViewPlayer } from "../../game/model";
 import { GENERALS_BY_ID } from "../../game/catalog/generals";
+import { FACTION_ICON_ALIAS, GENERAL_PORTRAIT_ALIAS } from "./assetAliases";
 import { GAME_FONT_FAMILY } from "./typography";
 
 const FACTION_COLORS: Record<Faction, number> = {
@@ -186,26 +187,11 @@ export class PlayerAvatar extends Container {
   }
 
   private resolvePortrait(generalID: string): Texture | null {
-    for (const alias of [
-      `main/generals/avatar/${generalID}.jpg`,
-      `main/generals/avatar/${generalID}.png`,
-      `main/generals/${generalID}.jpg`,
-      `${generalID}.jpg`,
-    ]) {
-      const tex = Assets.get<Texture>(alias);
-      if (tex) return tex;
-    }
-    return null;
+    const alias = GENERAL_PORTRAIT_ALIAS[generalID];
+    return alias ? (Assets.get<Texture>(alias) ?? null) : null;
   }
 
   private resolveFactionIcon(faction: Faction): Texture | null {
-    for (const alias of [
-      `main/ui/kingdom/${faction}.png`,
-      `main/ui/kingdom/${faction}.jpg`,
-    ]) {
-      const tex = Assets.get<Texture>(alias);
-      if (tex) return tex;
-    }
-    return null;
+    return Assets.get<Texture>(FACTION_ICON_ALIAS[faction]) ?? null;
   }
 }

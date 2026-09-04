@@ -1,0 +1,96 @@
+import type { CardName, Faction } from "../../game/model";
+
+export const CARD_ART_ALIAS: Partial<Record<CardName, string>> = {
+  slash: "main/cards/card/slash.png",
+  dodge: "main/cards/card/jink.png",
+  peach: "main/cards/card/peach.png",
+  duel: "main/cards/card/duel.png",
+  dismantle: "main/cards/card/dismantlement.png",
+  snatch: "main/cards/card/snatch.png",
+  "borrowed-sword": "main/cards/card/collateral.png",
+  "ex-nihilo": "main/cards/card/ex_nihilo.png",
+  nullification: "main/cards/card/nullification.png",
+  "arrow-barrage": "main/cards/card/archery_attack.png",
+  "barbarian-invasion": "main/cards/card/savage_assault.png",
+  "peach-garden": "main/cards/card/god_salvation.png",
+  harvest: "main/cards/card/amazing_grace.png",
+  indulgence: "main/cards/card/indulgence.png",
+  lightning: "main/cards/card/lightning.png",
+};
+
+export const EQUIP_ART_ALIAS: Partial<Record<CardName, string>> = {
+  crossbow: "main/cards/card/Crossbow.png",
+  "qinggang-sword": "main/cards/card/QinggangSword.png",
+  "gender-swords": "main/cards/card/DoubleSword.png",
+  "ice-sword": "main/cards/card/IceSword.png",
+  "rock-cleaving-axe": "main/cards/card/Axe.png",
+  "green-dragon-blade": "main/cards/card/Blade.png",
+  "serpent-spear": "main/cards/card/Spear.png",
+  halberd: "main/cards/card/Halberd.png",
+  "qilin-bow": "main/cards/card/KylinBow.png",
+  "bagua-formation": "main/cards/card/EightDiagram.png",
+  "renwang-shield": "main/cards/card/RenwangShield.png",
+  jueying: "main/cards/card/JueYing.png",
+  "zhaohuang-feidian": "main/cards/card/ZhuaHuangFeiDian.png",
+  dilu: "main/cards/card/DiLu.png",
+  dayuan: "main/cards/card/DaYuan.png",
+  "red-hare": "main/cards/card/ChiTu.png",
+  zixing: "main/cards/card/ZiXing.png",
+};
+
+export const EQUIP_ICON_ALIAS: Partial<Record<CardName, string>> = {
+  crossbow: "main/ui/equips/Crossbow.png",
+  "qinggang-sword": "main/ui/equips/QinggangSword.png",
+  "gender-swords": "main/ui/equips/DoubleSword.png",
+  "ice-sword": "main/ui/equips/IceSword.png",
+  "rock-cleaving-axe": "main/ui/equips/Axe.png",
+  "green-dragon-blade": "main/ui/equips/Blade.png",
+  "serpent-spear": "main/ui/equips/Spear.png",
+  halberd: "main/ui/equips/Halberd.png",
+  "qilin-bow": "main/ui/equips/KylinBow.png",
+  "bagua-formation": "main/ui/equips/EightDiagram.png",
+  "renwang-shield": "main/ui/equips/RenwangShield.png",
+  jueying: "main/ui/equips/JueYing.png",
+  "zhaohuang-feidian": "main/ui/equips/ZhuaHuangFeiDian.png",
+  dilu: "main/ui/equips/DiLu.png",
+  dayuan: "main/ui/equips/DaYuan.png",
+  "red-hare": "main/ui/equips/ChiTu.png",
+  zixing: "main/ui/equips/ZiXing.png",
+};
+
+export const GENERAL_PORTRAIT_ALIAS: Record<string, string> = {
+  "cao-cao": "main/generals/avatar/caocao.png",
+  "sima-yi": "main/generals/avatar/simayi.png",
+  "xiahou-dun": "main/generals/avatar/xiahoudun.png",
+  "zhang-liao": "main/generals/avatar/zhangliao.png",
+  "xu-chu": "main/generals/avatar/xuchu.png",
+  "guo-jia": "main/generals/avatar/guojia.png",
+  "zhen-ji": "main/generals/avatar/zhenji.png",
+  "liu-bei": "main/generals/avatar/liubei.png",
+  "guan-yu": "main/generals/avatar/guanyu.png",
+  "zhang-fei": "main/generals/avatar/zhangfei.png",
+  "zhuge-liang": "main/generals/avatar/zhugeliang.png",
+  "zhao-yun": "main/generals/avatar/zhaoyun.png",
+  "ma-chao": "main/generals/avatar/machao.png",
+  "huang-yueying": "main/generals/avatar/huangyueying.png",
+  "sun-quan": "main/generals/avatar/sunquan.png",
+  "gan-ning": "main/generals/avatar/ganning.png",
+  "lu-meng": "main/generals/avatar/lvmeng.png",
+  "huang-gai": "main/generals/avatar/huanggai.png",
+  "zhou-yu": "main/generals/avatar/zhouyu.png",
+  "da-qiao": "main/generals/avatar/daqiao.png",
+  "lu-xun": "main/generals/avatar/luxun.png",
+  "sun-shangxiang": "main/generals/avatar/sunshangxiang.png",
+  "hua-tuo": "main/generals/avatar/huatuo.png",
+  "lu-bu": "main/generals/avatar/lvbu.png",
+  "diao-chan": "main/generals/avatar/diaochan.png",
+};
+
+export const GENERALS_WITHOUT_PORTRAIT = ["hua-xiong", "yuan-shu"] as const;
+
+export const FACTION_ICON_ALIAS: Record<Faction, string> = {
+  wei: "main/ui/kingdom/icon/wei.png",
+  shu: "main/ui/kingdom/icon/shu.png",
+  wu: "main/ui/kingdom/icon/wu.png",
+  qun: "main/ui/kingdom/icon/qun.png",
+};

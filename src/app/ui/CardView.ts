@@ -3,6 +3,7 @@ import { Assets } from "pixi.js";
 
 import type { CardName, PhysicalCard, Suit } from "../../game/model";
 import { CARD_DEFINITIONS } from "../../game/catalog/cards";
+import { CARD_ART_ALIAS, EQUIP_ART_ALIAS } from "./assetAliases";
 import { GAME_FONT_FAMILY } from "./typography";
 
 const SUIT_SYMBOLS: Record<Suit, string> = {
@@ -53,51 +54,49 @@ export class CardView extends Container {
       });
     this.addChild(bg);
 
-    // --- Card illustration (attempt to load from assets) ---
+    // --- Full card face ---
     const cardTexture = this.resolveTexture(card.definitionID);
     if (cardTexture) {
-      const illustration = new Sprite(cardTexture);
-      // Fill the card area, leaving space for suit/rank overlay
-      illustration.width = w - 8;
-      illustration.height = h - 36;
-      illustration.position.set(4, 28);
-      illustration.alpha = disabled ? 0.4 : 0.85;
-      this.addChild(illustration);
+      const face = new Sprite(cardTexture);
+      face.width = w - 8;
+      face.height = h - 8;
+      face.position.set(4, 4);
+      face.alpha = disabled ? 0.4 : 1;
+      this.addChild(face);
     }
 
-    // --- Suit symbol ---
+    // Artwork is shared by card definition, so physical suit/rank stays dynamic.
     const suitColor = isRed ? 0xcc2222 : 0x111111;
-    const suitText = new Text({
-      text: SUIT_SYMBOLS[card.suit],
+    const metadataBacking = new Graphics()
+      .roundRect(3, 3, Math.min(w - 6, 36), Math.min(20, h * 0.2), 4)
+      .fill({ color: selected ? 0x8f1d20 : 0xf3e5c8, alpha: 0.92 });
+    this.addChild(metadataBacking);
+    const metadataText = new Text({
+      text: `${SUIT_SYMBOLS[card.suit]} ${card.rank}`,
       style: {
         fontFamily: GAME_FONT_FAMILY,
-        fontSize: 16,
+        fontSize: Math.max(7, Math.min(11, h / 9)),
         fill: selected ? 0xffffff : suitColor,
         fontWeight: "bold",
       },
     });
-    suitText.position.set(6, 4);
-    this.addChild(suitText);
+    metadataText.position.set(6, 5);
+    if (metadataText.width > w - 12)
+      metadataText.scale.set((w - 12) / metadataText.width);
+    this.addChild(metadataText);
 
-    // --- Rank ---
-    const rankText = new Text({
-      text: card.rank,
-      style: {
-        fontFamily: GAME_FONT_FAMILY,
-        fontSize: 12,
-        fill: selected ? 0xffffff : suitColor,
-        fontWeight: "bold",
-      },
-    });
-    rankText.position.set(22, 6);
-    this.addChild(rankText);
+    // --- Vietnamese card name overlay ---
+    const nameBarHeight = Math.min(20, Math.max(14, h * 0.18));
+    const nameBacking = new Graphics()
+      .roundRect(3, h - nameBarHeight - 3, w - 6, nameBarHeight, 4)
+      .fill({ color: selected ? 0x8f1d20 : 0xf3e5c8, alpha: 0.92 });
+    this.addChild(nameBacking);
 
-    // --- Card name label at the bottom ---
     const nameText = new Text({
       text: `【${definition.name}】`,
       style: {
         fontFamily: GAME_FONT_FAMILY,
-        fontSize: 10,
+        fontSize: Math.max(7, Math.min(10, h / 10)),
         fill: selected ? 0xffffff : 0x201812,
         align: "center",
       },
@@ -117,6 +116,13 @@ export class CardView extends Container {
       this.addChild(overlay);
     }
 
+    if (selected) {
+      const selectionOutline = new Graphics()
+        .roundRect(1, 1, w - 2, h - 2, 6)
+        .stroke({ color: 0xb93730, width: 3 });
+      this.addChild(selectionOutline);
+    }
+
     // --- Interaction ---
     if (options?.onTap && !disabled) {
       this.eventMode = "static";
@@ -126,15 +132,7 @@ export class CardView extends Container {
   }
 
   private resolveTexture(definitionID: CardName): Texture | null {
-    // Try multiple alias patterns used by assetpack
-    for (const alias of [
-      `main/cards/card/${definitionID}.png`,
-      `main/cards/card/${definitionID}.jpg`,
-      `${definitionID}.png`,
-    ]) {
-      const tex = Assets.get<Texture>(alias);
-      if (tex) return tex;
-    }
-    return null;
+    const alias = CARD_ART_ALIAS[definitionID] ?? EQUIP_ART_ALIAS[definitionID];
+    return alias ? (Assets.get<Texture>(alias) ?? null) : null;
   }
 }
