@@ -78,7 +78,7 @@ export class MainScreen extends Container {
   private selectedZoneChoices: ZoneCardChoice[] = [];
   private selectedPromptPlayerIDs: PlayerID[] = [];
   private lastPromptID: number | null = null;
-  private nullificationTimeout: any = null;
+  private nullificationTimeout: ReturnType<typeof setTimeout> | null = null;
   private handScrollX = 0;
   private serpentSpearMode = false;
   private virtualAs: "slash" | "snatch" | "indulgence" | null = null;
@@ -151,6 +151,10 @@ export class MainScreen extends Container {
     this.state = state;
     const promptID = state?.G.prompt?.id ?? null;
     if (promptID !== this.lastPromptID) {
+      if (this.nullificationTimeout) {
+        clearTimeout(this.nullificationTimeout);
+        this.nullificationTimeout = null;
+      }
       this.selectedCardIDs.clear();
       this.selectedTargetIDs = [];
       this.selectedZoneChoices = [];
@@ -158,6 +162,21 @@ export class MainScreen extends Container {
       this.lastPromptID = promptID;
       this.virtualAs = null;
       this.pendingSkill = null;
+
+      const prompt = state?.G.prompt;
+      if (
+        prompt &&
+        prompt.kind === "card-response" &&
+        prompt.reason === "nullification" &&
+        prompt.responderID === this.match?.currentViewerID
+      ) {
+        this.nullificationTimeout = setTimeout(() => {
+          this.nullificationTimeout = null;
+          if (this.state?.G.prompt?.id === promptID) {
+            this.answerPrompt(promptID, { kind: "pass" });
+          }
+        }, 4000);
+      }
     }
     const requiredActorID = state ? this.requiredActorID(state.G) : null;
     if (requiredActorID !== this.lastRequiredActorID) {
@@ -1972,6 +1991,10 @@ export class MainScreen extends Container {
   }
 
   private answerPrompt(promptID: number, answer: PromptAnswer): void {
+    if (this.nullificationTimeout) {
+      clearTimeout(this.nullificationTimeout);
+      this.nullificationTimeout = null;
+    }
     this.match!.move("answerPrompt", promptID, answer);
     this.selectedCardIDs.clear();
     this.selectedTargetIDs = [];
