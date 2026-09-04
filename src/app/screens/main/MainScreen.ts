@@ -1,7 +1,10 @@
 import { Assets, Container, Graphics, Sprite, Text, Texture } from "pixi.js";
 
-import type { LocalMatchState } from "../../../client/LocalMatch";
-import { LocalMatch } from "../../../client/LocalMatch";
+import type {
+  MatchClientState,
+  MatchConfig,
+} from "../../../client/MatchClient";
+import { MatchClient } from "../../../client/MatchClient";
 import {
   canRespondWithCard,
   canSelectCardTarget,
@@ -19,6 +22,9 @@ import type {
   TurnStep,
   ZoneCardChoice,
 } from "../../../game/model";
+import { CardView } from "../../ui/CardView";
+import { PlayerAvatar } from "../../ui/PlayerAvatar";
+import { EQUIP_ICON_ALIAS } from "../../ui/assetAliases";
 import { getEquipmentSlotViews } from "../../ui/equipmentView";
 import { layoutActionRow } from "../../ui/layout";
 import { fitScale } from "../../ui/textLayout";
@@ -59,9 +65,9 @@ export class MainScreen extends Container {
   public static assetBundles = ["main"];
 
   private readonly content = new Container();
-  private match?: LocalMatch;
+  private match?: MatchClient;
   private unsubscribe?: () => void;
-  private state: LocalMatchState = null;
+  private state: MatchClientState = null;
   private selectedCardIDs = new Set<string>();
   private selectedTargetIDs: PlayerID[] = [];
   private selectedZoneChoices: ZoneCardChoice[] = [];
@@ -90,7 +96,22 @@ export class MainScreen extends Container {
   }
 
   public prepare(): void {
-    this.match = new LocalMatch(4);
+    const urlParams = new URLSearchParams(window.location.search);
+    const mode = urlParams.get("mode") as "local" | "remote" | null;
+    const config: MatchConfig = {};
+
+    if (mode === "remote") {
+      config.mode = "remote";
+      config.matchID = urlParams.get("matchID") || undefined;
+      config.playerID = urlParams.get("playerID") || undefined;
+      config.credentials = urlParams.get("credentials") || undefined;
+      config.serverUrl = urlParams.get("serverUrl") || undefined;
+    } else {
+      config.mode = "local";
+      config.numPlayers = 4;
+    }
+
+    this.match = new MatchClient(config);
     this.unsubscribe = this.match.subscribe((state) =>
       this.receiveState(state),
     );
@@ -117,7 +138,7 @@ export class MainScreen extends Container {
     this.clearContent();
   }
 
-  private receiveState(state: LocalMatchState): void {
+  private receiveState(state: MatchClientState): void {
     this.state = state;
     const promptID = state?.G.prompt?.id ?? null;
     if (promptID !== this.lastPromptID) {
@@ -132,6 +153,10 @@ export class MainScreen extends Container {
     }
     const requiredActorID = state ? this.requiredActorID(state.G) : null;
     if (requiredActorID !== this.lastRequiredActorID) {
+      this.selectedCardIDs.clear();
+      this.selectedTargetIDs = [];
+      this.selectedZoneChoices = [];
+      this.selectedPromptPlayerIDs = [];
       this.serpentSpearMode = false;
       this.virtualAs = null;
       this.pendingSkill = null;
@@ -239,7 +264,9 @@ export class MainScreen extends Container {
   }
 
   private drawViewerSelector(G: TqsPlayerViewState): void {
-    const buttonWidth = 54;
+    if (this.match?.isRemote) return;
+
+    const buttonWidth = 50;
     const buttonGap = 8;
     const selectorWidth =
       G.seatOrder.length * buttonWidth + (G.seatOrder.length - 1) * buttonGap;
@@ -554,6 +581,20 @@ export class MainScreen extends Container {
         slot.cardID ? COLORS.gold : COLORS.muted,
       );
       base.eventMode = "none";
+      const card = slot.cardID ? G.cards[slot.cardID] : null;
+      const iconAlias = card ? EQUIP_ICON_ALIAS[card.definitionID] : null;
+      const iconTexture = iconAlias
+        ? (Assets.get<Texture>(iconAlias) ?? null)
+        : null;
+      if (iconTexture) {
+        const icon = new Sprite(iconTexture);
+        icon.position.set(x + 2, y + 2);
+        icon.width = slotWidth - 4;
+        icon.height = slotHeight - 4;
+        icon.alpha = 0.72;
+        icon.eventMode = "none";
+        this.content.addChild(icon);
+      }
       const label = this.addText(
         slot.label,
         x + 9,
@@ -625,6 +666,7 @@ export class MainScreen extends Container {
     const top = 600;
     const requiredActorID = this.requiredActorID(G);
     if (
+      !this.match!.isRemote &&
       requiredActorID &&
       (viewerID !== requiredActorID ||
         this.handoffConfirmedFor !== requiredActorID)
@@ -632,6 +674,12 @@ export class MainScreen extends Container {
       this.drawHandoff(G, requiredActorID, top);
       return;
     }
+    const avatarHeight = Math.max(
+      76,
+      Math.min(110, this.viewportHeight - top - 170),
+    );
+    const avatarWidth = (avatarHeight * 100) / 122;
+    const handLeft = 50 + avatarWidth;
     const role = player.role
       ? ROLE_NAMES[player.role]
       : "Thân Phận chưa xác định";
@@ -643,6 +691,8 @@ export class MainScreen extends Container {
       player.role === "lord" ? COLORS.gold : COLORS.paper,
       0,
       "left",
+      0,
+      handLeft - 42,
     );
 
     const canSelectGeneral =
@@ -674,7 +724,15 @@ export class MainScreen extends Container {
       return;
     }
 
-    this.drawHand(G, viewerID, top + 34);
+    const avatar = new PlayerAvatar(player, {
+      width: avatarWidth,
+      height: avatarHeight,
+      isActiveActor: G.turn.activePlayerID === viewerID,
+    });
+    avatar.position.set(34, top + 22);
+    this.content.addChild(avatar);
+
+    this.drawHand(G, viewerID, top, handLeft);
     this.drawActions(G, viewerID);
   }
 
@@ -769,10 +827,29 @@ export class MainScreen extends Container {
     void G;
   }
 
-  private drawHand(G: TqsPlayerViewState, viewerID: PlayerID, y: number): void {
-    this.addText("BÀI TRÊN TAY", 34, y, 12, COLORS.gold, 0, "left", 1.5);
+  private drawHand(
+    G: TqsPlayerViewState,
+    viewerID: PlayerID,
+    y: number,
+    handLeft: number,
+  ): void {
     const hand = G.players[viewerID].hand;
-    const cardsPerPage = 6;
+    const equipmentCardIDs = this.getEquipmentConversionCardIDs(G, viewerID);
+    this.addText(
+      hand.length === 0 && equipmentCardIDs.length > 0
+        ? "TRANG BỊ DÙNG NHƯ LÁ KHÁC"
+        : equipmentCardIDs.length > 0
+          ? "BÀI TRÊN TAY · TRANG BỊ"
+          : "BÀI TRÊN TAY",
+      handLeft,
+      y,
+      12,
+      COLORS.gold,
+      0,
+      "left",
+      1.5,
+    );
+    const cardsPerPage = Math.max(1, 6 - equipmentCardIDs.length);
     const pageCount = Math.max(1, Math.ceil(hand.length / cardsPerPage));
     this.handPage = Math.min(this.handPage, pageCount - 1);
     const visibleHand = hand.slice(
@@ -780,26 +857,31 @@ export class MainScreen extends Container {
       (this.handPage + 1) * cardsPerPage,
     );
     const cardGap = 6;
-    const availableWidth = this.viewportWidth - 68;
-    const cardWidth = Math.min(
-      116,
-      (availableWidth - cardGap * Math.max(0, visibleHand.length - 1)) /
-        Math.max(1, visibleHand.length),
+    const equipmentGap =
+      visibleHand.length > 0 && equipmentCardIDs.length > 0 ? 12 : 0;
+    const visibleCardCount = visibleHand.length + equipmentCardIDs.length;
+    const availableWidth = this.viewportWidth - handLeft - 34;
+    const maximumCardHeight = Math.max(
+      76,
+      Math.min(100, this.viewportHeight - y - 170),
     );
+    const cardWidth = Math.min(
+      (maximumCardHeight * 93) / 130,
+      (availableWidth -
+        equipmentGap -
+        cardGap * Math.max(0, visibleCardCount - 1)) /
+        Math.max(1, visibleCardCount),
+    );
+    const cardHeight = (cardWidth * 130) / 93;
     visibleHand.forEach((cardID, index) => {
       const card = G.cards[cardID];
       if (!card) return;
-      const definition = CARD_DEFINITIONS[card.definitionID];
       const selected = this.selectedCardIDs.has(cardID);
-      const x = 34 + index * (cardWidth + cardGap);
-      const label = `【${definition.name}】\n${SUIT_LABELS[card.suit]} ${card.rank}`;
-      this.addButton(
-        label,
-        x + cardWidth / 2,
-        y + 66 - (selected ? 9 : 0),
-        cardWidth,
-        86,
-        () => {
+      const cardView = new CardView(card, {
+        selected,
+        width: cardWidth,
+        height: cardHeight,
+        onTap: () => {
           if (G.turn.step === "discard") {
             if (selected) this.selectedCardIDs.delete(cardID);
             else this.selectedCardIDs.add(cardID);
@@ -835,26 +917,41 @@ export class MainScreen extends Container {
           }
           this.render();
         },
-        selected ? COLORS.redBright : COLORS.paperDark,
-        selected ? COLORS.white : COLORS.ink,
-        false,
-        { fontSize: 13, paddingX: 10, paddingY: 10 },
-      );
-    });
-    if (pageCount > 1) {
-      this.drawPager(y + 122, this.handPage, pageCount, (page) => {
-        this.handPage = page;
-        this.render();
       });
+      cardView.position.set(
+        handLeft + index * (cardWidth + cardGap),
+        y + 22 - (selected ? 9 : 0),
+      );
+      this.content.addChild(cardView);
+    });
+    const equipmentLeft =
+      handLeft + visibleHand.length * (cardWidth + cardGap) + equipmentGap;
+    this.drawEquipmentConversions(
+      G,
+      equipmentCardIDs,
+      equipmentLeft,
+      y,
+      cardWidth,
+      cardHeight,
+    );
+    if (pageCount > 1) {
+      this.drawPager(
+        y - 4,
+        this.handPage,
+        pageCount,
+        (page) => {
+          this.handPage = page;
+          this.render();
+        },
+        handLeft + availableWidth / 2,
+      );
     }
-    this.drawEquipmentConversions(G, viewerID, y + (pageCount > 1 ? 150 : 128));
   }
 
-  private drawEquipmentConversions(
+  private getEquipmentConversionCardIDs(
     G: TqsPlayerViewState,
     viewerID: PlayerID,
-    y: number,
-  ): void {
+  ): string[] {
     const prompt = G.prompt;
     const respondingHere =
       prompt?.kind === "card-response" &&
@@ -865,57 +962,46 @@ export class MainScreen extends Container {
       G.turn.step === "play" &&
       G.turn.activePlayerID === viewerID &&
       !this.pendingSkill;
-    if (!respondingHere && !playingHere) return;
+    if (!respondingHere && !playingHere) return [];
     const equipment = G.players[viewerID].equipment;
     const equipCardIDs = Object.values(equipment).filter(
       (cardID): cardID is string => Boolean(cardID),
     );
-    const eligible = equipCardIDs.filter((cardID) =>
+    return equipCardIDs.filter((cardID) =>
       respondingHere
         ? canRespondWithCard(G, viewerID, cardID, prompt.response)
         : getVirtualConversions(G, viewerID, cardID).length > 0,
     );
-    if (eligible.length === 0) return;
-    this.addText(
-      "TRANG BỊ DÙNG NHƯ LÁ KHÁC",
-      34,
-      y,
-      12,
-      COLORS.gold,
-      0,
-      "left",
-      1.5,
-    );
-    const cardGap = 6;
-    const availableWidth = this.viewportWidth - 68;
-    const cardWidth = Math.min(
-      116,
-      (availableWidth - cardGap * Math.max(0, eligible.length - 1)) /
-        Math.max(1, eligible.length),
-    );
-    eligible.forEach((cardID, index) => {
+  }
+
+  private drawEquipmentConversions(
+    G: TqsPlayerViewState,
+    cardIDs: string[],
+    x: number,
+    y: number,
+    cardWidth: number,
+    cardHeight: number,
+  ): void {
+    if (cardIDs.length === 0) return;
+    cardIDs.forEach((cardID, index) => {
       const card = G.cards[cardID];
       if (!card) return;
-      const definition = CARD_DEFINITIONS[card.definitionID];
       const selected = this.selectedCardIDs.has(cardID);
-      const x = 34 + index * (cardWidth + cardGap);
-      const label = `【${definition.name}】\n${SUIT_LABELS[card.suit]} ${card.rank}`;
-      this.addButton(
-        label,
-        x + cardWidth / 2,
-        y + 34 + 66 - (selected ? 9 : 0),
-        cardWidth,
-        86,
-        () => {
+      const cardView = new CardView(card, {
+        selected,
+        width: cardWidth,
+        height: cardHeight,
+        onTap: () => {
           this.selectedCardIDs = selected ? new Set() : new Set([cardID]);
           this.selectedTargetIDs = [];
           this.render();
         },
-        selected ? COLORS.redBright : COLORS.paperDark,
-        selected ? COLORS.white : COLORS.ink,
-        false,
-        { fontSize: 13, paddingX: 10, paddingY: 10 },
+      });
+      cardView.position.set(
+        x + index * (cardWidth + 6),
+        y + 22 - (selected ? 9 : 0),
       );
+      this.content.addChild(cardView);
     });
   }
 
@@ -2064,8 +2150,8 @@ export class MainScreen extends Container {
     page: number,
     pageCount: number,
     onChange: (page: number) => void,
+    centerX = this.viewportWidth / 2,
   ): void {
-    const centerX = this.viewportWidth / 2;
     this.addButton(
       "‹",
       centerX - 58,
@@ -2128,9 +2214,15 @@ export class MainScreen extends Container {
 
   private pruneSelection(): void {
     if (!this.state || !this.match) return;
-    const hand = new Set(this.state.G.players[this.match.currentViewerID].hand);
+    const player = this.state.G.players[this.match.currentViewerID];
+    const availableCards = new Set([
+      ...player.hand,
+      ...Object.values(player.equipment).filter((cardID): cardID is string =>
+        Boolean(cardID),
+      ),
+    ]);
     this.selectedCardIDs = new Set(
-      [...this.selectedCardIDs].filter((cardID) => hand.has(cardID)),
+      [...this.selectedCardIDs].filter((cardID) => availableCards.has(cardID)),
     );
     this.selectedTargetIDs = this.selectedTargetIDs.filter(
       (playerID) => this.state!.G.players[playerID]?.alive,

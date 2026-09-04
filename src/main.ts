@@ -1,6 +1,7 @@
 import { setEngine } from "./app/getEngine";
 import { LoadScreen } from "./app/screens/LoadScreen";
 import { MainScreen } from "./app/screens/main/MainScreen";
+import { LobbyUI } from "./app/ui/LobbyUI";
 import { loadGameFonts } from "./app/ui/typography";
 import { userSettings } from "./app/utils/userSettings";
 import { CreationEngine } from "./engine/engine";
@@ -30,6 +31,55 @@ setEngine(engine);
 
   // Show the load screen
   await engine.navigation.showScreen(LoadScreen);
-  // Show the main screen once the load screen is dismissed
-  await engine.navigation.showScreen(MainScreen);
+
+  const urlParams = new URLSearchParams(window.location.search);
+  const inviteMatchID = urlParams.get("matchID");
+
+  const launchMainScreen = () => engine.navigation.showScreen(MainScreen);
+
+  const credentials = urlParams.get("credentials");
+
+  if (inviteMatchID && !credentials) {
+    // If the room has password, user might fail, but let's just let LobbyUI handle join flow
+    LobbyUI.joinMatchProcess(
+      inviteMatchID,
+      null,
+      (
+        matchID: string,
+        playerID: string,
+        newCredentials?: string,
+        serverUrl?: string,
+      ) => {
+        // Modify URL to pass state to MainScreen (in memory or query string)
+        window.history.replaceState(
+          {},
+          "",
+          `/?mode=remote&matchID=${matchID}&playerID=${playerID}&credentials=${newCredentials}&serverUrl=${serverUrl}`,
+        );
+        launchMainScreen();
+      },
+    );
+  } else if (inviteMatchID && credentials) {
+    launchMainScreen();
+  } else {
+    LobbyUI.show(
+      (
+        matchID: string,
+        playerID: string,
+        credentials?: string,
+        serverUrl?: string,
+      ) => {
+        window.history.pushState(
+          {},
+          "",
+          `/?mode=remote&matchID=${matchID}&playerID=${playerID}&credentials=${credentials}&serverUrl=${serverUrl}`,
+        );
+        launchMainScreen();
+      },
+      () => {
+        window.history.pushState({}, "", `/?mode=local`);
+        launchMainScreen();
+      },
+    );
+  }
 })();
