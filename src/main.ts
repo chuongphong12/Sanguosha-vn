@@ -76,8 +76,12 @@ setEngine(engine);
         );
         launchMainScreen();
       },
-      () => {
-        window.history.pushState({}, "", `/?mode=local`);
+      (numPlayers: number) => {
+        window.history.pushState(
+          {},
+          "",
+          `/?mode=local&numPlayers=${numPlayers}`,
+        );
         launchMainScreen();
       },
     );

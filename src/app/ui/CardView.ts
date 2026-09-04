@@ -124,10 +124,13 @@ export class CardView extends Container {
     }
 
     // --- Interaction ---
-    if (options?.onTap && !disabled) {
+    if (!disabled) {
       this.eventMode = "static";
       this.cursor = "pointer";
-      this.on("pointertap", options.onTap);
+
+      if (options?.onTap) {
+        this.on("pointertap", options.onTap);
+      }
     }
   }
 

@@ -14,8 +14,8 @@ export class LobbyUI {
       credentials?: string,
       serverUrl?: string,
     ) => void,
-    onPlayOffline: () => void,
-  ) {
+    onPlayOffline: (numPlayers: number) => void,
+  ): void {
     this.backendUrl =
       new URLSearchParams(window.location.search).get("backend") ||
       (import.meta as any).env?.VITE_BACKEND_URL ||
@@ -41,7 +41,7 @@ export class LobbyUI {
       credentials?: string,
       serverUrl?: string,
     ) => void,
-    onPlayOffline: () => void,
+    onPlayOffline: (numPlayers: number) => void,
   ) {
     const appDiv = document.body;
     this.container = document.createElement("div");
@@ -71,7 +71,18 @@ export class LobbyUI {
       <div class="lobby-actions">
         <button id="btn-create-room" class="btn-ancient">Tạo Quân Lệnh</button>
         <button id="btn-refresh" class="btn-ancient btn-secondary">Làm Mới</button>
-        <button id="btn-offline" class="btn-ancient btn-secondary">Chơi Offline</button>
+        <div style="display: inline-block; margin-left: 10px; border-left: 1px solid #c59a45; padding-left: 10px;">
+          <select id="offline-num-players" class="input-ancient" style="width: auto; padding: 4px 8px; margin-right: 8px;">
+            <option value="4">4 Người</option>
+            <option value="5">5 Người</option>
+            <option value="6">6 Người</option>
+            <option value="7">7 Người</option>
+            <option value="8">8 Người</option>
+            <option value="9">9 Người</option>
+            <option value="10">10 Người</option>
+          </select>
+          <button id="btn-offline" class="btn-ancient btn-secondary">Chơi Offline</button>
+        </div>
       </div>
 
       <!-- Create Room Modal -->
@@ -116,8 +127,12 @@ export class LobbyUI {
       .getElementById("btn-refresh")!
       .addEventListener("click", () => this.refreshRooms(onJoinMatch));
     document.getElementById("btn-offline")!.addEventListener("click", () => {
+      const select = document.getElementById(
+        "offline-num-players",
+      ) as HTMLSelectElement;
+      const numPlayers = parseInt(select.value, 10);
       this.hide();
-      onPlayOffline();
+      onPlayOffline(numPlayers);
     });
 
     // Create Modal

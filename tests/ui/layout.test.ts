@@ -10,7 +10,7 @@ describe("action row layout", () => {
     expect(layout.centers[1] + 190 / 2).toBe(1840 - 34);
     expect(layout.centers[1] - 190 / 2 - (layout.centers[0] + 180 / 2)).toBe(8);
     expect(layout.widths).toEqual([180, 190]);
-    expect(layout.centerY + 48 / 2).toBe(820 - 30);
+    expect(layout.centerY + 48 / 2).toBe(820 - 280);
   });
 
   it("aligns a single button using the same right and bottom insets", () => {
@@ -18,7 +18,7 @@ describe("action row layout", () => {
 
     expect(layout.centers).toEqual([614]);
     expect(layout.widths).toEqual([240]);
-    expect(layout.centerY).toBe(766);
+    expect(layout.centerY).toBe(516);
   });
 
   it("shrinks a wide response row inside a narrow viewport", () => {

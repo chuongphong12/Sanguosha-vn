@@ -26,8 +26,8 @@ export class SeatView extends Container {
 
     // Main avatar
     const avatar = new PlayerAvatar(player, {
-      width: 100,
-      height: 120,
+      width: 140,
+      height: 160,
       isSelected: options.selected,
       isActiveActor: options.isActor,
       onTap: options.onTap,

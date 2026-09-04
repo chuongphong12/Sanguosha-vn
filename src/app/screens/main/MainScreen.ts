@@ -21,6 +21,7 @@ import type {
   TurnStep,
   ZoneCardChoice,
 } from "../../../game/model";
+import { CardView } from "../../ui/CardView";
 import { Dashboard } from "../../ui/Dashboard";
 import { SeatView } from "../../ui/SeatView";
 import { getEquipmentSlotViews } from "../../ui/equipmentView";
@@ -71,8 +72,7 @@ export class MainScreen extends Container {
   private selectedZoneChoices: ZoneCardChoice[] = [];
   private selectedPromptPlayerIDs: PlayerID[] = [];
   private lastPromptID: number | null = null;
-  private handPage = 0;
-  private promptPage = 0;
+  private handScrollX = 0;
   private serpentSpearMode = false;
   private virtualAs: "slash" | "snatch" | "indulgence" | null = null;
   private pendingSkill:
@@ -106,7 +106,8 @@ export class MainScreen extends Container {
       config.serverUrl = urlParams.get("serverUrl") || undefined;
     } else {
       config.mode = "local";
-      config.numPlayers = 4;
+      const numPlayersParam = parseInt(urlParams.get("numPlayers") || "4", 10);
+      config.numPlayers = isNaN(numPlayersParam) ? 4 : numPlayersParam;
     }
 
     this.match = new MatchClient(config);
@@ -126,8 +127,7 @@ export class MainScreen extends Container {
     this.selectedZoneChoices = [];
     this.selectedPromptPlayerIDs = [];
     this.lastPromptID = null;
-    this.handPage = 0;
-    this.promptPage = 0;
+    this.handScrollX = 0;
     this.serpentSpearMode = false;
     this.virtualAs = null;
     this.pendingSkill = null;
@@ -145,7 +145,6 @@ export class MainScreen extends Container {
       this.selectedZoneChoices = [];
       this.selectedPromptPlayerIDs = [];
       this.lastPromptID = promptID;
-      this.promptPage = 0;
       this.virtualAs = null;
       this.pendingSkill = null;
     }
@@ -292,8 +291,7 @@ export class MainScreen extends Container {
           this.selectedCardIDs.clear();
           this.selectedTargetIDs = [];
           this.selectedZoneChoices = [];
-          this.handPage = 0;
-          this.promptPage = 0;
+          this.handScrollX = 0;
           this.serpentSpearMode = false;
           this.handoffConfirmedFor = null;
           this.match!.switchViewer(playerID, (state) =>
@@ -408,24 +406,33 @@ export class MainScreen extends Container {
       seat.eventMode = selectableTarget ? "static" : "none";
       seat.cursor = selectableTarget ? "pointer" : "default";
 
+      const centerX = this.viewportWidth / 2;
+      const centerY = this.viewportHeight / 2 - 40;
+      const radiusX = this.viewportWidth / 2 - 140;
+      const radiusY = this.viewportHeight / 2 - 280;
+
       let px = 0;
       let py = 0;
-      const seatW = 140;
-      
       if (opponents.length === 1) {
-        px = this.viewportWidth / 2 - seatW / 2;
-        py = 80;
-      } else if (opponents.length === 2) {
-        if (index === 0) { px = this.viewportWidth - seatW - 40; py = 120; }
-        else { px = 40; py = 120; }
-      } else if (opponents.length === 3) {
-        if (index === 0) { px = this.viewportWidth - seatW - 40; py = this.viewportHeight / 2 - 140; } // Right
-        else if (index === 1) { px = this.viewportWidth / 2 - seatW / 2; py = 60; } // Top
-        else { px = 40; py = this.viewportHeight / 2 - 140; } // Left
+        px = centerX - 50; // 50 is half of Avatar width (100)
+        py = centerY - radiusY - 60;
       } else {
-        // Fallback for more players: spread across top edge
-        px = 40 + (index * (this.viewportWidth - seatW - 80)) / (opponents.length - 1);
-        py = 80;
+        // Calculate a circular arc that passes through the Top, Left, and Right points
+        const H = radiusY;
+        const R = (radiusX * radiusX + H * H) / (2 * H);
+        const TopY = centerY - radiusY - 60;
+        const Yc = TopY + R; // Center of the circle
+
+        const LeftY = centerY - 60;
+        const angleLeft = Math.atan2(LeftY - Yc, -radiusX);
+        const angleRight = Math.atan2(LeftY - Yc, radiusX);
+
+        // Spread evenly by angle along the circular arc = even arc length distance
+        const t = index / (opponents.length - 1); // 0 (left) to 1 (right)
+        const angle = angleLeft + t * (angleRight - angleLeft);
+
+        px = centerX + R * Math.cos(angle) - 50;
+        py = Yc + R * Math.sin(angle);
       }
 
       seat.position.set(px, py);
@@ -447,8 +454,8 @@ export class MainScreen extends Container {
   private drawLog(G: TqsPlayerViewState): void {
     const height = 140;
     const width = 360;
-    const y = this.viewportHeight - 250 - height - 10;
-    const x = 20;
+    const y = this.viewportHeight - 250 - height - 32;
+    const x = (this.viewportWidth - width) / 2;
 
     this.addPanel(x, y, width, height, 0x181411, COLORS.gold, 0.75);
 
@@ -528,7 +535,7 @@ export class MainScreen extends Container {
     const dashboard = new Dashboard(G, viewerID, {
       viewportWidth: this.viewportWidth,
       selectedCardIDs: this.selectedCardIDs,
-      handPage: this.handPage,
+      handScrollX: this.handScrollX,
       onCardTap: (cardID: string) => {
         if (G.turn.step === "discard") {
           if (this.selectedCardIDs.has(cardID))
@@ -560,8 +567,8 @@ export class MainScreen extends Container {
         }
         this.render();
       },
-      onPageChange: (page: number) => {
-        this.handPage = page;
+      onScroll: (scrollX: number) => {
+        this.handScrollX = scrollX;
         this.render();
       },
     });
@@ -750,7 +757,15 @@ export class MainScreen extends Container {
               othersAlive,
           },
         ] as const
-      ).filter((skill) => skill.enabled);
+      ).filter(
+        (skill) =>
+          skill.enabled &&
+          G.players[viewerID].generalID &&
+          GENERALS_BY_ID[G.players[viewerID].generalID!]?.skillIDs.includes(
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            skill.id as any,
+          ),
+      );
       if (
         this.pendingSkill &&
         !skillBar.some((skill) => this.pendingSkill === skill.id)
@@ -769,16 +784,16 @@ export class MainScreen extends Container {
         G.cards[viewerWeaponID]?.definitionID === "serpent-spear";
       if (skillBar.length > 0) {
         const barWidth = Math.min(
-          150,
+          120,
           (this.viewportWidth - 68) / skillBar.length,
         );
         skillBar.forEach((skill, index) => {
           const active = this.pendingSkill === skill.id;
           this.addButton(
             skill.label,
-            34 + barWidth / 2 + index * barWidth,
-            this.viewportHeight - 122,
-            barWidth - 6,
+            34 + barWidth / 2 + index * (barWidth + 8),
+            this.viewportHeight - 280,
+            barWidth,
             40,
             () => {
               if (skill.id === "ku-rou") {
@@ -1654,43 +1669,61 @@ export class MainScreen extends Container {
       });
     }
 
-    const y = this.viewportHeight - 154;
-    const perPage = 6;
-    const pageCount = Math.max(1, Math.ceil(choices.length / perPage));
-    this.promptPage = Math.min(this.promptPage, pageCount - 1);
-    const visibleChoices = choices.slice(
-      this.promptPage * perPage,
-      (this.promptPage + 1) * perPage,
-    );
-    const width = Math.min(
-      150,
-      (this.viewportWidth - 68) / Math.max(1, visibleChoices.length),
-    );
-    visibleChoices.forEach(({ label, choice }, index) => {
+    const y = (this.viewportHeight - 80) / 2;
+    this.addText("Chọn bài", this.viewportWidth / 2, y - 120, 20, COLORS.gold);
+
+    const cardW = 120,
+      cardH = 168,
+      gap = 16;
+    const totalW = choices.length * cardW + (choices.length - 1) * gap;
+    const startX = this.viewportWidth / 2 - totalW / 2 + cardW / 2;
+
+    choices.forEach(({ label, choice }, index) => {
       const selectedIndex = this.selectedZoneChoices.findIndex(
         (selected) => JSON.stringify(selected) === JSON.stringify(choice),
       );
-      this.addButton(
-        label,
-        34 + width / 2 + index * width,
-        y,
-        width - 6,
-        54,
-        () => {
-          if (selectedIndex >= 0)
-            this.selectedZoneChoices.splice(selectedIndex, 1);
-          else if (this.selectedZoneChoices.length < prompt.maximum)
-            this.selectedZoneChoices.push(choice);
-          this.render();
-        },
-        selectedIndex >= 0 ? COLORS.redBright : COLORS.ink,
-      );
-    });
-    if (pageCount > 1)
-      this.drawPager(y + 38, this.promptPage, pageCount, (page) => {
-        this.promptPage = page;
+      const selected = selectedIndex >= 0;
+
+      let cardID: string | undefined;
+      if (choice.zone === "judgement" || choice.zone === "processing")
+        cardID = choice.cardID;
+      else if (choice.zone === "equipment")
+        cardID = owner.equipment[choice.slot];
+      else if (choice.zone === "hand") cardID = owner.hand[choice.handIndex];
+
+      const card = cardID ? G.cards[cardID] : undefined;
+
+      const onTap = () => {
+        if (selectedIndex >= 0)
+          this.selectedZoneChoices.splice(selectedIndex, 1);
+        else if (this.selectedZoneChoices.length < prompt.maximum)
+          this.selectedZoneChoices.push(choice);
         this.render();
-      });
+      };
+
+      if (card) {
+        const cardView = new CardView(card, {
+          selected,
+          width: cardW,
+          height: cardH,
+          onTap,
+        });
+        cardView.position.set(startX + index * (cardW + gap), y);
+        cardView.pivot.set(cardW / 2, cardH / 2);
+        if (selected) cardView.y -= 20;
+        this.content.addChild(cardView);
+      } else {
+        this.addButton(
+          label,
+          startX + index * (cardW + gap),
+          y,
+          cardW,
+          cardH,
+          onTap,
+          selected ? COLORS.redBright : COLORS.ink,
+        );
+      }
+    });
     const actionRow = layoutActionRow(
       this.viewportWidth,
       this.viewportHeight,
@@ -1731,43 +1764,45 @@ export class MainScreen extends Container {
       { kind: "harvest-choice" }
     >,
   ): void {
-    const y = this.viewportHeight - 154;
-    const perPage = 6;
-    const pageCount = Math.max(
-      1,
-      Math.ceil(prompt.availableCardIDs.length / perPage),
+    const y = (this.viewportHeight - 80) / 2;
+    this.addText(
+      "Chọn một lá bài",
+      this.viewportWidth / 2,
+      y - 120,
+      20,
+      COLORS.gold,
     );
-    this.promptPage = Math.min(this.promptPage, pageCount - 1);
-    const visibleCardIDs = prompt.availableCardIDs.slice(
-      this.promptPage * perPage,
-      (this.promptPage + 1) * perPage,
-    );
-    const width = Math.min(
-      150,
-      (this.viewportWidth - 68) / Math.max(1, visibleCardIDs.length),
-    );
+
+    const visibleCardIDs = prompt.availableCardIDs;
+    const cardW = 120;
+    const cardH = 168;
+    const gap = 16;
+
+    const totalW =
+      visibleCardIDs.length * cardW + (visibleCardIDs.length - 1) * gap;
+    const startX = this.viewportWidth / 2 - totalW / 2 + cardW / 2;
+
     visibleCardIDs.forEach((cardID, index) => {
       const card = G.cards[cardID];
       const selected = this.selectedCardIDs.has(cardID);
-      this.addButton(
-        `【${CARD_DEFINITIONS[card.definitionID].name}】\n${SUIT_LABELS[card.suit]} ${card.rank}`,
-        34 + width / 2 + index * width,
-        y,
-        width - 6,
-        60,
-        () => {
+
+      const cardView = new CardView(card, {
+        selected,
+        width: cardW,
+        height: cardH,
+        onTap: () => {
           this.selectedCardIDs = selected ? new Set() : new Set([cardID]);
           this.render();
         },
-        selected ? COLORS.redBright : COLORS.paperDark,
-        selected ? COLORS.white : COLORS.ink,
-      );
-    });
-    if (pageCount > 1)
-      this.drawPager(y + 42, this.promptPage, pageCount, (page) => {
-        this.promptPage = page;
-        this.render();
       });
+
+      cardView.position.set(startX + index * (cardW + gap), y);
+      cardView.pivot.set(cardW / 2, cardH / 2);
+      if (selected) cardView.y -= 20;
+
+      this.content.addChild(cardView);
+    });
+
     const selectedID = [...this.selectedCardIDs].find((cardID) =>
       prompt.availableCardIDs.includes(cardID),
     );
@@ -1801,38 +1836,6 @@ export class MainScreen extends Container {
     this.serpentSpearMode = false;
     this.virtualAs = null;
     this.pendingSkill = null;
-  }
-
-  private drawPager(
-    y: number,
-    page: number,
-    pageCount: number,
-    onChange: (page: number) => void,
-    centerX = this.viewportWidth / 2,
-  ): void {
-    this.addButton(
-      "‹",
-      centerX - 58,
-      y,
-      42,
-      30,
-      () => onChange(Math.max(0, page - 1)),
-      COLORS.ink,
-      COLORS.paper,
-      page === 0,
-    );
-    this.addText(`${page + 1}/${pageCount}`, centerX, y, 11, COLORS.paperDark);
-    this.addButton(
-      "›",
-      centerX + 58,
-      y,
-      42,
-      30,
-      () => onChange(Math.min(pageCount - 1, page + 1)),
-      COLORS.ink,
-      COLORS.paper,
-      page === pageCount - 1,
-    );
   }
 
   private promptStatus(G: TqsPlayerViewState, responder: string): string {
