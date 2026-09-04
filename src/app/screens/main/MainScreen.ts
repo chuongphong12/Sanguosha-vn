@@ -167,13 +167,12 @@ export class MainScreen extends Container {
       if (
         prompt &&
         prompt.kind === "card-response" &&
-        prompt.reason === "nullification" &&
-        prompt.responderID === this.match?.currentViewerID
+        prompt.reason === "nullification"
       ) {
         this.nullificationTimeout = setTimeout(() => {
           this.nullificationTimeout = null;
           if (this.state?.G.prompt?.id === promptID) {
-            this.answerPrompt(promptID, { kind: "pass" });
+            this.match!.move("timeoutPrompt", promptID);
           }
         }, 4000);
       }
