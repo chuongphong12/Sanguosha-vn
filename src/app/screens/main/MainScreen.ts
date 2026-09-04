@@ -5,6 +5,7 @@ import type {
   MatchConfig,
 } from "../../../client/MatchClient";
 import { MatchClient } from "../../../client/MatchClient";
+import { GENERAL_PORTRAIT_ALIAS } from "../../ui/assetAliases";
 import {
   canRespondWithCard,
   canSelectCardTarget,
@@ -673,10 +674,10 @@ export class MainScreen extends Container {
     this.addText(
       "CHỌN VÕ TƯỚNG",
       centerX,
-      centerY - 250,
+      centerY - 220,
       32,
       COLORS.gold,
-      0,
+      0.5,
       "center",
     );
 
@@ -689,7 +690,7 @@ export class MainScreen extends Container {
     candidates.forEach((generalID, index) => {
       const isSelected = this.selectedCandidateID === generalID;
       const x = startX + index * (cardW + gap);
-      const y = centerY - 100;
+      const y = centerY - 60;
 
       const cardContainer = new Container();
       cardContainer.position.set(x, y);
@@ -710,19 +711,28 @@ export class MainScreen extends Container {
       cardContainer.addChild(frame);
 
       // Portrait
-      let texture = Assets.get<Texture>(generalID);
+      const alias = GENERAL_PORTRAIT_ALIAS[generalID];
+      let texture = alias ? Assets.get<Texture>(alias) : undefined;
       if (!texture) texture = Assets.get<Texture>("unknown");
-      const sprite = new Sprite(texture);
-      sprite.width = cardW;
-      sprite.height = cardH;
-      sprite.anchor.set(0.5);
-      // mask
-      const mask = new Graphics()
-        .roundRect(-cardW / 2, -cardH / 2, cardW, cardH, 4)
-        .fill(0xffffff);
-      sprite.mask = mask;
-      cardContainer.addChild(mask);
-      cardContainer.addChild(sprite);
+      if (texture) {
+        const sprite = new Sprite(texture);
+        sprite.width = cardW;
+        sprite.height = cardH;
+        sprite.anchor.set(0.5);
+        // mask
+        const mask = new Graphics()
+          .roundRect(-cardW / 2, -cardH / 2, cardW, cardH, 4)
+          .fill(0xffffff);
+        sprite.mask = mask;
+        cardContainer.addChild(mask);
+        cardContainer.addChild(sprite);
+      } else {
+        // Fallback if still no texture
+        const placeholder = new Graphics()
+          .rect(-cardW / 2, -cardH / 2, cardW, cardH)
+          .fill(0x2a2520);
+        cardContainer.addChild(placeholder);
+      }
 
       this.content.addChild(cardContainer);
     });
