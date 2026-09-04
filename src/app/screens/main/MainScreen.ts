@@ -78,6 +78,7 @@ export class MainScreen extends Container {
   private selectedZoneChoices: ZoneCardChoice[] = [];
   private selectedPromptPlayerIDs: PlayerID[] = [];
   private lastPromptID: number | null = null;
+  private nullificationTimeout: any = null;
   private handScrollX = 0;
   private serpentSpearMode = false;
   private virtualAs: "slash" | "snatch" | "indulgence" | null = null;
@@ -133,6 +134,10 @@ export class MainScreen extends Container {
     this.selectedZoneChoices = [];
     this.selectedPromptPlayerIDs = [];
     this.lastPromptID = null;
+    if (this.nullificationTimeout) {
+      clearTimeout(this.nullificationTimeout);
+      this.nullificationTimeout = null;
+    }
     this.handScrollX = 0;
     this.serpentSpearMode = false;
     this.virtualAs = null;
@@ -739,24 +744,6 @@ export class MainScreen extends Container {
 
       // Info Panel
       const panelW = 600;
-      const panelH = 200;
-      const panelY = centerY + 90;
-
-      const panel = new Graphics()
-        .roundRect(centerX - panelW / 2, panelY, panelW, panelH, 8)
-        .fill({ color: COLORS.black, alpha: 0.85 })
-        .stroke({ color: COLORS.gold, width: 2 });
-      this.content.addChild(panel);
-
-      this.addText(
-        `${general.name} - Thể Lực: ${general.maxHP}`,
-        centerX,
-        panelY + 20,
-        24,
-        COLORS.gold,
-        0.5,
-        "center",
-      );
 
       let skillsText = "";
       general.skillIDs.forEach((skillID) => {
@@ -782,15 +769,36 @@ export class MainScreen extends Container {
           lineHeight: 24,
         },
       });
+
+      // Calculate dynamic panel height
+      const panelH = Math.max(160, 60 + skillsLabel.height + 20);
+      const panelY = centerY + 80;
+
+      const panel = new Graphics()
+        .roundRect(centerX - panelW / 2, panelY, panelW, panelH, 8)
+        .fill({ color: COLORS.black, alpha: 0.85 })
+        .stroke({ color: COLORS.gold, width: 2 });
+      this.content.addChild(panel);
+
+      this.addText(
+        `${general.name} - Thể Lực: ${general.maxHP}`,
+        centerX,
+        panelY + 24,
+        24,
+        COLORS.gold,
+        0.5,
+        "center",
+      );
+
       skillsLabel.anchor.set(0, 0);
-      skillsLabel.position.set(centerX - panelW / 2 + 20, panelY + 45);
+      skillsLabel.position.set(centerX - panelW / 2 + 20, panelY + 54);
       this.content.addChild(skillsLabel);
 
       // Confirm Button
       this.addButton(
         "Xác Nhận",
         centerX,
-        panelY + panelH + 40,
+        panelY + panelH + 34,
         180,
         50,
         () => {
