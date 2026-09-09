@@ -35,3 +35,10 @@ src/manifest.json
 .gitnexus/
 .codegraph/
 *.md
+
+# Generated assets and test results
+raw-assets/
+test-results/
+playwright-report/
+playwright/.cache/
+patch*.js
