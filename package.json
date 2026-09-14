@@ -3,6 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "type": "module",
+  "packageManager": "pnpm@11.3.0",
   "scripts": {
     "start": "npm run dev",
     "clean": "node -e \"const fs=require('fs'); ['.assetpack', 'public/assets', 'src/manifest.json'].forEach(f => fs.rmSync(f, {recursive:true, force:true}))\"",
