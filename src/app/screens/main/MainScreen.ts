@@ -5,6 +5,7 @@ import {
   Text,
   Texture,
   TilingSprite,
+  Sprite,
 } from "pixi.js";
 
 import { LobbyClient } from "boardgame.io/client";
@@ -97,6 +98,10 @@ export class MainScreen extends Container {
   private mainBundleLoaded = false;
   private isAwaitingBundle = false;
   private autoSkipWuxie = true;
+  private rolePopupDismissed = false;
+  private roleCardRevealed = false;
+  private lordExtraHp = 1;
+  private turnTimeLimit: number | null = null;
   private lobbyPollInterval?: number;
 
   constructor() {
@@ -296,7 +301,7 @@ export class MainScreen extends Container {
     // Overlay for General Selection
     const viewer = G.players[this.match!.currentViewerID];
     const canSelectGeneral =
-      !viewer.generalSelected &&
+      viewer.generalID === null &&
       viewer.generalCandidates.length > 0 &&
       ((G.status === "lord-selection" &&
         this.match!.currentViewerID === G.lordID) ||
@@ -359,38 +364,78 @@ export class MainScreen extends Container {
       );
     });
 
-    if (amIHost) {
-      this.addButton(
-        `[${this.autoSkipWuxie ? "X" : "  "}] Tự động bỏ qua Vô Giải Khả Kích`,
-        centerX,
-        this.viewportHeight - 190,
-        360,
-        40,
-        () => {
-          this.autoSkipWuxie = !this.autoSkipWuxie;
-          this.render();
-        },
-        THEME.colors.ink,
-        THEME.colors.paper,
-      );
+      if (amIHost) {
+        this.addText("TÙY CHỈNH GAME", centerX, this.viewportHeight - 280, 20, THEME.colors.gold, 0.5, "center");
 
-      const canStart = joinedPlayers.length >= 4;
-      this.addButton(
-        "Bắt Đầu",
-        centerX,
-        this.viewportHeight - 120,
-        200,
-        50,
-        () => {
-          if (canStart) {
-            this.match!.move("startGame", joinedPlayerIDs, this.autoSkipWuxie);
-          }
-        },
-        canStart ? THEME.colors.red : THEME.colors.ink,
-        THEME.colors.paper,
-        !canStart,
-      );
-    } else {
+        this.addButton(
+          `Vô Giải Khả Kích: ${this.autoSkipWuxie ? "Tự Động" : "Thủ Công"}`,
+          centerX - 140,
+          this.viewportHeight - 230,
+          260,
+          40,
+          () => {
+            this.autoSkipWuxie = !this.autoSkipWuxie;
+            this.render();
+          },
+          this.autoSkipWuxie ? THEME.colors.gold : THEME.colors.ink,
+          THEME.colors.paper,
+        );
+
+        this.addButton(
+          `Máu Chủ Công: ${this.lordExtraHp > 0 ? "+1" : "Giữ Nguyên"}`,
+          centerX + 140,
+          this.viewportHeight - 230,
+          260,
+          40,
+          () => {
+            this.lordExtraHp = this.lordExtraHp === 1 ? 0 : 1;
+            this.render();
+          },
+          this.lordExtraHp > 0 ? THEME.colors.gold : THEME.colors.ink,
+          THEME.colors.paper,
+        );
+
+        let timeLimitStr = "Vô Hạn";
+        if (this.turnTimeLimit === 15) timeLimitStr = "15 Giây";
+        if (this.turnTimeLimit === 30) timeLimitStr = "30 Giây";
+
+        this.addButton(
+          `Thời Gian Lượt: ${timeLimitStr}`,
+          centerX,
+          this.viewportHeight - 180,
+          260,
+          40,
+          () => {
+            if (this.turnTimeLimit === null) this.turnTimeLimit = 30;
+            else if (this.turnTimeLimit === 30) this.turnTimeLimit = 15;
+            else this.turnTimeLimit = null;
+            this.render();
+          },
+          this.turnTimeLimit !== null ? THEME.colors.gold : THEME.colors.ink,
+          THEME.colors.paper,
+        );
+
+        const canStart = joinedPlayers.length >= 4;
+        this.addButton(
+          "Bắt Đầu",
+          centerX,
+          this.viewportHeight - 110,
+          200,
+          50,
+          () => {
+            if (canStart) {
+              this.match!.move("startGame", joinedPlayerIDs, {
+                autoSkipWuxie: this.autoSkipWuxie,
+                lordExtraHp: this.lordExtraHp,
+                turnTimeLimit: this.turnTimeLimit,
+              });
+            }
+          },
+          canStart ? THEME.colors.red : THEME.colors.ink,
+          THEME.colors.paper,
+          !canStart,
+        );
+      } else {
       this.addText(
         "Chờ chủ phòng bắt đầu...",
         centerX,
@@ -432,7 +477,7 @@ export class MainScreen extends Container {
       .stroke({ color: THEME.colors.gold, width: 1, alpha: 0.55 });
     this.content.addChild(background);
     this.addBackgroundTexture(
-      "main/system/tableBg",
+      "system/tableBg",
       this.viewportWidth,
       this.viewportHeight,
       0.8,
@@ -451,8 +496,8 @@ export class MainScreen extends Container {
     for (const alias of [
       `${name}.jpg`,
       `${name}.png`,
-      `main/${name}.jpg`,
-      `main/${name}.png`,
+      `${name}.jpg`,
+      `${name}.png`,
       `/assets/main/${name}.jpg`,
     ]) {
       texture = Assets.get<Texture>(alias);
@@ -750,6 +795,24 @@ export class MainScreen extends Container {
     const viewerID = this.match!.currentViewerID;
     const player = G.players[viewerID];
     const top = this.viewportHeight - 250;
+    
+    // Draw Hidden Role Card in bottom left
+    const roleCardTex = this.roleCardRevealed ? Assets.get(`system/roles/${player.role}.png`) : Assets.get(`system/roles/unknown.png`);
+    if (roleCardTex) {
+      const roleSprite = new Sprite(roleCardTex);
+      roleSprite.x = 20;
+      roleSprite.y = top;
+      roleSprite.scale.set(0.2);
+      roleSprite.eventMode = "static";
+      roleSprite.cursor = "pointer";
+      roleSprite.on("pointerdown", () => {
+        this.roleCardRevealed = !this.roleCardRevealed;
+        this.render();
+      });
+      this.content.addChild(roleSprite);
+      
+      this.addText("Thân Phận (Bấm để xem)", 20 + roleSprite.width / 2, top - 20, 12, THEME.colors.muted, 0.5, "center");
+    }
 
     const requiredActorID = this.requiredActorID(G);
     if (
@@ -763,7 +826,7 @@ export class MainScreen extends Container {
     }
 
     const canSelectGeneral =
-      !player.generalSelected &&
+      player.generalID === null &&
       player.generalCandidates.length > 0 &&
       ((G.status === "lord-selection" && viewerID === G.lordID) ||
         (G.status === "general-selection" && viewerID !== G.lordID));
