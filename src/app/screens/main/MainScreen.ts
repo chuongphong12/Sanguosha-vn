@@ -319,8 +319,11 @@ export class MainScreen extends Container {
   private drawWaitingRoom(): void {
     const viewerID = this.match!.currentViewerID;
     
+    // Add cinematic background over the default one
+    this.addBackgroundTexture("bg.jpg", this.viewportWidth, this.viewportHeight, 0.5);
+
     // Header
-    this.addText("SẢNH CHỜ", this.viewportWidth / 2, 80, 32, THEME.colors.gold, 0.5, "center");
+    this.addText("SẢNH CHỜ", this.viewportWidth / 2, 60, 42, THEME.colors.gold, 0.5, "center");
 
     const leftCenterX = this.viewportWidth / 2 - 250;
     const rightCenterX = this.viewportWidth / 2 + 250;
@@ -344,21 +347,37 @@ export class MainScreen extends Container {
     const amIHost = viewerID === actualHostID;
 
     // LEFT PANEL: Player List
-    this.addText(`NGƯỜI CHƠI (${joinedPlayers.length}/${amIHost ? this.targetNumPlayers : 10})`, leftCenterX, 140, 20, THEME.colors.paper, 0.5, "center");
+    this.addText(`NGƯỜI CHƠI (${joinedPlayers.length}/${amIHost ? this.targetNumPlayers : 10})`, leftCenterX, 130, 22, THEME.colors.gold, 0.5, "center");
 
     const bgList = new Graphics()
-      .rect(leftCenterX - 180, 170, 360, 420)
-      .fill({ color: THEME.colors.panelBg, alpha: 0.8 })
+      .rect(leftCenterX - 180, 160, 360, 470)
+      .fill({ color: THEME.colors.panelBg, alpha: 0.85 })
       .stroke({ color: THEME.colors.gold, width: 2 });
     this.content.addChild(bgList);
 
-    joinedPlayers.forEach((p, i) => {
-      const y = 200 + i * 40;
-      const isHost = String(p.id) === actualHostID;
-      const isMe = String(p.id) === viewerID;
-      const color = isMe ? THEME.colors.gold : THEME.colors.paper;
-      this.addText(`Slot ${p.id}: ${p.name || "Khách"} ${isHost ? "(Chủ phòng)" : ""}`, leftCenterX - 160, y, 18, color, 0, "left");
-    });
+    const slotCount = amIHost ? this.targetNumPlayers : 10;
+    for (let i = 0; i < slotCount; i++) {
+      const y = 175 + i * 44;
+      const p = joinedPlayers[i];
+      
+      const slotBg = new Graphics()
+        .rect(leftCenterX - 160, y, 320, 38)
+        .fill({ color: p ? 0x222222 : 0x111111, alpha: 0.8 })
+        .stroke({ color: THEME.colors.gold, width: 1, alpha: 0.5 });
+      this.content.addChild(slotBg);
+
+      this.addText(`${i + 1}`, leftCenterX - 145, y + 19, 18, THEME.colors.gold, 0, "left");
+
+      if (p) {
+        const isHost = String(p.id) === actualHostID;
+        const isMe = String(p.id) === viewerID;
+        const color = isMe ? THEME.colors.gold : THEME.colors.paper;
+        this.addText(`${p.name || "Khách"} ${isHost ? "(Chủ phòng)" : ""}`, leftCenterX - 110, y + 19, 18, color, 0, "left");
+        this.addText("Sẵn Sàng", leftCenterX + 145, y + 19, 16, 0x00FF00, 1, "right");
+      } else {
+        this.addText("Open Slot", leftCenterX - 110, y + 19, 18, 0x555555, 0, "left");
+      }
+    }
 
     // Auto-start logic
     if (amIHost && this.autoStartWhenFull && joinedPlayers.length >= this.targetNumPlayers && !this.startingMatch) {
@@ -372,10 +391,10 @@ export class MainScreen extends Container {
     }
 
     // RIGHT PANEL: Game Settings
-    this.addText("TÙY CHỈNH GAME", rightCenterX, 140, 20, THEME.colors.gold, 0.5, "center");
+    this.addText("TÙY CHỈNH GAME", rightCenterX, 130, 22, THEME.colors.gold, 0.5, "center");
     const bgSettings = new Graphics()
-      .rect(rightCenterX - 180, 170, 360, 420)
-      .fill({ color: THEME.colors.panelBg, alpha: 0.8 })
+      .rect(rightCenterX - 180, 160, 360, 470)
+      .fill({ color: THEME.colors.panelBg, alpha: 0.85 })
       .stroke({ color: THEME.colors.gold, width: 2 });
     this.content.addChild(bgSettings);
 
@@ -417,10 +436,10 @@ export class MainScreen extends Container {
         else this.turnTimeLimit = null;
         this.render();
       }, this.turnTimeLimit !== null ? THEME.colors.gold : THEME.colors.ink, THEME.colors.paper);
-      y += 60;
-
+      
+      y += 200; // Push to bottom of panel
       const canStart = joinedPlayers.length >= 4;
-      this.addButton("Bắt Đầu Ngay", rightCenterX, y, 200, 40, () => {
+      this.addButton("Bắt Đầu Ngay", rightCenterX, y, 280, 50, () => {
         if (canStart) {
           this.match!.move("startGame", joinedPlayerIDs, {
             autoSkipWuxie: this.autoSkipWuxie,
@@ -428,101 +447,13 @@ export class MainScreen extends Container {
             turnTimeLimit: this.turnTimeLimit,
           });
         }
-      }, canStart ? THEME.colors.red : THEME.colors.ink, THEME.colors.paper, !canStart);
+      }, canStart ? THEME.colors.red : THEME.colors.ink, THEME.colors.gold, !canStart, { fontSize: 24, fontWeight: "700" });
     } else {
       this.addText("Chủ phòng đang thiết lập...", rightCenterX, 250, 18, THEME.colors.muted, 0.5, "center");
     }
 
-
-  }
-
-  private drawBackground(): void {
-    const background = new Graphics()
-      .rect(0, 0, this.viewportWidth, this.viewportHeight)
-      .fill(THEME.colors.black);
-    background
-      .circle(
-        this.viewportWidth * 0.82,
-        this.viewportHeight * 0.22,
-        Math.min(this.viewportWidth, 520) * 0.34,
-      )
-      .fill({ color: THEME.colors.red, alpha: 0.16 });
-    background
-      .rect(18, 18, this.viewportWidth - 36, this.viewportHeight - 36)
-      .stroke({ color: THEME.colors.gold, width: 1, alpha: 0.55 });
-    this.content.addChild(background);
-    this.addBackgroundTexture(
-      "system/tableBg",
-      this.viewportWidth,
-      this.viewportHeight,
-      0.8,
-    );
-  }
-
-  private addBackgroundTexture(
-    name: string,
-    width: number,
-    height: number,
-    alpha = 1,
-    x?: number,
-    y?: number,
-  ): void {
-    let texture: Texture | null = null;
-    for (const alias of [
-      `${name}.jpg`,
-      `${name}.png`,
-      `${name}.jpg`,
-      `${name}.png`,
-      `/assets/main/${name}.jpg`,
-    ]) {
-      texture = Assets.get<Texture>(alias);
-      if (texture) break;
-    }
-    if (!texture) return;
-    const sprite = new TilingSprite({
-      texture,
-      width,
-      height,
-    });
-    sprite.alpha = alpha;
-    sprite.position.set(x ?? 0, y ?? 0);
-    this.content.addChild(sprite);
-  }
-
-  private async leaveMatchAndExit(): Promise<void> {
-    if (this.match?.isRemote) {
-      try {
-        const urlParams = new URLSearchParams(window.location.search);
-        const serverUrl = urlParams.get("serverUrl");
-        const matchID = urlParams.get("matchID");
-        const playerID = urlParams.get("playerID");
-        const credentials = urlParams.get("credentials");
-        if (serverUrl && matchID && playerID && credentials) {
-          const lc = new LobbyClient({ server: serverUrl });
-          await lc.leaveMatch("tam-quoc-sat-standard-2013", matchID, {
-            playerID,
-            credentials,
-          });
-        }
-      } catch (e) {
-        console.error(e);
-      }
-    }
-    window.location.href = "/";
-  }
-
-  private drawTitle(): void {
-    // The user requested to remove the game title to avoid overlap.
-    this.addButton(
-      "Thoát",
-      74, // centerX
-      48, // centerY
-      80,
-      34,
-      () => this.leaveMatchAndExit(),
-      THEME.colors.ink,
-      THEME.colors.paper,
-    );
+    // Redraw exit button on top of background
+    this.drawTitle();
   }
 
   private drawViewerSelector(G: TqsPlayerViewState): void {
