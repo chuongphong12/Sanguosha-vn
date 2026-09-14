@@ -102,6 +102,10 @@ export class MainScreen extends Container {
   private roleCardRevealed = false;
   private lordExtraHp = 1;
   private turnTimeLimit: number | null = null;
+  private targetNumPlayers: number = 8;
+  private autoStartWhenFull: boolean = false;
+  private startingMatch: boolean = false;
+
   private lobbyPollInterval?: number;
 
   constructor() {
@@ -313,11 +317,14 @@ export class MainScreen extends Container {
     }
   }
   private drawWaitingRoom(): void {
-    const centerX = this.viewportWidth / 2;
     const viewerID = this.match!.currentViewerID;
+    
+    // Header
+    this.addText("SẢNH CHỜ", this.viewportWidth / 2, 80, 32, THEME.colors.gold, 0.5, "center");
 
-    this.addText("SẢNH CHỜ", centerX, 80, 32, THEME.colors.gold, 0.5, "center");
-
+    const leftCenterX = this.viewportWidth / 2 - 250;
+    const rightCenterX = this.viewportWidth / 2 + 250;
+    
     interface MatchPlayer {
       id: number;
       name?: string;
@@ -326,7 +333,6 @@ export class MainScreen extends Container {
     if (this.match!.isRemote) {
       joinedPlayers = (this.state!.matchData as MatchPlayer[])?.filter((p) => p.name) || [];
     } else {
-      // Local mode fallback
       const numPlayers = this.match!.playerIDs.length;
       for (let i = 0; i < numPlayers; i++) {
         joinedPlayers.push({ id: i, name: `Player ${i + 1}` });
@@ -334,131 +340,102 @@ export class MainScreen extends Container {
     }
     const joinedPlayerIDs = joinedPlayers.map((p) => String(p.id));
 
-    // Fallback if host left: the lowest ID becomes the host.
-    const actualHostID =
-      joinedPlayerIDs.length > 0
-        ? String(Math.min(...joinedPlayerIDs.map(Number)))
-        : "0";
+    const actualHostID = joinedPlayerIDs.length > 0 ? String(Math.min(...joinedPlayerIDs.map(Number))) : "0";
     const amIHost = viewerID === actualHostID;
 
-    this.addText(
-      `Người chơi: ${joinedPlayers.length}/10`,
-      centerX,
-      130,
-      20,
-      THEME.colors.paper,
-      0.5,
-      "center",
-    );
+    // LEFT PANEL: Player List
+    this.addText(`NGƯỜI CHƠI (${joinedPlayers.length}/${amIHost ? this.targetNumPlayers : 10})`, leftCenterX, 140, 20, THEME.colors.paper, 0.5, "center");
 
-    const startY = 180;
-    joinedPlayers.forEach((p, i: number) => {
-      this.addText(
-        `Slot ${p.id}: ${p.name} ${String(p.id) === actualHostID ? "(Chủ phòng)" : ""}`,
-        centerX,
-        startY + i * 35,
-        18,
-        String(p.id) === viewerID ? THEME.colors.gold : THEME.colors.paper,
-        0.5,
-        "center",
-      );
+    const bgList = new Graphics()
+      .rect(leftCenterX - 180, 170, 360, 420)
+      .fill({ color: THEME.colors.panelBg, alpha: 0.8 })
+      .stroke({ color: THEME.colors.gold, width: 2 });
+    this.content.addChild(bgList);
+
+    joinedPlayers.forEach((p, i) => {
+      const y = 200 + i * 40;
+      const isHost = String(p.id) === actualHostID;
+      const isMe = String(p.id) === viewerID;
+      const color = isMe ? THEME.colors.gold : THEME.colors.paper;
+      this.addText(`Slot ${p.id}: ${p.name || "Khách"} ${isHost ? "(Chủ phòng)" : ""}`, leftCenterX - 160, y, 18, color, 0, "left");
     });
 
-      if (amIHost) {
-        this.addText("TÙY CHỈNH GAME", centerX, this.viewportHeight - 280, 20, THEME.colors.gold, 0.5, "center");
-
-        this.addButton(
-          `Vô Giải Khả Kích: ${this.autoSkipWuxie ? "Tự Động" : "Thủ Công"}`,
-          centerX - 140,
-          this.viewportHeight - 230,
-          260,
-          40,
-          () => {
-            this.autoSkipWuxie = !this.autoSkipWuxie;
-            this.render();
-          },
-          this.autoSkipWuxie ? THEME.colors.gold : THEME.colors.ink,
-          THEME.colors.paper,
-        );
-
-        this.addButton(
-          `Máu Chủ Công: ${this.lordExtraHp > 0 ? "+1" : "Giữ Nguyên"}`,
-          centerX + 140,
-          this.viewportHeight - 230,
-          260,
-          40,
-          () => {
-            this.lordExtraHp = this.lordExtraHp === 1 ? 0 : 1;
-            this.render();
-          },
-          this.lordExtraHp > 0 ? THEME.colors.gold : THEME.colors.ink,
-          THEME.colors.paper,
-        );
-
-        let timeLimitStr = "Vô Hạn";
-        if (this.turnTimeLimit === 15) timeLimitStr = "15 Giây";
-        if (this.turnTimeLimit === 30) timeLimitStr = "30 Giây";
-
-        this.addButton(
-          `Thời Gian Lượt: ${timeLimitStr}`,
-          centerX,
-          this.viewportHeight - 180,
-          260,
-          40,
-          () => {
-            if (this.turnTimeLimit === null) this.turnTimeLimit = 30;
-            else if (this.turnTimeLimit === 30) this.turnTimeLimit = 15;
-            else this.turnTimeLimit = null;
-            this.render();
-          },
-          this.turnTimeLimit !== null ? THEME.colors.gold : THEME.colors.ink,
-          THEME.colors.paper,
-        );
-
-        const canStart = joinedPlayers.length >= 4;
-        this.addButton(
-          "Bắt Đầu",
-          centerX,
-          this.viewportHeight - 110,
-          200,
-          50,
-          () => {
-            if (canStart) {
-              this.match!.move("startGame", joinedPlayerIDs, {
-                autoSkipWuxie: this.autoSkipWuxie,
-                lordExtraHp: this.lordExtraHp,
-                turnTimeLimit: this.turnTimeLimit,
-              });
-            }
-          },
-          canStart ? THEME.colors.red : THEME.colors.ink,
-          THEME.colors.paper,
-          !canStart,
-        );
-      } else {
-      this.addText(
-        "Chờ chủ phòng bắt đầu...",
-        centerX,
-        this.viewportHeight - 120,
-        18,
-        THEME.colors.muted,
-        0.5,
-        "center",
-      );
+    // Auto-start logic
+    if (amIHost && this.autoStartWhenFull && joinedPlayers.length >= this.targetNumPlayers && !this.startingMatch) {
+      this.startingMatch = true;
+      this.match!.move("startGame", joinedPlayerIDs, {
+        autoSkipWuxie: this.autoSkipWuxie,
+        lordExtraHp: this.lordExtraHp,
+        turnTimeLimit: this.turnTimeLimit,
+      });
+      return;
     }
 
-    this.addButton(
-      "Rời Khỏi",
-      centerX,
-      this.viewportHeight - 60,
-      200,
-      50,
-      () => {
-        this.leaveMatchAndExit();
-      },
-      THEME.colors.ink,
-      THEME.colors.paper,
-    );
+    // RIGHT PANEL: Game Settings
+    this.addText("TÙY CHỈNH GAME", rightCenterX, 140, 20, THEME.colors.gold, 0.5, "center");
+    const bgSettings = new Graphics()
+      .rect(rightCenterX - 180, 170, 360, 420)
+      .fill({ color: THEME.colors.panelBg, alpha: 0.8 })
+      .stroke({ color: THEME.colors.gold, width: 2 });
+    this.content.addChild(bgSettings);
+
+    if (amIHost) {
+      let y = 190;
+      
+      this.addButton(`Số Người Chơi: ${this.targetNumPlayers}`, rightCenterX - 160, y, 320, 36, () => {
+        const options = [4, 5, 6, 8, 10];
+        const idx = options.indexOf(this.targetNumPlayers);
+        this.targetNumPlayers = options[(idx + 1) % options.length];
+        this.render();
+      }, THEME.colors.ink, THEME.colors.paper);
+      y += 50;
+
+      this.addButton(`Tự Bắt Đầu: ${this.autoStartWhenFull ? "BẬT" : "TẮT"}`, rightCenterX - 160, y, 320, 36, () => {
+        this.autoStartWhenFull = !this.autoStartWhenFull;
+        this.render();
+      }, this.autoStartWhenFull ? THEME.colors.gold : THEME.colors.ink, THEME.colors.paper);
+      y += 50;
+
+      this.addButton(`Vô Giải Khả Kích: ${this.autoSkipWuxie ? "Tự Động" : "Thủ Công"}`, rightCenterX - 160, y, 320, 36, () => {
+        this.autoSkipWuxie = !this.autoSkipWuxie;
+        this.render();
+      }, this.autoSkipWuxie ? THEME.colors.gold : THEME.colors.ink, THEME.colors.paper);
+      y += 50;
+
+      this.addButton(`Máu Chủ Công: ${this.lordExtraHp > 0 ? "+1" : "Giữ Nguyên"}`, rightCenterX - 160, y, 320, 36, () => {
+        this.lordExtraHp = this.lordExtraHp === 1 ? 0 : 1;
+        this.render();
+      }, this.lordExtraHp > 0 ? THEME.colors.gold : THEME.colors.ink, THEME.colors.paper);
+      y += 50;
+
+      let timeLimitStr = "Vô Hạn";
+      if (this.turnTimeLimit === 15) timeLimitStr = "15 Giây";
+      if (this.turnTimeLimit === 30) timeLimitStr = "30 Giây";
+      this.addButton(`Thời Gian Lượt: ${timeLimitStr}`, rightCenterX - 160, y, 320, 36, () => {
+        if (this.turnTimeLimit === null) this.turnTimeLimit = 30;
+        else if (this.turnTimeLimit === 30) this.turnTimeLimit = 15;
+        else this.turnTimeLimit = null;
+        this.render();
+      }, this.turnTimeLimit !== null ? THEME.colors.gold : THEME.colors.ink, THEME.colors.paper);
+      y += 60;
+
+      const canStart = joinedPlayers.length >= 4;
+      this.addButton("Bắt Đầu Ngay", rightCenterX - 100, y, 200, 40, () => {
+        if (canStart) {
+          this.match!.move("startGame", joinedPlayerIDs, {
+            autoSkipWuxie: this.autoSkipWuxie,
+            lordExtraHp: this.lordExtraHp,
+            turnTimeLimit: this.turnTimeLimit,
+          });
+        }
+      }, canStart ? THEME.colors.red : THEME.colors.ink, THEME.colors.paper, !canStart);
+    } else {
+      this.addText("Chủ phòng đang thiết lập...", rightCenterX, 250, 18, THEME.colors.muted, 0.5, "center");
+    }
+
+    this.addButton("Rời Khỏi", this.viewportWidth / 2 - 100, this.viewportHeight - 60, 200, 50, () => {
+      this.leaveMatchAndExit();
+    }, THEME.colors.ink, THEME.colors.paper);
   }
 
   private drawBackground(): void {
