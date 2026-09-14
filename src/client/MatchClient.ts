@@ -84,13 +84,13 @@ export class MatchClient {
   }
 
   public get state(): MatchClientState {
-    return this.asPlayerView(this.getClient(this.viewerID).getState());
+    return this.asPlayerView(this.getClient(this.viewerID), this.getClient(this.viewerID).getState());
   }
 
   public subscribe(listener: StateListener): () => void {
     this.unsubscribeViewer?.();
     this.unsubscribeViewer = this.getClient(this.viewerID).subscribe((state) =>
-      listener(this.asPlayerView(state)),
+      listener(this.asPlayerView(this.getClient(this.viewerID), state)),
     );
     return () => {
       this.unsubscribeViewer?.();
@@ -104,7 +104,7 @@ export class MatchClient {
     this.viewerID = playerID;
     this.unsubscribeViewer?.();
     this.unsubscribeViewer = this.getClient(playerID).subscribe((state) =>
-      listener(this.asPlayerView(state)),
+      listener(this.asPlayerView(this.getClient(this.viewerID), state)),
     );
   }
 
@@ -127,7 +127,10 @@ export class MatchClient {
     return client;
   }
 
-  private asPlayerView(state: AuthoritativeClientState): MatchClientState {
-    return state as MatchClientState;
+  private asPlayerView(client: LocalClient, state: AuthoritativeClientState): MatchClientState {
+    if (!state) return null as any;
+    const s = state as any;
+    s.matchData = client.matchData;
+    return s as MatchClientState;
   }
 }

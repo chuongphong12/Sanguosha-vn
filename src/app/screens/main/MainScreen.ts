@@ -97,6 +97,7 @@ export class MainScreen extends Container {
   private mainBundleLoaded = false;
   private isAwaitingBundle = false;
   private autoSkipWuxie = true;
+  private lobbyPollInterval?: number;
 
   constructor() {
     super();
@@ -124,9 +125,28 @@ export class MainScreen extends Container {
     this.unsubscribe = this.match.subscribe((state) =>
       this.receiveState(state),
     );
+
+    if (config.mode === "remote" && config.matchID && config.serverUrl) {
+      const lobbyClient = new LobbyClient({ server: config.serverUrl });
+      this.lobbyPollInterval = window.setInterval(async () => {
+        if (this.state?.G.status === "waiting-room") {
+          try {
+            const matchInfo = await lobbyClient.getMatch("tam-quoc-sat-standard-2013", config.matchID!);
+            if (this.state) {
+              this.state.matchData = matchInfo.players as any;
+              this.render();
+            }
+          } catch (err) {}
+        }
+      }, 2000);
+    }
   }
 
   public reset(): void {
+    if (this.lobbyPollInterval) {
+      window.clearInterval(this.lobbyPollInterval);
+      this.lobbyPollInterval = undefined;
+    }
     this.unsubscribe?.();
     this.unsubscribe = undefined;
     this.match?.destroy();
@@ -297,8 +317,16 @@ export class MainScreen extends Container {
       id: number;
       name?: string;
     }
-    const joinedPlayers =
-      (this.state!.matchData as MatchPlayer[])?.filter((p) => p.name) || [];
+    let joinedPlayers: MatchPlayer[] = [];
+    if (this.match!.isRemote) {
+      joinedPlayers = (this.state!.matchData as MatchPlayer[])?.filter((p) => p.name) || [];
+    } else {
+      // Local mode fallback
+      const numPlayers = this.match!.playerIDs.length;
+      for (let i = 0; i < numPlayers; i++) {
+        joinedPlayers.push({ id: i, name: `Player ${i + 1}` });
+      }
+    }
     const joinedPlayerIDs = joinedPlayers.map((p) => String(p.id));
 
     // Fallback if host left: the lowest ID becomes the host.
