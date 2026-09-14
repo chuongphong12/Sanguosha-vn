@@ -35,6 +35,8 @@ src/manifest.json
 .gitnexus/
 .codegraph/
 *.md
+!README.md
+!AGENTS.md
 
 # Generated assets and test results
 raw-assets/
@@ -42,3 +44,5 @@ test-results/
 playwright-report/
 playwright/.cache/
 patch*.js
+# Agent patch scripts
+*.py
