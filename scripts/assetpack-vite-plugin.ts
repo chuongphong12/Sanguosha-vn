@@ -13,6 +13,11 @@ export function assetpackPlugin() {
         manifest: {
           output: "./src/manifest.json",
         },
+        texturePacker: {
+          texturePacker: {
+            nameStyle: "relative"
+          }
+        }
       }),
     ],
   } as AssetPackConfig;
