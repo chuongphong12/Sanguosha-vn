@@ -1,9 +1,15 @@
 {
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "cpu-features",
+      "esbuild",
+      "sharp"
+    ]
+  },
   "name": "tqs-boardgame",
   "version": "0.0.0",
   "private": true,
   "type": "module",
-  "packageManager": "pnpm@11.3.0",
   "engines": {
     "node": "22.x"
   },
