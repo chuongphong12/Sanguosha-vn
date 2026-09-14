@@ -515,7 +515,17 @@ export interface DyingEffect {
   passedPlayerIDs: PlayerID[];
 }
 
+export interface SkillTriggerEffect {
+  id: number;
+  kind: "skill-trigger";
+  skillId: string;
+  owner: PlayerID;
+  context: any;
+}
+
 export type GameEffect =
+  | SkillTriggerEffect
+  | { id: number; kind: "execute-draw"; ownerID: PlayerID; }
   | FinishUseEffect
   | NullificationEffect
   | SlashEffect
@@ -575,7 +585,8 @@ export interface GameLogEntry {
 
 export interface TqsGameState {
   rulesVersion: "standard-2013-v2";
-  status: "lord-selection" | "general-selection" | "playing" | "ended";
+  status: "waiting-room" | "lord-selection" | "general-selection" | "playing" | "ended";
+  config: { autoSkipWuxie?: boolean };
   seatOrder: PlayerID[];
   lordID: PlayerID;
   players: Record<PlayerID, PlayerState>;
@@ -611,6 +622,8 @@ export interface TqsPlayerViewState extends Omit<
 }
 
 export interface TqsSetupOptions {
+  joinedPlayerIDs?: string[];
+  autoSkipWuxie?: boolean;
   numPlayers: number;
   roleVariant?: "standard" | "double-renegade";
 }

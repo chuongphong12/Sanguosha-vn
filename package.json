@@ -5,9 +5,12 @@
   "type": "module",
   "scripts": {
     "start": "npm run dev",
+    "clean": "node -e \"const fs=require('fs'); ['.assetpack', 'public/assets', 'src/manifest.json'].forEach(f => fs.rmSync(f, {recursive:true, force:true}))\"",
+    "prebuild": "npm run clean",
     "build": "npm run check && vite build",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
+    "predev": "npm run clean",
     "dev": "vite",
     "serve": "tsx --env-file=.env server/server.ts",
     "test": "vitest run --config vitest.config.ts",

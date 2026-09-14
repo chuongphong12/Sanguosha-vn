@@ -6,12 +6,7 @@ import { GENERALS_BY_ID } from "../../game/catalog/generals";
 import { FACTION_ICON_ALIAS, GENERAL_PORTRAIT_ALIAS } from "./assetAliases";
 import { GAME_FONT_FAMILY } from "./typography";
 
-const FACTION_COLORS: Record<Faction, number> = {
-  wei: 0x1a5fa8,
-  shu: 0xb33a2a,
-  wu: 0x2a8a3e,
-  qun: 0x8a8a3e,
-};
+import { THEME } from "./theme";
 
 const AVATAR_WIDTH = 120;
 const AVATAR_HEIGHT = 140;
@@ -49,7 +44,7 @@ export class PlayerAvatar extends Container {
       : isActive
         ? 0xc59a45
         : faction
-          ? FACTION_COLORS[faction]
+          ? THEME.colors.factions[faction]
           : 0x555555;
     const bg = new Graphics()
       .roundRect(0, 0, w, h, 6)
@@ -131,7 +126,7 @@ export class PlayerAvatar extends Container {
         // Fallback: small colored circle
         const dot = new Graphics()
           .circle(w - 14, 16, 8)
-          .fill(FACTION_COLORS[faction]);
+          .fill(THEME.colors.factions[faction]);
         this.addChild(dot);
       }
     }
@@ -172,17 +167,40 @@ export class PlayerAvatar extends Container {
     const gap = 2;
     const dotSize = Math.min(12, (totalWidth - gap * (maxHP - 1)) / maxHP);
 
-    // Determine HP color based on ratio
-    const ratio = hp / maxHP;
-    const hpColor =
-      ratio > 0.66 ? 0x2aaa44 : ratio > 0.33 ? 0xddaa22 : 0xcc3322;
+    // 5 = green (hp >= max), 4 = green (ratio > 0.5), 3 = yellow, 2 = red, 1 = red, 0 = empty
+    let colorSuffix = "0";
+    if (hp > 0) {
+      const ratio = hp / maxHP;
+      if (ratio > 0.5) colorSuffix = "1";
+      else if (ratio > 0.25) colorSuffix = "2";
+      else colorSuffix = "3";
+    }
 
     for (let i = 0; i < maxHP; i++) {
       const filled = i < hp;
-      const dot = new Graphics()
-        .roundRect(x + i * (dotSize + gap), y, dotSize, dotSize, 3)
-        .fill(filled ? hpColor : 0x333333);
-      this.addChild(dot);
+      const textureAlias = filled
+        ? `main/ui/system/magatamas/${colorSuffix}.png`
+        : `main/ui/system/magatamas/0.png`;
+      const tex = Assets.get<Texture>(textureAlias);
+      if (tex) {
+        const magatama = new Sprite(tex);
+        magatama.width = dotSize;
+        magatama.height = dotSize;
+        magatama.position.set(x + i * (dotSize + gap), y);
+        this.addChild(magatama);
+      } else {
+        // Fallback to simple graphics if texture is missing
+        const fallbackColor =
+          colorSuffix === "1"
+            ? 0x2aaa44
+            : colorSuffix === "2"
+              ? 0xddaa22
+              : 0xcc3322;
+        const dot = new Graphics()
+          .roundRect(x + i * (dotSize + gap), y, dotSize, dotSize, 3)
+          .fill(filled ? fallbackColor : 0x333333);
+        this.addChild(dot);
+      }
     }
   }
 

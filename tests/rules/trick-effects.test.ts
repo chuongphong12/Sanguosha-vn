@@ -64,6 +64,7 @@ describe("trick card effects", () => {
       identityShuffle,
     );
     passNullificationWindow(G);
+    console.log("PROMPT:", G.prompt, "STACK:", G.effectStack.map(e => e.kind));
     answerCardPrompt(
       G,
       targetID,

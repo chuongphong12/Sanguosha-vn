@@ -24,6 +24,10 @@ export class CreationAudioPlugin {
   public static init(): void {
     const app = this as unknown as Application;
 
+    // Use HTMLAudioElement instead of WebAudio to prevent "Unable to decode audio data"
+    // crashes from slightly malformed or unsupported OGG files.
+    sound.useLegacy = true;
+
     app.audio = {
       bgm: new BGM(),
       sfx: new SFX(),

@@ -35,6 +35,12 @@ const originalPost = server.router.post.bind(server.router);
   } else if (path === "/games/:name/:id/join") {
     const ourMiddleware = async (ctx: any, next: any) => {
       const matchID = ctx.params.id;
+      const fetched = await (server as any).db.fetch(matchID, { state: true });
+      if (fetched.state && fetched.state.G.status !== "waiting-room") {
+        ctx.status = 403;
+        ctx.body = { error: "Ván đấu đã bắt đầu!" };
+        return;
+      }
       const inputPassword = ctx.request.body?.data?.password;
       const expectedPassword = roomPasswords.get(matchID);
       if (expectedPassword && inputPassword !== expectedPassword) {

@@ -16,10 +16,15 @@ export class LobbyUI {
     ) => void,
     onPlayOffline: (numPlayers: number) => void,
   ): void {
+    const isLocalhost =
+      window.location.hostname === "localhost" ||
+      window.location.hostname === "127.0.0.1";
     this.backendUrl =
       new URLSearchParams(window.location.search).get("backend") ||
       (import.meta as any).env?.VITE_BACKEND_URL ||
-      `http://localhost:8000`;
+      (isLocalhost
+        ? "http://localhost:8000"
+        : `http://localhost:8000`);
     this.lobbyClient = new LobbyClient({ server: this.backendUrl });
     if (!this.container) {
       this.createDOM(onJoinMatch, onPlayOffline);
@@ -174,11 +179,12 @@ export class LobbyUI {
           const created = await this.lobbyClient.createMatch(
             "tam-quoc-sat-standard-2013",
             {
-              numPlayers: 4,
+              numPlayers: 10,
               setupData: {
                 roomName,
                 hasPassword: isPrivate,
                 password: isPrivate ? password : null,
+                isOnline: true,
               },
               unlisted: false, // We show it but require password
             },
@@ -294,10 +300,15 @@ export class LobbyUI {
       serverUrl?: string,
     ) => void,
   ) {
+    const isLocalhost =
+      window.location.hostname === "localhost" ||
+      window.location.hostname === "127.0.0.1";
     this.backendUrl =
       new URLSearchParams(window.location.search).get("backend") ||
       (import.meta as any).env?.VITE_BACKEND_URL ||
-      `http://localhost:8000`;
+      (isLocalhost
+        ? "http://localhost:8000"
+        : `http://localhost:8000`);
     this.lobbyClient = new LobbyClient({ server: this.backendUrl });
     try {
       const data = password ? { password } : {};

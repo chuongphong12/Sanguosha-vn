@@ -15,17 +15,23 @@ import {
 function passNullificationWindow(
   G: ReturnType<typeof createStartedGame>,
 ): void {
-  while (
+  if (
     G.prompt?.kind === "card-response" &&
     G.prompt.reason === "nullification"
   ) {
-    answerCardPrompt(
-      G,
-      G.prompt.responderID,
-      G.prompt.id,
-      { kind: "pass" },
-      identityShuffle,
-    );
+    const promptID = G.prompt.id;
+    const living = G.seatOrder.filter((id) => G.players[id].alive);
+    for (const playerID of living) {
+      if (G.prompt && G.prompt.id === promptID) {
+        answerCardPrompt(
+          G,
+          playerID,
+          promptID,
+          { kind: "pass" },
+          identityShuffle,
+        );
+      }
+    }
   }
 }
 

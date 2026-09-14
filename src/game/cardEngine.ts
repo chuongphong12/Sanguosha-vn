@@ -1,6 +1,8 @@
 ﻿import { CARD_DEFINITIONS } from "./catalog/cards";
 import { GENERALS_BY_ID } from "./catalog/generals";
 import { ROLE_NAMES } from "./catalog/roles";
+import { SKILL_REGISTRY } from "./engine/SkillRegistry";
+import { emitEvent } from "./engine/EventBus";
 import type {
   CardColor,
   CardName,
@@ -129,7 +131,7 @@ function isPromptAnswer(value: unknown): value is PromptAnswer {
   return true;
 }
 
-function playerName(G: TqsGameState, playerID: PlayerID): string {
+export function playerName(G: TqsGameState, playerID: PlayerID): string {
   const generalID = G.players[playerID]?.generalID;
   return generalID
     ? GENERALS_BY_ID[generalID]?.name
@@ -288,7 +290,7 @@ function hasCardInZone(
   );
 }
 
-function removeHandCard(
+export function removeHandCard(
   G: TqsGameState,
   playerID: PlayerID,
   cardID: string,
@@ -298,29 +300,15 @@ function removeHandCard(
   if (index < 0)
     throw new Error(`Lá bài ${cardID} không nằm trên tay ${playerID}.`);
   hand.splice(index, 1);
-  if (
-    G.status === "playing" &&
-    hand.length === 0 &&
-    hasSkill(G, playerID, "lian-ying")
-  )
-    G.effectStack.push({
-      id: resolutionID(G),
-      kind: "lian-ying",
-      ownerID: playerID,
-    });
+  if (G.status === "playing") {
+    emitEvent(G, "LoseHandCard", { playerID, cardID });
+  }
 }
 
 function loseEquipmentCard(G: TqsGameState, ownerID: PlayerID): void {
-  if (
-    G.status === "playing" &&
-    G.players[ownerID].alive &&
-    hasSkill(G, ownerID, "xiao-ji")
-  )
-    G.effectStack.push({
-      id: resolutionID(G),
-      kind: "xiao-ji",
-      ownerID,
-    });
+  if (G.status === "playing" && G.players[ownerID].alive) {
+    emitEvent(G, "LoseEquipment", { playerID: ownerID });
+  }
 }
 
 function handToProcessing(
@@ -367,7 +355,7 @@ function processingToDiscard(G: TqsGameState, cardID: string): void {
   }
 }
 
-function takeTopCard(G: TqsGameState, shuffle: Shuffle): string | null {
+export function takeTopCard(G: TqsGameState, shuffle: Shuffle): string | null {
   if (G.deck.length === 0 && G.discard.length > 0) {
     G.deck = shuffle([...G.discard]);
     G.discard = [];
@@ -428,7 +416,7 @@ function nullifiable(
   };
 }
 
-function damageEffect(
+export function damageEffect(
   G: TqsGameState,
   sourceID: PlayerID | null,
   targetID: PlayerID,
@@ -548,7 +536,7 @@ function isIdleForPlay(G: TqsGameState, playerID: PlayerID): boolean {
   );
 }
 
-function hasZoneCard(
+export function hasZoneCard(
   G: TqsGameState | TqsPlayerViewState,
   playerID: PlayerID,
 ): boolean {
@@ -1259,7 +1247,7 @@ function killPlayer(
   }
 }
 
-function moveSelectedCard(
+export function moveSelectedCard(
   G: TqsGameState,
   prompt: SelectCardsPrompt,
   answer: PromptAnswer,
@@ -1307,7 +1295,7 @@ function moveSelectedCard(
   return cardIDs;
 }
 
-function removeZoneCard(
+export function removeZoneCard(
   G: TqsGameState,
   ownerID: PlayerID,
   cardID: string,
@@ -1848,7 +1836,7 @@ function resolveDamage(G: TqsGameState, effect: DamageEffect): void {
     G.players[effect.targetID].hp -= effect.amount;
     writeLog(
       G,
-      `${playerName(G, effect.targetID)} chịu ${effect.amount} điểm Sát Thương.`,
+      `\${playerName(G, effect.targetID)} chịu \${effect.amount} điểm Sát Thương.`,
     );
     effect.stage = "after-dying";
     if (G.players[effect.targetID].hp <= 0) {
@@ -1864,127 +1852,19 @@ function resolveDamage(G: TqsGameState, effect: DamageEffect): void {
     return;
   }
   const target = G.players[effect.targetID];
-  const triggers: GameEffect[] = [];
+  G.effectStack.shift();
   if (target.alive) {
-    if (hasSkill(G, target.id, "yi-ji"))
-      triggers.push({
-        id: resolutionID(G),
-        kind: "yi-ji",
-        ownerID: target.id,
-        remainingOpportunities: effect.amount,
-        stage: "offer",
-        poolCardIDs: [],
-        selectedCardID: null,
-      });
-    const causeCardIDs = effect.cardIDs.filter((cardID) =>
-      G.processing.includes(cardID),
-    );
-    if (causeCardIDs.length > 0 && hasSkill(G, target.id, "jian-xiong"))
-      triggers.push({
-        id: resolutionID(G),
-        kind: "jian-xiong",
-        ownerID: target.id,
-        cardIDs: causeCardIDs,
-      });
-    if (!effect.sourceID || !G.players[effect.sourceID].alive) {
-      G.effectStack.shift();
-      if (triggers.length > 0) G.effectStack.unshift(...triggers);
-      return;
-    }
-    if (hasSkill(G, target.id, "fan-kui") && hasZoneCard(G, effect.sourceID))
-      triggers.push({
-        id: resolutionID(G),
-        kind: "fan-kui",
-        ownerID: target.id,
-        sourceID: effect.sourceID,
-      });
-    if (hasSkill(G, target.id, "gang-lie"))
-      triggers.push({
-        id: resolutionID(G),
-        kind: "gang-lie",
-        ownerID: target.id,
-        sourceID: effect.sourceID,
-        judgeCardID: null,
-      });
-    if (
-      effect.cardName === "slash" &&
-      effect.cardColor === "red" &&
-      hasSkill(G, target.id, "yao-wu")
-    )
-      triggers.push({
-        id: resolutionID(G),
-        kind: "yao-wu",
-        ownerID: target.id,
-        sourceID: effect.sourceID,
-      });
+    emitEvent(G, "AfterDamage", {
+      targetID: effect.targetID,
+      amount: effect.amount,
+      effect: effect,
+    });
   }
-  G.effectStack.shift();
-  if (triggers.length > 0) G.effectStack.unshift(...triggers);
 }
 
-function resolveFanKui(
-  G: TqsGameState,
-  effect: Extract<GameEffect, { kind: "fan-kui" }>,
-): void {
-  if (
-    !G.players[effect.ownerID].alive ||
-    !G.players[effect.sourceID].alive ||
-    !hasZoneCard(G, effect.sourceID)
-  ) {
-    G.effectStack.shift();
-    return;
-  }
-  G.prompt = {
-    id: resolutionID(G),
-    effectID: effect.id,
-    kind: "option",
-    responderID: effect.ownerID,
-    reason: "fan-kui",
-    sourceID: effect.sourceID,
-    targetID: effect.ownerID,
-    choices: ["activate", "decline"],
-  };
-}
 
-function resolveGangLie(
-  G: TqsGameState,
-  effect: Extract<GameEffect, { kind: "gang-lie" }>,
-  shuffle: Shuffle,
-): void {
-  if (!G.players[effect.ownerID].alive || !G.players[effect.sourceID].alive) {
-    G.effectStack.shift();
-    return;
-  }
-  const judgeCardID = takeTopCard(G, shuffle);
-  if (judgeCardID) {
-    const judgeCard = G.cards[judgeCardID];
-    G.discard.push(judgeCardID);
-    effect.judgeCardID = judgeCardID;
-    writeLog(G, `【Cương Liệt】 phán xét ${judgeCard.suit} ${judgeCard.rank}.`);
-    if (judgeCard.suit !== "heart") {
-      const source = G.players[effect.sourceID];
-      if (source.hand.length >= 2) {
-        G.prompt = {
-          id: resolutionID(G),
-          effectID: effect.id,
-          kind: "select-cards",
-          responderID: effect.sourceID,
-          reason: "gang-lie-discard",
-          ownerID: effect.sourceID,
-          zones: ["hand"],
-          minimum: 2,
-          maximum: 2,
-          allowPass: false,
-        };
-        return;
-      }
-      G.effectStack.shift();
-      G.effectStack.unshift(damageEffect(G, effect.ownerID, effect.sourceID));
-      return;
-    }
-  }
-  G.effectStack.shift();
-}
+
+
 
 function resolveDying(G: TqsGameState, effect: DyingEffect): void {
   if (G.players[effect.dyingPlayerID].hp >= 1) {
@@ -2036,130 +1916,15 @@ function enterDiscardPhase(G: TqsGameState, playerID: PlayerID): void {
     });
 }
 
-function resolveTuXi(
-  G: TqsGameState,
-  effect: Extract<GameEffect, { kind: "tu-xi" }>,
-): void {
-  const ownerID = effect.ownerID;
-  G.prompt = {
-    id: resolutionID(G),
-    effectID: effect.id,
-    kind: "option",
-    responderID: ownerID,
-    reason: "tu-xi",
-    sourceID: ownerID,
-    targetID: ownerID,
-    choices: ["activate", "decline"],
-  };
-}
 
-function resolveLianYing(
-  G: TqsGameState,
-  effect: Extract<GameEffect, { kind: "lian-ying" }>,
-): void {
-  if (
-    !G.players[effect.ownerID].alive ||
-    G.players[effect.ownerID].hand.length > 0
-  ) {
-    G.effectStack.shift();
-    return;
-  }
-  G.prompt = {
-    id: resolutionID(G),
-    effectID: effect.id,
-    kind: "option",
-    responderID: effect.ownerID,
-    reason: "lian-ying",
-    sourceID: effect.ownerID,
-    targetID: effect.ownerID,
-    choices: ["activate", "decline"],
-  };
-}
 
-function resolveXiaoJi(
-  G: TqsGameState,
-  effect: Extract<GameEffect, { kind: "xiao-ji" }>,
-): void {
-  if (!G.players[effect.ownerID].alive) {
-    G.effectStack.shift();
-    return;
-  }
-  G.prompt = {
-    id: resolutionID(G),
-    effectID: effect.id,
-    kind: "option",
-    responderID: effect.ownerID,
-    reason: "xiao-ji",
-    sourceID: effect.ownerID,
-    targetID: effect.ownerID,
-    choices: ["activate", "decline"],
-  };
-}
 
-function resolveLuoYi(
-  G: TqsGameState,
-  effect: Extract<GameEffect, { kind: "luo-yi" }>,
-): void {
-  G.prompt = {
-    id: resolutionID(G),
-    effectID: effect.id,
-    kind: "option",
-    responderID: effect.ownerID,
-    reason: "luo-yi",
-    sourceID: effect.ownerID,
-    targetID: effect.ownerID,
-    choices: ["activate", "decline"],
-  };
-}
 
-function resolveYiJi(
-  G: TqsGameState,
-  effect: Extract<GameEffect, { kind: "yi-ji" }>,
-): void {
-  const owner = G.players[effect.ownerID];
-  if (!owner.alive || effect.remainingOpportunities <= 0) {
-    G.effectStack.shift();
-    return;
-  }
-  if (effect.stage === "offer") {
-    G.prompt = {
-      id: resolutionID(G),
-      effectID: effect.id,
-      kind: "option",
-      responderID: effect.ownerID,
-      reason: "yi-ji",
-      sourceID: effect.ownerID,
-      targetID: effect.ownerID,
-      choices: ["activate", "decline"],
-    };
-    return;
-  }
-  if (effect.stage === "card") {
-    G.prompt = {
-      id: resolutionID(G),
-      effectID: effect.id,
-      kind: "select-cards",
-      responderID: effect.ownerID,
-      reason: "yi-ji",
-      ownerID: effect.ownerID,
-      zones: ["hand"],
-      minimum: 0,
-      maximum: 1,
-      allowPass: true,
-    };
-    return;
-  }
-  G.prompt = {
-    id: resolutionID(G),
-    effectID: effect.id,
-    kind: "choose-players",
-    responderID: effect.ownerID,
-    reason: "yi-ji",
-    candidates: G.seatOrder.filter((playerID) => G.players[playerID].alive),
-    minimum: 1,
-    maximum: 1,
-  };
-}
+
+
+
+
+
 
 function finishYiJiOpportunity(
   G: TqsGameState,
@@ -2172,69 +1937,11 @@ function finishYiJiOpportunity(
   else effect.stage = "offer";
 }
 
-function resolveFanJian(
-  G: TqsGameState,
-  effect: Extract<GameEffect, { kind: "fan-jian" }>,
-): void {
-  if (!G.players[effect.targetID].alive || !G.players[effect.ownerID].alive) {
-    G.effectStack.shift();
-    return;
-  }
-  G.prompt = {
-    id: resolutionID(G),
-    effectID: effect.id,
-    kind: "option",
-    responderID: effect.targetID,
-    reason: "fan-jian-suit",
-    sourceID: effect.ownerID,
-    targetID: effect.targetID,
-    choices: ["heart", "diamond", "club", "spade"],
-  };
-}
 
-function resolveJianXiong(
-  G: TqsGameState,
-  effect: Extract<GameEffect, { kind: "jian-xiong" }>,
-): void {
-  if (
-    !G.players[effect.ownerID].alive ||
-    !effect.cardIDs.some((cardID) => G.processing.includes(cardID))
-  ) {
-    G.effectStack.shift();
-    return;
-  }
-  G.prompt = {
-    id: resolutionID(G),
-    effectID: effect.id,
-    kind: "option",
-    responderID: effect.ownerID,
-    reason: "jian-xiong",
-    sourceID: effect.ownerID,
-    targetID: effect.ownerID,
-    choices: ["activate", "decline"],
-  };
-}
 
-function resolveYaoWu(
-  G: TqsGameState,
-  effect: Extract<GameEffect, { kind: "yao-wu" }>,
-): void {
-  const source = G.players[effect.sourceID];
-  if (!source?.alive) {
-    G.effectStack.shift();
-    return;
-  }
-  G.prompt = {
-    id: resolutionID(G),
-    effectID: effect.id,
-    kind: "option",
-    responderID: effect.sourceID,
-    reason: "yao-wu",
-    sourceID: effect.sourceID,
-    targetID: effect.ownerID,
-    choices: source.hp < source.maxHP ? ["recover", "draw"] : ["draw"],
-  };
-}
+
+
+
 
 function resolveWangZun(
   G: TqsGameState,
@@ -2442,6 +2149,10 @@ function resolveTurnFlow(G: TqsGameState, shuffle: Shuffle): boolean {
     finishTurn(G, shuffle);
     return true;
   }
+  if (G.turn.step === "start") {
+    G.turn.step = "prepare";
+    return true;
+  }
   if (G.turn.step === "end") {
     if (!G.turn.biYueResolved && hasSkill(G, playerID, "bi-yue")) {
       G.turn.biYueResolved = true;
@@ -2529,31 +2240,12 @@ function resolveTurnFlow(G: TqsGameState, shuffle: Shuffle): boolean {
   if (G.turn.step === "draw") {
     if (G.turn.drewCards) return false;
     G.turn.drewCards = true;
-    if (hasSkill(G, playerID, "luo-yi")) {
-      G.effectStack.unshift({
-        id: resolutionID(G),
-        kind: "luo-yi",
-        ownerID: playerID,
-      });
-      return true;
-    }
-    if (
-      hasSkill(G, playerID, "tu-xi") &&
-      G.seatOrder.some(
-        (otherID) =>
-          otherID !== playerID &&
-          G.players[otherID].alive &&
-          G.players[otherID].hand.length > 0,
-      )
-    ) {
-      G.effectStack.unshift({
-        id: resolutionID(G),
-        kind: "tu-xi",
-        ownerID: playerID,
-      });
-      return true;
-    }
-    performRegularDraw(G, playerID, shuffle);
+    G.effectStack.unshift({
+      id: resolutionID(G),
+      kind: "execute-draw",
+      ownerID: playerID,
+    });
+    emitEvent(G, "DrawPhase", { playerID });
     return true;
   }
   return false;
@@ -2567,6 +2259,19 @@ export function resolveCardGame(G: TqsGameState, shuffle: Shuffle): void {
       continue;
     }
     switch (effect.kind) {
+      case "skill-trigger": {
+        const def = SKILL_REGISTRY[effect.skillId];
+        if (def && def.onTrigger) def.onTrigger(G, effect, shuffle);
+        else G.effectStack.shift();
+        break;
+      }
+      case "execute-draw":
+        if (!G.turn.skippedSteps.includes("draw")) {
+          performRegularDraw(G, effect.ownerID, shuffle);
+        }
+        advanceAfterDraw(G, effect.ownerID);
+        G.effectStack.shift();
+        break;
       case "finish-use":
         for (const cardID of effect.materialCardIDs)
           processingToDiscard(G, cardID);
@@ -2589,36 +2294,6 @@ export function resolveCardGame(G: TqsGameState, shuffle: Shuffle): void {
         break;
       case "required-response":
         resolveRequiredResponse(G, effect);
-        break;
-      case "fan-kui":
-        resolveFanKui(G, effect);
-        break;
-      case "gang-lie":
-        resolveGangLie(G, effect, shuffle);
-        break;
-      case "tu-xi":
-        resolveTuXi(G, effect);
-        break;
-      case "lian-ying":
-        resolveLianYing(G, effect);
-        break;
-      case "xiao-ji":
-        resolveXiaoJi(G, effect);
-        break;
-      case "luo-yi":
-        resolveLuoYi(G, effect);
-        break;
-      case "yi-ji":
-        resolveYiJi(G, effect);
-        break;
-      case "fan-jian":
-        resolveFanJian(G, effect);
-        break;
-      case "jian-xiong":
-        resolveJianXiong(G, effect);
-        break;
-      case "yao-wu":
-        resolveYaoWu(G, effect);
         break;
       case "wang-zun":
         resolveWangZun(G, effect);
@@ -3025,10 +2700,7 @@ function answerSelectCards(
     return true;
   }
   if (answer.kind === "pass" && prompt.allowPass) {
-    if (effect.kind === "yi-ji") {
-      finishYiJiOpportunity(G, effect);
-      return true;
-    }
+    
     if (effect.kind === "guan-xing" && effect.stage === "top") {
       effect.topCardIDs = [];
       effect.stage = "bottom";
@@ -3105,42 +2777,9 @@ function answerSelectCards(
     finishGuanXing(G, effect, cardIDs);
     return true;
   }
-  if (effect.kind === "yi-ji") {
-    if (effect.stage !== "card" || cardIDs.length > 1) return false;
-    for (const cardID of cardIDs)
-      if (!effect.poolCardIDs.includes(cardID)) return false;
-    if (cardIDs.length === 0) {
-      finishYiJiOpportunity(G, effect);
-      return true;
-    }
-    effect.selectedCardID = cardIDs[0];
-    effect.stage = "recipient";
-    return true;
-  }
-  if (effect.kind === "fan-kui") {
-    for (const cardID of cardIDs) {
-      removeZoneCard(G, effect.sourceID, cardID);
-      G.players[effect.ownerID].hand.push(cardID);
-      writeLog(
-        G,
-        `${playerName(G, effect.ownerID)} dùng 【Phản Quỹ】 lấy một lá của ${playerName(G, effect.sourceID)}.`,
-      );
-    }
-    G.effectStack.shift();
-    return true;
-  }
-  if (effect.kind === "gang-lie" && prompt.reason === "gang-lie-discard") {
-    for (const cardID of cardIDs) {
-      removeZoneCard(G, effect.sourceID, cardID);
-      G.discard.push(cardID);
-    }
-    writeLog(
-      G,
-      `${playerName(G, effect.sourceID)} bỏ hai lá vì 【Cương Liệt】.`,
-    );
-    G.effectStack.shift();
-    return true;
-  }
+  
+  
+  
   if (effect.kind === "resolve-delayed" && prompt.reason === "gui-cai") {
     const cardID = cardIDs[0];
     handToDiscard(G, prompt.ownerID, cardID);
@@ -3163,6 +2802,13 @@ function answerOption(
   shuffle: Shuffle,
 ): boolean {
   if (answer.kind !== "option") return false;
+  if (effect.kind === "skill-trigger") {
+    const def = SKILL_REGISTRY[effect.skillId];
+    if (def && def.onAnswer) {
+      return def.onAnswer(G, effect, answer, shuffle);
+    }
+    return false;
+  }
   const prompt = G.prompt;
   if (prompt?.kind !== "option" || !prompt.choices.includes(answer.choice))
     return false;
@@ -3298,28 +2944,7 @@ function answerOption(
       return true;
     }
   }
-  if (effect.kind === "fan-kui") {
-    if (answer.choice === "activate") {
-      G.prompt = {
-        id: resolutionID(G),
-        effectID: effect.id,
-        kind: "select-cards",
-        responderID: effect.ownerID,
-        reason: "fan-kui",
-        ownerID: effect.sourceID,
-        zones: ["hand", "equipment"],
-        minimum: 1,
-        maximum: 1,
-        allowPass: false,
-      };
-      return true;
-    }
-    if (answer.choice === "decline") {
-      G.effectStack.shift();
-      return true;
-    }
-    return false;
-  }
+  
   if (effect.kind === "resolve-delayed" && prompt.reason === "gui-cai") {
     if (answer.choice === "decline") {
       G.effectStack.shift();
@@ -3341,27 +2966,7 @@ function answerOption(
     };
     return true;
   }
-  if (effect.kind === "yi-ji") {
-    if (answer.choice === "decline") {
-      G.effectStack.shift();
-      return true;
-    }
-    if (answer.choice !== "activate" || effect.stage !== "offer") return false;
-    effect.poolCardIDs = [];
-    for (let index = 0; index < 2; index += 1) {
-      const cardID = takeTopCard(G, shuffle);
-      if (!cardID) break;
-      G.players[effect.ownerID].hand.push(cardID);
-      effect.poolCardIDs.push(cardID);
-    }
-    writeLog(
-      G,
-      `${playerName(G, effect.ownerID)} dùng 【Di Kế】 xem ${effect.poolCardIDs.length} lá đầu Chồng Bài Rút.`,
-    );
-    if (effect.poolCardIDs.length === 0) finishYiJiOpportunity(G, effect);
-    else effect.stage = "card";
-    return true;
-  }
+  
   if (effect.kind === "guan-xing") {
     if (answer.choice === "decline") {
       G.effectStack.shift();
@@ -3432,38 +3037,8 @@ function answerOption(
     G.effectStack.shift();
     return true;
   }
-  if (effect.kind === "jian-xiong") {
-    if (answer.choice === "activate") {
-      const obtained = effect.cardIDs.filter((cardID) => {
-        const index = G.processing.indexOf(cardID);
-        if (index < 0) return false;
-        G.processing.splice(index, 1);
-        return true;
-      });
-      G.players[effect.ownerID].hand.push(...obtained);
-      writeLog(
-        G,
-        `${playerName(G, effect.ownerID)} dùng 【Gian Hùng】 nhận ${obtained.length} lá gây sát thương.`,
-      );
-    } else if (answer.choice !== "decline") return false;
-    G.effectStack.shift();
-    return true;
-  }
-  if (effect.kind === "yao-wu") {
-    const source = G.players[effect.sourceID];
-    if (answer.choice === "recover" && source.hp < source.maxHP) {
-      source.hp += 1;
-      writeLog(
-        G,
-        `【Diệu Võ】: ${playerName(G, effect.sourceID)} hồi phục 1 Thể Lực.`,
-      );
-    } else if (answer.choice === "draw") {
-      drawCards(G, effect.sourceID, 1, shuffle);
-      writeLog(G, `【Diệu Võ】: ${playerName(G, effect.sourceID)} rút 1 lá.`);
-    } else return false;
-    G.effectStack.shift();
-    return true;
-  }
+  
+  
   if (effect.kind === "wang-zun") {
     if (answer.choice === "activate") {
       drawCards(G, effect.ownerID, 1, shuffle);
@@ -3518,100 +3093,11 @@ function answerOption(
     }
     return false;
   }
-  if (effect.kind === "tu-xi") {
-    if (answer.choice === "activate") {
-      const candidates = G.seatOrder.filter(
-        (otherID) =>
-          otherID !== effect.ownerID &&
-          G.players[otherID].alive &&
-          G.players[otherID].hand.length > 0,
-      );
-      if (candidates.length === 0) {
-        G.effectStack.shift();
-        performRegularDraw(G, effect.ownerID, shuffle);
-        return true;
-      }
-      G.prompt = {
-        id: resolutionID(G),
-        effectID: effect.id,
-        kind: "choose-players",
-        responderID: effect.ownerID,
-        reason: "tu-xi",
-        candidates,
-        minimum: 1,
-        maximum: Math.min(2, candidates.length),
-      };
-      return true;
-    }
-    if (answer.choice === "decline") {
-      G.effectStack.shift();
-      performRegularDraw(G, effect.ownerID, shuffle);
-      return true;
-    }
-    return false;
-  }
-  if (effect.kind === "lian-ying") {
-    if (answer.choice === "activate") {
-      drawCards(G, effect.ownerID, 1, shuffle);
-      writeLog(
-        G,
-        `${playerName(G, effect.ownerID)} dùng 【Liên Doanh】 rút 1 lá.`,
-      );
-    } else if (answer.choice !== "decline") return false;
-    G.effectStack.shift();
-    return true;
-  }
-  if (effect.kind === "xiao-ji") {
-    if (answer.choice === "activate") {
-      drawCards(G, effect.ownerID, 2, shuffle);
-      writeLog(
-        G,
-        `${playerName(G, effect.ownerID)} dùng 【Kiêu Cơ】 rút 2 lá.`,
-      );
-    } else if (answer.choice !== "decline") return false;
-    G.effectStack.shift();
-    return true;
-  }
-  if (effect.kind === "luo-yi") {
-    if (answer.choice === "activate") {
-      G.effectStack.shift();
-      const amount = hasSkill(G, effect.ownerID, "ying-zi") ? 2 : 1;
-      drawCards(G, effect.ownerID, amount, shuffle);
-      G.turn.luoYiBuff = true;
-      writeLog(
-        G,
-        `${playerName(G, effect.ownerID)} dùng 【Lõa Y】 rút ${amount} lá, tăng sát thương 【Sát】/【Quyết Đấu】 lượt này.`,
-      );
-      advanceAfterDraw(G, effect.ownerID);
-      return true;
-    }
-    if (answer.choice === "decline") {
-      G.effectStack.shift();
-      performRegularDraw(G, effect.ownerID, shuffle);
-      return true;
-    }
-    return false;
-  }
-  if (effect.kind === "fan-jian") {
-    const suits = ["heart", "diamond", "club", "spade"] as const;
-    if (!suits.includes(answer.choice as (typeof suits)[number])) return false;
-    const owner = G.players[effect.ownerID];
-    if (owner.hand.length === 0) {
-      G.effectStack.shift();
-      return true;
-    }
-    const cardID = shuffle(owner.hand)[0];
-    removeHandCard(G, effect.ownerID, cardID);
-    G.players[effect.targetID].hand.push(cardID);
-    writeLog(
-      G,
-      `${playerName(G, effect.targetID)} nhận 【${CARD_DEFINITIONS[G.cards[cardID].definitionID].name}】 qua 【Phản Gián】.`,
-    );
-    G.effectStack.shift();
-    if (G.cards[cardID].suit !== answer.choice)
-      G.effectStack.unshift(damageEffect(G, effect.ownerID, effect.targetID));
-    return true;
-  }
+  
+  
+  
+  
+  
   return false;
 }
 
@@ -3739,45 +3225,9 @@ function answerLiuLiPlayers(
   return true;
 }
 
-function answerYiJiPlayers(
-  G: TqsGameState,
-  effect: Extract<GameEffect, { kind: "yi-ji" }>,
-  prompt: Extract<GamePrompt, { kind: "choose-players" }>,
-  answer: PromptAnswer,
-): boolean {
-  if (
-    answer.kind !== "players" ||
-    prompt.reason !== "yi-ji" ||
-    effect.stage !== "recipient" ||
-    !effect.selectedCardID
-  )
-    return false;
-  const chosen = [...new Set(answer.playerIDs)];
-  if (
-    chosen.length !== 1 ||
-    !prompt.candidates.includes(chosen[0]) ||
-    !effect.poolCardIDs.includes(effect.selectedCardID) ||
-    !G.players[effect.ownerID].hand.includes(effect.selectedCardID)
-  )
-    return false;
-  const cardID = effect.selectedCardID;
-  const hand = G.players[effect.ownerID].hand;
-  hand.splice(hand.indexOf(cardID), 1);
-  G.players[chosen[0]].hand.push(cardID);
-  writeLog(
-    G,
-    `${playerName(G, effect.ownerID)} dùng 【Di Kế】 đưa một lá cho ${playerName(G, chosen[0])}.`,
-  );
-  effect.poolCardIDs = effect.poolCardIDs.filter(
-    (poolCardID) => poolCardID !== cardID,
-  );
-  effect.selectedCardID = null;
-  if (effect.poolCardIDs.length === 0) finishYiJiOpportunity(G, effect);
-  else effect.stage = "card";
-  return true;
-}
 
-function markSkillUsed(
+
+export function markSkillUsed(
   G: TqsGameState,
   playerID: PlayerID,
   skillID: string,
@@ -3959,32 +3409,12 @@ export function useSkill(
     return true;
   }
 
-  if (skillID === "fan-jian") {
-    if (!isRecord(payload)) return false;
-    const { targetID } = payload as Record<string, unknown>;
-    if (typeof targetID !== "string") return false;
-    const target = G.players[targetID];
-    if (
-      !target?.alive ||
-      targetID === playerID ||
-      G.players[playerID].hand.length === 0
-    )
-      return false;
-    markSkillUsed(G, playerID, skillID);
-    writeLog(
-      G,
-      `${playerName(G, playerID)} dùng 【Phản Gián】 với ${playerName(G, targetID)}.`,
-    );
-    G.effectStack.push({
-      id: resolutionID(G),
-      kind: "fan-jian",
-      ownerID: playerID,
-      targetID,
-    });
-    resolveCardGame(G, shuffle);
-    return true;
-  }
+  
 
+  const def = SKILL_REGISTRY[skillID];
+  if (def && def.onUse) {
+    return def.onUse(G, playerID, payload, shuffle);
+  }
   return false;
 }
 
@@ -4009,7 +3439,12 @@ export function answerCardPrompt(
     return false;
 
   let accepted = false;
-  if (prompt.kind === "card-response") {
+  if (effect.kind === "skill-trigger") {
+    const def = SKILL_REGISTRY[effect.skillId];
+    if (def && def.onAnswer) {
+      accepted = def.onAnswer(G, effect, answer, shuffle);
+    }
+  } else if (prompt.kind === "card-response") {
     if (
       answer.kind === "summon" &&
       prompt.summonFaction &&
@@ -4069,9 +3504,7 @@ export function answerCardPrompt(
     accepted =
       prompt.reason === "tu-xi" && effect.kind === "tu-xi"
         ? answerChoosePlayers(G, effect, prompt, answer, shuffle)
-        : prompt.reason === "yi-ji" && effect.kind === "yi-ji"
-          ? answerYiJiPlayers(G, effect, prompt, answer)
-          : prompt.reason === "liu-li" && effect.kind === "slash"
+        : prompt.reason === "liu-li" && effect.kind === "slash"
             ? answerLiuLiPlayers(G, effect, prompt, answer)
             : false;
   } else if (

@@ -11,21 +11,12 @@ import { CARD_DEFINITIONS } from "../../game/catalog/cards";
 import { GAME_FONT_FAMILY } from "./typography";
 import { CardView } from "./CardView";
 import { PlayerAvatar } from "./PlayerAvatar";
-
-const COLORS = {
-  ink: 0x201812,
-  paper: 0xf3e5c8,
-  paperDark: 0xd6bd91,
-  red: 0x8f1d20,
-  redBright: 0xb93730,
-  gold: 0xc59a45,
-  muted: 0x9a836b,
-  black: 0x120f0d,
-  white: 0xfffbef,
-  green: 0x3f6f55,
-};
+import { THEME } from "./theme";
+import { Panel } from "./components/Panel";
 
 export class Dashboard extends Container {
+  static hoveredCardID: string | null = null;
+
   constructor(
     G: TqsPlayerViewState,
     viewerID: PlayerID,
@@ -44,10 +35,10 @@ export class Dashboard extends Container {
     const panelHeight = 240;
 
     // === Background panel ===
-    const bg = new Graphics()
-      .roundRect(0, 0, vw - 60, panelHeight, 8)
-      .fill({ color: 0x181411, alpha: 0.96 })
-      .stroke({ color: COLORS.gold, width: 1, alpha: 0.7 });
+    const bg = new Panel({
+      width: vw - 60,
+      height: panelHeight,
+    });
     this.addChild(bg);
 
     // === Player Avatar (left side) ===
@@ -69,7 +60,7 @@ export class Dashboard extends Container {
       style: {
         fontFamily: GAME_FONT_FAMILY,
         fontSize: 11,
-        fill: COLORS.gold,
+        fill: THEME.colors.gold,
         letterSpacing: 1.5,
       },
     });
@@ -99,46 +90,100 @@ export class Dashboard extends Container {
 
     let hoverTimeout: any;
 
+    const EQUIP_DESCRIPTIONS: Record<string, string> = {
+      "zhuge-crossbow":
+        "Tầm đánh: 1\nCó thể sử dụng vô hạn 【Sát】 trong giai đoạn xuất bài.",
+      "qinggang-sword":
+        "Tầm đánh: 2\nKhi sử dụng 【Sát】 bỏ qua phòng ngự của 【Bát Quái Trận】.",
+      "serpent-spear":
+        "Tầm đánh: 3\nCó thể gộp 2 lá bài bất kỳ làm 1 lá 【Sát】.",
+      "rock-cleaving-axe":
+        "Tầm đánh: 3\nKhi 【Sát】 bị 【Thiểm】 vô hiệu hóa, có thể bỏ 2 lá để bắt buộc trúng.",
+      "green-dragon-blade":
+        "Tầm đánh: 3\nKhi 【Sát】 bị vô hiệu hóa, có thể lập tức đánh thêm 【Sát】.",
+      halberd:
+        "Tầm đánh: 4\nNếu đây là lá bài cuối cùng trên tay, 【Sát】 có thể chọn tối đa 3 mục tiêu.",
+      "qilin-bow":
+        "Tầm đánh: 5\nKhi 【Sát】 gây sát thương, có thể phá 1 Ngựa của mục tiêu.",
+      "ice-sword":
+        "Tầm đánh: 2\nKhi 【Sát】 gây sát thương, có thể bỏ qua sát thương để hủy 2 lá của mục tiêu.",
+      "ci-xiong-swords":
+        "Tầm đánh: 2\nKhi 【Sát】 mục tiêu khác giới, mục tiêu phải chọn: Bỏ 1 lá hoặc cho bạn rút 1 lá.",
+      "bagua-formation":
+        "Khi cần sử dụng/đánh ra 【Thiểm】, phán xét Đỏ sẽ được tính là 1 lá 【Thiểm】.",
+      "renwang-shield":
+        "Vô hiệu hóa mọi sát thương từ 【Sát】 có chất màu Đen.",
+      "silver-lion":
+        "Mọi sát thương nhận vào nếu lớn hơn 1 đều được giảm xuống còn 1. Khi bị mất trang bị này, hồi 1 Thể Lực.",
+      tengjia:
+        "Vô hiệu hóa 【Sát】 thường, 【Nam Man】, 【Vạn Tiễn】. Chịu thêm 1 sát thương khi bị sát thương Hỏa.",
+    };
+
     const showPopover = (card: PhysicalCard, x: number, y: number) => {
       popover.removeChildren();
 
       const cardDef = CARD_DEFINITIONS[card.definitionID];
+      let descText = EQUIP_DESCRIPTIONS[cardDef.id] || "Không có thông tin.";
+      if (
+        cardDef.id === "red-hare" ||
+        cardDef.id === "dayuan" ||
+        cardDef.id === "zixing"
+      ) {
+        descText = "-1 Khoảng cách tính đến người chơi khác.";
+      } else if (
+        cardDef.id === "dilu" ||
+        cardDef.id === "jueying" ||
+        cardDef.id === "zhaohuang-feidian" ||
+        (cardDef.id as string) === "hualiu"
+      ) {
+        descText = "+1 Khoảng cách phòng thủ.";
+      }
 
-      // Background for popover
-      const bg = new Graphics()
-        .roundRect(0, 0, 240, 140, 8)
-        .fill({ color: 0x110c0a, alpha: 0.95 })
-        .stroke({ color: COLORS.gold, width: 1, alpha: 0.8 });
+      const bg = new Panel({
+        width: 320,
+        height: 150,
+        color: THEME.colors.popoverBg,
+        alpha: 0.95,
+      });
       popover.addChild(bg);
 
-      // Draw a mini CardView inside
       const miniCard = new CardView(card, { width: 80, height: 112 });
-      miniCard.position.set(12, 14);
+      miniCard.position.set(12, 19);
       popover.addChild(miniCard);
 
-      // Description text
-      // We don't have description in CardDefinition yet, so just show name/kind for now
+      const nameLabel = new Text({
+        text: cardDef.name,
+        style: {
+          fontFamily: GAME_FONT_FAMILY,
+          fontSize: 16,
+          fill: THEME.colors.gold,
+          wordWrap: true,
+          wordWrapWidth: 196,
+          lineHeight: 20,
+        },
+      });
+      nameLabel.position.set(104, 16);
+      popover.addChild(nameLabel);
+
       const desc = new Text({
-        text:
-          cardDef.name +
-          "\n" +
-          (cardDef.kind === "equipment" ? "Trang bị" : cardDef.kind),
+        text: descText,
         style: {
           fontFamily: GAME_FONT_FAMILY,
           fontSize: 12,
-          fill: COLORS.paper,
+          fill: THEME.colors.paper,
           wordWrap: true,
-          wordWrapWidth: 124,
-          lineHeight: 16,
+          wordWrapWidth: 196,
+          lineHeight: 18,
         },
       });
-      desc.position.set(104, 14);
+      // Move description down a bit in case nameLabel wraps to 2 lines
+      desc.position.set(104, nameLabel.height + 22);
       popover.addChild(desc);
 
-      popover.position.set(x, y - 150);
+      popover.position.set(x, y - 160);
 
       clearTimeout(hoverTimeout);
-      animate(popover as any, { alpha: 1, y: y - 160 }, { duration: 0.2 });
+      animate(popover as any, { alpha: 1, y: y - 170 }, { duration: 0.2 });
     };
 
     const hidePopover = () => {
@@ -149,49 +194,41 @@ export class Dashboard extends Container {
     };
 
     equipments.forEach((eq, index) => {
-      const eqY = 32 + index * 36;
+      const col = index % 2;
+      const row = Math.floor(index / 2);
 
-      const slot = new Graphics()
-        .roundRect(equipLeft, eqY, 150, 30, 4)
-        .fill({ color: 0x000000, alpha: 0.3 })
-        .stroke({ color: 0x443322, width: 1 });
-      this.addChild(slot);
-
-      const typeText = new Text({
-        text: eq.label,
-        style: {
-          fontFamily: GAME_FONT_FAMILY,
-          fontSize: 10,
-          fill: COLORS.muted,
-        },
-      });
-      typeText.position.set(equipLeft + 6, eqY + 8);
-      this.addChild(typeText);
+      const eqX = equipLeft + col * 74;
+      const eqY = 36 + row * 100;
 
       if (eq.id) {
         const card = G.cards[eq.id];
-        const cardDef = CARD_DEFINITIONS[card.definitionID];
-        const nameText = new Text({
-          text: cardDef.name,
+        const cardView = new CardView(card, { width: 66, height: 92 });
+        cardView.position.set(eqX, eqY);
+        this.addChild(cardView);
+
+        cardView.eventMode = "static";
+        cardView.cursor = "pointer";
+        cardView.on("pointerenter", () => showPopover(card, eqX, eqY));
+        cardView.on("pointerleave", hidePopover);
+      } else {
+        const slot = new Graphics()
+          .roundRect(0, 0, 66, 92, 4)
+          .fill({ color: 0x000000, alpha: 0.3 })
+          .stroke({ color: 0x443322, width: 1 });
+        slot.position.set(eqX, eqY);
+        this.addChild(slot);
+
+        const typeText = new Text({
+          text: eq.label,
           style: {
             fontFamily: GAME_FONT_FAMILY,
-            fontSize: 12,
-            fill: COLORS.paper,
+            fontSize: 11,
+            fill: THEME.colors.muted,
           },
         });
-
-        // Prevent overflow
-        if (nameText.width > 90) {
-          nameText.scale.set(90 / nameText.width);
-        }
-        nameText.position.set(equipLeft + 54, eqY + 7);
-        this.addChild(nameText);
-
-        // Hover events
-        slot.eventMode = "static";
-        slot.cursor = "pointer";
-        slot.on("pointerenter", () => showPopover(card, equipLeft + 160, eqY));
-        slot.on("pointerleave", hidePopover);
+        typeText.anchor.set(0.5);
+        typeText.position.set(eqX + 33, eqY + 46);
+        this.addChild(typeText);
       }
     });
 
@@ -209,10 +246,10 @@ export class Dashboard extends Container {
         style: {
           fontFamily: GAME_FONT_FAMILY,
           fontSize: 11,
-          fill: COLORS.redBright,
+          fill: THEME.colors.redBright,
         },
       });
-      delayText.position.set(equipLeft, 190);
+      delayText.position.set(equipLeft + 180, 12);
       this.addChild(delayText);
     }
 
@@ -222,7 +259,11 @@ export class Dashboard extends Container {
 
     const countBadge = new Text({
       text: `${player.hand.length} lá`,
-      style: { fontFamily: GAME_FONT_FAMILY, fontSize: 11, fill: COLORS.muted },
+      style: {
+        fontFamily: GAME_FONT_FAMILY,
+        fontSize: 11,
+        fill: THEME.colors.muted,
+      },
     });
     countBadge.anchor.set(1, 0);
     countBadge.position.set(vw - 60 - 12, 12);
@@ -232,8 +273,10 @@ export class Dashboard extends Container {
     cardContainer.sortableChildren = true;
 
     // Add mask to prevent cards bleeding below the dashboard bottom
+    // We expand the mask upwards (-500) and horizontally (+/- 200) so hovered cards don't get clipped,
+    // while still clipping the bottom at panelHeight.
     const handMask = new Graphics()
-      .rect(handLeft, 0, handAreaWidth, panelHeight)
+      .rect(handLeft - 200, -500, handAreaWidth + 400, panelHeight + 500)
       .fill(0xffffff);
     this.addChild(handMask);
     cardContainer.mask = handMask;
@@ -283,11 +326,22 @@ export class Dashboard extends Container {
       cardView.x += cardW / 2;
       cardView.y += cardH;
 
-      cardView.zIndex = index;
+      const isHovered = Dashboard.hoveredCardID === cardID;
+
+      if (isHovered) {
+        cardView.zIndex = 1000;
+        cardView.y = baseY + cardH - 60 - (selected ? 20 : 0);
+        cardView.rotation = 0;
+        cardView.scale.set(1.2);
+      } else {
+        cardView.zIndex = index;
+      }
 
       cardView.on("pointerenter", () => {
+        Dashboard.hoveredCardID = cardID;
         cardView.zIndex = 1000;
-        animate(
+        if ((cardView as any)._anim) (cardView as any)._anim.stop();
+        (cardView as any)._anim = animate(
           cardView as any,
           {
             y: baseY + cardH - 60 - (selected ? 20 : 0),
@@ -299,8 +353,12 @@ export class Dashboard extends Container {
       });
 
       cardView.on("pointerleave", () => {
+        if (Dashboard.hoveredCardID === cardID) {
+          Dashboard.hoveredCardID = null;
+        }
         cardView.zIndex = index;
-        animate(
+        if ((cardView as any)._anim) (cardView as any)._anim.stop();
+        (cardView as any)._anim = animate(
           cardView as any,
           {
             y: baseY + cardH - (selected ? 20 : 0),
@@ -309,6 +367,12 @@ export class Dashboard extends Container {
           },
           { duration: 0.2, ease: "easeOut" },
         );
+      });
+
+      cardView.once("destroyed", () => {
+        if ((cardView as any)._anim) {
+          (cardView as any)._anim.stop();
+        }
       });
 
       cardContainer.addChild(cardView);
@@ -320,7 +384,7 @@ export class Dashboard extends Container {
         style: {
           fontFamily: GAME_FONT_FAMILY,
           fontSize: 13,
-          fill: COLORS.muted,
+          fill: THEME.colors.muted,
         },
       });
       emptyText.position.set(centerX, panelHeight - 80);

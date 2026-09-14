@@ -15,6 +15,10 @@ import type {
 } from "./model";
 import { startCardTurn } from "./cardEngine";
 import { drawCards, writeLog } from "./rules";
+import { registerAllSkills } from "./engine/skills";
+
+// Ensure skills are registered
+registerAllSkills();
 
 export function validateSetupOptions(
   options: TqsSetupOptions,
@@ -35,6 +39,70 @@ export function validateSetupOptions(
   return undefined;
 }
 
+export function createWaitingRoomState(options: {
+  numPlayers: number;
+}): TqsGameState {
+  const playerIDs = Array.from({ length: options.numPlayers }, (_, index) =>
+    String(index),
+  );
+  const players = Object.fromEntries(
+    playerIDs.map((id, index): [string, PlayerState] => [
+      id,
+      {
+        id,
+        seat: index,
+        role: "rebel",
+        roleRevealed: false,
+        generalID: null,
+        generalCandidates: [],
+        activeSkillIDs: [],
+        maxHP: 0,
+        hp: 0,
+        alive: false, // Not alive until game starts
+        hand: [],
+        equipment: {},
+        judgement: [],
+        slashUses: 0,
+        skillsUsedThisTurn: [],
+      },
+    ]),
+  );
+
+  return {
+    rulesVersion: "standard-2013-v2",
+    status: "waiting-room",
+    seatOrder: [],
+    lordID: "0",
+    players,
+    deck: [],
+    discard: [],
+    processing: [],
+    cards: {},
+    turn: {
+      activePlayerID: "0",
+      step: "prepare",
+      number: 0,
+      skippedSteps: [],
+      resolvedJudgementCardIDs: [],
+      drewCards: false,
+      luoYiBuff: false,
+      rendeGiven: 0,
+      wangZunResolved: false,
+      wangZunHandLimitPenalty: 0,
+      biYueResolved: false,
+    },
+    effectStack: [],
+    prompt: null,
+    nextResolutionID: 1,
+    winner: null,
+    log: [],
+    nextLogID: 1,
+    config: {
+      autoSkipWuxie: true,
+    },
+  };
+}
+
 export function createInitialState(
   options: TqsSetupOptions,
   shuffle: Shuffle,
@@ -42,9 +110,14 @@ export function createInitialState(
   const validationError = validateSetupOptions(options);
   if (validationError) throw new Error(validationError);
 
-  const playerIDs = Array.from({ length: options.numPlayers }, (_, index) =>
-    String(index),
-  );
+  const playerIDs =
+    options.joinedPlayerIDs ||
+    Array.from({ length: options.numPlayers }, (_, index) => String(index));
+
+  if (playerIDs.length !== options.numPlayers) {
+    throw new Error("Số lượng joinedPlayerIDs không khớp với numPlayers");
+  }
+
   const roles = shuffle(getRoleDeck(options.numPlayers, options.roleVariant));
   const lordIndex = roles.indexOf("lord");
   const seatOrder = [
@@ -138,6 +211,9 @@ export function createInitialState(
     winner: null,
     log: [],
     nextLogID: 1,
+    config: {
+      autoSkipWuxie: options.autoSkipWuxie ?? true,
+    },
   };
 }
 

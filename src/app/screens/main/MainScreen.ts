@@ -1,11 +1,11 @@
-import { Assets, Container, Graphics, Sprite, Text, Texture } from "pixi.js";
+import { Assets, Container, Graphics,  Text, Texture, TilingSprite } from "pixi.js";
 
 import type {
   MatchClientState,
   MatchConfig,
 } from "../../../client/MatchClient";
 import { MatchClient } from "../../../client/MatchClient";
-import { PlayerAvatar } from "../../ui/PlayerAvatar";
+import { GeneralCardView } from "../../ui/components/GeneralCardView";
 import {
   canRespondWithCard,
   canSelectCardTarget,
@@ -31,21 +31,10 @@ import { Dashboard } from "../../ui/Dashboard";
 import { SeatView } from "../../ui/SeatView";
 import { getEquipmentSlotViews } from "../../ui/equipmentView";
 import { layoutActionRow } from "../../ui/layout";
-import { fitScale } from "../../ui/textLayout";
 import { GAME_FONT_FAMILY } from "../../ui/typography";
-
-const COLORS = {
-  ink: 0x201812,
-  paper: 0xf3e5c8,
-  paperDark: 0xd6bd91,
-  red: 0x8f1d20,
-  redBright: 0xb93730,
-  gold: 0xc59a45,
-  muted: 0x9a836b,
-  black: 0x120f0d,
-  white: 0xfffbef,
-  green: 0x3f6f55,
-};
+import { THEME } from "../../ui/theme";
+import { Button } from "../../ui/components/Button";
+import { Panel } from "../../ui/components/Panel";
 
 const STEP_NAMES: Record<TurnStep, string> = {
   prepare: "Chuẩn Bị",
@@ -66,7 +55,8 @@ const SUIT_LABELS = {
 const MIN_LAYOUT_HEIGHT = 860;
 
 export class MainScreen extends Container {
-  public static assetBundles = ["main"];
+  // We remove assetBundles = ["main"] so WaitingRoom loads instantly.
+  // Assets are still background-loaded by engine.
 
   private readonly content = new Container();
   private match?: MatchClient;
@@ -94,6 +84,10 @@ export class MainScreen extends Container {
   private lastRequiredActorID: PlayerID | null = null;
   private viewportWidth = 768;
   private viewportHeight = 1024;
+
+  private mainBundleLoaded = false;
+  private isAwaitingBundle = false;
+  private autoSkipWuxie = true;
 
   constructor() {
     super();
@@ -149,6 +143,38 @@ export class MainScreen extends Container {
 
   private receiveState(state: MatchClientState): void {
     this.state = state;
+    if (state && state.G.status !== "waiting-room" && !this.mainBundleLoaded) {
+      if (!this.isAwaitingBundle) {
+        this.isAwaitingBundle = true;
+        // Draw a simple loading screen so it's not purely black
+        this.clearContent();
+        this.addText(
+          "Đang tải dữ liệu trò chơi...",
+          this.viewportWidth / 2,
+          this.viewportHeight / 2,
+          24,
+          THEME.colors.gold,
+        );
+
+        Assets.loadBundle("main")
+          .then(() => {
+            this.mainBundleLoaded = true;
+            this.isAwaitingBundle = false;
+            this.render();
+          })
+          .catch((err) => {
+            console.error("Lỗi tải tài nguyên:", err);
+            this.addText(
+              "Lỗi tải tài nguyên! Hãy thử làm mới trang.",
+              this.viewportWidth / 2,
+              this.viewportHeight / 2 + 40,
+              16,
+              THEME.colors.redBright,
+            );
+          });
+      }
+      return; // Skip normal rendering until loaded
+    }
     const promptID = state?.G.prompt?.id ?? null;
     if (promptID !== this.lastPromptID) {
       if (this.nullificationTimeout) {
@@ -211,18 +237,33 @@ export class MainScreen extends Container {
         this.viewportWidth / 2,
         160,
         24,
-        COLORS.paper,
+        THEME.colors.paper,
       );
       return;
     }
 
     const G = this.state.G;
+    if (G.status === "waiting-room") {
+      this.drawWaitingRoom();
+      return;
+    }
+
+    if (!this.mainBundleLoaded) {
+      this.addText(
+        "Đang tải dữ liệu trò chơi...",
+        this.viewportWidth / 2,
+        this.viewportHeight / 2,
+        24,
+        THEME.colors.gold,
+      );
+      return;
+    }
+
     this.drawViewerSelector(G);
     this.drawStatus(G);
     this.drawSeats(G);
     this.drawLog(G);
     this.drawPrivateArea(G);
-
     // Overlay for General Selection
     const viewer = G.players[this.match!.currentViewerID];
     const canSelectGeneral =
@@ -237,31 +278,131 @@ export class MainScreen extends Container {
       this.drawGeneralCandidates(G, viewer.generalCandidates);
     }
   }
+  private drawWaitingRoom(): void {
+    const centerX = this.viewportWidth / 2;
+    const viewerID = this.match!.currentViewerID;
+
+    this.addText("SẢNH CHỜ", centerX, 80, 32, THEME.colors.gold, 0.5, "center");
+
+    interface MatchPlayer {
+      id: number;
+      name?: string;
+    }
+    const joinedPlayers =
+      (this.state!.matchData as MatchPlayer[])?.filter((p) => p.name) || [];
+    const joinedPlayerIDs = joinedPlayers.map((p) => String(p.id));
+
+    // Fallback if host left: the lowest ID becomes the host.
+    const actualHostID =
+      joinedPlayerIDs.length > 0
+        ? String(Math.min(...joinedPlayerIDs.map(Number)))
+        : "0";
+    const amIHost = viewerID === actualHostID;
+
+    this.addText(
+      `Người chơi: ${joinedPlayers.length}/10`,
+      centerX,
+      130,
+      20,
+      THEME.colors.paper,
+      0.5,
+      "center",
+    );
+
+    const startY = 180;
+    joinedPlayers.forEach((p, i: number) => {
+      this.addText(
+        `Slot ${p.id}: ${p.name} ${String(p.id) === actualHostID ? "(Chủ phòng)" : ""}`,
+        centerX,
+        startY + i * 35,
+        18,
+        String(p.id) === viewerID ? THEME.colors.gold : THEME.colors.paper,
+        0.5,
+        "center",
+      );
+    });
+
+    if (amIHost) {
+      this.addButton(
+        `[${this.autoSkipWuxie ? "X" : "  "}] Tự động bỏ qua Vô Giải Khả Kích`,
+        centerX,
+        this.viewportHeight - 190,
+        360,
+        40,
+        () => {
+          this.autoSkipWuxie = !this.autoSkipWuxie;
+          this.render();
+        },
+        THEME.colors.ink,
+        THEME.colors.paper,
+      );
+
+      const canStart = joinedPlayers.length >= 4;
+      this.addButton(
+        "Bắt Đầu",
+        centerX,
+        this.viewportHeight - 120,
+        200,
+        50,
+        () => {
+          if (canStart) {
+            this.match!.move("startGame", joinedPlayerIDs, this.autoSkipWuxie);
+          }
+        },
+        canStart ? THEME.colors.red : THEME.colors.ink,
+        THEME.colors.paper,
+        !canStart,
+      );
+    } else {
+      this.addText(
+        "Chờ chủ phòng bắt đầu...",
+        centerX,
+        this.viewportHeight - 120,
+        18,
+        THEME.colors.muted,
+        0.5,
+        "center",
+      );
+    }
+
+    this.addButton(
+      "Rời Khỏi",
+      centerX,
+      this.viewportHeight - 60,
+      200,
+      50,
+      () => {
+        this.leaveMatchAndExit();
+      },
+      THEME.colors.ink,
+      THEME.colors.paper,
+    );
+  }
 
   private drawBackground(): void {
     const background = new Graphics()
       .rect(0, 0, this.viewportWidth, this.viewportHeight)
-      .fill(COLORS.black);
+      .fill(THEME.colors.black);
     background
       .circle(
         this.viewportWidth * 0.82,
         this.viewportHeight * 0.22,
         Math.min(this.viewportWidth, 520) * 0.34,
       )
-      .fill({ color: COLORS.red, alpha: 0.16 });
+      .fill({ color: THEME.colors.red, alpha: 0.16 });
     background
       .rect(18, 18, this.viewportWidth - 36, this.viewportHeight - 36)
-      .stroke({ color: COLORS.gold, width: 1, alpha: 0.55 });
+      .stroke({ color: THEME.colors.gold, width: 1, alpha: 0.55 });
     this.content.addChild(background);
-    this.addTextureSprite(
-      "table",
+    this.addBackgroundTexture(
+      "main/system/tableBg",
       this.viewportWidth,
       this.viewportHeight,
       0.8,
     );
   }
 
-  private addTextureSprite(
+  private addBackgroundTexture(
     name: string,
     width: number,
     height: number,
@@ -281,25 +422,50 @@ export class MainScreen extends Container {
       if (texture) break;
     }
     if (!texture) return;
-    const sprite = new Sprite(texture);
-    sprite.width = width;
-    sprite.height = height;
+    const sprite = new TilingSprite({
+      texture,
+      width,
+      height,
+    });
     sprite.alpha = alpha;
     sprite.position.set(x ?? 0, y ?? 0);
     this.content.addChild(sprite);
   }
 
+  private async leaveMatchAndExit(): Promise<void> {
+    if (this.match?.isRemote) {
+      try {
+        const urlParams = new URLSearchParams(window.location.search);
+        const serverUrl = urlParams.get("serverUrl");
+        const matchID = urlParams.get("matchID");
+        const playerID = urlParams.get("playerID");
+        const credentials = urlParams.get("credentials");
+        if (serverUrl && matchID && playerID && credentials) {
+          const { LobbyClient } = await import("boardgame.io/client");
+          const lc = new LobbyClient({ server: serverUrl });
+          await lc.leaveMatch("tam-quoc-sat-standard-2013", matchID, {
+            playerID,
+            credentials,
+          });
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    }
+    window.location.href = "/";
+  }
+
   private drawTitle(): void {
-    this.addText("TAM QUỐC SÁT", 34, 30, 30, COLORS.paper, 0, "left");
-    this.addText(
-      "STANDARD 2013 · ĐẤU CỤC BỘ",
-      35,
-      66,
-      12,
-      COLORS.gold,
-      0,
-      "left",
-      2,
+    // The user requested to remove the game title to avoid overlap.
+    this.addButton(
+      "Thoát",
+      74, // centerX
+      48, // centerY
+      80,
+      34,
+      () => this.leaveMatchAndExit(),
+      THEME.colors.ink,
+      THEME.colors.paper,
     );
   }
 
@@ -317,7 +483,7 @@ export class MainScreen extends Container {
       selectorLeft - 16,
       48,
       14,
-      COLORS.paperDark,
+      THEME.colors.paperDark,
       1,
       "right",
     );
@@ -341,8 +507,8 @@ export class MainScreen extends Container {
             this.receiveState(state),
           );
         },
-        active ? COLORS.redBright : COLORS.ink,
-        COLORS.paper,
+        active ? THEME.colors.redBright : THEME.colors.ink,
+        THEME.colors.paper,
         selectorLocked,
       );
     });
@@ -355,8 +521,8 @@ export class MainScreen extends Container {
       panelY,
       this.viewportWidth - 60,
       66,
-      COLORS.ink,
-      COLORS.gold,
+      THEME.colors.ink,
+      THEME.colors.gold,
     );
 
     let status = "";
@@ -388,7 +554,7 @@ export class MainScreen extends Container {
       52,
       panelY + 18,
       18,
-      COLORS.paper,
+      THEME.colors.paper,
       0,
       "left",
       0,
@@ -399,7 +565,7 @@ export class MainScreen extends Container {
       52,
       panelY + 44,
       12,
-      COLORS.paperDark,
+      THEME.colors.paperDark,
       0,
       "left",
       0,
@@ -421,11 +587,15 @@ export class MainScreen extends Container {
       const isActor = this.requiredActorID(G) === playerID;
       const targetOrder = this.selectedTargetIDs.indexOf(playerID);
       const selected = targetOrder >= 0;
+      const isChoosingTarget =
+        this.selectedCardIDs.size > 0 || this.pendingSkill !== undefined;
       const selectableTarget = selected || this.canSelectTarget(G, playerID);
+      const isHighlighted = isChoosingTarget && selectableTarget;
 
       const seat = new SeatView(G, playerID, {
         selected,
         isActor,
+        isHighlighted,
         onTap: () => {
           if (selectableTarget) {
             if (selected) {
@@ -486,7 +656,7 @@ export class MainScreen extends Container {
           seat.x + 80,
           seat.y + 18,
           20,
-          COLORS.white,
+          THEME.colors.white,
         );
       }
 
@@ -500,9 +670,18 @@ export class MainScreen extends Container {
     const y = this.viewportHeight - 250 - height - 32;
     const x = (this.viewportWidth - width) / 2;
 
-    this.addPanel(x, y, width, height, 0x181411, COLORS.gold, 0.75);
+    this.addPanel(x, y, width, height, 0x181411, THEME.colors.gold, 0.75);
 
-    this.addText("DIỄN BIẾN", x + 16, y + 14, 13, COLORS.gold, 0, "left", 2);
+    this.addText(
+      "DIỄN BIẾN",
+      x + 16,
+      y + 14,
+      13,
+      THEME.colors.gold,
+      0,
+      "left",
+      2,
+    );
     const entries = G.log.slice(-5);
     if (entries.length === 0) {
       this.addText(
@@ -510,7 +689,7 @@ export class MainScreen extends Container {
         x + 16,
         y + 44,
         13,
-        COLORS.muted,
+        THEME.colors.muted,
         0,
         "left",
       );
@@ -522,7 +701,7 @@ export class MainScreen extends Container {
         x + 16,
         y + 36 + index * 20,
         12,
-        COLORS.paper,
+        THEME.colors.paper,
         0,
         "left",
         0,
@@ -558,7 +737,7 @@ export class MainScreen extends Container {
         this.viewportWidth / 2,
         top + 20,
         24,
-        COLORS.gold,
+        THEME.colors.gold,
       );
       return;
     }
@@ -572,7 +751,7 @@ export class MainScreen extends Container {
         34,
         top + 48,
         15,
-        COLORS.muted,
+        THEME.colors.muted,
         0,
         "left",
         0,
@@ -640,21 +819,21 @@ export class MainScreen extends Container {
       this.viewportWidth - 60,
       154,
       0x181411,
-      COLORS.gold,
+      THEME.colors.gold,
     );
     this.addText(
       `ĐƯA THIẾT BỊ CHO P${seat}`,
       this.viewportWidth / 2,
       top + 18,
       20,
-      COLORS.paper,
+      THEME.colors.paper,
     );
     this.addText(
       `P${seat} cần thực hiện hành động tiếp theo.`,
       this.viewportWidth / 2,
       top + 52,
       13,
-      COLORS.paperDark,
+      THEME.colors.paperDark,
     );
     this.addButton(
       `Tôi là P${seat} · Tiếp tục`,
@@ -675,7 +854,7 @@ export class MainScreen extends Container {
           this.render();
         }
       },
-      COLORS.red,
+      THEME.colors.red,
     );
   }
 
@@ -690,57 +869,40 @@ export class MainScreen extends Container {
     // Dim the background
     const bg = new Graphics()
       .rect(0, 0, this.viewportWidth, this.viewportHeight)
-      .fill({ color: COLORS.black, alpha: 0.7 });
+      .fill({ color: THEME.colors.black, alpha: 0.7 });
     bg.eventMode = "static"; // Block clicks to underlying UI
     this.content.addChild(bg);
 
     this.addText(
       "CHỌN VÕ TƯỚNG",
       centerX,
-      centerY - 220,
-      32,
-      COLORS.gold,
+      centerY - 260,
+      36,
+      THEME.colors.gold,
       0.5,
       "center",
     );
 
-    const gap = 40;
-    const cardW = 140;
-    const cardH = 196; // Standard ratio
-    const totalW = candidates.length * cardW + (candidates.length - 1) * gap;
+    let gap = 24;
+    let cardW = 280;
+    let totalW = candidates.length * cardW + (candidates.length - 1) * gap;
+    if (totalW > this.viewportWidth - 60) {
+      cardW = (this.viewportWidth - 60 - (candidates.length - 1) * gap) / candidates.length;
+      totalW = candidates.length * cardW + (candidates.length - 1) * gap;
+    }
+    const cardH = cardW * 1.4; // Standard ratio
     const startX = centerX - totalW / 2 + cardW / 2;
 
     candidates.forEach((generalID, index) => {
       const isSelected = this.selectedCandidateID === generalID;
       const x = startX + index * (cardW + gap);
-      const y = centerY - 60;
+      const y = centerY - 20;
 
       const cardContainer = new Container();
       // PlayerAvatar draws from top-left, so adjust position
       cardContainer.position.set(x - cardW / 2, y - cardH / 2);
 
-      const general = GENERALS_BY_ID[generalID];
-      // Create a dummy player to render the avatar
-      const dummyPlayer = {
-        id: "dummy",
-        seat: index,
-        alive: true,
-        hp: general.maxHP,
-        maxHP: general.maxHP,
-        roleRevealed: true,
-        activeSkillIDs: general.skillIDs,
-        hand: [],
-        equipment: {},
-        judgement: [],
-        slashUses: 0,
-        skillsUsedThisTurn: [],
-        role: null,
-        generalID: generalID,
-        generalSelected: true,
-        generalCandidates: [],
-      };
-
-      const avatar = new PlayerAvatar(dummyPlayer, {
+      const card = new GeneralCardView(generalID, {
         width: cardW,
         height: cardH,
         isSelected: isSelected,
@@ -752,7 +914,7 @@ export class MainScreen extends Container {
         },
       });
 
-      cardContainer.addChild(avatar);
+      cardContainer.addChild(card);
 
       this.content.addChild(cardContainer);
     });
@@ -780,7 +942,7 @@ export class MainScreen extends Container {
         style: {
           fontFamily: GAME_FONT_FAMILY,
           fontSize: 18,
-          fill: COLORS.white,
+          fill: THEME.colors.white,
           align: "left",
           wordWrap: true,
           wordWrapWidth: panelW - 40,
@@ -790,12 +952,17 @@ export class MainScreen extends Container {
 
       // Calculate dynamic panel height
       const panelH = Math.max(160, 60 + skillsLabel.height + 20);
-      const panelY = centerY + 80;
+      
+      // Dynamic panel Y placement based on card size
+      const currentCardW = Math.min(280, (this.viewportWidth - 60 - (candidates.length - 1) * gap) / candidates.length);
+      const currentCardH = currentCardW * 1.4;
+      const cardCenterY = centerY - 20;
+      const panelY = cardCenterY + currentCardH / 2 + 20;
 
       const panel = new Graphics()
         .roundRect(centerX - panelW / 2, panelY, panelW, panelH, 8)
-        .fill({ color: COLORS.black, alpha: 0.85 })
-        .stroke({ color: COLORS.gold, width: 2 });
+        .fill({ color: THEME.colors.black, alpha: 0.85 })
+        .stroke({ color: THEME.colors.gold, width: 2 });
       this.content.addChild(panel);
 
       this.addText(
@@ -803,7 +970,7 @@ export class MainScreen extends Container {
         centerX,
         panelY + 24,
         24,
-        COLORS.gold,
+        THEME.colors.gold,
         0.5,
         "center",
       );
@@ -824,8 +991,8 @@ export class MainScreen extends Container {
           this.selectedCandidateID = null; // Clear state
           this.match!.move("selectGeneral", selected!);
         },
-        COLORS.red,
-        COLORS.paper,
+        THEME.colors.red,
+        THEME.colors.paper,
         false,
         { fontSize: 20, fontWeight: "700" },
       );
@@ -969,7 +1136,7 @@ export class MainScreen extends Container {
               this.virtualAs = null;
               this.render();
             },
-            active ? COLORS.redBright : COLORS.ink,
+            active ? THEME.colors.redBright : THEME.colors.ink,
           );
         });
       }
@@ -1005,7 +1172,7 @@ export class MainScreen extends Container {
             this.selectedTargetIDs = [];
             this.render();
           },
-          this.virtualAs ? COLORS.redBright : COLORS.ink,
+          this.virtualAs ? THEME.colors.redBright : THEME.colors.ink,
         );
       }
       const spearIndex = canToggleSpear ? playActionIndex++ : -1;
@@ -1159,8 +1326,8 @@ export class MainScreen extends Container {
           this.virtualAs = null;
           this.pendingSkill = null;
         },
-        COLORS.red,
-        COLORS.white,
+        THEME.colors.red,
+        THEME.colors.white,
         useDisabled,
       );
       if (spearIndex >= 0) {
@@ -1176,7 +1343,7 @@ export class MainScreen extends Container {
             this.selectedTargetIDs = [];
             this.render();
           },
-          this.serpentSpearMode ? COLORS.redBright : COLORS.ink,
+          this.serpentSpearMode ? THEME.colors.redBright : THEME.colors.ink,
         );
       }
       this.addButton(
@@ -1191,7 +1358,7 @@ export class MainScreen extends Container {
           this.pendingSkill = null;
           this.match!.move("endPlayPhase");
         },
-        COLORS.ink,
+        THEME.colors.ink,
       );
       if (this.pendingSkill) {
         const instructions: Record<string, string> = {
@@ -1206,12 +1373,12 @@ export class MainScreen extends Container {
         };
         this.addText(
           instructions[this.pendingSkill],
-          34,
-          actionRow.centerY - 8,
-          13,
-          COLORS.muted,
-          0,
-          "left",
+          actionRow.centers[0] - actionRow.widths[0] / 2 - 20,
+          actionRow.centerY,
+          14,
+          THEME.colors.gold,
+          1,
+          "right",
         );
         return;
       }
@@ -1231,12 +1398,12 @@ export class MainScreen extends Container {
           instruction = "Chỉ có thể dùng 【Đào】 khi đã tổn thất Thể Lực.";
         this.addText(
           instruction,
-          34,
-          actionRow.centerY - 8,
-          13,
-          COLORS.muted,
-          0,
-          "left",
+          actionRow.centers[0] - actionRow.widths[0] / 2 - 20,
+          actionRow.centerY,
+          14,
+          THEME.colors.gold,
+          1,
+          "right",
         );
       }
       return;
@@ -1253,12 +1420,12 @@ export class MainScreen extends Container {
         G.players[viewerID].hand.length - Math.max(0, G.players[viewerID].hp);
       this.addText(
         `Cần bỏ: ${required} lá · Đã chọn: ${this.selectedCardIDs.size} lá`,
-        34,
-        actionRow.centerY - 8,
-        14,
-        COLORS.paperDark,
-        0,
-        "left",
+        actionRow.centers[0] - actionRow.widths[0] / 2 - 20,
+        actionRow.centerY,
+        15,
+        THEME.colors.gold,
+        1,
+        "right",
       );
       if (canResumePlay)
         this.addButton(
@@ -1271,7 +1438,7 @@ export class MainScreen extends Container {
             this.selectedCardIDs.clear();
             this.match!.move("resumePlayPhase");
           },
-          COLORS.ink,
+          THEME.colors.ink,
         );
       this.addButton(
         "Xác nhận bỏ bài",
@@ -1280,8 +1447,8 @@ export class MainScreen extends Container {
         actionRow.widths[canResumePlay ? 1 : 0],
         48,
         () => this.match!.move("discardCards", [...this.selectedCardIDs]),
-        COLORS.red,
-        COLORS.white,
+        THEME.colors.red,
+        THEME.colors.white,
         this.selectedCardIDs.size !== required,
       );
       return;
@@ -1460,7 +1627,7 @@ export class MainScreen extends Container {
             row.widths[index],
             48,
             () => this.answerPrompt(prompt.id, { kind: "option", choice }),
-            COLORS.ink,
+            THEME.colors.ink,
           );
         });
         return;
@@ -1479,7 +1646,7 @@ export class MainScreen extends Container {
           48,
           () =>
             this.answerPrompt(prompt.id, { kind: "option", choice: "discard" }),
-          COLORS.red,
+          THEME.colors.red,
         );
         this.addButton(
           "Để đối phương rút 1 lá",
@@ -1489,7 +1656,7 @@ export class MainScreen extends Container {
           48,
           () =>
             this.answerPrompt(prompt.id, { kind: "option", choice: "draw" }),
-          COLORS.ink,
+          THEME.colors.ink,
         );
         return;
       }
@@ -1511,7 +1678,7 @@ export class MainScreen extends Container {
             actionRow.widths[index],
             48,
             () => this.answerPrompt(prompt.id, { kind: "option", choice }),
-            choice === "recover" ? COLORS.red : COLORS.ink,
+            choice === "recover" ? THEME.colors.red : THEME.colors.ink,
           );
         });
         return;
@@ -1529,7 +1696,7 @@ export class MainScreen extends Container {
         48,
         () =>
           this.answerPrompt(prompt.id, { kind: "option", choice: "activate" }),
-        COLORS.red,
+        THEME.colors.red,
       );
       this.addButton(
         this.optionDeclineLabel(prompt.reason),
@@ -1539,7 +1706,7 @@ export class MainScreen extends Container {
         48,
         () =>
           this.answerPrompt(prompt.id, { kind: "option", choice: "decline" }),
-        COLORS.ink,
+        THEME.colors.ink,
       );
       return;
     }
@@ -1563,7 +1730,7 @@ export class MainScreen extends Container {
       { kind: "choose-players" }
     >,
   ): void {
-    const y = this.viewportHeight - 154;
+    const y = this.viewportHeight - 340;
     const width = Math.min(
       120,
       (this.viewportWidth - 68) / Math.max(1, prompt.candidates.length),
@@ -1573,7 +1740,7 @@ export class MainScreen extends Container {
       this.viewportWidth / 2,
       y - 40,
       13,
-      COLORS.paperDark,
+      THEME.colors.paperDark,
     );
     prompt.candidates.forEach((playerID, index) => {
       const selected = this.selectedPromptPlayerIDs.includes(playerID);
@@ -1593,13 +1760,14 @@ export class MainScreen extends Container {
           else if (canToggle) this.selectedPromptPlayerIDs.push(playerID);
           this.render();
         },
-        selected ? COLORS.redBright : COLORS.ink,
+        selected ? THEME.colors.redBright : THEME.colors.ink,
       );
     });
     const actionRow = layoutActionRow(
       this.viewportWidth,
       this.viewportHeight,
       [180, 150],
+      { bottomInset: 260 },
     );
     this.addButton(
       "Xác nhận",
@@ -1612,8 +1780,8 @@ export class MainScreen extends Container {
           kind: "players",
           playerIDs: [...this.selectedPromptPlayerIDs],
         }),
-      COLORS.red,
-      COLORS.white,
+      THEME.colors.red,
+      THEME.colors.white,
       this.selectedPromptPlayerIDs.length < prompt.minimum,
     );
     if (prompt.minimum === 0)
@@ -1624,7 +1792,7 @@ export class MainScreen extends Container {
         actionRow.widths[1],
         48,
         () => this.answerPrompt(prompt.id, { kind: "pass" }),
-        COLORS.ink,
+        THEME.colors.ink,
       );
   }
 
@@ -1678,8 +1846,8 @@ export class MainScreen extends Container {
               }
             : { kind: "card", cardID: selectedCardID },
         ),
-      COLORS.red,
-      COLORS.white,
+      THEME.colors.red,
+      THEME.colors.white,
       !canUsePhysical && !canUseSpear,
     );
     if (prompt.allowBagua) {
@@ -1691,7 +1859,7 @@ export class MainScreen extends Container {
         actionRow.widths[baguaIndex],
         48,
         () => this.answerPrompt(prompt.id, { kind: "bagua" }),
-        COLORS.ink,
+        THEME.colors.ink,
       );
     }
     if (prompt.summonFaction) {
@@ -1705,7 +1873,7 @@ export class MainScreen extends Container {
         actionRow.widths[summonIndex],
         48,
         () => this.answerPrompt(prompt.id, { kind: "summon" }),
-        COLORS.green,
+        THEME.colors.green,
       );
     }
     this.addButton(
@@ -1715,8 +1883,8 @@ export class MainScreen extends Container {
       actionRow.widths[actionIndex],
       48,
       () => this.answerPrompt(prompt.id, { kind: "pass" }),
-      COLORS.ink,
-      COLORS.paper,
+      THEME.colors.ink,
+      THEME.colors.paper,
       !prompt.allowPass,
     );
   }
@@ -1832,7 +2000,13 @@ export class MainScreen extends Container {
     }
 
     const y = (this.viewportHeight - 80) / 2;
-    this.addText("Chọn bài", this.viewportWidth / 2, y - 120, 20, COLORS.gold);
+    this.addText(
+      "Chọn bài",
+      this.viewportWidth / 2,
+      y - 120,
+      20,
+      THEME.colors.gold,
+    );
 
     const cardW = 120,
       cardH = 168,
@@ -1882,7 +2056,7 @@ export class MainScreen extends Container {
           cardW,
           cardH,
           onTap,
-          selected ? COLORS.redBright : COLORS.ink,
+          selected ? THEME.colors.redBright : THEME.colors.ink,
         );
       }
     });
@@ -1902,8 +2076,8 @@ export class MainScreen extends Container {
           kind: "zone-cards",
           choices: [...this.selectedZoneChoices],
         }),
-      COLORS.red,
-      COLORS.white,
+      THEME.colors.red,
+      THEME.colors.white,
       this.selectedZoneChoices.length < prompt.minimum ||
         this.selectedZoneChoices.length > prompt.maximum,
     );
@@ -1915,7 +2089,7 @@ export class MainScreen extends Container {
         actionRow.widths[1],
         48,
         () => this.answerPrompt(prompt.id, { kind: "pass" }),
-        COLORS.ink,
+        THEME.colors.ink,
       );
   }
 
@@ -1932,7 +2106,7 @@ export class MainScreen extends Container {
       this.viewportWidth / 2,
       y - 120,
       20,
-      COLORS.gold,
+      THEME.colors.gold,
     );
 
     const visibleCardIDs = prompt.availableCardIDs;
@@ -1983,8 +2157,8 @@ export class MainScreen extends Container {
         if (selectedID)
           this.answerPrompt(prompt.id, { kind: "harvest", cardID: selectedID });
       },
-      COLORS.red,
-      COLORS.white,
+      THEME.colors.red,
+      THEME.colors.white,
       !selectedID,
     );
   }
@@ -2065,12 +2239,16 @@ export class MainScreen extends Container {
     borderColor: number,
     borderWidth = 1,
   ): Graphics {
-    const panel = new Graphics()
-      .roundRect(x, y, width, height, 8)
-      .fill({ color, alpha: 0.96 })
-      .stroke({ color: borderColor, width: borderWidth, alpha: 0.9 });
+    const panel = new Panel({
+      width,
+      height,
+      color,
+      borderColor,
+      borderWidth,
+    });
+    panel.position.set(x, y);
     this.content.addChild(panel);
-    return panel;
+    return panel as Graphics;
   }
 
   private addText(
@@ -2110,8 +2288,8 @@ export class MainScreen extends Container {
     width: number,
     height: number,
     onPress: () => void,
-    color = COLORS.ink,
-    textColor = COLORS.paper,
+    color = THEME.colors.ink,
+    textColor = THEME.colors.paper,
     disabled = false,
     textOptions: {
       fontSize?: number;
@@ -2120,41 +2298,20 @@ export class MainScreen extends Container {
       paddingY?: number;
     } = {},
   ): Container {
-    const button = new Container();
-    button.position.set(centerX - width / 2, centerY - height / 2);
-    button.eventMode = disabled ? "none" : "static";
-    button.cursor = disabled ? "default" : "pointer";
-    button.alpha = disabled ? 0.38 : 1;
-    button.addChild(
-      new Graphics()
-        .roundRect(0, 0, width, height, 7)
-        .fill(color)
-        .stroke({ color: COLORS.gold, width: 1, alpha: 0.75 }),
-    );
-    const paddingX = textOptions.paddingX ?? 14;
-    const paddingY = textOptions.paddingY ?? 8;
-    const maxTextWidth = Math.max(1, width - paddingX * 2);
-    const maxTextHeight = Math.max(1, height - paddingY * 2);
-    const fontSize = textOptions.fontSize ?? (height >= 64 ? 14 : 13);
-    const text = new Text({
-      text: label.normalize("NFC"),
-      style: {
-        fontFamily: GAME_FONT_FAMILY,
-        fontSize,
-        fontWeight: textOptions.fontWeight ?? "400",
-        fill: textColor,
-        align: "center",
-        lineHeight: Math.round(fontSize * 1.25),
-        wordWrap: true,
-        wordWrapWidth: maxTextWidth,
-      },
+    const button = new Button({
+      label,
+      width,
+      height,
+      onPress,
+      color,
+      textColor,
+      disabled,
+      ...textOptions,
     });
-    const textScale = fitScale(text, maxTextWidth, maxTextHeight);
-    text.scale.set(textScale);
-    text.anchor.set(0.5);
-    text.position.set(width / 2, height / 2);
-    button.addChild(text);
-    if (!disabled) button.on("pointertap", onPress);
+    // Button is already a container with text inside. We just need to position it.
+    // The previous implementation positioned it by its top-left corner.
+    // Our Button class positions its graphics at 0,0.
+    button.position.set(centerX - width / 2, centerY - height / 2);
     this.content.addChild(button);
     return button;
   }

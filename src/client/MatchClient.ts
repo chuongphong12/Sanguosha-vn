@@ -11,6 +11,7 @@ export type MatchClientState =
   | null
   | (Omit<NonNullable<AuthoritativeClientState>, "G"> & {
       G: TqsPlayerViewState;
+      matchData?: Array<{ id: number; name: string; data?: unknown }>;
     });
 
 type StateListener = (state: MatchClientState) => void;

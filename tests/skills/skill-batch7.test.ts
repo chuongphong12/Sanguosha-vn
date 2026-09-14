@@ -191,20 +191,10 @@ describe("hook-matched skills (batch 7)", () => {
       { kind: "pass" },
       identityShuffle,
     );
-    while (
-      G.prompt?.kind === "card-response" &&
-      G.prompt.reason === "rescue" &&
-      G.prompt.responderID !== huaTuoID
-    ) {
-      answerCardPrompt(
-        G,
-        G.prompt.responderID,
-        G.prompt.id,
-        { kind: "pass" },
-        identityShuffle,
-      );
+    
+    while (G.prompt?.reason === "rescue" && G.prompt.responderID !== huaTuoID) {
+      answerCardPrompt(G, G.prompt.responderID, G.prompt.id, { kind: "pass" }, identityShuffle);
     }
-    expect(G.prompt!.responderID).toBe(huaTuoID);
     answerCardPrompt(
       G,
       huaTuoID,

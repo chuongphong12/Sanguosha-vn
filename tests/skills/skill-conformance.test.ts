@@ -329,6 +329,7 @@ describe("Standard 2013 skill conformance", () => {
       { kind: "pass" },
       identityShuffle,
     );
+    console.log("PROMPT AFTER DODGE:", G.prompt);
     answerCardPrompt(
       G,
       caoCaoID,
@@ -336,7 +337,7 @@ describe("Standard 2013 skill conformance", () => {
       { kind: "option", choice: "activate" },
       identityShuffle,
     );
-
+    console.log("HAND AFTER ACTIVATE:", G.players[caoCaoID].hand);
     expect(G.players[caoCaoID].hand).toEqual(
       expect.arrayContaining([firstMaterialID, secondMaterialID]),
     );
