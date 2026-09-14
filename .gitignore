@@ -27,6 +27,7 @@ public/assets
 .assetpack
 src/manifest.json
 .env
+.env.*
 
 # Documents and AI Resources
 .references/
@@ -46,3 +47,6 @@ playwright/.cache/
 patch*.js
 # Agent patch scripts
 *.py
+
+pnpm-lock.yaml
+pnpm-workspace.yaml
