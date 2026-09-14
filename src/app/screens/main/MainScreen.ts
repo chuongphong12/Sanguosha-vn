@@ -382,7 +382,7 @@ export class MainScreen extends Container {
     if (amIHost) {
       let y = 190;
       
-      this.addButton(`Số Người Chơi: ${this.targetNumPlayers}`, rightCenterX - 160, y, 320, 36, () => {
+      this.addButton(`Số Người Chơi: ${this.targetNumPlayers}`, rightCenterX, y, 320, 36, () => {
         const options = [4, 5, 6, 8, 10];
         const idx = options.indexOf(this.targetNumPlayers);
         this.targetNumPlayers = options[(idx + 1) % options.length];
@@ -390,19 +390,19 @@ export class MainScreen extends Container {
       }, THEME.colors.ink, THEME.colors.paper);
       y += 50;
 
-      this.addButton(`Tự Bắt Đầu: ${this.autoStartWhenFull ? "BẬT" : "TẮT"}`, rightCenterX - 160, y, 320, 36, () => {
+      this.addButton(`Tự Bắt Đầu: ${this.autoStartWhenFull ? "BẬT" : "TẮT"}`, rightCenterX, y, 320, 36, () => {
         this.autoStartWhenFull = !this.autoStartWhenFull;
         this.render();
       }, this.autoStartWhenFull ? THEME.colors.gold : THEME.colors.ink, THEME.colors.paper);
       y += 50;
 
-      this.addButton(`Vô Giải Khả Kích: ${this.autoSkipWuxie ? "Tự Động" : "Thủ Công"}`, rightCenterX - 160, y, 320, 36, () => {
+      this.addButton(`Vô Giải Khả Kích: ${this.autoSkipWuxie ? "Tự Động" : "Thủ Công"}`, rightCenterX, y, 320, 36, () => {
         this.autoSkipWuxie = !this.autoSkipWuxie;
         this.render();
       }, this.autoSkipWuxie ? THEME.colors.gold : THEME.colors.ink, THEME.colors.paper);
       y += 50;
 
-      this.addButton(`Máu Chủ Công: ${this.lordExtraHp > 0 ? "+1" : "Giữ Nguyên"}`, rightCenterX - 160, y, 320, 36, () => {
+      this.addButton(`Máu Chủ Công: ${this.lordExtraHp > 0 ? "+1" : "Giữ Nguyên"}`, rightCenterX, y, 320, 36, () => {
         this.lordExtraHp = this.lordExtraHp === 1 ? 0 : 1;
         this.render();
       }, this.lordExtraHp > 0 ? THEME.colors.gold : THEME.colors.ink, THEME.colors.paper);
@@ -411,7 +411,7 @@ export class MainScreen extends Container {
       let timeLimitStr = "Vô Hạn";
       if (this.turnTimeLimit === 15) timeLimitStr = "15 Giây";
       if (this.turnTimeLimit === 30) timeLimitStr = "30 Giây";
-      this.addButton(`Thời Gian Lượt: ${timeLimitStr}`, rightCenterX - 160, y, 320, 36, () => {
+      this.addButton(`Thời Gian Lượt: ${timeLimitStr}`, rightCenterX, y, 320, 36, () => {
         if (this.turnTimeLimit === null) this.turnTimeLimit = 30;
         else if (this.turnTimeLimit === 30) this.turnTimeLimit = 15;
         else this.turnTimeLimit = null;
@@ -420,7 +420,7 @@ export class MainScreen extends Container {
       y += 60;
 
       const canStart = joinedPlayers.length >= 4;
-      this.addButton("Bắt Đầu Ngay", rightCenterX - 100, y, 200, 40, () => {
+      this.addButton("Bắt Đầu Ngay", rightCenterX, y, 200, 40, () => {
         if (canStart) {
           this.match!.move("startGame", joinedPlayerIDs, {
             autoSkipWuxie: this.autoSkipWuxie,
