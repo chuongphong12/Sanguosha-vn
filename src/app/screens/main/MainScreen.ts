@@ -358,6 +358,7 @@ export class MainScreen extends Container {
     const slotCount = amIHost ? this.targetNumPlayers : 10;
     for (let i = 0; i < slotCount; i++) {
       const y = 175 + i * 44;
+      const centerY = y + 19;
       const p = joinedPlayers[i];
       
       const slotBg = new Graphics()
@@ -366,16 +367,25 @@ export class MainScreen extends Container {
         .stroke({ color: THEME.colors.gold, width: 1, alpha: 0.5 });
       this.content.addChild(slotBg);
 
-      this.addText(`${i + 1}`, leftCenterX - 145, y + 19, 18, THEME.colors.gold, 0, "left");
+      const numTxt = this.addText(`${i + 1}`, leftCenterX - 145, centerY, 18, THEME.colors.gold, 0, "left");
+      numTxt.anchor.set(0, 0.5);
 
       if (p) {
         const isHost = String(p.id) === actualHostID;
         const isMe = String(p.id) === viewerID;
         const color = isMe ? THEME.colors.gold : THEME.colors.paper;
-        this.addText(`${p.name || "Khách"} ${isHost ? "(Chủ phòng)" : ""}`, leftCenterX - 110, y + 19, 18, color, 0, "left");
-        this.addText("Sẵn Sàng", leftCenterX + 145, y + 19, 16, 0x00FF00, 1, "right");
+        
+        let displayName = p.name || "Khách";
+        if (isHost) displayName += " (Chủ phòng)";
+        
+        const nameTxt = this.addText(displayName, leftCenterX - 110, centerY, 18, color, 0, "left", 0, 200);
+        nameTxt.anchor.set(0, 0.5);
+
+        const dot = new Graphics().circle(leftCenterX + 130, centerY, 6).fill(0x00FF00);
+        this.content.addChild(dot);
       } else {
-        this.addText("Open Slot", leftCenterX - 110, y + 19, 18, 0x555555, 0, "left");
+        const emptyTxt = this.addText("Open Slot", leftCenterX - 110, centerY, 18, 0x555555, 0, "left");
+        emptyTxt.anchor.set(0, 0.5);
       }
     }
 
