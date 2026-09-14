@@ -1,5 +1,11 @@
 import { SkillDefinition } from "../SkillRegistry";
-import { removeHandCard, playerName, damageEffect, markSkillUsed, resolveCardGame } from "../../cardEngine";
+import {
+  removeHandCard,
+  playerName,
+  damageEffect,
+  markSkillUsed,
+  resolveCardGame,
+} from "../../cardEngine";
 import { writeLog } from "../../rules";
 
 export const fanJianSkill: SkillDefinition = {
@@ -20,7 +26,7 @@ export const fanJianSkill: SkillDefinition = {
     markSkillUsed(G, playerID, "fan-jian");
     writeLog(
       G,
-      `${playerName(G, playerID)} dùng 【Phản Gián】 với ${playerName(G, targetID)}.`
+      `${playerName(G, playerID)} dùng 【Phản Gián】 với ${playerName(G, targetID)}.`,
     );
     G.effectStack.push({
       id: G.nextResolutionID++,
@@ -55,7 +61,8 @@ export const fanJianSkill: SkillDefinition = {
     const targetID = effect.context.targetID;
     if (answer.kind === "option") {
       const suits = ["heart", "diamond", "club", "spade"] as const;
-      if (!suits.includes(answer.choice as (typeof suits)[number])) return false;
+      if (!suits.includes(answer.choice as (typeof suits)[number]))
+        return false;
       const owner = G.players[effect.owner];
       if (owner.hand.length === 0) {
         G.effectStack.shift();
@@ -66,7 +73,7 @@ export const fanJianSkill: SkillDefinition = {
       G.players[targetID].hand.push(cardID);
       writeLog(
         G,
-        `${playerName(G, targetID)} đoán chất ${answer.choice}, rút được lá ${G.cards[cardID].suit}.`
+        `${playerName(G, targetID)} đoán chất ${answer.choice}, rút được lá ${G.cards[cardID].suit}.`,
       );
       G.effectStack.shift();
       if (G.cards[cardID].suit !== answer.choice) {
@@ -75,5 +82,5 @@ export const fanJianSkill: SkillDefinition = {
       return true;
     }
     return false;
-  }
+  },
 };

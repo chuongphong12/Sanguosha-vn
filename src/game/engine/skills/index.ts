@@ -1,6 +1,17 @@
 import { registerSkill } from "../SkillRegistry";
-import { yiJiSkill, jianXiongSkill, gangLieSkill, fanKuiSkill, yaoWuSkill } from "./damageSkills";
-import { tuXiSkill, luoYiSkill, lianYingSkill, xiaoJiSkill } from "./phaseSkills";
+import {
+  yiJiSkill,
+  jianXiongSkill,
+  gangLieSkill,
+  fanKuiSkill,
+  yaoWuSkill,
+} from "./damageSkills";
+import {
+  tuXiSkill,
+  luoYiSkill,
+  lianYingSkill,
+  xiaoJiSkill,
+} from "./phaseSkills";
 import { fanJianSkill } from "./activeSkills";
 
 export function registerAllSkills() {

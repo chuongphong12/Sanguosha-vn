@@ -26,13 +26,13 @@ export class GeneralCardView extends Container {
         const cardSprite = new Sprite(tex);
         cardSprite.width = w;
         cardSprite.height = h;
-        
+
         // Slightly round the corners of the card itself if needed
         const mask = new Graphics()
           .roundRect(0, 0, w, h, THEME.radius.sm)
           .fill(0xffffff);
         cardSprite.mask = mask;
-        
+
         this.addChild(cardSprite);
         this.addChild(mask);
       } else {
@@ -50,7 +50,7 @@ export class GeneralCardView extends Container {
         .roundRect(-4, -4, w + 8, h + 8, THEME.radius.sm + 2)
         .stroke({ color: THEME.colors.highlightGlow, width: 4, alpha: 0.8 });
       this.addChild(glow);
-      
+
       const border = new Graphics()
         .roundRect(0, 0, w, h, THEME.radius.sm)
         .stroke({ color: THEME.colors.highlightStroke, width: 3, alpha: 1 });
@@ -78,4 +78,3 @@ export class GeneralCardView extends Container {
     return null;
   }
 }
-

@@ -1,4 +1,4 @@
-﻿import { CARD_DEFINITIONS } from "./catalog/cards";
+import { CARD_DEFINITIONS } from "./catalog/cards";
 import { GENERALS_BY_ID } from "./catalog/generals";
 import { ROLE_NAMES } from "./catalog/roles";
 import { SKILL_REGISTRY } from "./engine/SkillRegistry";
@@ -151,7 +151,7 @@ function equipmentName(
   return cardID ? (G.cards[cardID]?.definitionID ?? null) : null;
 }
 
-function hasSkill(
+export function hasSkill(
   G: TqsGameState | TqsPlayerViewState,
   playerID: PlayerID,
   skillID: string,
@@ -1862,10 +1862,6 @@ function resolveDamage(G: TqsGameState, effect: DamageEffect): void {
   }
 }
 
-
-
-
-
 function resolveDying(G: TqsGameState, effect: DyingEffect): void {
   if (G.players[effect.dyingPlayerID].hp >= 1) {
     G.effectStack.shift();
@@ -1916,16 +1912,6 @@ function enterDiscardPhase(G: TqsGameState, playerID: PlayerID): void {
     });
 }
 
-
-
-
-
-
-
-
-
-
-
 function finishYiJiOpportunity(
   G: TqsGameState,
   effect: Extract<GameEffect, { kind: "yi-ji" }>,
@@ -1936,12 +1922,6 @@ function finishYiJiOpportunity(
   if (effect.remainingOpportunities <= 0) G.effectStack.shift();
   else effect.stage = "offer";
 }
-
-
-
-
-
-
 
 function resolveWangZun(
   G: TqsGameState,
@@ -2700,7 +2680,6 @@ function answerSelectCards(
     return true;
   }
   if (answer.kind === "pass" && prompt.allowPass) {
-    
     if (effect.kind === "guan-xing" && effect.stage === "top") {
       effect.topCardIDs = [];
       effect.stage = "bottom";
@@ -2777,9 +2756,7 @@ function answerSelectCards(
     finishGuanXing(G, effect, cardIDs);
     return true;
   }
-  
-  
-  
+
   if (effect.kind === "resolve-delayed" && prompt.reason === "gui-cai") {
     const cardID = cardIDs[0];
     handToDiscard(G, prompt.ownerID, cardID);
@@ -2944,7 +2921,7 @@ function answerOption(
       return true;
     }
   }
-  
+
   if (effect.kind === "resolve-delayed" && prompt.reason === "gui-cai") {
     if (answer.choice === "decline") {
       G.effectStack.shift();
@@ -2966,7 +2943,7 @@ function answerOption(
     };
     return true;
   }
-  
+
   if (effect.kind === "guan-xing") {
     if (answer.choice === "decline") {
       G.effectStack.shift();
@@ -3037,8 +3014,7 @@ function answerOption(
     G.effectStack.shift();
     return true;
   }
-  
-  
+
   if (effect.kind === "wang-zun") {
     if (answer.choice === "activate") {
       drawCards(G, effect.ownerID, 1, shuffle);
@@ -3093,11 +3069,7 @@ function answerOption(
     }
     return false;
   }
-  
-  
-  
-  
-  
+
   return false;
 }
 
@@ -3224,8 +3196,6 @@ function answerLiuLiPlayers(
   resetSlashTargetStage(effect);
   return true;
 }
-
-
 
 export function markSkillUsed(
   G: TqsGameState,
@@ -3409,8 +3379,6 @@ export function useSkill(
     return true;
   }
 
-  
-
   const def = SKILL_REGISTRY[skillID];
   if (def && def.onUse) {
     return def.onUse(G, playerID, payload, shuffle);
@@ -3505,8 +3473,8 @@ export function answerCardPrompt(
       prompt.reason === "tu-xi" && effect.kind === "tu-xi"
         ? answerChoosePlayers(G, effect, prompt, answer, shuffle)
         : prompt.reason === "liu-li" && effect.kind === "slash"
-            ? answerLiuLiPlayers(G, effect, prompt, answer)
-            : false;
+          ? answerLiuLiPlayers(G, effect, prompt, answer)
+          : false;
   } else if (
     prompt.kind === "harvest-choice" &&
     effect.kind === "harvest-pick"

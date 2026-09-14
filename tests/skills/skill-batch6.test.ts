@@ -72,8 +72,17 @@ describe("final batch skills", () => {
       { kind: "pass" },
       identityShuffle,
     );
-        while (G.prompt?.reason === "rescue" && G.prompt.responderID !== rescuerID) {
-      answerCardPrompt(G, G.prompt.responderID, G.prompt.id, { kind: "pass" }, identityShuffle);
+    while (
+      G.prompt?.reason === "rescue" &&
+      G.prompt.responderID !== rescuerID
+    ) {
+      answerCardPrompt(
+        G,
+        G.prompt.responderID,
+        G.prompt.id,
+        { kind: "pass" },
+        identityShuffle,
+      );
     }
     answerCardPrompt(
       G,
@@ -201,7 +210,7 @@ describe("final batch skills", () => {
       const targetHP = G.players[targetID].hp;
 
       expect(
-                useSkill(G, playerID, "fan-jian", { targetID }, identityShuffle),
+        useSkill(G, playerID, "fan-jian", { targetID }, identityShuffle),
       ).toBe(true);
       expect(G.prompt).toMatchObject({
         reason: "fan-jian-suit",

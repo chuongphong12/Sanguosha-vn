@@ -45,7 +45,7 @@ export type CardKind = "basic" | "trick" | "delayed-trick" | "equipment";
 export type EquipmentSlot =
   "weapon" | "armor" | "offensive-mount" | "defensive-mount";
 export type TurnStep =
-  "prepare" | "judge" | "draw" | "play" | "discard" | "end";
+  "start" | "prepare" | "judge" | "draw" | "play" | "discard" | "end";
 
 export interface CardDefinition {
   id: CardName;
@@ -202,6 +202,7 @@ export interface SelectCardsPrompt extends PromptBase {
 
 export interface HarvestPrompt extends PromptBase {
   kind: "harvest-choice";
+  reason?: string;
   availableCardIDs: string[];
 }
 
@@ -525,7 +526,7 @@ export interface SkillTriggerEffect {
 
 export type GameEffect =
   | SkillTriggerEffect
-  | { id: number; kind: "execute-draw"; ownerID: PlayerID; }
+  | { id: number; kind: "execute-draw"; ownerID: PlayerID }
   | FinishUseEffect
   | NullificationEffect
   | SlashEffect
@@ -585,7 +586,12 @@ export interface GameLogEntry {
 
 export interface TqsGameState {
   rulesVersion: "standard-2013-v2";
-  status: "waiting-room" | "lord-selection" | "general-selection" | "playing" | "ended";
+  status:
+    | "waiting-room"
+    | "lord-selection"
+    | "general-selection"
+    | "playing"
+    | "ended";
   config: { autoSkipWuxie?: boolean };
   seatOrder: PlayerID[];
   lordID: PlayerID;

@@ -1,5 +1,4 @@
 import { Server, Origins } from "boardgame.io/server";
-/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { TqsGame } from "../src/game/TqsGame";
 

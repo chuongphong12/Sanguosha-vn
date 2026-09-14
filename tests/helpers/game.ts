@@ -11,7 +11,10 @@ import { createInitialState, selectGeneral } from "../../src/game/setup";
 export const identityShuffle: Shuffle = <T>(items: T[]) => [...items];
 
 export function createStartedGame(numPlayers = 4): TqsGameState {
-  const G = createInitialState({ numPlayers, autoSkipWuxie: false }, identityShuffle);
+  const G = createInitialState(
+    { numPlayers, autoSkipWuxie: false },
+    identityShuffle,
+  );
   selectGeneral(G, G.lordID, "cao-cao", identityShuffle);
   for (const playerID of G.seatOrder.slice(1)) {
     selectGeneral(

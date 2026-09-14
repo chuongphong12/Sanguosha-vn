@@ -1,4 +1,11 @@
-import { Assets, Container, Graphics,  Text, Texture, TilingSprite } from "pixi.js";
+import {
+  Assets,
+  Container,
+  Graphics,
+  Text,
+  Texture,
+  TilingSprite,
+} from "pixi.js";
 
 import type {
   MatchClientState,
@@ -37,6 +44,7 @@ import { Button } from "../../ui/components/Button";
 import { Panel } from "../../ui/components/Panel";
 
 const STEP_NAMES: Record<TurnStep, string> = {
+  start: "Bắt Đầu",
   prepare: "Chuẩn Bị",
   judge: "Phán Xét",
   draw: "Rút Bài",
@@ -883,11 +891,13 @@ export class MainScreen extends Container {
       "center",
     );
 
-    let gap = 24;
+    const gap = 24;
     let cardW = 280;
     let totalW = candidates.length * cardW + (candidates.length - 1) * gap;
     if (totalW > this.viewportWidth - 60) {
-      cardW = (this.viewportWidth - 60 - (candidates.length - 1) * gap) / candidates.length;
+      cardW =
+        (this.viewportWidth - 60 - (candidates.length - 1) * gap) /
+        candidates.length;
       totalW = candidates.length * cardW + (candidates.length - 1) * gap;
     }
     const cardH = cardW * 1.4; // Standard ratio
@@ -952,9 +962,13 @@ export class MainScreen extends Container {
 
       // Calculate dynamic panel height
       const panelH = Math.max(160, 60 + skillsLabel.height + 20);
-      
+
       // Dynamic panel Y placement based on card size
-      const currentCardW = Math.min(280, (this.viewportWidth - 60 - (candidates.length - 1) * gap) / candidates.length);
+      const currentCardW = Math.min(
+        280,
+        (this.viewportWidth - 60 - (candidates.length - 1) * gap) /
+          candidates.length,
+      );
       const currentCardH = currentCardW * 1.4;
       const cardCenterY = centerY - 20;
       const panelY = cardCenterY + currentCardH / 2 + 20;
@@ -1091,7 +1105,6 @@ export class MainScreen extends Container {
           skill.enabled &&
           G.players[viewerID].generalID &&
           GENERALS_BY_ID[G.players[viewerID].generalID!]?.skillIDs.includes(
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             skill.id as any,
           ),
       );

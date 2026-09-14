@@ -191,9 +191,15 @@ describe("hook-matched skills (batch 7)", () => {
       { kind: "pass" },
       identityShuffle,
     );
-    
+
     while (G.prompt?.reason === "rescue" && G.prompt.responderID !== huaTuoID) {
-      answerCardPrompt(G, G.prompt.responderID, G.prompt.id, { kind: "pass" }, identityShuffle);
+      answerCardPrompt(
+        G,
+        G.prompt.responderID,
+        G.prompt.id,
+        { kind: "pass" },
+        identityShuffle,
+      );
     }
     answerCardPrompt(
       G,

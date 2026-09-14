@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Container, Graphics, Text } from "pixi.js";
 import { animate } from "motion";
 

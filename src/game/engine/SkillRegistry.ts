@@ -7,8 +7,18 @@ export interface SkillDefinition {
   triggerOn: GameEventName;
   canInvoke: (G: TqsGameState, playerID: PlayerID, context: any) => boolean;
   onTrigger?: (G: TqsGameState, effect: any, shuffle: Shuffle) => void;
-  onAnswer?: (G: TqsGameState, effect: any, answer: PromptAnswer, shuffle: Shuffle) => boolean;
-  onUse?: (G: TqsGameState, playerID: PlayerID, payload: unknown, shuffle: Shuffle) => boolean;
+  onAnswer?: (
+    G: TqsGameState,
+    effect: any,
+    answer: PromptAnswer,
+    shuffle: Shuffle,
+  ) => boolean;
+  onUse?: (
+    G: TqsGameState,
+    playerID: PlayerID,
+    payload: unknown,
+    shuffle: Shuffle,
+  ) => boolean;
 }
 
 export const SKILL_REGISTRY: Record<string, SkillDefinition> = {};

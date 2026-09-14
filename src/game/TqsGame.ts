@@ -153,43 +153,42 @@ export const TqsGame: Game<TqsGameState> = {
     adminDrawCard: authoritative(
       ({ G, random }, targetID: string, amount: number) => {
         drawCards(G, targetID, amount, shuffleFrom(random));
-        writeLog(G, `[Sandbox] Ép bốc ${amount} lá cho người chơi ${targetID}.`);
+        writeLog(
+          G,
+          `[Sandbox] Ép bốc ${amount} lá cho người chơi ${targetID}.`,
+        );
       },
       true,
     ),
-    adminSetHp: authoritative(
-      ({ G }, targetID: string, hp: number) => {
-        const player = G.players[targetID];
-        if (player) {
-          player.hp = Math.max(0, Math.min(hp, player.maxHP));
-          writeLog(G, `[Sandbox] Đặt máu của ${targetID} thành ${player.hp}.`);
-        }
-      },
-      true,
-    ),
-    adminDiscard: authoritative(
-      ({ G }, targetID: string, cardID: string) => {
-        const player = G.players[targetID];
-        if (!player) return;
-        const handIndex = player.hand.indexOf(cardID);
-        if (handIndex !== -1) {
-          player.hand.splice(handIndex, 1);
-          G.discard.push(cardID);
-          writeLog(G, `[Sandbox] Vứt 1 lá bài trên tay của ${targetID}.`);
-        } else {
-          // Check equipment
-          for (const slot of Object.keys(player.equipment) as Array<keyof typeof player.equipment>) {
-            if (player.equipment[slot] === cardID) {
-              player.equipment[slot] = null as any;
-              G.discard.push(cardID);
-              writeLog(G, `[Sandbox] Vứt trang bị của ${targetID}.`);
-              break;
-            }
+    adminSetHp: authoritative(({ G }, targetID: string, hp: number) => {
+      const player = G.players[targetID];
+      if (player) {
+        player.hp = Math.max(0, Math.min(hp, player.maxHP));
+        writeLog(G, `[Sandbox] Đặt máu của ${targetID} thành ${player.hp}.`);
+      }
+    }, true),
+    adminDiscard: authoritative(({ G }, targetID: string, cardID: string) => {
+      const player = G.players[targetID];
+      if (!player) return;
+      const handIndex = player.hand.indexOf(cardID);
+      if (handIndex !== -1) {
+        player.hand.splice(handIndex, 1);
+        G.discard.push(cardID);
+        writeLog(G, `[Sandbox] Vứt 1 lá bài trên tay của ${targetID}.`);
+      } else {
+        // Check equipment
+        for (const slot of Object.keys(player.equipment) as Array<
+          keyof typeof player.equipment
+        >) {
+          if (player.equipment[slot] === cardID) {
+            player.equipment[slot] = null as any;
+            G.discard.push(cardID);
+            writeLog(G, `[Sandbox] Vứt trang bị của ${targetID}.`);
+            break;
           }
         }
-      },
-      true,
-    ),
+      }
+    }, true),
   },
 
   endIf: ({ G }) => G.winner ?? undefined,
