@@ -7,6 +7,7 @@ import {
   TilingSprite,
 } from "pixi.js";
 
+import { LobbyClient } from "boardgame.io/client";
 import type {
   MatchClientState,
   MatchConfig,
@@ -449,7 +450,6 @@ export class MainScreen extends Container {
         const playerID = urlParams.get("playerID");
         const credentials = urlParams.get("credentials");
         if (serverUrl && matchID && playerID && credentials) {
-          const { LobbyClient } = await import("boardgame.io/client");
           const lc = new LobbyClient({ server: serverUrl });
           await lc.leaveMatch("tam-quoc-sat-standard-2013", matchID, {
             playerID,
