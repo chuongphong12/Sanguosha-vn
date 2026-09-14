@@ -47,6 +47,3 @@ playwright/.cache/
 patch*.js
 # Agent patch scripts
 *.py
-
-pnpm-lock.yaml
-pnpm-workspace.yaml
