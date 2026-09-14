@@ -433,9 +433,7 @@ export class MainScreen extends Container {
       this.addText("Chủ phòng đang thiết lập...", rightCenterX, 250, 18, THEME.colors.muted, 0.5, "center");
     }
 
-    this.addButton("Rời Khỏi", this.viewportWidth / 2 - 100, this.viewportHeight - 60, 200, 50, () => {
-      this.leaveMatchAndExit();
-    }, THEME.colors.ink, THEME.colors.paper);
+
   }
 
   private drawBackground(): void {
