@@ -452,8 +452,95 @@ export class MainScreen extends Container {
       this.addText("Chủ phòng đang thiết lập...", rightCenterX, 250, 18, THEME.colors.muted, 0.5, "center");
     }
 
-    // Redraw exit button on top of background
-    this.drawTitle();
+  }
+
+  private drawBackground(): void {
+    const background = new Graphics()
+      .rect(0, 0, this.viewportWidth, this.viewportHeight)
+      .fill(THEME.colors.black);
+    background
+      .circle(
+        this.viewportWidth * 0.82,
+        this.viewportHeight * 0.22,
+        Math.min(this.viewportWidth, 520) * 0.34,
+      )
+      .fill({ color: THEME.colors.red, alpha: 0.16 });
+    background
+      .rect(18, 18, this.viewportWidth - 36, this.viewportHeight - 36)
+      .stroke({ color: THEME.colors.gold, width: 1, alpha: 0.55 });
+    this.content.addChild(background);
+    this.addBackgroundTexture(
+      "system/tableBg",
+      this.viewportWidth,
+      this.viewportHeight,
+      0.8,
+    );
+  }
+
+  private addBackgroundTexture(
+    name: string,
+    width: number,
+    height: number,
+    alpha = 1,
+    x?: number,
+    y?: number,
+  ): void {
+    let texture: Texture | null = null;
+    for (const alias of [
+      `${name}.jpg`,
+      `${name}.png`,
+      `${name}.jpg`,
+      `${name}.png`,
+      `/assets/main/${name}.jpg`,
+    ]) {
+      texture = Assets.get<Texture>(alias);
+      if (texture) break;
+    }
+    if (!texture) return;
+    const sprite = new TilingSprite({
+      texture,
+      width,
+      height,
+    });
+    sprite.alpha = alpha;
+    sprite.position.set(x ?? 0, y ?? 0);
+    this.content.addChild(sprite);
+  }
+
+  private async leaveMatchAndExit(): Promise<void> {
+    if (this.match?.isRemote) {
+      try {
+        const urlParams = new URLSearchParams(window.location.search);
+        const serverUrl = urlParams.get("serverUrl");
+        const matchID = urlParams.get("matchID");
+        const playerID = urlParams.get("playerID");
+        const credentials = urlParams.get("credentials");
+        if (serverUrl && matchID && playerID && credentials) {
+          const lc = new LobbyClient({ server: serverUrl });
+          await lc.leaveMatch("tam-quoc-sat-standard-2013", matchID, {
+            playerID,
+            credentials,
+          });
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    }
+    window.location.href = "/";
+  }
+
+  private drawTitle(): void {
+    // The user requested to remove the game title to avoid overlap.
+    this.addButton(
+      "Thoát",
+      74, // centerX
+      48, // centerY
+      80,
+      34,
+      () => this.leaveMatchAndExit(),
+      THEME.colors.ink,
+      THEME.colors.paper,
+    );
   }
 
   private drawViewerSelector(G: TqsPlayerViewState): void {
