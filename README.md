@@ -1,72 +1,72 @@
 # Sanguosha VN (Tam Quốc Sát)
 
-Một phiên bản mã nguồn mở đưa board game thẻ bài đình đám **Tam Quốc Sát (Sanguosha)** lên trình duyệt web. Dự án được xây dựng bằng công nghệ web hiện đại (TypeScript, Pixi.js, Boardgame.io), mang lại trải nghiệm mượt mà, đồng bộ thời gian thực và hỗ trợ các tính năng tự động hóa luật chơi phức tạp của game gốc.
+An open-source browser-based adaptation of the famous card board game **Sanguosha (Tam Quốc Sát)**. This project is built with modern web technologies (TypeScript, PixiJS, Boardgame.io), providing a smooth experience, real-time multiplayer synchronization, and a robust engine handling the complex rules and card interactions of the original game.
 
-## 🌟 Tính Năng Nổi Bật
+## 🌟 Key Features
 
-- **Game Engine Mô Phỏng Chuẩn Mực:** Khung luật chơi được thiết kế chính xác theo tiêu chuẩn 2013, bao gồm cả những phase và trigger skills phức tạp.
-- **Thiết Kế Đồ Hoạ Tối Ưu:** Sử dụng PixiJS (WebGL) cùng Spine Animation mang lại hiệu năng cao và hiệu ứng hình ảnh sống động.
-- **Đồng Bộ Thời Gian Thực:** Boardgame.io xử lý toàn bộ server/client state management, cho phép người chơi dễ dàng tạo phòng, tham gia trận chiến và giữ trạng thái mạng đồng nhất.
-- **Hệ Thống Skill Mở Rộng Dễ Dàng (EventBus):** Kiến trúc EventBus cho phép tách biệt từng kỹ năng Tướng (Generals) và Thẻ Trang bị, dễ dàng thêm hoặc chỉnh sửa kỹ năng mà không làm phình to Engine cốt lõi.
-- **Kiểm Thử Chặt Chẽ:** Được bao phủ bởi hơn 170 bài test tự động (Vitest) cho tất cả các tình huống phản ứng bài và sử dụng skill phức tạp nhất, đảm bảo tính nhất quán của luật chơi.
+- **Accurate Game Engine:** The ruleset is modeled precisely after the standard 2013 game standard, handling all complex phases, turn flow, and trigger skills perfectly.
+- **High-Performance Graphics:** Powered by PixiJS (WebGL) and Spine Animation, ensuring smooth rendering, optimized asset management, and vivid visual effects.
+- **Real-Time Synchronization:** Utilizes Boardgame.io for comprehensive client-server state management, allowing players to easily create lobbies, join battles, and maintain consistent network state.
+- **Scalable Skill System (EventBus):** The EventBus architecture decouples character skills and equipment effects. This allows for easily adding or modifying complex interactions without bloating the core game engine.
+- **Strict Testing Coverage:** Backed by over 170+ automated tests (via Vitest) to guarantee consistency across edge cases, complex skill chaining, and phase resolutions.
 
-## 🛠️ Công Nghệ Sử Dụng
+## 🛠️ Tech Stack
 
-- **Ngôn ngữ chính:** [TypeScript](https://www.typescriptlang.org/)
+- **Core Language:** [TypeScript](https://www.typescriptlang.org/)
 - **Frontend Rendering:** [PixiJS v8](https://pixijs.com/) & [Spine](http://esotericsoftware.com/)
 - **UI Components:** `@pixi/ui` & [Motion](https://motion.dev/)
 - **Game State & Networking:** [Boardgame.io](https://boardgame.io/)
 - **Build Tool:** [Vite](https://vitejs.dev/)
 - **Testing:** [Vitest](https://vitest.dev/) (Logic) & [Playwright](https://playwright.dev/) (E2E)
 
-## 🚀 Hướng Dẫn Cài Đặt & Chạy Trực Tiếp
+## 🚀 Setup & Installation
 
-### 1. Yêu cầu hệ thống
-- Node.js (phiên bản 18+ hoặc mới nhất)
-- Trình quản lý gói `npm`, `yarn` hoặc `pnpm`
+### 1. Prerequisites
+- Node.js (v18+ recommended)
+- A package manager like `npm`, `yarn`, or `pnpm`
 
-### 2. Cài đặt các gói phụ thuộc
-Clone repo về máy, sau đó mở terminal tại thư mục gốc và chạy:
+### 2. Install Dependencies
+Clone the repository and install the dependencies in the root directory:
 ```bash
 npm install
 ```
 
-### 3. Khởi chạy Server và Client (Môi trường phát triển)
-Sử dụng các câu lệnh sau để chạy dự án:
+### 3. Running Locally (Development)
+You will need to start both the Frontend Client and the Backend Server for multiplayer functionality:
 
 ```bash
-# Chạy Frontend Client (tự động mở port qua Vite)
+# Start Frontend Client (Vite will auto-open a local port)
 npm run dev
 
-# Chạy Backend Server (Server của Boardgame.io xử lý multiplayer)
+# Start Backend Server (Boardgame.io server handling game state)
 npm run serve
 ```
-*Ghi chú: Khi chạy `npm run dev`, script tự động dọn dẹp các asset cũ (`npm run clean`) và tạo lại môi trường.*
+*Note: Running `npm run dev` triggers a pre-script (`npm run clean`) to automatically clean up old assets and prepare the environment.*
 
-### 4. Build môi trường Production
+### 4. Production Build
 ```bash
 npm run build
 ```
 
-## 🧪 Kiểm Thử (Testing)
+## 🧪 Testing
 
-Dự án bao gồm một bộ Unit Test chi tiết cho toàn bộ flow của Game và Skill:
+The project includes an extensive suite of unit and integration tests for the Game Engine and Skills.
 
 ```bash
-# Chạy bộ test một lần
+# Run the test suite once
 npm run test
 
-# Chạy chế độ watch khi dev
+# Run tests in watch mode for active development
 npm run test:watch
 ```
 
-## 📂 Cấu Trúc Dự Án (Tham khảo)
+## 📂 Project Structure
 
-- `src/game/` - Chứa toàn bộ Game Engine: core rule, `cardEngine.ts`, `setup.ts`, danh sách thẻ bài.
-- `src/game/engine/` - Trái tim của hệ thống xử lý Sự kiện & Kỹ năng (EventBus, SkillRegistry).
-- `src/app/` - Phần giao diện người chơi, render đồ hoạ (PixiJS), quản lý phòng chờ (Lobby UI).
-- `server/` - Thiết lập máy chủ Boardgame.io.
-- `tests/` - Các bộ test Vitest chia theo rules, skills, UI.
+- `src/game/` - Contains the core Game Engine: rules, `cardEngine.ts`, `setup.ts`, and the card catalog.
+- `src/game/engine/` - The heart of the Event & Skill resolution system (EventBus, SkillRegistry).
+- `src/app/` - The frontend client, handling UI, graphics (PixiJS), and the Lobby view.
+- `server/` - The Boardgame.io multiplayer server configuration.
+- `tests/` - Vitest test suites categorized by rules, skills, UI, and security.
 
-## 📝 Giấy Phép (License)
-Dự án được xây dựng với mục đích học tập và chia sẻ mã nguồn mở. Tài sản đồ hoạ (Assets) phụ thuộc vào bên thứ ba và có thể thuộc bản quyền của nhà phát hành gốc Yoka Games.
+## 📝 License
+This project is built for educational and open-source sharing purposes. Graphical assets and original character designs are subject to the copyright of their respective owners (Yoka Games).
