@@ -98,7 +98,55 @@ export class MainScreen extends Container {
   private mainBundleLoaded = false;
   private isAwaitingBundle = false;
   private autoSkipWuxie = true;
-  private rolePopupDismissed = false;
+  private rolePopupDismissed = false;\n
+  private rolePopupContainer?: PIXI.Container;
+  private showRolePopup(role: string) {
+    if (this.rolePopupContainer) return;
+    const popup = new PIXI.Container();
+    
+    const overlay = new PIXI.Graphics();
+    overlay.rect(0, 0, this.viewportWidth, this.viewportHeight).fill({ color: 0x000000, alpha: 0.85 });
+    overlay.eventMode = 'static';
+    overlay.cursor = 'pointer';
+    
+    const roleNames: Record<string, string> = {
+      'chu_cong': 'CHỦ CÔNG',
+      'trung_than': 'TRUNG THẦN',
+      'phan_tac': 'PHẢN TẶC',
+      'noi_gian': 'NỘI GIAN'
+    };
+    
+    const label = new PIXI.Text({
+      text: 'Thân phận của bạn là:\n\n' + (roleNames[role] || role.toUpperCase()),
+      style: {
+        fontFamily: 'Noto Serif',
+        fontSize: 48,
+        fontWeight: 'bold',
+        fill: { type: 'linear', colorStops: [{ offset: 0, color: '#d4af37' }, { offset: 1, color: '#aa801a' }] },
+        align: 'center',
+        stroke: { color: 0x1a1a1a, width: 4 }
+      }
+    });
+    label.anchor.set(0.5);
+    label.position.set(this.viewportWidth / 2, this.viewportHeight / 2);
+    
+    popup.addChild(overlay, label);
+    
+    // Auto dismiss after 3.5s or on click
+    const dismiss = () => {
+      if (this.rolePopupContainer && !this.rolePopupContainer.destroyed) {
+        this.rolePopupContainer.destroy();
+        this.rolePopupContainer = undefined;
+        this.render();
+      }
+    };
+    overlay.on('pointerdown', dismiss);
+    setTimeout(dismiss, 3500);
+    
+    this.addChild(popup);
+    this.rolePopupContainer = popup;
+  }
+
   private roleCardRevealed = false;
   private lordExtraHp = 1;
   private turnTimeLimit: number | null = null;
