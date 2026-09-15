@@ -47,6 +47,9 @@ const originalPost = server.router.post.bind(server.router);
         ctx.body = { error: "Sai mật khẩu!" };
         return;
       }
+      if (ctx.request.body?.data?.password) {
+        delete ctx.request.body.data.password;
+      }
       await next();
     };
     middlewares.splice(middlewares.length - 1, 0, ourMiddleware);

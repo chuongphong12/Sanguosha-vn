@@ -5,7 +5,7 @@ settings:
   excludeLinksFromLockfile: false
 
 patchedDependencies:
-  boardgame.io@0.50.2: 02c2dcc8735208ddef73cbec7197f4ca727980b9a44545ded0042c7539beb4db
+  boardgame.io@0.50.2: fea27dca4dad400644b391d754638ebc53ff32f5a6bec38ebead6d8b5c24009d
 
 importers:
 
@@ -25,7 +25,7 @@ importers:
         version: 2.3.2(pixi.js@8.20.1)
       boardgame.io:
         specifier: 0.50.2
-        version: 0.50.2(patch_hash=02c2dcc8735208ddef73cbec7197f4ca727980b9a44545ded0042c7539beb4db)(supports-color@7.2.0)
+        version: 0.50.2(patch_hash=fea27dca4dad400644b391d754638ebc53ff32f5a6bec38ebead6d8b5c24009d)(supports-color@7.2.0)
       motion:
         specifier: ^12.43.0
         version: 12.43.0
@@ -4344,7 +4344,7 @@ snapshots:
 
   bmp-ts@1.0.9: {}
 
-  boardgame.io@0.50.2(patch_hash=02c2dcc8735208ddef73cbec7197f4ca727980b9a44545ded0042c7539beb4db)(supports-color@7.2.0):
+  boardgame.io@0.50.2(patch_hash=fea27dca4dad400644b391d754638ebc53ff32f5a6bec38ebead6d8b5c24009d)(supports-color@7.2.0):
     dependencies:
       '@koa/cors': 3.4.3
       '@koa/router': 10.1.1(supports-color@7.2.0)

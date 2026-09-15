@@ -43,6 +43,13 @@ export const TqsGame: Game<TqsGameState> = {
   maxPlayers: 10,
   disableUndo: true,
   deltaState: false,
+  events: {
+    endGame: false,
+    endTurn: false,
+    endPhase: false,
+    setStage: false,
+    setActivePlayers: false,
+  },
 
   setup: ({ ctx, random }, setupData) => {
     const data = setupData as { isOnline?: boolean };
@@ -64,18 +71,20 @@ export const TqsGame: Game<TqsGameState> = {
   moves: {
     startGame: authoritative(
       (
-        { G, random },
-        joinedPlayerIDs: string[],
-        autoSkipWuxie: boolean = true,
+        { G, ctx, playerID, random },
+        clientOptions?: any,
       ) => {
+        if (playerID !== "0") return INVALID_MOVE;
         if (G.status !== "waiting-room") return INVALID_MOVE;
-        if (joinedPlayerIDs.length < 4 || joinedPlayerIDs.length > 10)
+        if (ctx.numPlayers < 4 || ctx.numPlayers > 10)
           return INVALID_MOVE;
         const options: TqsSetupOptions = {
-          numPlayers: joinedPlayerIDs.length,
-          joinedPlayerIDs,
+          numPlayers: ctx.numPlayers,
+          joinedPlayerIDs: ctx.playOrder,
           roleVariant: "standard",
-          autoSkipWuxie,
+          autoSkipWuxie: clientOptions?.autoSkipWuxie ?? true,
+          lordExtraHp: clientOptions?.lordExtraHp,
+          turnTimeLimit: clientOptions?.turnTimeLimit,
         };
         const newState = createInitialState(options, shuffleFrom(random));
         Object.assign(G, newState);
@@ -121,13 +130,14 @@ export const TqsGame: Game<TqsGameState> = {
       true,
     ),
 
-    timeoutPrompt: authoritative(({ G, random }, promptID: number) => {
+    timeoutPrompt: authoritative(({ G, playerID, random }, promptID: number) => {
       const prompt = G.prompt;
       if (
         prompt &&
         prompt.id === promptID &&
         prompt.kind === "card-response" &&
-        prompt.reason === "nullification"
+        prompt.reason === "nullification" &&
+        playerID === prompt.responderID
       ) {
         answerCardPrompt(
           G,
@@ -139,7 +149,7 @@ export const TqsGame: Game<TqsGameState> = {
       } else {
         return INVALID_MOVE;
       }
-    }, true),
+    }),
 
     discardCards: authoritative(
       ({ G, playerID, random }, cardIDs: string[]) => {
@@ -148,47 +158,6 @@ export const TqsGame: Game<TqsGameState> = {
       },
       true,
     ),
-
-    // Sandbox Manual Overrides (For host / edge cases)
-    adminDrawCard: authoritative(
-      ({ G, random }, targetID: string, amount: number) => {
-        drawCards(G, targetID, amount, shuffleFrom(random));
-        writeLog(
-          G,
-          `[Sandbox] Ép bốc ${amount} lá cho người chơi ${targetID}.`,
-        );
-      },
-      true,
-    ),
-    adminSetHp: authoritative(({ G }, targetID: string, hp: number) => {
-      const player = G.players[targetID];
-      if (player) {
-        player.hp = Math.max(0, Math.min(hp, player.maxHP));
-        writeLog(G, `[Sandbox] Đặt máu của ${targetID} thành ${player.hp}.`);
-      }
-    }, true),
-    adminDiscard: authoritative(({ G }, targetID: string, cardID: string) => {
-      const player = G.players[targetID];
-      if (!player) return;
-      const handIndex = player.hand.indexOf(cardID);
-      if (handIndex !== -1) {
-        player.hand.splice(handIndex, 1);
-        G.discard.push(cardID);
-        writeLog(G, `[Sandbox] Vứt 1 lá bài trên tay của ${targetID}.`);
-      } else {
-        // Check equipment
-        for (const slot of Object.keys(player.equipment) as Array<
-          keyof typeof player.equipment
-        >) {
-          if (player.equipment[slot] === cardID) {
-            player.equipment[slot] = null as any;
-            G.discard.push(cardID);
-            writeLog(G, `[Sandbox] Vứt trang bị của ${targetID}.`);
-            break;
-          }
-        }
-      }
-    }, true),
   },
 
   endIf: ({ G }) => G.winner ?? undefined,

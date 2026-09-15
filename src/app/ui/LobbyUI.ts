@@ -241,12 +241,14 @@ export class LobbyUI {
         const card = document.createElement("div");
         card.className = "room-card";
         card.innerHTML = `
-          <h3 class="room-title">${roomName}</h3>
+          <h3 class="room-title"></h3>
           <div class="room-meta">
             <span>Chỗ trống: ${emptySeats}/${match.players.length}</span>
           </div>
           ${hasPassword ? '<div class="room-private-icon">🔒</div>' : ""}
         `;
+        const titleEl = card.querySelector(".room-title");
+        if (titleEl) titleEl.textContent = roomName;
 
         card.addEventListener("click", () => {
           if (hasPassword) {

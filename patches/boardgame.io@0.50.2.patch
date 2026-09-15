@@ -1,7 +1,16 @@
 diff --git a/dist/boardgameio.es.js b/dist/boardgameio.es.js
-index d6bda465802ac8ca2b2c8e2ac21fd3341bdb3095..34e697ffff0d50d8933fb4add0f69175417900e3 100644
+index d6bda465802ac8ca2b2c8e2ac21fd3341bdb3095..63d9cb6ccd785ca826db020ec1aefc2ab7860459 100644
 --- a/dist/boardgameio.es.js	
 +++ b/dist/boardgameio.es.js	
+@@ -2526,7 +2526,7 @@ function Flow({ moves, phases, endIf, onEnd, turn, events, plugins, }) {
+         state = { ...state, ctx: { ...state.ctx, gameover: arg } };
+         // Run game end hook.
+         const G = wrapped.onEnd(state);
+-        return { ...state, G };
++        const res = { ...state, G }; if (res.plugins && res.plugins.random && res.plugins.random.data) { res.plugins = { ...res.plugins, random: { ...res.plugins.random, data: undefined } }; } return res;
+     }
+     function EndPhase(state, { arg, next, turn: initialTurn, automatic }) {
+         // End the turn first.
 @@ -13888,6 +13888,7 @@ const getFilterPlayerView = (game) => (playerID, payload) => {
          case 'sync': {
              const [matchID, syncInfo] = payload.args;
@@ -11,9 +20,18 @@ index d6bda465802ac8ca2b2c8e2ac21fd3341bdb3095..34e697ffff0d50d8933fb4add0f69175
              const newSyncInfo = {
                  ...syncInfo,
 diff --git a/dist/boardgameio.js b/dist/boardgameio.js
-index deea92d5649d7b6af12b0eaeb1fa67d342435f29..f4a8d16946da5b7b1f1adb45298e9bfd1bf6e7a5 100644
+index deea92d5649d7b6af12b0eaeb1fa67d342435f29..464b595d2574bc3cef56d970dc51d63fbeda3f11 100644
 --- a/dist/boardgameio.js	
 +++ b/dist/boardgameio.js	
+@@ -2533,7 +2533,7 @@ function Flow({ moves, phases, endIf, onEnd, turn, events, plugins, }) {
+         state = { ...state, ctx: { ...state.ctx, gameover: arg } };
+         // Run game end hook.
+         const G = wrapped.onEnd(state);
+-        return { ...state, G };
++        const res = { ...state, G }; if (res.plugins && res.plugins.random && res.plugins.random.data) { res.plugins = { ...res.plugins, random: { ...res.plugins.random, data: undefined } }; } return res;
+     }
+     function EndPhase(state, { arg, next, turn: initialTurn, automatic }) {
+         // End the turn first.
 @@ -13895,6 +13895,7 @@ const getFilterPlayerView = (game) => (playerID, payload) => {
          case 'sync': {
              const [matchID, syncInfo] = payload.args;
