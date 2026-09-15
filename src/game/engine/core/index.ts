@@ -632,8 +632,12 @@ function validateTargets(
         hasSkill(G, sourceID, "qi-cai"))
     );
   if (name === "dismantle")
-    return !hasSkill(G, targetID, "qian-xun") && hasZoneCard(G, targetID);
-  if (name === "indulgence") return !hasDelayed(G, targetID, "indulgence");
+    return hasZoneCard(G, targetID);
+  if (name === "indulgence")
+    return (
+      !hasSkill(G, targetID, "qian-xun") &&
+      !hasDelayed(G, targetID, "indulgence")
+    );
   if (name === "duel")
     return !(
       hasSkill(G, targetID, "kong-cheng") &&
