@@ -19,23 +19,26 @@ export function createPlayerView(
         playerID === G.lordID ||
         G.status === "playing" ||
         G.status === "ended";
+      
+      const { role, generalID, hand, ...rest } = player;
+
       return [
         playerID,
         {
-          ...player,
+          ...rest,
+          hand: isViewer ? [...hand] : hand.map(() => "hidden"),
           role:
             isViewer || player.roleRevealed || G.status === "ended"
-              ? player.role
+              ? role
               : null,
-          generalID: canViewGeneral ? player.generalID : null,
-          generalSelected: player.generalID !== null,
+          generalID: canViewGeneral ? generalID : null,
+          generalSelected: generalID !== null,
           generalCandidates: canViewCandidates
             ? [...player.generalCandidates]
             : [],
           activeSkillIDs: canViewGeneral ? [...player.activeSkillIDs] : [],
           maxHP: canViewGeneral ? player.maxHP : 0,
           hp: canViewGeneral ? player.hp : 0,
-          hand: isViewer ? [...player.hand] : player.hand.map(() => "hidden"),
           equipment: { ...player.equipment },
           judgement: [...player.judgement],
         },
@@ -43,11 +46,13 @@ export function createPlayerView(
     }),
   );
 
+  const { deck, ...G_rest } = G;
+
   return {
-    ...G,
+    ...G_rest,
     effectStack: [],
     players,
-    deck: G.deck.map(() => "hidden"),
+    deckSize: deck.length,
     discard: [...G.discard],
     processing: hidesGuanXingCards
       ? G.processing.map(() => "hidden")

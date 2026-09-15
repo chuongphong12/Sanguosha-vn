@@ -623,14 +623,14 @@ export class MainScreen extends Container {
       detail = `${G.seatOrder.length} người chơi · Standard 2013 · 108 lá bài`;
     } else if (G.status === "ended") {
       status = G.winner?.reason ?? "Ván đấu kết thúc.";
-      detail = `Chồng Bài Rút: ${G.deck.length} · Chồng Bài Bỏ: ${G.discard.length}`;
+      detail = `Chồng Bài Rút: ${G.deckSize} · Chồng Bài Bỏ: ${G.discard.length}`;
     } else if (G.prompt) {
       const responder = `P${G.players[G.prompt.responderID].seat + 1}`;
       status = this.promptStatus(G, responder);
-      detail = `Chồng Bài Rút: ${G.deck.length} · Chồng Bài Bỏ: ${G.discard.length}`;
+      detail = `Chồng Bài Rút: ${G.deckSize} · Chồng Bài Bỏ: ${G.discard.length}`;
     } else {
       status = `Lượt ${G.turn.number} · Giai Đoạn ${STEP_NAMES[G.turn.step]} · ${this.generalName(G, G.turn.activePlayerID)}`;
-      detail = `Chồng Bài Rút: ${G.deck.length} · Chồng Bài Bỏ: ${G.discard.length}`;
+      detail = `Chồng Bài Rút: ${G.deckSize} · Chồng Bài Bỏ: ${G.discard.length}`;
     }
 
     this.addText(

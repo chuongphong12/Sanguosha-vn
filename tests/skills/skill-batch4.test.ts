@@ -106,13 +106,6 @@ describe("loss and draw-replacement skills (batch 4)", () => {
       { cardID: slashID, targetIDs: [targetID] },
       identityShuffle,
     );
-    answerCardPrompt(
-      G,
-      targetID,
-      G.prompt!.id,
-      { kind: "pass" },
-      identityShuffle,
-    );
     expect(G.prompt).toMatchObject({
       reason: "lian-ying",
       responderID: sourceID,
@@ -125,6 +118,18 @@ describe("loss and draw-replacement skills (batch 4)", () => {
       identityShuffle,
     );
     expect(G.players[sourceID].hand).toHaveLength(1);
+    
+    expect(G.prompt).toMatchObject({
+      reason: "slash",
+      responderID: targetID,
+    });
+    answerCardPrompt(
+      G,
+      targetID,
+      G.prompt!.id,
+      { kind: "pass" },
+      identityShuffle,
+    );
     expect(G.prompt).toBeNull();
   });
 

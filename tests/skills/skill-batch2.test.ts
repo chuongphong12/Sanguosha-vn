@@ -154,7 +154,11 @@ describe("card conversion skills (batch 2)", () => {
     const targetID = G.seatOrder[1];
     assignGeneral(G, targetID, "zhen-ji");
     const slashID = giveCard(G, sourceID, "slash");
-    const equipmentCardID = giveCard(G, targetID, "crossbow");
+    const equipmentCardID = givePhysicalCard(
+      G,
+      targetID,
+      (c) => c.definitionID === "crossbow" && (c.suit === "spade" || c.suit === "club"),
+    );
     const hp = G.players[targetID].hp;
 
     declareCardUse(

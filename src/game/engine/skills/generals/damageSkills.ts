@@ -1,12 +1,12 @@
 // @ts-nocheck
-import { SkillDefinition } from "../SkillRegistry";
+import { SkillDefinition } from "../../SkillRegistry";
 import {
   TqsGameState,
   GameEffect,
   PlayerID,
   SkillTriggerEffect,
-} from "../../model";
-import { drawCards, writeLog } from "../../rules";
+} from "../../../types";
+import { drawCards, writeLog } from "../../../rules";
 import {
   removeZoneCard,
   playerName,
@@ -14,7 +14,8 @@ import {
   takeTopCard,
   hasZoneCard,
   moveSelectedCard,
-} from "../../cardEngine";
+  hasSkill,
+} from "../../../cardEngine";
 
 export const yiJiSkill: SkillDefinition = {
   id: "yi-ji",
@@ -337,6 +338,7 @@ export const gangLieSkill: SkillDefinition = {
           targetID: sourceID,
           amount: 1,
           type: "normal",
+          stage: "apply",
         });
         return;
       }

@@ -1,9 +1,9 @@
 // @ts-nocheck
-import { SkillDefinition } from "../SkillRegistry";
+import { SkillDefinition } from "../../SkillRegistry";
 import { SkillTriggerEffect } from "../../model";
-import { playerName } from "../../cardEngine";
-import { writeLog, drawCards } from "../../rules";
-import { hasSkill } from "../../cardEngine";
+import { playerName } from "../../../cardEngine";
+import { writeLog, drawCards } from "../../../rules";
+import { hasSkill } from "../../../cardEngine";
 
 export const tuXiSkill: SkillDefinition = {
   id: "tu-xi",

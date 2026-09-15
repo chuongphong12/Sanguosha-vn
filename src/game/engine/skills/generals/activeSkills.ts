@@ -1,12 +1,12 @@
-import { SkillDefinition } from "../SkillRegistry";
+import { SkillDefinition } from "../../SkillRegistry";
 import {
   removeHandCard,
   playerName,
   damageEffect,
   markSkillUsed,
   resolveCardGame,
-} from "../../cardEngine";
-import { writeLog } from "../../rules";
+} from "../../../cardEngine";
+import { writeLog } from "../../../rules";
 
 export const fanJianSkill: SkillDefinition = {
   id: "fan-jian",

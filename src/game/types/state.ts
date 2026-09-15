@@ -73,10 +73,8 @@ export interface TqsGameState {
 
 export interface PlayerViewPlayer extends Omit<
   PlayerState,
-  "role" | "generalID" | "generalCandidates" | "hand"
+  "role" | "generalID" | "generalCandidates"
 > {
-  hand: string[];
-  handSize: number;
   role: Role | null;
   generalID: string | null;
   generalSelected: boolean;

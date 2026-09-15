@@ -4,8 +4,10 @@ import { answerCardPrompt, declareCardUse } from "../../src/game/cardEngine";
 import { GENERALS_BY_ID, SKILLS } from "../../src/game/catalog/generals";
 import type { PlayerID, TqsGameState } from "../../src/game/model";
 import {
+  answerNullificationChain,
   createStartedGame,
   giveCard,
+  givePhysicalCard,
   identityShuffle,
   resetHands,
 } from "../helpers/game";
@@ -32,9 +34,12 @@ describe("Bug fixes", () => {
     // Give attacker a slash
     const slashCard = giveCard(G, zhenJiID, "slash");
 
-    // Give Zhen Ji a black non-equipment card, e.g., a black slash or dismantle (spades/clubs)
-    // We'll give a spade dismantle (black)
-    const dismantleCard = giveCard(G, targetID, "dismantle");
+    // We'll give a black dismantle (black)
+    const dismantleCard = givePhysicalCard(
+      G,
+      targetID,
+      (c) => c.definitionID === "dismantle" && (c.suit === "spade" || c.suit === "club"),
+    );
 
     // Attacker uses slash on Zhen Ji
     expect(
@@ -48,7 +53,7 @@ describe("Bug fixes", () => {
 
     // Zhen Ji is prompted for a Dodge
     expect(G.prompt).toMatchObject({
-      playerID: targetID,
+      responderID: targetID,
       reason: "slash",
       kind: "card-response",
     });
@@ -58,7 +63,7 @@ describe("Bug fixes", () => {
       G,
       targetID,
       G.prompt!.id,
-      { kind: "play-card", cardID: dismantleCard },
+      { kind: "card", cardID: dismantleCard },
       identityShuffle,
     );
 
@@ -74,7 +79,11 @@ describe("Bug fixes", () => {
     assignGeneral(G, ganNingID, "gan-ning");
 
     // Give Gan Ning a black card, e.g., a black slash
-    const blackCard = giveCard(G, ganNingID, "slash");
+    const blackCard = givePhysicalCard(
+      G,
+      ganNingID,
+      (c) => c.definitionID === "slash" && (c.suit === "spade" || c.suit === "club"),
+    );
 
     // Give target a card so it can be dismantled
     const targetCard = giveCard(G, targetID, "peach");
@@ -97,10 +106,11 @@ describe("Bug fixes", () => {
     // Check if the target is prompted to drop a card or we drop it for them
     // Depending on dismantle implementation, if no prompt, target just loses the card
     // Wait, dismantle prompts the user to select which card of target to drop
+    answerNullificationChain(G, {});
     expect(G.prompt).toMatchObject({
-      playerID: ganNingID,
+      responderID: ganNingID,
       reason: "dismantle",
-      kind: "choose-player-card",
+      kind: "select-cards",
     });
   });
 });
