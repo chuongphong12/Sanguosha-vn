@@ -98,40 +98,50 @@ export class MainScreen extends Container {
   private mainBundleLoaded = false;
   private isAwaitingBundle = false;
   private autoSkipWuxie = true;
-  private rolePopupDismissed = false;\n
+  private rolePopupDismissed = false;
+
   private rolePopupContainer?: PIXI.Container;
   private showRolePopup(role: string) {
     if (this.rolePopupContainer) return;
     const popup = new PIXI.Container();
-    
+
     const overlay = new PIXI.Graphics();
-    overlay.rect(0, 0, this.viewportWidth, this.viewportHeight).fill({ color: 0x000000, alpha: 0.85 });
-    overlay.eventMode = 'static';
-    overlay.cursor = 'pointer';
-    
+    overlay
+      .rect(0, 0, this.viewportWidth, this.viewportHeight)
+      .fill({ color: 0x000000, alpha: 0.85 });
+    overlay.eventMode = "static";
+    overlay.cursor = "pointer";
+
     const roleNames: Record<string, string> = {
-      'chu_cong': 'CHỦ CÔNG',
-      'trung_than': 'TRUNG THẦN',
-      'phan_tac': 'PHẢN TẶC',
-      'noi_gian': 'NỘI GIAN'
+      chu_cong: "CHỦ CÔNG",
+      trung_than: "TRUNG THẦN",
+      phan_tac: "PHẢN TẶC",
+      noi_gian: "NỘI GIAN",
     };
-    
+
     const label = new PIXI.Text({
-      text: 'Thân phận của bạn là:\n\n' + (roleNames[role] || role.toUpperCase()),
+      text:
+        "Thân phận của bạn là:\n\n" + (roleNames[role] || role.toUpperCase()),
       style: {
-        fontFamily: 'Noto Serif',
+        fontFamily: "Noto Serif",
         fontSize: 48,
-        fontWeight: 'bold',
-        fill: { type: 'linear', colorStops: [{ offset: 0, color: '#d4af37' }, { offset: 1, color: '#aa801a' }] },
-        align: 'center',
-        stroke: { color: 0x1a1a1a, width: 4 }
-      }
+        fontWeight: "bold",
+        fill: {
+          type: "linear",
+          colorStops: [
+            { offset: 0, color: "#d4af37" },
+            { offset: 1, color: "#aa801a" },
+          ],
+        },
+        align: "center",
+        stroke: { color: 0x1a1a1a, width: 4 },
+      },
     });
     label.anchor.set(0.5);
     label.position.set(this.viewportWidth / 2, this.viewportHeight / 2);
-    
+
     popup.addChild(overlay, label);
-    
+
     // Auto dismiss after 3.5s or on click
     const dismiss = () => {
       if (this.rolePopupContainer && !this.rolePopupContainer.destroyed) {
@@ -140,9 +150,9 @@ export class MainScreen extends Container {
         this.render();
       }
     };
-    overlay.on('pointerdown', dismiss);
+    overlay.on("pointerdown", dismiss);
     setTimeout(dismiss, 3500);
-    
+
     this.addChild(popup);
     this.rolePopupContainer = popup;
   }
@@ -188,7 +198,10 @@ export class MainScreen extends Container {
       this.lobbyPollInterval = window.setInterval(async () => {
         if (this.state?.G.status === "waiting-room") {
           try {
-            const matchInfo = await lobbyClient.getMatch("tam-quoc-sat-standard-2013", config.matchID!);
+            const matchInfo = await lobbyClient.getMatch(
+              "tam-quoc-sat-standard-2013",
+              config.matchID!,
+            );
             if (this.state) {
               this.state.matchData = matchInfo.players as any;
               this.render();
@@ -366,23 +379,37 @@ export class MainScreen extends Container {
   }
   private drawWaitingRoom(): void {
     const viewerID = this.match!.currentViewerID;
-    
+
     // Add cinematic background over the default one
-    this.addBackgroundTexture("bg.jpg", this.viewportWidth, this.viewportHeight, 0.5);
+    this.addBackgroundTexture(
+      "bg.jpg",
+      this.viewportWidth,
+      this.viewportHeight,
+      0.5,
+    );
 
     // Header
-    this.addText("SẢNH CHỜ", this.viewportWidth / 2, 60, 42, THEME.colors.gold, 0.5, "center");
+    this.addText(
+      "SẢNH CHỜ",
+      this.viewportWidth / 2,
+      60,
+      42,
+      THEME.colors.gold,
+      0.5,
+      "center",
+    );
 
     const leftCenterX = this.viewportWidth / 2 - 250;
     const rightCenterX = this.viewportWidth / 2 + 250;
-    
+
     interface MatchPlayer {
       id: number;
       name?: string;
     }
     let joinedPlayers: MatchPlayer[] = [];
     if (this.match!.isRemote) {
-      joinedPlayers = (this.state!.matchData as MatchPlayer[])?.filter((p) => p.name) || [];
+      joinedPlayers =
+        (this.state!.matchData as MatchPlayer[])?.filter((p) => p.name) || [];
     } else {
       const numPlayers = this.match!.playerIDs.length;
       for (let i = 0; i < numPlayers; i++) {
@@ -391,11 +418,22 @@ export class MainScreen extends Container {
     }
     const joinedPlayerIDs = joinedPlayers.map((p) => String(p.id));
 
-    const actualHostID = joinedPlayerIDs.length > 0 ? String(Math.min(...joinedPlayerIDs.map(Number))) : "0";
+    const actualHostID =
+      joinedPlayerIDs.length > 0
+        ? String(Math.min(...joinedPlayerIDs.map(Number)))
+        : "0";
     const amIHost = viewerID === actualHostID;
 
     // LEFT PANEL: Player List
-    this.addText(`NGƯỜI CHƠI (${joinedPlayers.length}/${amIHost ? this.targetNumPlayers : 10})`, leftCenterX, 130, 22, THEME.colors.gold, 0.5, "center");
+    this.addText(
+      `NGƯỜI CHƠI (${joinedPlayers.length}/${amIHost ? this.targetNumPlayers : 10})`,
+      leftCenterX,
+      130,
+      22,
+      THEME.colors.gold,
+      0.5,
+      "center",
+    );
 
     const bgList = new Graphics()
       .rect(leftCenterX - 180, 160, 360, 470)
@@ -408,37 +446,70 @@ export class MainScreen extends Container {
       const y = 175 + i * 44;
       const centerY = y + 19;
       const p = joinedPlayers[i];
-      
+
       const slotBg = new Graphics()
         .rect(leftCenterX - 160, y, 320, 38)
         .fill({ color: p ? 0x222222 : 0x111111, alpha: 0.8 })
         .stroke({ color: THEME.colors.gold, width: 1, alpha: 0.5 });
       this.content.addChild(slotBg);
 
-      const numTxt = this.addText(`${i + 1}`, leftCenterX - 145, centerY, 18, THEME.colors.gold, 0, "left");
+      const numTxt = this.addText(
+        `${i + 1}`,
+        leftCenterX - 145,
+        centerY,
+        18,
+        THEME.colors.gold,
+        0,
+        "left",
+      );
       numTxt.anchor.set(0, 0.5);
 
       if (p) {
         const isHost = String(p.id) === actualHostID;
         const isMe = String(p.id) === viewerID;
         const color = isMe ? THEME.colors.gold : THEME.colors.paper;
-        
+
         let displayName = p.name || "Khách";
         if (isHost) displayName += " (Chủ phòng)";
-        
-        const nameTxt = this.addText(displayName, leftCenterX - 110, centerY, 18, color, 0, "left", 0, 200);
+
+        const nameTxt = this.addText(
+          displayName,
+          leftCenterX - 110,
+          centerY,
+          18,
+          color,
+          0,
+          "left",
+          0,
+          200,
+        );
         nameTxt.anchor.set(0, 0.5);
 
-        const dot = new Graphics().circle(leftCenterX + 130, centerY, 6).fill(0x00FF00);
+        const dot = new Graphics()
+          .circle(leftCenterX + 130, centerY, 6)
+          .fill(0x00ff00);
         this.content.addChild(dot);
       } else {
-        const emptyTxt = this.addText("Open Slot", leftCenterX - 110, centerY, 18, 0x555555, 0, "left");
+        const emptyTxt = this.addText(
+          "Open Slot",
+          leftCenterX - 110,
+          centerY,
+          18,
+          0x555555,
+          0,
+          "left",
+        );
         emptyTxt.anchor.set(0, 0.5);
       }
     }
 
     // Auto-start logic
-    if (amIHost && this.autoStartWhenFull && joinedPlayers.length >= this.targetNumPlayers && !this.startingMatch) {
+    if (
+      amIHost &&
+      this.autoStartWhenFull &&
+      joinedPlayers.length >= this.targetNumPlayers &&
+      !this.startingMatch
+    ) {
       this.startingMatch = true;
       this.match!.move("startGame", {
         autoSkipWuxie: this.autoSkipWuxie,
@@ -449,7 +520,15 @@ export class MainScreen extends Container {
     }
 
     // RIGHT PANEL: Game Settings
-    this.addText("TÙY CHỈNH GAME", rightCenterX, 130, 22, THEME.colors.gold, 0.5, "center");
+    this.addText(
+      "TÙY CHỈNH GAME",
+      rightCenterX,
+      130,
+      22,
+      THEME.colors.gold,
+      0.5,
+      "center",
+    );
     const bgSettings = new Graphics()
       .rect(rightCenterX - 180, 160, 360, 470)
       .fill({ color: THEME.colors.panelBg, alpha: 0.85 })
@@ -458,58 +537,121 @@ export class MainScreen extends Container {
 
     if (amIHost) {
       let y = 190;
-      
-      this.addButton(`Số Người Chơi: ${this.targetNumPlayers}`, rightCenterX, y, 320, 36, () => {
-        const options = [4, 5, 6, 8, 10];
-        const idx = options.indexOf(this.targetNumPlayers);
-        this.targetNumPlayers = options[(idx + 1) % options.length];
-        this.render();
-      }, THEME.colors.ink, THEME.colors.paper);
+
+      this.addButton(
+        `Số Người Chơi: ${this.targetNumPlayers}`,
+        rightCenterX,
+        y,
+        320,
+        36,
+        () => {
+          const options = [4, 5, 6, 8, 10];
+          const idx = options.indexOf(this.targetNumPlayers);
+          this.targetNumPlayers = options[(idx + 1) % options.length];
+          this.render();
+        },
+        THEME.colors.ink,
+        THEME.colors.paper,
+      );
       y += 50;
 
-      this.addButton(`Tự Bắt Đầu: ${this.autoStartWhenFull ? "BẬT" : "TẮT"}`, rightCenterX, y, 320, 36, () => {
-        this.autoStartWhenFull = !this.autoStartWhenFull;
-        this.render();
-      }, this.autoStartWhenFull ? THEME.colors.gold : THEME.colors.ink, THEME.colors.paper);
+      this.addButton(
+        `Tự Bắt Đầu: ${this.autoStartWhenFull ? "BẬT" : "TẮT"}`,
+        rightCenterX,
+        y,
+        320,
+        36,
+        () => {
+          this.autoStartWhenFull = !this.autoStartWhenFull;
+          this.render();
+        },
+        this.autoStartWhenFull ? THEME.colors.gold : THEME.colors.ink,
+        THEME.colors.paper,
+      );
       y += 50;
 
-      this.addButton(`Vô Giải Khả Kích: ${this.autoSkipWuxie ? "Tự Động" : "Thủ Công"}`, rightCenterX, y, 320, 36, () => {
-        this.autoSkipWuxie = !this.autoSkipWuxie;
-        this.render();
-      }, this.autoSkipWuxie ? THEME.colors.gold : THEME.colors.ink, THEME.colors.paper);
+      this.addButton(
+        `Vô Giải Khả Kích: ${this.autoSkipWuxie ? "Tự Động" : "Thủ Công"}`,
+        rightCenterX,
+        y,
+        320,
+        36,
+        () => {
+          this.autoSkipWuxie = !this.autoSkipWuxie;
+          this.render();
+        },
+        this.autoSkipWuxie ? THEME.colors.gold : THEME.colors.ink,
+        THEME.colors.paper,
+      );
       y += 50;
 
-      this.addButton(`Máu Chủ Công: ${this.lordExtraHp > 0 ? "+1" : "Giữ Nguyên"}`, rightCenterX, y, 320, 36, () => {
-        this.lordExtraHp = this.lordExtraHp === 1 ? 0 : 1;
-        this.render();
-      }, this.lordExtraHp > 0 ? THEME.colors.gold : THEME.colors.ink, THEME.colors.paper);
+      this.addButton(
+        `Máu Chủ Công: ${this.lordExtraHp > 0 ? "+1" : "Giữ Nguyên"}`,
+        rightCenterX,
+        y,
+        320,
+        36,
+        () => {
+          this.lordExtraHp = this.lordExtraHp === 1 ? 0 : 1;
+          this.render();
+        },
+        this.lordExtraHp > 0 ? THEME.colors.gold : THEME.colors.ink,
+        THEME.colors.paper,
+      );
       y += 50;
 
       let timeLimitStr = "Vô Hạn";
       if (this.turnTimeLimit === 15) timeLimitStr = "15 Giây";
       if (this.turnTimeLimit === 30) timeLimitStr = "30 Giây";
-      this.addButton(`Thời Gian Lượt: ${timeLimitStr}`, rightCenterX, y, 320, 36, () => {
-        if (this.turnTimeLimit === null) this.turnTimeLimit = 30;
-        else if (this.turnTimeLimit === 30) this.turnTimeLimit = 15;
-        else this.turnTimeLimit = null;
-        this.render();
-      }, this.turnTimeLimit !== null ? THEME.colors.gold : THEME.colors.ink, THEME.colors.paper);
-      
+      this.addButton(
+        `Thời Gian Lượt: ${timeLimitStr}`,
+        rightCenterX,
+        y,
+        320,
+        36,
+        () => {
+          if (this.turnTimeLimit === null) this.turnTimeLimit = 30;
+          else if (this.turnTimeLimit === 30) this.turnTimeLimit = 15;
+          else this.turnTimeLimit = null;
+          this.render();
+        },
+        this.turnTimeLimit !== null ? THEME.colors.gold : THEME.colors.ink,
+        THEME.colors.paper,
+      );
+
       y += 200; // Push to bottom of panel
       const canStart = joinedPlayers.length >= 4;
-      this.addButton("Bắt Đầu Ngay", rightCenterX, y, 280, 50, () => {
-        if (canStart) {
-          this.match!.move("startGame", {
-            autoSkipWuxie: this.autoSkipWuxie,
-            lordExtraHp: this.lordExtraHp,
-            turnTimeLimit: this.turnTimeLimit,
-          });
-        }
-      }, canStart ? THEME.colors.red : THEME.colors.ink, THEME.colors.gold, !canStart, { fontSize: 24, fontWeight: "700" });
+      this.addButton(
+        "Bắt Đầu Ngay",
+        rightCenterX,
+        y,
+        280,
+        50,
+        () => {
+          if (canStart) {
+            this.match!.move("startGame", {
+              autoSkipWuxie: this.autoSkipWuxie,
+              lordExtraHp: this.lordExtraHp,
+              turnTimeLimit: this.turnTimeLimit,
+            });
+          }
+        },
+        canStart ? THEME.colors.red : THEME.colors.ink,
+        THEME.colors.gold,
+        !canStart,
+        { fontSize: 24, fontWeight: "700" },
+      );
     } else {
-      this.addText("Chủ phòng đang thiết lập...", rightCenterX, 250, 18, THEME.colors.muted, 0.5, "center");
+      this.addText(
+        "Chủ phòng đang thiết lập...",
+        rightCenterX,
+        250,
+        18,
+        THEME.colors.muted,
+        0.5,
+        "center",
+      );
     }
-
   }
 
   private drawBackground(): void {
@@ -797,63 +939,47 @@ export class MainScreen extends Container {
   }
 
   private drawLog(G: TqsPlayerViewState): void {
-    const height = 140;
-    const width = 360;
-    const y = this.viewportHeight - 250 - height - 32;
-    const x = (this.viewportWidth - width) / 2;
+    const width = 280;
+    const height = this.viewportHeight;
+    const x = this.viewportWidth - width;
+    const y = 0;
 
-    this.addPanel(x, y, width, height, 0x181411, THEME.colors.gold, 0.75);
+    this.addPanel(x, y, width, height, 0x181411, THEME.colors.gold, 0.85);
 
-    this.addText(
-      "DIỄN BIẾN",
-      x + 16,
-      y + 14,
-      13,
-      THEME.colors.gold,
-      0,
-      "left",
-      2,
-    );
-    const entries = G.log.slice(-5);
+    this.addText("DIỄN BIẾN", x + width / 2, y + 24, 18, THEME.colors.gold, 0.5, "center", 2);
+    
+    const entries = G.log.slice(-30); // show more logs
     if (entries.length === 0) {
-      this.addText(
-        "Chưa có diễn biến nào.",
-        x + 16,
-        y + 44,
-        13,
-        THEME.colors.muted,
-        0,
-        "left",
-      );
+      this.addText("Chưa có diễn biến nào.", x + 20, y + 60, 14, THEME.colors.muted, 0, "left");
       return;
     }
-    entries.forEach((entry, index) => {
-      this.addText(
-        entry.message,
-        x + 16,
-        y + 36 + index * 20,
-        12,
-        THEME.colors.paper,
-        0,
-        "left",
-        0,
-        width - 32,
-      );
-    });
+    
+    // Draw logs from bottom up so newest is at the bottom
+    const startY = height - 40;
+    let currentY = startY;
+    
+    for (let i = entries.length - 1; i >= 0; i--) {
+      const entry = entries[i];
+      const text = this.addText(entry.message, x + 20, currentY, 13, THEME.colors.paper, 0, "left", 0, width - 40);
+      currentY -= (text.height + 10);
+      if (currentY < 60) break; // Don't overflow title
+    }
   }
 
   private drawPrivateArea(G: TqsPlayerViewState): void {
     const viewerID = this.match!.currentViewerID;
     const player = G.players[viewerID];
     const top = this.viewportHeight - 250;
-    
+
     // Draw Hidden Role Card in bottom left
-    const roleCardTex = this.roleCardRevealed ? Assets.get(`system/roles/${player.role}.png`) : Assets.get(`system/roles/unknown.png`);
+    const roleCardTex = this.roleCardRevealed
+      ? Assets.get(`system/roles/${player.role}.png`)
+      : Assets.get(`system/roles/unknown.png`);
     if (roleCardTex) {
       const roleSprite = new Sprite(roleCardTex);
-      roleSprite.x = 20;
-      roleSprite.y = top;
-      roleSprite.scale.set(0.2);
+      roleSprite.scale.set(0.35); // Made larger
+      roleSprite.x = 30;
+      roleSprite.y = this.viewportHeight - roleSprite.height - 30; // Anchored to bottom left safely
       roleSprite.eventMode = "static";
       roleSprite.cursor = "pointer";
       roleSprite.on("pointerdown", () => {
@@ -861,8 +987,16 @@ export class MainScreen extends Container {
         this.render();
       });
       this.content.addChild(roleSprite);
-      
-      this.addText("Thân Phận (Bấm để xem)", 20 + roleSprite.width / 2, top - 20, 12, THEME.colors.muted, 0.5, "center");
+
+      this.addText(
+        "Thân Phận",
+        30 + roleSprite.width / 2,
+        roleSprite.y - 15,
+        16,
+        THEME.colors.gold,
+        0.5,
+        "center",
+      );
     }
 
     const requiredActorID = this.requiredActorID(G);
@@ -1107,7 +1241,7 @@ export class MainScreen extends Container {
 
       // Dynamic panel Y placement based on card size
       const currentCardW = Math.min(
-          180,
+        180,
         (this.viewportWidth - 60 - (candidates.length - 1) * gap) /
           candidates.length,
       );
