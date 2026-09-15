@@ -392,7 +392,7 @@ export class MainScreen extends Container {
     // Auto-start logic
     if (amIHost && this.autoStartWhenFull && joinedPlayers.length >= this.targetNumPlayers && !this.startingMatch) {
       this.startingMatch = true;
-      this.match!.move("startGame", joinedPlayerIDs, {
+      this.match!.move("startGame", {
         autoSkipWuxie: this.autoSkipWuxie,
         lordExtraHp: this.lordExtraHp,
         turnTimeLimit: this.turnTimeLimit,
@@ -451,7 +451,7 @@ export class MainScreen extends Container {
       const canStart = joinedPlayers.length >= 4;
       this.addButton("Bắt Đầu Ngay", rightCenterX, y, 280, 50, () => {
         if (canStart) {
-          this.match!.move("startGame", joinedPlayerIDs, {
+          this.match!.move("startGame", {
             autoSkipWuxie: this.autoSkipWuxie,
             lordExtraHp: this.lordExtraHp,
             turnTimeLimit: this.turnTimeLimit,
@@ -978,7 +978,7 @@ export class MainScreen extends Container {
     this.addText(
       "CHỌN VÕ TƯỚNG",
       centerX,
-      centerY - 260,
+      centerY - 220,
       36,
       THEME.colors.gold,
       0.5,
@@ -986,7 +986,7 @@ export class MainScreen extends Container {
     );
 
     const gap = 24;
-    let cardW = 280;
+    let cardW = 180;
     let totalW = candidates.length * cardW + (candidates.length - 1) * gap;
     if (totalW > this.viewportWidth - 60) {
       cardW =
@@ -1000,7 +1000,7 @@ export class MainScreen extends Container {
     candidates.forEach((generalID, index) => {
       const isSelected = this.selectedCandidateID === generalID;
       const x = startX + index * (cardW + gap);
-      const y = centerY - 20;
+      const y = centerY - 40;
 
       const cardContainer = new Container();
       // PlayerAvatar draws from top-left, so adjust position
@@ -1045,7 +1045,7 @@ export class MainScreen extends Container {
         text: skillsText.trim().normalize("NFC"),
         style: {
           fontFamily: GAME_FONT_FAMILY,
-          fontSize: 18,
+          fontSize: 16,
           fill: THEME.colors.white,
           align: "left",
           wordWrap: true,
@@ -1059,7 +1059,7 @@ export class MainScreen extends Container {
 
       // Dynamic panel Y placement based on card size
       const currentCardW = Math.min(
-        280,
+          180,
         (this.viewportWidth - 60 - (candidates.length - 1) * gap) /
           candidates.length,
       );

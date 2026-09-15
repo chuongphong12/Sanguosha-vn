@@ -1,4 +1,4 @@
-import { Container, NineSliceSprite, Texture } from "pixi.js";
+import { Container, Graphics } from "pixi.js";
 
 const defaultRoundedBoxOptions = {
   color: 0xffffff,
@@ -12,44 +12,26 @@ const defaultRoundedBoxOptions = {
 export type RoundedBoxOptions = typeof defaultRoundedBoxOptions;
 
 /**
- * Generic rounded box based on a nine-sliced sprite that can be resized freely.
+ * Generic rounded box based on PIXI Graphics that can be resized freely.
  */
 export class RoundedBox extends Container {
-  /** The rectangular area, that scales without distorting rounded corners */
-  private image: NineSliceSprite;
+  /** The rectangular area */
+  private image: Graphics;
   /** Optional shadow matching the box image, with y offest */
-  private shadow?: NineSliceSprite;
+  private shadow?: Graphics;
 
   constructor(options: Partial<RoundedBoxOptions> = {}) {
     super();
     const opts = { ...defaultRoundedBoxOptions, ...options };
-    this.image = new NineSliceSprite({
-      texture: Texture.from("rounded-rectangle.png"),
-      leftWidth: 34,
-      topHeight: 34,
-      rightWidth: 34,
-      bottomHeight: 34,
-      width: opts.width,
-      height: opts.height,
-      tint: opts.color,
-    });
-    this.image.x = -this.image.width * 0.5;
-    this.image.y = -this.image.height * 0.5;
+    this.image = new Graphics();
+    this.image.roundRect(-opts.width * 0.5, -opts.height * 0.5, opts.width, opts.height, 34);
+    this.image.fill(opts.color);
     this.addChild(this.image);
 
     if (opts.shadow) {
-      this.shadow = new NineSliceSprite({
-        texture: Texture.from("rounded-rectangle.png"),
-        leftWidth: 34,
-        topHeight: 34,
-        rightWidth: 34,
-        bottomHeight: 34,
-        width: opts.width,
-        height: opts.height,
-        tint: opts.shadowColor,
-      });
-      this.shadow.x = -this.shadow.width * 0.5;
-      this.shadow.y = -this.shadow.height * 0.5 + opts.shadowOffset;
+      this.shadow = new Graphics();
+      this.shadow.roundRect(-opts.width * 0.5, -opts.height * 0.5 + opts.shadowOffset, opts.width, opts.height, 34);
+      this.shadow.fill(opts.shadowColor);
       this.addChildAt(this.shadow, 0);
     }
   }
