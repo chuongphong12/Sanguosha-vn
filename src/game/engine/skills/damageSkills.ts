@@ -262,38 +262,86 @@ export const gangLieSkill: SkillDefinition = {
       return;
     }
 
-    const judgeCardID = takeTopCard(G, shuffle);
-    if (judgeCardID) {
-      const judgeCard = G.cards[judgeCardID];
+    if (!effect.judgeCardID) {
+      const judgeCardID = takeTopCard(G, shuffle);
+      if (!judgeCardID) {
+        G.effectStack.shift();
+        return;
+      }
+      effect.judgeCardID = judgeCardID;
       G.discard.push(judgeCardID);
+      const judgeCard = G.cards[judgeCardID];
       writeLog(
         G,
         `【Cương Liệt】 phán xét ${judgeCard.suit} ${judgeCard.rank}.`,
       );
 
-      if (judgeCard.suit !== "heart") {
-        const sourceID = effect.context.effect.sourceID;
-        const source = G.players[sourceID];
-        if (source.hand.length >= 2) {
-          G.prompt = {
-            id: G.nextResolutionID++,
-            effectID: effect.id,
-            kind: "select-cards",
-            responderID: sourceID,
-            reason: "gang-lie-discard",
-            ownerID: sourceID,
-            zones: ["hand"],
-            minimum: 2,
-            maximum: 2,
-            allowPass: false,
-          };
-          return;
-        }
-        G.effectStack.shift();
-        G.effectStack.unshift(damageEffect(G, effect.owner, sourceID));
+      const guiCaiUser = G.seatOrder.find(
+        (playerID) =>
+          G.players[playerID].alive &&
+          hasSkill(G, playerID, "gui-cai") &&
+          G.players[playerID].hand.length > 0,
+      );
+      if (guiCaiUser) {
+        G.prompt = {
+          id: G.nextResolutionID++,
+          effectID: effect.id,
+          kind: "option",
+          responderID: guiCaiUser,
+          reason: "gui-cai",
+          sourceID: guiCaiUser,
+          targetID: effect.owner,
+          choices: ["activate", "decline"],
+        };
         return;
       }
     }
+
+    const judgeCardID = effect.judgeCardID;
+    const judgeCard = G.cards[judgeCardID];
+
+    if (hasSkill(G, effect.owner, "tian-du")) {
+      const discardIndex = G.discard.indexOf(judgeCardID);
+      if (discardIndex >= 0) {
+        G.discard.splice(discardIndex, 1);
+        G.players[effect.owner].hand.push(judgeCardID);
+        writeLog(
+          G,
+          `${playerName(G, effect.owner)} dùng 【Thiên Đố】 nhận lá phán xét.`,
+        );
+      }
+    }
+
+    if (judgeCard.suit !== "heart") {
+      const sourceID = effect.context.effect.sourceID;
+      const source = G.players[sourceID];
+      if (source.hand.length >= 2) {
+        G.prompt = {
+          id: G.nextResolutionID++,
+          effectID: effect.id,
+          kind: "select-cards",
+          responderID: sourceID,
+          reason: "gang-lie-discard",
+          ownerID: sourceID,
+          zones: ["hand"],
+          minimum: 2,
+          maximum: 2,
+        };
+        return;
+      } else {
+        G.effectStack.shift();
+        G.effectStack.unshift({
+          id: G.nextResolutionID++,
+          kind: "damage",
+          sourceID: effect.owner,
+          targetID: sourceID,
+          amount: 1,
+          type: "normal",
+        });
+        return;
+      }
+    }
+
     G.effectStack.shift();
   },
   onAnswer: (G, baseEffect, answer, shuffle) => {

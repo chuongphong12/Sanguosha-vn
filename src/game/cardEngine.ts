@@ -1057,7 +1057,7 @@ function declareVirtualUse(
   G: TqsGameState,
   playerID: PlayerID,
   cardID: string,
-  as: "slash" | "snatch" | "indulgence",
+  as: "slash" | "snatch" | "dismantle" | "indulgence",
   targetIDs: PlayerID[],
   shuffle: Shuffle,
 ): boolean {
@@ -1198,7 +1198,7 @@ function disposeProcessing(G: TqsGameState): void {
   G.processing = [];
 }
 
-function killPlayer(
+export function killPlayer(
   G: TqsGameState,
   playerID: PlayerID,
   sourceID: PlayerID | null,
@@ -2086,21 +2086,100 @@ function finishGuanXing(
 function resolveLuoShen(
   G: TqsGameState,
   effect: Extract<GameEffect, { kind: "luo-shen" }>,
+  shuffle: Shuffle,
 ): void {
   if (!G.players[effect.ownerID].alive) {
     G.effectStack.shift();
     return;
   }
-  G.prompt = {
-    id: resolutionID(G),
-    effectID: effect.id,
-    kind: "option",
-    responderID: effect.ownerID,
-    reason: "luo-shen",
-    sourceID: effect.ownerID,
-    targetID: effect.ownerID,
-    choices: ["activate", "decline"],
-  };
+
+  if (effect.judgeCardID === undefined) {
+    G.prompt = {
+      id: resolutionID(G),
+      effectID: effect.id,
+      kind: "option",
+      responderID: effect.ownerID,
+      reason: "luo-shen",
+      sourceID: effect.ownerID,
+      targetID: effect.ownerID,
+      choices: ["activate", "decline"],
+    };
+    return;
+  }
+
+  if (effect.judgeCardID === "declined") {
+    G.effectStack.shift();
+    return;
+  }
+
+  if (effect.judgeCardID === null) {
+    const judgeCardID = takeTopCard(G, shuffle);
+    if (!judgeCardID) {
+      G.effectStack.shift();
+      return;
+    }
+    effect.judgeCardID = judgeCardID;
+    G.discard.push(judgeCardID);
+    const judgeCard = G.cards[judgeCardID];
+    writeLog(G, `【Lạc Thần】 phán xét ${judgeCard.suit} ${judgeCard.rank}.`);
+
+    const guiCaiUser = G.seatOrder.find(
+      (playerID) =>
+        G.players[playerID].alive &&
+        hasSkill(G, playerID, "gui-cai") &&
+        G.players[playerID].hand.length > 0,
+    );
+    if (guiCaiUser) {
+      G.prompt = {
+        id: resolutionID(G),
+        effectID: effect.id,
+        kind: "option",
+        responderID: guiCaiUser,
+        reason: "gui-cai",
+        sourceID: guiCaiUser,
+        targetID: effect.ownerID,
+        choices: ["activate", "decline"],
+      };
+      return;
+    }
+  }
+
+  const cardID = effect.judgeCardID!;
+  const card = G.cards[cardID];
+
+  if (hasSkill(G, effect.ownerID, "tian-du")) {
+    const discardIndex = G.discard.indexOf(cardID);
+    if (discardIndex >= 0) {
+      G.discard.splice(discardIndex, 1);
+      G.players[effect.ownerID].hand.push(cardID);
+      writeLog(
+        G,
+        `${playerName(G, effect.ownerID)} dùng 【Thiên Đố】 nhận lá phán xét.`,
+      );
+    }
+  }
+
+  if (cardColor(card) === "black") {
+    const discardIndex = G.discard.indexOf(cardID);
+    if (discardIndex >= 0) {
+      G.discard.splice(discardIndex, 1);
+      G.players[effect.ownerID].hand.push(cardID);
+    }
+    writeLog(
+      G,
+      `${playerName(G, effect.ownerID)} dùng 【Lạc Thần】 nhận một lá đen.`,
+    );
+
+    G.effectStack.shift();
+    G.effectStack.unshift({
+      id: resolutionID(G),
+      kind: "luo-shen",
+      ownerID: effect.ownerID,
+    });
+  } else {
+    writeLog(G, `【Lạc Thần】 phán xét lá đỏ, dừng lại.`);
+    G.effectStack.shift();
+  }
 }
 
 function resolveOptionalSkill(
@@ -2285,7 +2364,13 @@ export function resolveCardGame(G: TqsGameState, shuffle: Shuffle): void {
         resolveGuanXing(G, effect);
         break;
       case "luo-shen":
-        resolveLuoShen(G, effect);
+        resolveLuoShen(G, effect, shuffle);
+        break;
+      case "bagua-judgement":
+        resolveBaguaJudgement(G, effect, shuffle);
+        break;
+      case "tie-ji-judgement":
+        resolveTieJiJudgement(G, effect, shuffle);
         break;
       case "optional-skill":
         resolveOptionalSkill(G, effect);
@@ -2431,7 +2516,17 @@ function answerSlashPrompt(
   answer: PromptAnswer,
   shuffle: Shuffle,
 ): boolean {
-  if (answer.kind === "bagua") return resolveBagua(G, prompt, shuffle);
+  if (answer.kind === "bagua") {
+    if (!prompt.allowBagua) return false;
+    G.effectStack.unshift({
+      id: resolutionID(G),
+      kind: "bagua-judgement",
+      ownerID: prompt.responderID,
+      judgeCardID: null,
+    });
+    G.prompt = null;
+    return true;
+  }
   if (prompt.forbidCard && answer.kind === "card") return false;
   if (answer.kind === "pass") {
     effect.stage = "before-damage";
@@ -2552,7 +2647,17 @@ function answerRequiredResponse(
   answer: PromptAnswer,
   shuffle: Shuffle,
 ): boolean {
-  if (answer.kind === "bagua") return resolveBagua(G, prompt, shuffle);
+  if (answer.kind === "bagua") {
+    if (!prompt.allowBagua) return false;
+    G.effectStack.unshift({
+      id: resolutionID(G),
+      kind: "bagua-judgement",
+      ownerID: prompt.responderID,
+      judgeCardID: null,
+    });
+    G.prompt = null;
+    return true;
+  }
   if (answer.kind === "pass") {
     G.effectStack.shift();
     G.effectStack.unshift(
@@ -2757,16 +2862,15 @@ function answerSelectCards(
     return true;
   }
 
-  if (effect.kind === "resolve-delayed" && prompt.reason === "gui-cai") {
+  if (prompt.reason === "gui-cai") {
     const cardID = cardIDs[0];
     handToDiscard(G, prompt.ownerID, cardID);
-    effect.judgeCardID = cardID;
+    (effect as any).judgeCardID = cardID;
     writeLog(
       G,
       `${playerName(G, prompt.ownerID)} dùng 【Quỷ Tài】 thay lá phán xét.`,
     );
-    G.effectStack.shift();
-    applyJudgementResult(G, effect);
+    G.prompt = null;
     return true;
   }
   return false;
@@ -2968,28 +3072,15 @@ function answerOption(
     else effect.stage = "top";
     return true;
   }
-  if (effect.kind === "luo-shen") {
+  if (effect.kind === "luo-shen" && prompt.reason === "luo-shen") {
     if (answer.choice === "decline") {
-      G.effectStack.shift();
+      effect.judgeCardID = "declined";
+      G.prompt = null;
       return true;
     }
     if (answer.choice !== "activate") return false;
-    const cardID = takeTopCard(G, shuffle);
-    if (!cardID) {
-      G.effectStack.shift();
-      return true;
-    }
-    if (cardColor(G.cards[cardID]) === "black") {
-      G.players[effect.ownerID].hand.push(cardID);
-      writeLog(
-        G,
-        `${playerName(G, effect.ownerID)} dùng 【Lạc Thần】 nhận một lá đen.`,
-      );
-    } else {
-      G.discard.push(cardID);
-      G.effectStack.shift();
-      writeLog(G, `【Lạc Thần】 phán xét lá đỏ, dừng lại.`);
-    }
+    effect.judgeCardID = null;
+    G.prompt = null;
     return true;
   }
   if (effect.kind === "optional-skill") {
@@ -3028,80 +3119,19 @@ function answerOption(
     return true;
   }
   if (effect.kind === "slash" && prompt.reason === "tie-ji") {
-    if (answer.choice === "activate") {
-      const judgeCardID = takeTopCard(G, shuffle);
-      if (judgeCardID) {
-        const judgeCard = G.cards[judgeCardID];
-        G.discard.push(judgeCardID);
-        writeLog(
-          G,
-          `【Thiết Kỵ】 phán xét ${judgeCard.suit} ${judgeCard.rank}.`,
-        );
-        if (cardColor(judgeCard) === "red") {
-          effect.ignoreDodge = true;
-          writeLog(G, `【Thiết Kỵ】 khóa 【Thiểm】 của mục tiêu.`);
-        }
-      }
-      return true;
-    }
     if (answer.choice === "decline") return true;
-    return false;
-  }
-  if (effect.kind === "slash" && prompt.reason === "liu-li") {
     if (answer.choice === "activate") {
-      G.prompt = {
+      G.effectStack.unshift({
         id: resolutionID(G),
-        effectID: effect.id,
-        kind: "select-cards",
-        responderID: effect.use.targetIDs[effect.targetIndex],
-        reason: "liu-li",
-        ownerID: effect.use.targetIDs[effect.targetIndex],
-        zones: ["hand", "equipment"],
-        minimum: 1,
-        maximum: 1,
-        allowPass: false,
-      };
-      return true;
-    }
-    if (answer.choice === "decline") {
-      effect.stage = "dodge";
+        kind: "tie-ji-judgement",
+        ownerID: effect.use.sourceID,
+        slashTargetID: effect.use.targetIDs[effect.targetIndex],
+        judgeCardID: null,
+      });
+      G.prompt = null;
       return true;
     }
     return false;
-  }
-
-  return false;
-}
-
-function answerAllySummon(
-  G: TqsGameState,
-  effect: Extract<GameEffect, { kind: "ally-summon" }>,
-  prompt: CardResponsePrompt,
-  answer: PromptAnswer,
-): boolean {
-  if (answer.kind === "pass") {
-    effect.passedIDs.push(prompt.responderID);
-    return true;
-  }
-  if (
-    answer.kind === "card" &&
-    matchesResponse(G, prompt.responderID, answer.cardID, effect.response)
-  ) {
-    zoneToDiscard(G, prompt.responderID, answer.cardID);
-    G.effectStack.shift();
-    completeAllyResponse(G, effect);
-    return true;
-  }
-  if (
-    answer.kind === "serpent-spear" &&
-    effect.response === "slash" &&
-    canUseSerpentSpear(G, prompt.responderID, answer.cardIDs)
-  ) {
-    for (const cardID of answer.cardIDs)
-      handToDiscard(G, prompt.responderID, cardID);
-    G.effectStack.shift();
-    completeAllyResponse(G, effect);
-    return true;
   }
   return false;
 }
@@ -3543,4 +3573,192 @@ export function discardCardHand(
   G.turn.step = "end";
   resolveCardGame(G, shuffle);
   return true;
+}
+
+export function resolveBaguaJudgement(
+  G: TqsGameState,
+  effect: Extract<GameEffect, { kind: "bagua-judgement" }>,
+  shuffle: Shuffle,
+): void {
+  if (!effect.judgeCardID) {
+    const judgeCardID = takeTopCard(G, shuffle);
+    if (!judgeCardID) {
+      G.effectStack.shift();
+      return;
+    }
+    effect.judgeCardID = judgeCardID;
+    G.discard.push(judgeCardID);
+    const judgeCard = G.cards[judgeCardID];
+    writeLog(
+      G,
+      `【Bát Quái Trận】 phán xét ${judgeCard.suit} ${judgeCard.rank}.`,
+    );
+
+    const guiCaiUser = G.seatOrder.find(
+      (playerID) =>
+        G.players[playerID].alive &&
+        hasSkill(G, playerID, "gui-cai") &&
+        G.players[playerID].hand.length > 0,
+    );
+    if (guiCaiUser) {
+      G.prompt = {
+        id: resolutionID(G),
+        effectID: effect.id,
+        kind: "option",
+        responderID: guiCaiUser,
+        reason: "gui-cai",
+        sourceID: guiCaiUser,
+        targetID: effect.ownerID,
+        choices: ["activate", "decline"],
+      };
+      return;
+    }
+  }
+
+  const cardID = effect.judgeCardID;
+  const card = G.cards[cardID];
+  const success = cardColor(card) === "red";
+  writeLog(
+    G,
+    `【Bát Quái Trận】 phán xét ${success ? "đỏ, thành công" : "đen, thất bại"}.`,
+  );
+
+  if (hasSkill(G, effect.ownerID, "tian-du")) {
+    const discardIndex = G.discard.indexOf(cardID);
+    if (discardIndex >= 0) {
+      G.discard.splice(discardIndex, 1);
+      G.players[effect.ownerID].hand.push(cardID);
+      writeLog(
+        G,
+        `${playerName(G, effect.ownerID)} dùng 【Thiên Đố】 nhận lá phán xét.`,
+      );
+    }
+  }
+
+  G.effectStack.shift();
+  const slashEffect = G.effectStack[0];
+  if (slashEffect?.kind === "slash") {
+    slashEffect.baguaTried = true;
+    if (success) {
+      slashEffect.dodgesUsed += 1;
+    } else {
+      G.prompt = {
+        id: resolutionID(G),
+        effectID: slashEffect.id,
+        kind: "play-card",
+        responderID: effect.ownerID,
+        reason: "slash",
+        ownerID: effect.ownerID,
+        allowBagua: false,
+      };
+    }
+  } else if (slashEffect?.kind === "required-response") {
+    slashEffect.baguaTried = true;
+    if (success) {
+      G.effectStack.shift(); // remove required-response
+    } else {
+      G.prompt = {
+        id: resolutionID(G),
+        effectID: slashEffect.id,
+        kind: "play-card",
+        responderID: effect.ownerID,
+        reason: slashEffect.reason,
+        ownerID: effect.ownerID,
+        allowBagua: false,
+      };
+    }
+  }
+}
+
+export function resolveTieJiJudgement(
+  G: TqsGameState,
+  effect: Extract<GameEffect, { kind: "tie-ji-judgement" }>,
+  shuffle: Shuffle,
+): void {
+  if (!effect.judgeCardID) {
+    const judgeCardID = takeTopCard(G, shuffle);
+    if (!judgeCardID) {
+      G.effectStack.shift();
+      return;
+    }
+    effect.judgeCardID = judgeCardID;
+    G.discard.push(judgeCardID);
+    const judgeCard = G.cards[judgeCardID];
+    writeLog(G, `【Thiết Kỵ】 phán xét ${judgeCard.suit} ${judgeCard.rank}.`);
+
+    const guiCaiUser = G.seatOrder.find(
+      (playerID) =>
+        G.players[playerID].alive &&
+        hasSkill(G, playerID, "gui-cai") &&
+        G.players[playerID].hand.length > 0,
+    );
+    if (guiCaiUser) {
+      G.prompt = {
+        id: resolutionID(G),
+        effectID: effect.id,
+        kind: "option",
+        responderID: guiCaiUser,
+        reason: "gui-cai",
+        sourceID: guiCaiUser,
+        targetID: effect.ownerID,
+        choices: ["activate", "decline"],
+      };
+      return;
+    }
+  }
+
+  const cardID = effect.judgeCardID;
+  const card = G.cards[cardID];
+
+  if (hasSkill(G, effect.ownerID, "tian-du")) {
+    const discardIndex = G.discard.indexOf(cardID);
+    if (discardIndex >= 0) {
+      G.discard.splice(discardIndex, 1);
+      G.players[effect.ownerID].hand.push(cardID);
+      writeLog(
+        G,
+        `${playerName(G, effect.ownerID)} dùng 【Thiên Đố】 nhận lá phán xét.`,
+      );
+    }
+  }
+
+  G.effectStack.shift();
+  const slashEffect = G.effectStack[0];
+  if (slashEffect?.kind === "slash" && cardColor(card) === "red") {
+    slashEffect.ignoreDodge = true;
+    writeLog(G, `【Thiết Kỵ】 khóa 【Thiểm】 của mục tiêu.`);
+  }
+}
+
+export function answerAllySummon(
+  G: TqsGameState,
+  effect: Extract<GameEffect, { kind: "ally-summon" }>,
+  prompt: CardResponsePrompt,
+  answer: PromptAnswer,
+): boolean {
+  if (answer.kind === "pass") {
+    effect.passedIDs.push(prompt.responderID);
+    return true;
+  }
+  if (
+    answer.kind === "card" &&
+    matchesResponse(G, prompt.responderID, answer.cardID, effect.response)
+  ) {
+    zoneToDiscard(G, prompt.responderID, answer.cardID);
+    G.effectStack.shift();
+    completeAllyResponse(G, effect);
+    return true;
+  }
+  if (
+    answer.kind === "serpent-spear" &&
+    effect.response === "slash" &&
+    canUseSerpentSpear(G, prompt.responderID, answer.cardIDs)
+  ) {
+    for (const cardID of answer.cardIDs)
+      handToDiscard(G, prompt.responderID, cardID);
+    G.effectStack.shift();
+    completeAllyResponse(G, effect);
+    return true;
+  }
+  return false;
 }
