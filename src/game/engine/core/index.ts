@@ -1395,20 +1395,38 @@ function promptNullification(
   );
 }
 
-function resolveNullification(
-  G: TqsGameState,
-  effect: NullificationEffect,
-): void {
-  const excluded =
-    effect.nullificationCardIDs.length === 0 && effect.sourceID
-      ? [effect.sourceID]
-      : [];
-  if (aliveInActionOrder(G).every((playerID) => excluded.includes(playerID))) {
-    closeNullification(G, effect);
-    return;
+  function resolveNullification(
+    G: TqsGameState,
+    effect: NullificationEffect,
+  ): void {
+    const order = aliveInActionOrder(G);
+    const startIndex = order.indexOf(effect.sourceID ?? G.turn.activePlayerID);
+    const rotatedOrder = [...order.slice(startIndex), ...order.slice(0, startIndex)];
+    
+    const excluded = effect.nullificationCardIDs.length === 0 && effect.sourceID ? [effect.sourceID] : [];
+    
+    let nextPlayer = null;
+    for (const playerID of rotatedOrder) {
+      if (effect.passedPlayerIDs.includes(playerID) || excluded.includes(playerID)) continue;
+      
+      const hasWuxie = G.players[playerID].hand.some(cID => G.cards[cID].name === 'nullification');
+      if (G.config && G.config.autoSkipWuxie && !hasWuxie) {
+        effect.passedPlayerIDs.push(playerID);
+        continue;
+      }
+      
+      nextPlayer = playerID;
+      break;
+    }
+
+    if (!nextPlayer) {
+      closeNullification(G, effect);
+      return;
+    }
+    
+    effect.responderID = nextPlayer;
+    promptNullification(G, effect);
   }
-  promptNullification(G, effect);
-}
 
 function advanceSlashTarget(effect: SlashEffect): void {
   effect.targetIndex += 1;
