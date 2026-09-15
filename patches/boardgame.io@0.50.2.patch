@@ -1,0 +1,24 @@
+diff --git a/dist/boardgameio.es.js b/dist/boardgameio.es.js
+index d6bda465802ac8ca2b2c8e2ac21fd3341bdb3095..34e697ffff0d50d8933fb4add0f69175417900e3 100644
+--- a/dist/boardgameio.es.js	
++++ b/dist/boardgameio.es.js	
+@@ -13888,6 +13888,7 @@ const getFilterPlayerView = (game) => (playerID, payload) => {
+         case 'sync': {
+             const [matchID, syncInfo] = payload.args;
+             const filteredState = applyPlayerView(game, playerID, syncInfo.state);
++            const filteredInitialState = applyPlayerView(game, playerID, syncInfo.initialState);
+             const log = redactLog(syncInfo.log, playerID);
+             const newSyncInfo = {
+                 ...syncInfo,
+diff --git a/dist/boardgameio.js b/dist/boardgameio.js
+index deea92d5649d7b6af12b0eaeb1fa67d342435f29..f4a8d16946da5b7b1f1adb45298e9bfd1bf6e7a5 100644
+--- a/dist/boardgameio.js	
++++ b/dist/boardgameio.js	
+@@ -13895,6 +13895,7 @@ const getFilterPlayerView = (game) => (playerID, payload) => {
+         case 'sync': {
+             const [matchID, syncInfo] = payload.args;
+             const filteredState = applyPlayerView(game, playerID, syncInfo.state);
++            const filteredInitialState = applyPlayerView(game, playerID, syncInfo.initialState);
+             const log = redactLog(syncInfo.log, playerID);
+             const newSyncInfo = {
+                 ...syncInfo,
