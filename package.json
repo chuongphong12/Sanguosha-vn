@@ -25,7 +25,8 @@
     "serve": "tsx --env-file-if-exists=.env server/server.ts",
     "test": "vitest run --config vitest.config.ts",
     "test:watch": "vitest --config vitest.config.ts",
-    "check": "npm run lint && npm run typecheck && npm run test"
+    "check": "npm run lint && npm run typecheck && npm run test",
+    "postinstall": "patch-package"
   },
   "dependencies": {
     "@esotericsoftware/spine-pixi-v8": "^4.3.13",
