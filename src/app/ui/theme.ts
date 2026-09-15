@@ -15,10 +15,10 @@ export const THEME = {
     panelBg: 0x181411,
     popoverBg: 0x110c0a,
     factions: {
-      wei: 0x1a5fa8,
-      shu: 0xb33a2a,
-      wu: 0x2a8a3e,
-      qun: 0x8a8a3e,
+      wei: 0x1c4587,
+      shu: 0xa61c00,
+      wu: 0x38761d,
+      qun: 0xb8860b,
     },
   },
   spacing: {

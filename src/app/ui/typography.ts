@@ -1,3 +1,4 @@
+import { TextStyle } from 'pixi.js';
 import "./typography.css";
 
 export const GAME_FONT_FAMILY = "Noto Serif";
@@ -18,3 +19,11 @@ export async function loadGameFonts(): Promise<void> {
   ]);
   await document.fonts.ready;
 }
+
+export const TitleTextStyle = new TextStyle({
+  fontFamily: GAME_FONT_FAMILY,
+  fontWeight: 'bold',
+  fill: { type: 'linear', colorStops: [{ offset: 0, color: "#d4af37" }, { offset: 1, color: "#aa801a" }] },
+  stroke: { color: 0x1a1a1a, width: 3 },
+  dropShadow: { alpha: 0.5, blur: 2, color: 0x000000, distance: 2 }
+});
