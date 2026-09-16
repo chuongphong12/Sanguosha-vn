@@ -40,43 +40,7 @@ setEngine(engine);
   const stateCredentials = window.history.state?.credentials;
   const credentials = urlParams.get("credentials") || stateCredentials; // Fallback to URL in case of old links, but prefer state
 
-  if (inviteMatchID && !credentials) {
-    // If the room has password, user might fail, but let's just let LobbyUI handle join flow
-    LobbyUI.joinMatchProcess(
-      inviteMatchID,
-      null,
-      (
-        matchID: string,
-        playerID: string,
-        newCredentials?: string,
-        serverUrl?: string,
-      ) => {
-        // Pass sensitive info in state, keep only matchID in URL
-        window.history.replaceState(
-          { mode: "remote", playerID, credentials: newCredentials, serverUrl },
-          "",
-          `/?matchID=${matchID}`,
-        );
-        launchMainScreen();
-      },
-    );
-  } else if (inviteMatchID && credentials) {
-    // Note: If credentials are in URL from old link, we keep them, or we could replace state here.
-    // For now, if we have them, just launch.
-    if (urlParams.has("credentials")) {
-      window.history.replaceState(
-        { 
-          mode: "remote", 
-          playerID: urlParams.get("playerID"), 
-          credentials: urlParams.get("credentials"), 
-          serverUrl: urlParams.get("serverUrl") 
-        },
-        "",
-        `/?matchID=${inviteMatchID}`,
-      );
-    }
-    launchMainScreen();
-  } else {
+  const showLobby = () => {
     LobbyUI.show(
       (
         matchID: string,
@@ -100,5 +64,51 @@ setEngine(engine);
         launchMainScreen();
       },
     );
+  };
+
+  if (inviteMatchID && !credentials) {
+    // If the room has password, user might fail, but let's just let LobbyUI handle join flow
+    LobbyUI.joinMatchProcess(
+      inviteMatchID,
+      null,
+      (
+        matchID: string,
+        playerID: string,
+        newCredentials?: string,
+        serverUrl?: string,
+      ) => {
+        // Pass sensitive info in state, keep only matchID in URL
+        window.history.replaceState(
+          { mode: "remote", playerID, credentials: newCredentials, serverUrl },
+          "",
+          `/?matchID=${matchID}`,
+        );
+        launchMainScreen();
+      },
+    ).then((success) => {
+      if (!success) {
+        // If joining failed (e.g. invalid password, room not found), reset URL and show normal lobby
+        window.history.replaceState({}, "", "/");
+        showLobby();
+      }
+    });
+  } else if (inviteMatchID && credentials) {
+    // Note: If credentials are in URL from old link, we keep them, or we could replace state here.
+    // For now, if we have them, just launch.
+    if (urlParams.has("credentials")) {
+      window.history.replaceState(
+        { 
+          mode: "remote", 
+          playerID: urlParams.get("playerID"), 
+          credentials: urlParams.get("credentials"), 
+          serverUrl: urlParams.get("serverUrl") 
+        },
+        "",
+        `/?matchID=${inviteMatchID}`,
+      );
+    }
+    launchMainScreen();
+  } else {
+    showLobby();
   }
 })();

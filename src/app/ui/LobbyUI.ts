@@ -298,7 +298,7 @@ export class LobbyUI {
       credentials?: string,
       serverUrl?: string,
     ) => void,
-  ) {
+  ): Promise<boolean> {
     const isLocalhost =
       window.location.hostname === "localhost" ||
       window.location.hostname === "127.0.0.1";
@@ -317,7 +317,7 @@ export class LobbyUI {
       const emptySeat = result.players.find((p) => !p.name);
       if (!emptySeat) {
         alert("Phòng đã đầy!");
-        return;
+        return false;
       }
 
       const joined = await this.lobbyClient.joinMatch(
@@ -337,21 +337,20 @@ export class LobbyUI {
         joined.playerCredentials,
         this.backendUrl,
       );
+      return true;
     } catch (err: unknown) {
       console.error(err);
       if (
         err &&
         typeof err === "object" &&
-        "response" in err &&
-        (err as any).response?.status === 401
+        "message" in err &&
+        (err as any).message === "Invalid credentials"
       ) {
-        alert("Sai khẩu lệnh!");
+        alert("Mật khẩu không đúng!");
       } else {
-        alert(
-          "Không thể tiến vào phòng! " +
-            (err instanceof Error ? err.message : String(err)),
-        );
+        alert("Lỗi tham gia phòng! Phòng có thể không tồn tại.");
       }
+      return false;
     }
   }
 }
