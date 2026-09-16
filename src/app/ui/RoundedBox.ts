@@ -24,13 +24,25 @@ export class RoundedBox extends Container {
     super();
     const opts = { ...defaultRoundedBoxOptions, ...options };
     this.image = new Graphics();
-    this.image.roundRect(-opts.width * 0.5, -opts.height * 0.5, opts.width, opts.height, 34);
+    this.image.roundRect(
+      -opts.width * 0.5,
+      -opts.height * 0.5,
+      opts.width,
+      opts.height,
+      34,
+    );
     this.image.fill(opts.color);
     this.addChild(this.image);
 
     if (opts.shadow) {
       this.shadow = new Graphics();
-      this.shadow.roundRect(-opts.width * 0.5, -opts.height * 0.5 + opts.shadowOffset, opts.width, opts.height, 34);
+      this.shadow.roundRect(
+        -opts.width * 0.5,
+        -opts.height * 0.5 + opts.shadowOffset,
+        opts.width,
+        opts.height,
+        34,
+      );
       this.shadow.fill(opts.shadowColor);
       this.addChildAt(this.shadow, 0);
     }

@@ -97,11 +97,11 @@ setEngine(engine);
     // For now, if we have them, just launch.
     if (urlParams.has("credentials")) {
       window.history.replaceState(
-        { 
-          mode: "remote", 
-          playerID: urlParams.get("playerID"), 
-          credentials: urlParams.get("credentials"), 
-          serverUrl: urlParams.get("serverUrl") 
+        {
+          mode: "remote",
+          playerID: urlParams.get("playerID"),
+          credentials: urlParams.get("credentials"),
+          serverUrl: urlParams.get("serverUrl"),
         },
         "",
         `/?matchID=${inviteMatchID}`,

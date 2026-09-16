@@ -631,8 +631,7 @@ function validateTargets(
       (distanceBetween(G, sourceID, targetID) <= 1 ||
         hasSkill(G, sourceID, "qi-cai"))
     );
-  if (name === "dismantle")
-    return hasZoneCard(G, targetID);
+  if (name === "dismantle") return hasZoneCard(G, targetID);
   if (name === "indulgence")
     return (
       !hasSkill(G, targetID, "qian-xun") &&
@@ -710,7 +709,10 @@ export function canSelectCardTarget(
         candidateID !== holderID &&
         distanceBetween(authoritativeShape, holderID, candidateID) <=
           attackRange(authoritativeShape, holderID) &&
-        !(hasSkill(G, candidateID, "kong-cheng") && G.players[candidateID].hand.length === 0)
+        !(
+          hasSkill(G, candidateID, "kong-cheng") &&
+          G.players[candidateID].hand.length === 0
+        )
       );
     }
     return false;
@@ -1396,41 +1398,50 @@ function promptNullification(
   );
 }
 
-  function resolveNullification(
-    G: TqsGameState,
-    effect: NullificationEffect,
-  ): void {
-    const order = aliveInActionOrder(G);
-    const startIndex = order.indexOf(effect.sourceID ?? G.turn.activePlayerID);
-    const rotatedOrder = [...order.slice(startIndex), ...order.slice(0, startIndex)];
-    
-    const excluded = effect.nullificationCardIDs.length === 0 && effect.sourceID ? [effect.sourceID] : [];
-    
-    let nextPlayer = null;
-    for (const playerID of rotatedOrder) {
-      if (effect.passedPlayerIDs.includes(playerID) || excluded.includes(playerID)) continue;
-      
-      const hasWuxie = 
-        G.players[playerID].hand.some(cID => canRespondWithCard(G, playerID, cID, 'nullification')) ||
-        Object.values(G.players[playerID].equipment).some(cID => cID && canRespondWithCard(G, playerID, cID as string, 'nullification'));
-      
-      if (G.config && G.config.autoSkipWuxie && !hasWuxie) {
-        effect.passedPlayerIDs.push(playerID);
-        continue;
-      }
-      
-      nextPlayer = playerID;
-      break;
+function resolveNullification(
+  G: TqsGameState,
+  effect: NullificationEffect,
+): void {
+  const order = aliveInActionOrder(G);
+  const startIndex = order.indexOf(effect.sourceID ?? G.turn.activePlayerID);
+  const rotatedOrder = [
+    ...order.slice(startIndex),
+    ...order.slice(0, startIndex),
+  ];
+
+  const excluded: PlayerID[] = [];
+
+  let nextPlayer = null;
+  for (const playerID of rotatedOrder) {
+    if (effect.passedPlayerIDs.includes(playerID)) continue;
+
+    const hasWuxie =
+      G.players[playerID].hand.some((cID) =>
+        canRespondWithCard(G, playerID, cID, "nullification"),
+      ) ||
+      Object.values(G.players[playerID].equipment).some(
+        (cID) =>
+          cID &&
+          canRespondWithCard(G, playerID, cID as string, "nullification"),
+      );
+
+    if (G.config && G.config.autoSkipWuxie && !hasWuxie) {
+      effect.passedPlayerIDs.push(playerID);
+      continue;
     }
 
-    if (!nextPlayer) {
-      closeNullification(G, effect);
-      return;
-    }
-    
-    effect.responderID = nextPlayer;
-    promptNullification(G, effect);
+    nextPlayer = playerID;
+    break;
   }
+
+  if (!nextPlayer) {
+    closeNullification(G, effect);
+    return;
+  }
+
+  effect.responderID = nextPlayer;
+  promptNullification(G, effect);
+}
 
 function advanceSlashTarget(effect: SlashEffect): void {
   effect.targetIndex += 1;
@@ -2399,7 +2410,9 @@ export function resolveCardGame(G: TqsGameState, shuffle: Shuffle): void {
         break;
       }
       case "draw":
-        drawCards(G, effect.targetID, effect.amount, shuffle);
+        if (G.players[effect.targetID].alive) {
+          drawCards(G, effect.targetID, effect.amount, shuffle);
+        }
         G.effectStack.shift();
         break;
       case "harvest":
@@ -2757,7 +2770,8 @@ function answerRescue(
       return false;
     zoneToDiscard(G, prompt.responderID, answer.cardID);
     const dying = G.players[effect.dyingPlayerID];
-    const responderGeneral = GENERALS_BY_ID[G.players[prompt.responderID].generalID!];
+    const responderGeneral =
+      GENERALS_BY_ID[G.players[prompt.responderID].generalID!];
     const jiuYuanBonus =
       prompt.responderID !== effect.dyingPlayerID &&
       hasSkill(G, dying.id, "jiu-yuan") &&
@@ -2822,7 +2836,7 @@ function answerSelectCards(
             effect.use.materialCardIDs,
             "slash",
             effect.use.color,
-          )
+          ),
         );
         return true;
       }
@@ -2970,7 +2984,8 @@ function answerOption(
       return true;
     }
     if (answer.choice === "decline") {
-      if (effect.stage === "gender-swords" || prompt.reason === "liu-li") effect.stage = "dodge";
+      if (effect.stage === "gender-swords" || prompt.reason === "liu-li")
+        effect.stage = "dodge";
       else if (effect.stage === "dodged") advanceSlashTarget(effect);
       else if (effect.stage === "before-damage") {
         effect.stage = "after-damage";
@@ -3094,10 +3109,9 @@ function answerOption(
     }
   }
 
-  if (effect.kind === "resolve-delayed" && prompt.reason === "gui-cai") {
+  if (prompt.reason === "gui-cai") {
     if (answer.choice === "decline") {
-      G.effectStack.shift();
-      applyJudgementResult(G, effect);
+      G.prompt = null;
       return true;
     }
     if (answer.choice !== "activate") return false;

@@ -16,10 +16,7 @@ import { GENERALS } from "../../src/game/catalog/generals";
 
 function expectTrackedAsset(alias: string): void {
   const sourcePath = fileURLToPath(
-    new URL(
-      `../../raw-assets/main{m}{tps}/${alias}`,
-      import.meta.url,
-    ),
+    new URL(`../../raw-assets/main{m}{tps}/${alias}`, import.meta.url),
   );
   expect(existsSync(sourcePath), alias).toBe(true);
 }

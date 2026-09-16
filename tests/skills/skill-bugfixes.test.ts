@@ -38,7 +38,9 @@ describe("Bug fixes", () => {
     const dismantleCard = givePhysicalCard(
       G,
       targetID,
-      (c) => c.definitionID === "dismantle" && (c.suit === "spade" || c.suit === "club"),
+      (c) =>
+        c.definitionID === "dismantle" &&
+        (c.suit === "spade" || c.suit === "club"),
     );
 
     // Attacker uses slash on Zhen Ji
@@ -82,7 +84,8 @@ describe("Bug fixes", () => {
     const blackCard = givePhysicalCard(
       G,
       ganNingID,
-      (c) => c.definitionID === "slash" && (c.suit === "spade" || c.suit === "club"),
+      (c) =>
+        c.definitionID === "slash" && (c.suit === "spade" || c.suit === "club"),
     );
 
     // Give target a card so it can be dismantled

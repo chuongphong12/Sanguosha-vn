@@ -14,7 +14,7 @@ export class GeneralCardView extends Container {
     super();
 
     const targetW = options?.width ?? 280;
-    
+
     // Always build the UI at base dimensions
     const w = 280;
     const h = 560;
@@ -43,7 +43,7 @@ export class GeneralCardView extends Container {
         const cardSprite = new Sprite(tex);
         const scale = w / tex.width;
         cardSprite.scale.set(scale);
-        
+
         const cardMask = new Graphics()
           .roundRect(0, 0, w, imgHeight, 8)
           .fill(0xffffff);
@@ -67,7 +67,7 @@ export class GeneralCardView extends Container {
           fill: 0xf3e5c8,
           fontStyle: "italic",
           fontWeight: "bold",
-        }
+        },
       });
       nameText.anchor.set(0.5, 0);
       nameText.position.set(w / 2, imgHeight + 12);
@@ -78,7 +78,7 @@ export class GeneralCardView extends Container {
         wei: "NGỤY",
         shu: "THỤC",
         wu: "NGÔ",
-        qun: "QUẦN"
+        qun: "QUẦN",
       };
       const factionName = factionNames[general.faction] ?? "VÔ";
       const statsText = new Text({
@@ -87,8 +87,8 @@ export class GeneralCardView extends Container {
           fontFamily: GAME_FONT_FAMILY,
           fontSize: 12,
           fill: 0x8b8c88,
-          letterSpacing: 1
-        }
+          letterSpacing: 1,
+        },
       });
       statsText.anchor.set(0.5, 0);
       statsText.position.set(w / 2, imgHeight + 52);
@@ -100,7 +100,7 @@ export class GeneralCardView extends Container {
       skillsContainer.position.set(16, skillsStartY);
       let currentY = 0;
 
-      general.skillIDs.forEach(skillID => {
+      general.skillIDs.forEach((skillID) => {
         const skill = SKILLS[skillID];
         if (!skill) return;
 
@@ -110,8 +110,8 @@ export class GeneralCardView extends Container {
             fontFamily: GAME_FONT_FAMILY,
             fontSize: 12,
             fill: 0xaa801a,
-            fontWeight: "bold"
-          }
+            fontWeight: "bold",
+          },
         });
         title.position.set(0, currentY);
         skillsContainer.addChild(title);
@@ -125,11 +125,11 @@ export class GeneralCardView extends Container {
             wordWrap: true,
             wordWrapWidth: w - 32,
             lineHeight: 16,
-          }
+          },
         });
         desc.position.set(0, currentY + 16);
         skillsContainer.addChild(desc);
-        
+
         currentY += 16 + desc.height + 8;
       });
 
@@ -147,36 +147,38 @@ export class GeneralCardView extends Container {
       .rect(16, btnY, btnW, btnH)
       .fill({ color: 0x000000, alpha: 0.5 })
       .stroke({ color: 0xaa801a, width: 1, alpha: 0.8 });
-    
+
     const btnText = new Text({
       text: "CHỌN TƯỚNG NÀY",
       style: {
         fontFamily: GAME_FONT_FAMILY,
         fontSize: 14,
         fill: 0xaa801a,
-        fontWeight: "bold"
-      }
+        fontWeight: "bold",
+      },
     });
     btnText.anchor.set(0.5);
     btnText.position.set(16 + btnW / 2, btnY + btnH / 2);
-    
+
     btn.eventMode = "static";
     btn.cursor = "pointer";
     btn.on("pointerover", () => {
-      btn.clear()
+      btn
+        .clear()
         .rect(16, btnY, btnW, btnH)
         .fill({ color: 0xaa801a, alpha: 0.2 })
         .stroke({ color: 0xaa801a, width: 1, alpha: 1 });
       btnText.style.fill = 0xffffff;
     });
     btn.on("pointerout", () => {
-      btn.clear()
+      btn
+        .clear()
         .rect(16, btnY, btnW, btnH)
         .fill({ color: 0x000000, alpha: 0.5 })
         .stroke({ color: 0xaa801a, width: 1, alpha: 0.8 });
       btnText.style.fill = 0xaa801a;
     });
-    
+
     if (options?.onConfirm) {
       btn.on("pointertap", () => {
         options.onConfirm?.();
@@ -185,7 +187,7 @@ export class GeneralCardView extends Container {
 
     innerContainer.addChild(btn);
     innerContainer.addChild(btnText);
-    
+
     // Scale everything to fit the target width
     innerContainer.scale.set(targetW / 280);
   }

@@ -157,7 +157,9 @@ describe("card conversion skills (batch 2)", () => {
     const equipmentCardID = givePhysicalCard(
       G,
       targetID,
-      (c) => c.definitionID === "crossbow" && (c.suit === "spade" || c.suit === "club"),
+      (c) =>
+        c.definitionID === "crossbow" &&
+        (c.suit === "spade" || c.suit === "club"),
     );
     const hp = G.players[targetID].hp;
 

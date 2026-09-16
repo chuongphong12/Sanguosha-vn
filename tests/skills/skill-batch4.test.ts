@@ -118,7 +118,7 @@ describe("loss and draw-replacement skills (batch 4)", () => {
       identityShuffle,
     );
     expect(G.players[sourceID].hand).toHaveLength(1);
-    
+
     expect(G.prompt).toMatchObject({
       reason: "slash",
       responderID: targetID,

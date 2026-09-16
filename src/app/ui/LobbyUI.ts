@@ -87,11 +87,20 @@ export class LobbyUI {
         </div>
       </div>
 
-      <!-- Create Room Modal -->
       <div id="modal-create" class="modal-overlay hidden">
         <div class="modal-content">
           <h2>Tạo Lệnh Bài</h2>
           <input type="text" id="input-room-name" class="input-ancient" placeholder="Tên phòng..." />
+          <div class="modal-checkbox" style="margin: 10px 0;">
+            Số người chơi: 
+            <select id="create-num-players" class="input-ancient" style="width: auto;">
+              <option value="4">4 Người</option>
+              <option value="5">5 Người</option>
+              <option value="6">6 Người</option>
+              <option value="8">8 Người</option>
+              <option value="10" selected>10 Người</option>
+            </select>
+          </div>
           <div class="modal-checkbox">
             <input type="checkbox" id="chk-private" /> <label for="chk-private">Phòng Bí Mật (Private)</label>
           </div>
@@ -172,11 +181,16 @@ export class LobbyUI {
         const isPrivate = chkPrivate.checked;
         const password = inputPass.value;
 
+        const numPlayersSelect = document.getElementById(
+          "create-num-players",
+        ) as HTMLSelectElement;
+        const numPlayers = parseInt(numPlayersSelect.value, 10);
+
         try {
           const created = await this.lobbyClient.createMatch(
             "tam-quoc-sat-standard-2013",
             {
-              numPlayers: 10,
+              numPlayers,
               setupData: {
                 roomName,
                 hasPassword: isPrivate,
@@ -307,50 +321,62 @@ export class LobbyUI {
       (import.meta as any).env?.VITE_BACKEND_URL ||
       (isLocalhost ? "http://localhost:8000" : window.location.origin);
     this.lobbyClient = new LobbyClient({ server: this.backendUrl });
-    try {
-      const data = password ? { password } : {};
-      // Fetch current seats
-      const result = await this.lobbyClient.getMatch(
-        "tam-quoc-sat-standard-2013",
-        matchID,
-      );
-      const emptySeat = result.players.find((p) => !p.name);
-      if (!emptySeat) {
-        alert("Phòng đã đầy!");
+    let retryCount = 0;
+    while (retryCount < 3) {
+      try {
+        const data = password ? { password } : {};
+        // Fetch current seats
+        const result = await this.lobbyClient.getMatch(
+          "tam-quoc-sat-standard-2013",
+          matchID,
+        );
+        const emptySeat = result.players.find((p) => !p.name);
+        if (!emptySeat) {
+          alert("Phòng đã đầy!");
+          return false;
+        }
+
+        const joined = await this.lobbyClient.joinMatch(
+          "tam-quoc-sat-standard-2013",
+          matchID,
+          {
+            playerID: emptySeat.id.toString(),
+            playerName: this.playerName,
+            data,
+          },
+        );
+
+        this.hide();
+        onJoinMatch(
+          matchID,
+          emptySeat.id.toString(),
+          joined.playerCredentials,
+          this.backendUrl,
+        );
+        return true;
+      } catch (err: any) {
+        if (err && err.message && err.message.includes("403")) {
+          retryCount++;
+          await new Promise((r) => setTimeout(r, 1000));
+          continue;
+        }
+        console.error(err);
+        if (
+          err &&
+          typeof err === "object" &&
+          "message" in err &&
+          (err as any).message === "Invalid credentials"
+        ) {
+          alert("Mật khẩu không đúng!");
+        } else {
+          alert("Lỗi tham gia phòng! Phòng có thể không tồn tại.");
+        }
         return false;
       }
-
-      const joined = await this.lobbyClient.joinMatch(
-        "tam-quoc-sat-standard-2013",
-        matchID,
-        {
-          playerID: emptySeat.id.toString(),
-          playerName: this.playerName,
-          data,
-        },
-      );
-
-      this.hide();
-      onJoinMatch(
-        matchID,
-        emptySeat.id.toString(),
-        joined.playerCredentials,
-        this.backendUrl,
-      );
-      return true;
-    } catch (err: unknown) {
-      console.error(err);
-      if (
-        err &&
-        typeof err === "object" &&
-        "message" in err &&
-        (err as any).message === "Invalid credentials"
-      ) {
-        alert("Mật khẩu không đúng!");
-      } else {
-        alert("Lỗi tham gia phòng! Phòng có thể không tồn tại.");
-      }
-      return false;
     }
+    alert("Không thể tham gia phòng sau nhiều lần thử.");
+    window.history.replaceState({}, "", "/");
+    window.location.reload();
+    return false;
   }
 }

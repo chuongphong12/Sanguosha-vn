@@ -47,7 +47,10 @@ export const TqsGame: Game<TqsGameState> = {
     endGame: false,
     endTurn: false,
     endPhase: false,
+    setPhase: false,
+    endStage: false,
     setStage: false,
+    pass: false,
     setActivePlayers: false,
   },
 
@@ -70,18 +73,15 @@ export const TqsGame: Game<TqsGameState> = {
 
   moves: {
     startGame: authoritative(
-      (
-        { G, ctx, playerID, random },
-        clientOptions?: any,
-      ) => {
+      ({ G, ctx, playerID, random }, clientOptions?: any) => {
         if (playerID !== "0") return INVALID_MOVE;
         if (G.status !== "waiting-room") return INVALID_MOVE;
-        const actualNumPlayers = clientOptions?.actualNumPlayers ?? ctx.numPlayers;
-        if (actualNumPlayers < 4 || actualNumPlayers > 10)
-          return INVALID_MOVE;
+        const actualNumPlayers =
+          clientOptions?.actualNumPlayers ?? ctx.numPlayers;
+        if (actualNumPlayers < 4 || actualNumPlayers > 10) return INVALID_MOVE;
         const options: TqsSetupOptions = {
           numPlayers: actualNumPlayers,
-          joinedPlayerIDs: ctx.playOrder.slice(0, actualNumPlayers),
+          joinedPlayerIDs: clientOptions?.joinedPlayerIDs ?? ctx.playOrder.slice(0, actualNumPlayers),
           roleVariant: "standard",
           autoSkipWuxie: clientOptions?.autoSkipWuxie ?? true,
           lordExtraHp: clientOptions?.lordExtraHp,
@@ -131,26 +131,28 @@ export const TqsGame: Game<TqsGameState> = {
       true,
     ),
 
-    timeoutPrompt: authoritative(({ G, playerID, random }, promptID: number) => {
-      const prompt = G.prompt;
-      if (
-        prompt &&
-        prompt.id === promptID &&
-        prompt.kind === "card-response" &&
-        prompt.reason === "nullification" &&
-        playerID === prompt.responderID
-      ) {
-        answerCardPrompt(
-          G,
-          prompt.responderID,
-          promptID,
-          { kind: "pass" },
-          shuffleFrom(random),
-        );
-      } else {
-        return INVALID_MOVE;
-      }
-    }),
+    timeoutPrompt: authoritative(
+      ({ G, playerID, random }, promptID: number) => {
+        const prompt = G.prompt;
+        if (
+          prompt &&
+          prompt.id === promptID &&
+          prompt.kind === "card-response" &&
+          prompt.reason === "nullification" &&
+          playerID === prompt.responderID
+        ) {
+          answerCardPrompt(
+            G,
+            prompt.responderID,
+            promptID,
+            { kind: "pass" },
+            shuffleFrom(random),
+          );
+        } else {
+          return INVALID_MOVE;
+        }
+      },
+    ),
 
     discardCards: authoritative(
       ({ G, playerID, random }, cardIDs: string[]) => {

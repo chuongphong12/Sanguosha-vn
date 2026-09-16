@@ -35,9 +35,27 @@ src/manifest.json
 .claude/
 .gitnexus/
 .codegraph/
+.gemini/
 *.md
 !README.md
-!AGENTS.md
+AGENTS.md
+CLAUDE.md
+Agent.md
+agent.md
+claude.md
+
+# Agent generated planning and docs
+docs/
+plans/
+plan/
+
+# Keep the UI research package reviewable instead of silently ignoring it.
+!docs/
+!docs/plans/
+!docs/plans/2026-09-16-ui-upgrade-plan-v2.md
+!docs/plans/2026-09-16-ui-upgrade-plan-v3.md
+!docs/plans/ui-upgrade/
+!docs/plans/ui-upgrade/**
 
 # Generated assets and test results
 raw-assets/

@@ -145,8 +145,6 @@ export function canRespondWithCard(
   response: ResponseKind,
 ): boolean {
   return matchesResponse(G as TqsGameState, playerID, cardID, response);
-    conversions.push("indulgence");
-  return conversions;
 }
 
 export function aliveInActionOrder(
@@ -343,7 +341,6 @@ export function obeysTongJi(
   );
 }
 
-
 export function hasZoneCard(
   G: TqsGameState | TqsPlayerViewState,
   playerID: PlayerID,
@@ -355,4 +352,3 @@ export function hasZoneCard(
     player.judgement.length > 0
   );
 }
-

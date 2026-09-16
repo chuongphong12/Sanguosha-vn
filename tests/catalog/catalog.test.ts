@@ -60,7 +60,7 @@ describe("Standard 2013 catalog", () => {
       lord: "Chủ Công",
       loyalist: "Trung Thần",
       rebel: "Phản Tặc",
-      renegade: "Nội Gian",
+      renegade: "Nội Gián",
     });
   });
 

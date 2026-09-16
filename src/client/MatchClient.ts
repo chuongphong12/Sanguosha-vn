@@ -84,7 +84,10 @@ export class MatchClient {
   }
 
   public get state(): MatchClientState {
-    return this.asPlayerView(this.getClient(this.viewerID), this.getClient(this.viewerID).getState());
+    return this.asPlayerView(
+      this.getClient(this.viewerID),
+      this.getClient(this.viewerID).getState(),
+    );
   }
 
   public subscribe(listener: StateListener): () => void {
@@ -127,7 +130,10 @@ export class MatchClient {
     return client;
   }
 
-  private asPlayerView(client: LocalClient, state: AuthoritativeClientState): MatchClientState {
+  private asPlayerView(
+    client: LocalClient,
+    state: AuthoritativeClientState,
+  ): MatchClientState {
     if (!state) return null as any;
     const s = state as any;
     s.matchData = client.matchData;

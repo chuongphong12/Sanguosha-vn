@@ -112,7 +112,14 @@ describe("damage and judgement trigger skills (batch 3)", () => {
       { kind: "option", choice: "activate" },
       identityShuffle,
     );
-    console.log("SOURCE HP AFTER ACTIVATE:", G.players[sourceID].hp, "EFFECT STACK:", G.effectStack, "PROMPT:", G.prompt);
+    console.log(
+      "SOURCE HP AFTER ACTIVATE:",
+      G.players[sourceID].hp,
+      "EFFECT STACK:",
+      G.effectStack,
+      "PROMPT:",
+      G.prompt,
+    );
 
     expect(G.players[targetID].hp).toBe(G.players[targetID].maxHP - 1);
     expect(G.players[sourceID].hp).toBe(hpSource - 1);

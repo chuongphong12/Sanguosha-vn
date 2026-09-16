@@ -15,9 +15,9 @@ export function assetpackPlugin() {
         },
         texturePacker: {
           texturePacker: {
-            nameStyle: "relative"
-          }
-        }
+            nameStyle: "relative",
+          },
+        },
       }),
     ],
   } as AssetPackConfig;

@@ -65,7 +65,7 @@ export class Dashboard extends Container {
         faceTex = Assets.get<Texture>(`cards/roles/${player.role}.jpg`);
       } catch (e) {}
     }
-    
+
     const roleSprite = new Sprite(backTex);
     roleSprite.width = avatarW;
     roleSprite.height = avatarH;

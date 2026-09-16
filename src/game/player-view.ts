@@ -19,7 +19,7 @@ export function createPlayerView(
         playerID === G.lordID ||
         G.status === "playing" ||
         G.status === "ended";
-      
+
       const { role, generalID, hand, ...rest } = player;
 
       return [

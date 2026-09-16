@@ -26,7 +26,7 @@ import {
   hasLordSkill,
   SKILLS,
 } from "../../../game/catalog/generals";
-import { ROLE_NAMES, Role } from "../../../game/catalog/roles";
+import { ROLE_NAMES } from "../../../game/catalog/roles";
 import type {
   CardDefinition,
   CardResponsePrompt,
@@ -115,10 +115,15 @@ export class MainScreen extends Container {
 
     const content = new Container();
     content.position.set(this.viewportWidth / 2, this.viewportHeight / 2);
-    
+
     const title = new Text({
       text: "Thân phận của bạn là:",
-      style: { fontFamily: "Noto Serif", fontSize: 24, fill: "#ffffff", align: "center" }
+      style: {
+        fontFamily: "Noto Serif",
+        fontSize: 24,
+        fill: "#ffffff",
+        align: "center",
+      },
     });
     title.anchor.set(0.5);
     title.position.set(0, -180);
@@ -136,7 +141,7 @@ export class MainScreen extends Container {
       sprite.anchor.set(0.5);
       // Playing cards are around 300x400 usually.
       // If we want it big in the center, scale 1.0 or 1.2 is good.
-      sprite.scale.set(1.0); 
+      sprite.scale.set(1.0);
       sprite.position.set(0, -20);
       content.addChild(sprite);
     }
@@ -195,12 +200,18 @@ export class MainScreen extends Container {
     if (mode === "remote") {
       config.mode = "remote";
       config.matchID = urlParams.get("matchID") || undefined;
-      config.playerID = state.playerID || urlParams.get("playerID") || undefined;
-      config.credentials = state.credentials || urlParams.get("credentials") || undefined;
-      config.serverUrl = state.serverUrl || urlParams.get("serverUrl") || undefined;
+      config.playerID =
+        state.playerID || urlParams.get("playerID") || undefined;
+      config.credentials =
+        state.credentials || urlParams.get("credentials") || undefined;
+      config.serverUrl =
+        state.serverUrl || urlParams.get("serverUrl") || undefined;
     } else {
       config.mode = "local";
-      const numPlayersParam = parseInt(state.numPlayers || urlParams.get("numPlayers") || "4", 10);
+      const numPlayersParam = parseInt(
+        state.numPlayers || urlParams.get("numPlayers") || "4",
+        10,
+      );
       config.numPlayers = isNaN(numPlayersParam) ? 4 : numPlayersParam;
     }
 
@@ -208,6 +219,8 @@ export class MainScreen extends Container {
     this.unsubscribe = this.match.subscribe((state) =>
       this.receiveState(state),
     );
+
+    (window as any).__TQS_MATCH__ = this.match;
 
     if (config.mode === "remote" && config.matchID && config.serverUrl) {
       const lobbyClient = new LobbyClient({ server: config.serverUrl });
@@ -263,9 +276,25 @@ export class MainScreen extends Container {
         this.isAwaitingBundle = true;
         // Draw a simple loading screen so it's not purely black
         this.clearContent();
-        this.addText("Đang tải tài nguyên Game...", this.viewportWidth / 2, this.viewportHeight / 2 - 20, 24, THEME.colors.gold, 0.5, "center");
-        this.addText("Vui lòng chờ...", this.viewportWidth / 2, this.viewportHeight / 2 + 20, 16, THEME.colors.muted, 0.5, "center");
-        
+        this.addText(
+          "Đang tải tài nguyên Game...",
+          this.viewportWidth / 2,
+          this.viewportHeight / 2 - 20,
+          24,
+          THEME.colors.gold,
+          0.5,
+          "center",
+        );
+        this.addText(
+          "Vui lòng chờ...",
+          this.viewportWidth / 2,
+          this.viewportHeight / 2 + 20,
+          16,
+          THEME.colors.muted,
+          0.5,
+          "center",
+        );
+
         Assets.loadBundle("main")
           .then(() => {
             this.mainBundleLoaded = true;
@@ -281,13 +310,13 @@ export class MainScreen extends Container {
               16,
               THEME.colors.redBright,
               0.5,
-              "center"
+              "center",
             );
           });
       }
       return; // Skip normal rendering until loaded
     }
-    
+
     const promptID = state?.G.prompt?.id ?? null;
     if (promptID !== this.lastPromptID) {
       if (this.nullificationTimeout) {
@@ -384,14 +413,14 @@ export class MainScreen extends Container {
     this.drawPrivateArea(G);
     // Overlay for General Selection
     const viewer = G.players[this.match!.currentViewerID];
-      const canSelectGeneral =
-        this.rolePopupDismissedFor === this.match!.currentViewerID &&
-        viewer.generalID === null &&
-        viewer.generalCandidates.length > 0 &&
-        ((G.status === "lord-selection" &&
-          this.match!.currentViewerID === G.lordID) ||
-          (G.status === "general-selection" &&
-            this.match!.currentViewerID !== G.lordID));
+    const canSelectGeneral =
+      this.rolePopupDismissedFor === this.match!.currentViewerID &&
+      viewer.generalID === null &&
+      viewer.generalCandidates.length > 0 &&
+      ((G.status === "lord-selection" &&
+        this.match!.currentViewerID === G.lordID) ||
+        (G.status === "general-selection" &&
+          this.match!.currentViewerID !== G.lordID));
 
     if (canSelectGeneral) {
       this.drawGeneralCandidates(G, viewer.generalCandidates);
@@ -536,6 +565,7 @@ export class MainScreen extends Container {
         lordExtraHp: this.lordExtraHp,
         turnTimeLimit: this.turnTimeLimit,
         actualNumPlayers: joinedPlayers.length,
+        joinedPlayerIDs: joinedPlayers.map(p => String(p.id)),
       });
       return;
     }
@@ -655,6 +685,7 @@ export class MainScreen extends Container {
               lordExtraHp: this.lordExtraHp,
               turnTimeLimit: this.turnTimeLimit,
               actualNumPlayers: joinedPlayers.length,
+              joinedPlayerIDs: joinedPlayers.map(p => String(p.id)),
             });
           }
         },
@@ -820,8 +851,11 @@ export class MainScreen extends Container {
 
     const getPlayerName = (id: string) => {
       if (this.match?.isRemote && this.state?.matchData) {
-        const matchData = this.state.matchData as { id: number; name?: string }[];
-        const p = matchData.find(m => String(m.id) === id);
+        const matchData = this.state.matchData as {
+          id: number;
+          name?: string;
+        }[];
+        const p = matchData.find((m) => String(m.id) === id);
         if (p && p.name) return p.name;
       }
       return `P${Number(id) + 1}`;
@@ -858,7 +892,7 @@ export class MainScreen extends Container {
         fontSize: 16,
         fill: THEME.colors.paper,
         align: "center",
-      }
+      },
     });
 
     const detailText = new Text({
@@ -868,7 +902,7 @@ export class MainScreen extends Container {
         fontSize: 12,
         fill: THEME.colors.paperDark,
         align: "center",
-      }
+      },
     });
 
     const contentWidth = Math.max(statusText.width, detailText.width);
@@ -883,7 +917,7 @@ export class MainScreen extends Container {
       panelHeight,
       THEME.colors.ink,
       THEME.colors.gold,
-      0.85
+      0.85,
     );
 
     statusText.anchor.set(0.5, 0);
@@ -995,21 +1029,49 @@ export class MainScreen extends Container {
 
     this.addPanel(x, y, width, height, 0x181411, THEME.colors.gold, 0.85);
 
-    this.addText("DIỄN BIẾN", x + width / 2, y + 24, 18, THEME.colors.gold, 0.5, "center", 2);
-    
+    this.addText(
+      "DIỄN BIẾN",
+      x + width / 2,
+      y + 24,
+      18,
+      THEME.colors.gold,
+      0.5,
+      "center",
+      2,
+    );
+
     const entries = G.log.slice(-30); // show more logs
     if (entries.length === 0) {
-      this.addText("Chưa có diễn biến nào.", x + 20, y + 60, 14, THEME.colors.muted, 0, "left");
+      this.addText(
+        "Chưa có diễn biến nào.",
+        x + 20,
+        y + 60,
+        14,
+        THEME.colors.muted,
+        0,
+        "left",
+      );
       return;
     }
-    
+
     // Draw logs from bottom up so newest is at the bottom
     const startY = height - 40;
     let currentY = startY;
-    
+
     for (let i = entries.length - 1; i >= 0; i--) {
       const entry = entries[i];
-      const text = this.addText(entry.message, x + 20, 0, 13, THEME.colors.paper, 0, "left", 0, width - 40, true);
+      const text = this.addText(
+        entry.message,
+        x + 20,
+        0,
+        13,
+        THEME.colors.paper,
+        0,
+        "left",
+        0,
+        width - 40,
+        true,
+      );
       currentY -= text.height;
       text.y = currentY;
       currentY -= 10;
@@ -1021,8 +1083,6 @@ export class MainScreen extends Container {
     const viewerID = this.match!.currentViewerID;
     const player = G.players[viewerID];
     const top = this.viewportHeight - 250;
-
-
 
     const requiredActorID = this.requiredActorID(G);
     if (
@@ -1187,7 +1247,7 @@ export class MainScreen extends Container {
       centerX,
       centerY - 270,
       20,
-      THEME.colors.gray,
+      THEME.colors.muted,
       0.5,
       "center",
     );
@@ -1983,7 +2043,8 @@ export class MainScreen extends Container {
       13,
       THEME.colors.paperDark,
     );
-    const startX = boardW / 2 - (width * prompt.candidates.length) / 2 + width / 2;
+    const startX =
+      boardW / 2 - (width * prompt.candidates.length) / 2 + width / 2;
     prompt.candidates.forEach((playerID, index) => {
       const selected = this.selectedPromptPlayerIDs.includes(playerID);
       const canToggle =
@@ -2167,7 +2228,15 @@ export class MainScreen extends Container {
     }
     if (!validCardID) {
       for (const cardID of Object.values(responder.equipment)) {
-        if (cardID && canRespondWithCard(G, prompt.responderID, cardID as string, prompt.response)) {
+        if (
+          cardID &&
+          canRespondWithCard(
+            G,
+            prompt.responderID,
+            cardID as string,
+            prompt.response,
+          )
+        ) {
           validCardID = cardID as string;
           break;
         }
@@ -2191,7 +2260,7 @@ export class MainScreen extends Container {
       },
       THEME.colors.red,
       THEME.colors.white,
-      !validCardID
+      !validCardID,
     );
 
     this.addButton(
@@ -2317,19 +2386,12 @@ export class MainScreen extends Container {
 
     const y = (this.viewportHeight - 80) / 2;
     const boardW = this.viewportWidth - 280;
-    this.addText(
-      "Chọn bài",
-      boardW / 2,
-      y - 120,
-      20,
-      THEME.colors.gold,
-    );
+    this.addText("Chọn bài", boardW / 2, y - 120, 20, THEME.colors.gold);
 
     const cardW = 120;
     const cardH = 168;
     let gap = 32;
-    const totalRequestedW =
-      choices.length * cardW + (choices.length - 1) * gap;
+    const totalRequestedW = choices.length * cardW + (choices.length - 1) * gap;
     if (totalRequestedW > boardW - 68) {
       gap = 16;
     }
@@ -2424,13 +2486,7 @@ export class MainScreen extends Container {
   ): void {
     const y = (this.viewportHeight - 80) / 2;
     const boardW = this.viewportWidth - 280;
-    this.addText(
-      "Chọn một lá bài",
-      boardW / 2,
-      y - 120,
-      20,
-      THEME.colors.gold,
-    );
+    this.addText("Chọn một lá bài", boardW / 2, y - 120, 20, THEME.colors.gold);
 
     const visibleCardIDs = prompt.availableCardIDs;
     const cardW = 120;
@@ -2594,7 +2650,9 @@ export class MainScreen extends Container {
         fill: color,
         align,
         letterSpacing,
-        ...(wrap && maxWidth ? { wordWrap: true, wordWrapWidth: maxWidth } : {}),
+        ...(wrap && maxWidth
+          ? { wordWrap: true, wordWrapWidth: maxWidth }
+          : {}),
       },
     });
     label.anchor.set(anchor, anchor === 0 ? 0 : 0.5);

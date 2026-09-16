@@ -32,7 +32,9 @@ export class LoadScreen extends Container {
     this.addChild(this.background);
 
     const overlay = new Graphics();
-    overlay.rect(-5000, -5000, 10000, 10000).fill({ color: 0x000000, alpha: 0.35 });
+    overlay
+      .rect(-5000, -5000, 10000, 10000)
+      .fill({ color: 0x000000, alpha: 0.35 });
     this.addChild(overlay);
 
     this.logo = new Sprite(
