@@ -34,8 +34,9 @@ describe("final batch skills", () => {
     const lordID = G.lordID;
     const rescuerID = G.seatOrder[3];
     const attackerID = G.seatOrder[1];
-    G.players[lordID].generalID = "sun-quan";
+    assignGeneral(G, lordID, "sun-quan");
     G.players[lordID].activeSkillIDs = ["zhi-heng", "jiu-yuan"];
+    assignGeneral(G, rescuerID, "huang-gai"); // Wu general
     G.players[lordID].hp = 1;
     const slashID = giveCard(G, attackerID, "slash");
     const peachID = giveCard(G, rescuerID, "peach");

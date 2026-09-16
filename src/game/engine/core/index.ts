@@ -709,7 +709,8 @@ export function canSelectCardTarget(
       return (
         candidateID !== holderID &&
         distanceBetween(authoritativeShape, holderID, candidateID) <=
-          attackRange(authoritativeShape, holderID)
+          attackRange(authoritativeShape, holderID) &&
+        !(hasSkill(G, candidateID, "kong-cheng") && G.players[candidateID].hand.length === 0)
       );
     }
     return false;
@@ -1514,23 +1515,6 @@ function resolveSlash(G: TqsGameState, effect: SlashEffect): void {
       return;
     }
     if (effect.ignoreDodge) {
-      const allowBagua =
-        !effect.ignoreArmor &&
-        !effect.baguaTried &&
-        equipmentName(G, targetID, "armor") === "bagua-formation";
-      if (allowBagua) {
-        G.prompt = responsePrompt(
-          G,
-          effect.id,
-          targetID,
-          "dodge",
-          "slash",
-          sourceID,
-          targetID,
-          { allowBagua: true, forbidCard: true },
-        );
-        return;
-      }
       effect.stage = "before-damage";
       return;
     }
@@ -2770,9 +2754,11 @@ function answerRescue(
       return false;
     zoneToDiscard(G, prompt.responderID, answer.cardID);
     const dying = G.players[effect.dyingPlayerID];
+    const responderGeneral = GENERALS_BY_ID[G.players[prompt.responderID].generalID!];
     const jiuYuanBonus =
       prompt.responderID !== effect.dyingPlayerID &&
-      hasSkill(G, dying.id, "jiu-yuan")
+      hasSkill(G, dying.id, "jiu-yuan") &&
+      responderGeneral?.faction === "wu"
         ? 1
         : 0;
     dying.hp += 1 + jiuYuanBonus;
@@ -3325,10 +3311,10 @@ export function useSkill(
     const cardIDs = [...new Set(payload)];
     if (
       cardIDs.length === 0 ||
-      !cardIDs.every((cardID) => hasCardInHand(G, playerID, cardID))
+      !cardIDs.every((cardID) => hasCardInZone(G, playerID, cardID))
     )
       return false;
-    for (const cardID of cardIDs) handToDiscard(G, playerID, cardID);
+    for (const cardID of cardIDs) zoneToDiscard(G, playerID, cardID);
     markSkillUsed(G, playerID, skillID);
     drawCards(G, playerID, cardIDs.length, shuffle);
     writeLog(
@@ -3431,16 +3417,17 @@ export function useSkill(
     const first = G.players[firstID];
     const second = G.players[secondID];
     if (
-      !hasCardInHand(G, playerID, cardID) ||
+      !hasCardInZone(G, playerID, cardID) ||
       !first?.alive ||
       !second?.alive ||
       firstID === secondID ||
       [firstID, secondID].includes(playerID) ||
       GENERALS_BY_ID[first.generalID!]?.gender !== "male" ||
-      GENERALS_BY_ID[second.generalID!]?.gender !== "male"
+      GENERALS_BY_ID[second.generalID!]?.gender !== "male" ||
+      (hasSkill(G, secondID, "kong-cheng") && second.hand.length === 0)
     )
       return false;
-    handToDiscard(G, playerID, cardID);
+    zoneToDiscard(G, playerID, cardID);
     writeLog(
       G,
       `${playerName(G, playerID)} dùng 【Ly Gián】, ${playerName(G, firstID)} và ${playerName(G, secondID)} tiến hành 【Quyết Đấu】.`,

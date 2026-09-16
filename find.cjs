@@ -1,0 +1,1 @@
+const fs = require('fs'); const lines = fs.readFileSync('C:/Users/Hudson Brekker/.gemini/antigravity-cli/brain/dc4a9a20-ed69-4a71-973c-2d682adf023a/.system_generated/logs/transcript.jsonl', 'utf8').split('\n'); lines.forEach(line => { if (line.includes('Báo cáo') || line.includes('Edge Case') || line.includes('Tôn Quy?n C?u Vi?n')) { console.log(line.substring(0, 500)); } });
