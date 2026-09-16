@@ -247,10 +247,18 @@ export class MainScreen extends Container {
         this.isAwaitingBundle = true;
         // Draw a simple loading screen so it's not purely black
         this.clearContent();
-        this.addText(detail, panelX + panelWidth / 2, panelY + 38, 13, THEME.colors.muted, 0.5, "center");
-      currentY -= (text.height + 10);
-      if (currentY < 60) break; // Don't overflow title
+        this.addText("Đang tải tài nguyên Game...", this.viewportWidth / 2, this.viewportHeight / 2 - 20, 24, THEME.colors.gold, 0.5, "center");
+        this.addText("Vui lòng chờ...", this.viewportWidth / 2, this.viewportHeight / 2 + 20, 16, THEME.colors.muted, 0.5, "center");
+      }
+      return;
     }
+    
+    if (state && state.G.status !== "waiting-room" && !this.rolePopupDismissed && this.match) {
+      this.rolePopupDismissed = true;
+      this.showRolePopup(state.G.players[this.match.currentViewerID].role);
+    }
+
+    this.render();
   }
 
   private drawPrivateArea(G: TqsPlayerViewState): void {
