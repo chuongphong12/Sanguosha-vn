@@ -247,32 +247,15 @@ export class MainScreen extends Container {
         this.isAwaitingBundle = true;
         // Draw a simple loading screen so it's not purely black
         this.clearContent();
-        this.addText(
-          "Đang tải dữ liệu trò chơi...",
-          this.viewportWidth / 2,
-          this.viewportHeight / 2,
-          24,
-          THEME.colors.gold,
-        );
-
-        Assets.loadBundle("main")
-          .then(() => {
-            this.mainBundleLoaded = true;
-            this.isAwaitingBundle = false;
-            this.render();
-          })
-          .catch((err) => {
-            console.error("Lỗi tải tài nguyên:", err);
-            this.addText(
-              "Lỗi tải tài nguyên! Hãy thử làm mới trang.",
-              this.viewportWidth / 2,
-              this.viewportHeight / 2 + 40,
-              16,
-              THEME.colors.redBright,
-            );
-          });
+        this.addText("Đang tải tài nguyên Game...", this.viewportWidth / 2, this.viewportHeight / 2 - 20, 24, THEME.colors.gold, 0.5, "center");
+        this.addText("Vui lòng chờ...", this.viewportWidth / 2, this.viewportHeight / 2 + 20, 16, THEME.colors.muted, 0.5, "center");
       }
       return; // Skip normal rendering until loaded
+    }
+    
+    if (state && state.G.status !== "waiting-room" && !this.rolePopupDismissed && this.match) {
+      this.rolePopupDismissed = true;
+      this.showRolePopup(state.G.players[this.match.currentViewerID].role);
     }
     const promptID = state?.G.prompt?.id ?? null;
     if (promptID !== this.lastPromptID) {

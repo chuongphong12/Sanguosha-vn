@@ -14,7 +14,7 @@ test.describe("Tam Quoc Sat - Lobby & Game", () => {
     );
 
     // 1. Navigate to the frontend, forcing it to use the local test backend (which proxies to 8000)
-    await page.goto("/?backend=" + encodeURIComponent("http://localhost:8081"));
+    await page.goto("/?backend=" + encodeURIComponent("http://localhost:8000"));
 
     // 2. Verify Lobby is visible
     const lobbyUI = page.locator("#lobby-ui");
