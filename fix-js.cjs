@@ -1,1 +1,0 @@
-const fs = require("fs"); let files = ["node_modules/.pnpm_patches/boardgame.io@0.50.2/dist/boardgameio.js", "node_modules/.pnpm_patches/boardgame.io@0.50.2/dist/boardgameio.es.js"]; for(let f of files) { let p = fs.readFileSync(f, "utf8"); p = p.replace(/(\.\.\.syncInfo,)(\s+)(state: filteredState,)/g, "$1$2initialState: filteredInitialState,$2$3"); fs.writeFileSync(f, p); }
