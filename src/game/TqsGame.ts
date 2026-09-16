@@ -76,11 +76,12 @@ export const TqsGame: Game<TqsGameState> = {
       ) => {
         if (playerID !== "0") return INVALID_MOVE;
         if (G.status !== "waiting-room") return INVALID_MOVE;
-        if (ctx.numPlayers < 4 || ctx.numPlayers > 10)
+        const actualNumPlayers = clientOptions?.actualNumPlayers ?? ctx.numPlayers;
+        if (actualNumPlayers < 4 || actualNumPlayers > 10)
           return INVALID_MOVE;
         const options: TqsSetupOptions = {
-          numPlayers: ctx.numPlayers,
-          joinedPlayerIDs: ctx.playOrder,
+          numPlayers: actualNumPlayers,
+          joinedPlayerIDs: ctx.playOrder.slice(0, actualNumPlayers),
           roleVariant: "standard",
           autoSkipWuxie: clientOptions?.autoSkipWuxie ?? true,
           lordExtraHp: clientOptions?.lordExtraHp,

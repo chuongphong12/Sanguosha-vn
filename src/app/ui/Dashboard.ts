@@ -1,5 +1,6 @@
-import { Container, Graphics, Text } from "pixi.js";
+import { Container, Graphics, Text, Sprite, Texture, Assets } from "pixi.js";
 import { animate } from "motion";
+import { ROLE_NAMES } from "../../game/catalog/roles";
 
 import type {
   PlayerID,
@@ -51,6 +52,64 @@ export class Dashboard extends Container {
     });
     avatar.position.set(8, 8);
     this.addChild(avatar);
+
+    // === Role Card (right side) ===
+    const roleCardContainer = new Container();
+    const roleLeft = vw - 60 - avatarW - 8;
+    roleCardContainer.position.set(roleLeft, 8);
+
+    const backTex = Assets.get<Texture>("cards/roles/back.jpg");
+    let faceTex: Texture | undefined;
+    if (player.role) {
+      try {
+        faceTex = Assets.get<Texture>(`cards/roles/${player.role}.jpg`);
+      } catch (e) {}
+    }
+    
+    const roleSprite = new Sprite(backTex);
+    roleSprite.width = avatarW;
+    roleSprite.height = avatarH;
+    roleCardContainer.addChild(roleSprite);
+
+    const roleBorder = new Graphics()
+      .roundRect(0, 0, avatarW, avatarH, 6)
+      .stroke({ color: THEME.colors.gold, width: 2, alpha: 0.8 });
+    roleCardContainer.addChild(roleBorder);
+
+    let roleRevealed = player.role === "lord";
+    const roleLabelText = new Text({
+      text: "Thân Phận\n(Nhấn để lật)",
+      style: {
+        fontFamily: GAME_FONT_FAMILY,
+        fontSize: 14,
+        fill: THEME.colors.gold,
+        align: "center",
+        stroke: { color: 0x000000, width: 3 },
+      },
+    });
+    roleLabelText.anchor.set(0.5);
+    roleLabelText.position.set(avatarW / 2, avatarH / 2);
+    roleCardContainer.addChild(roleLabelText);
+
+    if (player.role === "lord") {
+      if (faceTex) roleSprite.texture = faceTex;
+      roleLabelText.visible = false;
+    } else {
+      roleCardContainer.eventMode = "static";
+      roleCardContainer.cursor = "pointer";
+      roleCardContainer.on("pointerdown", () => {
+        roleRevealed = !roleRevealed;
+        if (roleRevealed) {
+          if (faceTex) roleSprite.texture = faceTex;
+          roleLabelText.visible = false;
+        } else {
+          if (backTex) roleSprite.texture = backTex;
+          roleLabelText.visible = true;
+        }
+      });
+    }
+
+    this.addChild(roleCardContainer);
 
     // === Equipment Zone ===
     const equipLeft = 8 + avatarW + 12;
@@ -265,7 +324,7 @@ export class Dashboard extends Container {
       },
     });
     countBadge.anchor.set(1, 0);
-    countBadge.position.set(vw - 60 - 12, 12);
+    countBadge.position.set(roleLeft - 12, 12);
     this.addChild(countBadge);
 
     const cardContainer = new Container();
@@ -288,8 +347,8 @@ export class Dashboard extends Container {
 
     // Radial layout Math
     const radius = 1200;
-    // EXACT CENTER OF DASHBOARD
-    const centerX = (vw - 60) / 2;
+    // EXACT CENTER OF AVAILABLE SPACE
+    const centerX = (handLeft + roleLeft) / 2;
     // Push the center way down so the arc is flat
     const centerY = panelHeight + radius - 90;
 

@@ -136,6 +136,11 @@ export class CardView extends Container {
 
   private resolveTexture(definitionID: CardName): Texture | null {
     const alias = CARD_ART_ALIAS[definitionID] ?? EQUIP_ART_ALIAS[definitionID];
-    return alias ? (Assets.get<Texture>(alias) ?? null) : null;
+    if (alias) {
+      try {
+        return Assets.get<Texture>(alias) ?? null;
+      } catch (e) {}
+    }
+    return null;
   }
 }

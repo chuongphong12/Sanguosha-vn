@@ -1410,7 +1410,10 @@ function promptNullification(
     for (const playerID of rotatedOrder) {
       if (effect.passedPlayerIDs.includes(playerID) || excluded.includes(playerID)) continue;
       
-      const hasWuxie = G.players[playerID].hand.some(cID => G.cards[cID].name === 'nullification');
+      const hasWuxie = 
+        G.players[playerID].hand.some(cID => canRespondWithCard(G, playerID, cID, 'nullification')) ||
+        Object.values(G.players[playerID].equipment).some(cID => cID && canRespondWithCard(G, playerID, cID as string, 'nullification'));
+      
       if (G.config && G.config.autoSkipWuxie && !hasWuxie) {
         effect.passedPlayerIDs.push(playerID);
         continue;
@@ -2806,6 +2809,36 @@ function answerSelectCards(
       effect.stage = "bottom";
       return true;
     }
+    if (effect.kind === "slash") {
+      if (prompt.reason === "ice-sword") {
+        effect.stage = "after-damage";
+        G.effectStack.unshift(
+          damageEffect(
+            G,
+            effect.use.sourceID,
+            effect.use.targetIDs[effect.targetIndex],
+            1,
+            "normal",
+            effect.use.materialCardIDs,
+            "slash",
+            effect.use.color,
+          )
+        );
+        return true;
+      }
+      if (prompt.reason === "rock-cleaving-axe") {
+        advanceSlashTarget(effect);
+        return true;
+      }
+      if (prompt.reason === "qilin-bow") {
+        advanceSlashTarget(effect);
+        return true;
+      }
+      if (prompt.reason === "liu-li") {
+        effect.stage = "dodge";
+        return true;
+      }
+    }
   }
   const cardIDs = moveSelectedCard(G, prompt, answer);
   if (!cardIDs) return false;
@@ -2932,7 +2965,7 @@ function answerOption(
         zones: ["hand"],
         minimum: 1,
         maximum: 1,
-        allowPass: false,
+        allowPass: true,
       };
       return true;
     }
@@ -2990,7 +3023,7 @@ function answerOption(
         zones: ["hand", "equipment"],
         minimum: Math.min(2, available),
         maximum: Math.min(2, available),
-        allowPass: false,
+        allowPass: true,
       };
       return true;
     }
@@ -3012,7 +3045,7 @@ function answerOption(
         zones: ["hand", "equipment"],
         minimum: 2,
         maximum: 2,
-        allowPass: false,
+        allowPass: true,
       };
       return true;
     }
@@ -3027,7 +3060,7 @@ function answerOption(
         zones: ["hand", "equipment"],
         minimum: 1,
         maximum: 1,
-        allowPass: false,
+        allowPass: true,
       };
       return true;
     }
@@ -3042,7 +3075,7 @@ function answerOption(
         zones: ["equipment"],
         minimum: 1,
         maximum: 1,
-        allowPass: false,
+        allowPass: true,
       };
       return true;
     }

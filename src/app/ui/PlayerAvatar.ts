@@ -181,7 +181,10 @@ export class PlayerAvatar extends Container {
       const textureAlias = filled
         ? `main/ui/system/magatamas/${colorSuffix}.png`
         : `main/ui/system/magatamas/0.png`;
-      const tex = Assets.get<Texture>(textureAlias);
+      let tex: Texture | undefined;
+      try {
+        tex = Assets.get<Texture>(textureAlias);
+      } catch (e) {}
       if (tex) {
         const magatama = new Sprite(tex);
         magatama.width = dotSize;
@@ -206,10 +209,18 @@ export class PlayerAvatar extends Container {
 
   private resolvePortrait(generalID: string): Texture | null {
     const alias = GENERAL_PORTRAIT_ALIAS[generalID];
-    return alias ? (Assets.get<Texture>(alias) ?? null) : null;
+    if (alias) {
+      try {
+        return Assets.get<Texture>(alias) ?? null;
+      } catch (e) {}
+    }
+    return null;
   }
 
   private resolveFactionIcon(faction: Faction): Texture | null {
-    return Assets.get<Texture>(FACTION_ICON_ALIAS[faction]) ?? null;
+    try {
+      return Assets.get<Texture>(FACTION_ICON_ALIAS[faction]) ?? null;
+    } catch (e) {}
+    return null;
   }
 }

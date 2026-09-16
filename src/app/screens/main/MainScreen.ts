@@ -26,6 +26,7 @@ import {
   hasLordSkill,
   SKILLS,
 } from "../../../game/catalog/generals";
+import { ROLE_NAMES, Role } from "../../../game/catalog/roles";
 import type {
   CardDefinition,
   CardResponsePrompt,
@@ -98,51 +99,66 @@ export class MainScreen extends Container {
   private mainBundleLoaded = false;
   private isAwaitingBundle = false;
   private autoSkipWuxie = true;
-  private rolePopupDismissed = false;
+  private rolePopupDismissedFor: string | null = null;
 
-  private rolePopupContainer?: PIXI.Container;
+  private rolePopupContainer?: Container;
   private showRolePopup(role: string) {
     if (this.rolePopupContainer) return;
-    const popup = new PIXI.Container();
+    const popup = new Container();
 
-    const overlay = new PIXI.Graphics();
+    const overlay = new Graphics();
     overlay
       .rect(0, 0, this.viewportWidth, this.viewportHeight)
       .fill({ color: 0x000000, alpha: 0.85 });
     overlay.eventMode = "static";
     overlay.cursor = "pointer";
 
-    const roleNames: Record<string, string> = {
-      chu_cong: "CHỦ CÔNG",
-      trung_than: "TRUNG THẦN",
-      phan_tac: "PHẢN TẶC",
-      noi_gian: "NỘI GIAN",
-    };
+    const content = new Container();
+    content.position.set(this.viewportWidth / 2, this.viewportHeight / 2);
+    
+    const title = new Text({
+      text: "Thân phận của bạn là:",
+      style: { fontFamily: "Noto Serif", fontSize: 24, fill: "#ffffff", align: "center" }
+    });
+    title.anchor.set(0.5);
+    title.position.set(0, -180);
+    content.addChild(title);
 
-    const label = new PIXI.Text({
-      text:
-        "Thân phận của bạn là:\n\n" + (roleNames[role] || role.toUpperCase()),
+    const roleAlias = `cards/roles/${role}.jpg`;
+    let faceTex: Texture | undefined;
+    if (role) {
+      try {
+        faceTex = Assets.get<Texture>(roleAlias);
+      } catch (e) {}
+    }
+    if (faceTex) {
+      const sprite = new Sprite(faceTex);
+      sprite.anchor.set(0.5);
+      // Playing cards are around 300x400 usually.
+      // If we want it big in the center, scale 1.0 or 1.2 is good.
+      sprite.scale.set(1.0); 
+      sprite.position.set(0, -20);
+      content.addChild(sprite);
+    }
+
+    const roleNameStr = (ROLE_NAMES as any)[role] || role.toUpperCase();
+    const label = new Text({
+      text: roleNameStr.toUpperCase(),
       style: {
         fontFamily: "Noto Serif",
         fontSize: 48,
         fontWeight: "bold",
-        fill: {
-          type: "linear",
-          colorStops: [
-            { offset: 0, color: "#d4af37" },
-            { offset: 1, color: "#aa801a" },
-          ],
-        },
+        fill: "#d4af37",
         align: "center",
         stroke: { color: 0x1a1a1a, width: 4 },
       },
     });
     label.anchor.set(0.5);
-    label.position.set(this.viewportWidth / 2, this.viewportHeight / 2);
+    label.position.set(0, 160);
+    content.addChild(label);
 
-    popup.addChild(overlay, label);
+    popup.addChild(overlay, content);
 
-    // Auto dismiss after 3.5s or on click
     const dismiss = () => {
       if (this.rolePopupContainer && !this.rolePopupContainer.destroyed) {
         this.rolePopupContainer.destroy();
@@ -157,7 +173,6 @@ export class MainScreen extends Container {
     this.rolePopupContainer = popup;
   }
 
-  private roleCardRevealed = false;
   private lordExtraHp = 1;
   private turnTimeLimit: number | null = null;
   private targetNumPlayers: number = 8;
@@ -273,10 +288,6 @@ export class MainScreen extends Container {
       return; // Skip normal rendering until loaded
     }
     
-    if (state && state.G.status !== "waiting-room" && !this.rolePopupDismissed && this.match) {
-      this.rolePopupDismissed = true;
-      this.showRolePopup(state.G.players[this.match.currentViewerID].role);
-    }
     const promptID = state?.G.prompt?.id ?? null;
     if (promptID !== this.lastPromptID) {
       if (this.nullificationTimeout) {
@@ -350,6 +361,11 @@ export class MainScreen extends Container {
       return;
     }
 
+    if (this.rolePopupDismissedFor !== this.match!.currentViewerID) {
+      this.rolePopupDismissedFor = this.match!.currentViewerID;
+      this.showRolePopup(G.players[this.match!.currentViewerID].role || "");
+    }
+
     if (!this.mainBundleLoaded) {
       this.addText(
         "Đang tải dữ liệu trò chơi...",
@@ -368,13 +384,14 @@ export class MainScreen extends Container {
     this.drawPrivateArea(G);
     // Overlay for General Selection
     const viewer = G.players[this.match!.currentViewerID];
-    const canSelectGeneral =
-      viewer.generalID === null &&
-      viewer.generalCandidates.length > 0 &&
-      ((G.status === "lord-selection" &&
-        this.match!.currentViewerID === G.lordID) ||
-        (G.status === "general-selection" &&
-          this.match!.currentViewerID !== G.lordID));
+      const canSelectGeneral =
+        this.rolePopupDismissedFor === this.match!.currentViewerID &&
+        viewer.generalID === null &&
+        viewer.generalCandidates.length > 0 &&
+        ((G.status === "lord-selection" &&
+          this.match!.currentViewerID === G.lordID) ||
+          (G.status === "general-selection" &&
+            this.match!.currentViewerID !== G.lordID));
 
     if (canSelectGeneral) {
       this.drawGeneralCandidates(G, viewer.generalCandidates);
@@ -518,6 +535,7 @@ export class MainScreen extends Container {
         autoSkipWuxie: this.autoSkipWuxie,
         lordExtraHp: this.lordExtraHp,
         turnTimeLimit: this.turnTimeLimit,
+        actualNumPlayers: joinedPlayers.length,
       });
       return;
     }
@@ -636,6 +654,7 @@ export class MainScreen extends Container {
               autoSkipWuxie: this.autoSkipWuxie,
               lordExtraHp: this.lordExtraHp,
               turnTimeLimit: this.turnTimeLimit,
+              actualNumPlayers: joinedPlayers.length,
             });
           }
         },
@@ -696,8 +715,10 @@ export class MainScreen extends Container {
       `${name}.png`,
       `/assets/main/${name}.jpg`,
     ]) {
-      texture = Assets.get<Texture>(alias);
-      if (texture) break;
+      try {
+        texture = Assets.get<Texture>(alias);
+        if (texture) break;
+      } catch (e) {}
     }
     if (!texture) return;
     const sprite = new TilingSprite({
@@ -793,25 +814,28 @@ export class MainScreen extends Container {
   }
 
   private drawStatus(G: TqsPlayerViewState): void {
-    const panelY = 104;
-    this.addPanel(
-      30,
-      panelY,
-      this.viewportWidth - 60,
-      66,
-      THEME.colors.ink,
-      THEME.colors.gold,
-    );
+    const layoutWidth = this.viewportWidth - 280;
+    const centerX = layoutWidth / 2;
+    const panelY = 16;
+
+    const getPlayerName = (id: string) => {
+      if (this.match?.isRemote && this.state?.matchData) {
+        const matchData = this.state.matchData as { id: number; name?: string }[];
+        const p = matchData.find(m => String(m.id) === id);
+        if (p && p.name) return p.name;
+      }
+      return `P${Number(id) + 1}`;
+    };
 
     let status = "";
     let detail = "";
     if (G.status === "lord-selection") {
-      status = `Chủ Công chọn Võ Tướng · Lượt chọn: P${G.players[G.lordID].seat + 1}`;
+      status = `Chủ Công chọn Võ Tướng · Lượt chọn: ${getPlayerName(G.lordID)}`;
       detail = `${G.seatOrder.length} người chơi · Standard 2013 · 108 lá bài`;
     } else if (G.status === "general-selection") {
       const pending = G.seatOrder
         .filter((id) => !G.players[id].generalSelected)
-        .map((id) => `P${G.players[id].seat + 1}`)
+        .map((id) => getPlayerName(id))
         .join(", ");
       status = `Các người chơi còn lại bí mật chọn Võ Tướng · Chưa hoàn tất: ${pending}`;
       detail = `${G.seatOrder.length} người chơi · Standard 2013 · 108 lá bài`;
@@ -819,7 +843,7 @@ export class MainScreen extends Container {
       status = G.winner?.reason ?? "Ván đấu kết thúc.";
       detail = `Chồng Bài Rút: ${G.deckSize} · Chồng Bài Bỏ: ${G.discard.length}`;
     } else if (G.prompt) {
-      const responder = `P${G.players[G.prompt.responderID].seat + 1}`;
+      const responder = getPlayerName(G.prompt.responderID);
       status = this.promptStatus(G, responder);
       detail = `Chồng Bài Rút: ${G.deckSize} · Chồng Bài Bỏ: ${G.discard.length}`;
     } else {
@@ -827,28 +851,48 @@ export class MainScreen extends Container {
       detail = `Chồng Bài Rút: ${G.deckSize} · Chồng Bài Bỏ: ${G.discard.length}`;
     }
 
-    this.addText(
-      status,
-      52,
-      panelY + 18,
-      18,
-      THEME.colors.paper,
-      0,
-      "left",
-      0,
-      this.viewportWidth - 104,
+    const statusText = new Text({
+      text: status,
+      style: {
+        fontFamily: GAME_FONT_FAMILY,
+        fontSize: 16,
+        fill: THEME.colors.paper,
+        align: "center",
+      }
+    });
+
+    const detailText = new Text({
+      text: detail,
+      style: {
+        fontFamily: GAME_FONT_FAMILY,
+        fontSize: 12,
+        fill: THEME.colors.paperDark,
+        align: "center",
+      }
+    });
+
+    const contentWidth = Math.max(statusText.width, detailText.width);
+    const panelWidth = contentWidth + 80;
+    const panelHeight = 56;
+    const panelX = centerX - panelWidth / 2;
+
+    this.addPanel(
+      panelX,
+      panelY,
+      panelWidth,
+      panelHeight,
+      THEME.colors.ink,
+      THEME.colors.gold,
+      0.85
     );
-    this.addText(
-      detail,
-      52,
-      panelY + 44,
-      12,
-      THEME.colors.paperDark,
-      0,
-      "left",
-      0,
-      this.viewportWidth - 104,
-    );
+
+    statusText.anchor.set(0.5, 0);
+    statusText.position.set(centerX, panelY + 8);
+    this.content.addChild(statusText);
+
+    detailText.anchor.set(0.5, 0);
+    detailText.position.set(centerX, panelY + 32);
+    this.content.addChild(detailText);
   }
 
   private drawSeats(G: TqsPlayerViewState): void {
@@ -897,9 +941,10 @@ export class MainScreen extends Container {
       seat.eventMode = selectableTarget ? "static" : "none";
       seat.cursor = selectableTarget ? "pointer" : "default";
 
-      const centerX = this.viewportWidth / 2;
+      const layoutWidth = this.viewportWidth - 280;
+      const centerX = layoutWidth / 2;
       const centerY = this.viewportHeight / 2 - 40;
-      const radiusX = this.viewportWidth / 2 - 140;
+      const radiusX = layoutWidth / 2 - 140;
       const radiusY = this.viewportHeight / 2 - 280;
 
       let px = 0;
@@ -964,8 +1009,10 @@ export class MainScreen extends Container {
     
     for (let i = entries.length - 1; i >= 0; i--) {
       const entry = entries[i];
-      const text = this.addText(entry.message, x + 20, currentY, 13, THEME.colors.paper, 0, "left", 0, width - 40);
-      currentY -= (text.height + 10);
+      const text = this.addText(entry.message, x + 20, 0, 13, THEME.colors.paper, 0, "left", 0, width - 40, true);
+      currentY -= text.height;
+      text.y = currentY;
+      currentY -= 10;
       if (currentY < 60) break; // Don't overflow title
     }
   }
@@ -975,33 +1022,7 @@ export class MainScreen extends Container {
     const player = G.players[viewerID];
     const top = this.viewportHeight - 250;
 
-    // Draw Hidden Role Card in bottom left
-    const roleCardTex = this.roleCardRevealed
-      ? Assets.get(`system/roles/${player.role}.png`)
-      : Assets.get(`system/roles/unknown.png`);
-    if (roleCardTex) {
-      const roleSprite = new Sprite(roleCardTex);
-      roleSprite.scale.set(0.35); // Made larger
-      roleSprite.x = 30;
-      roleSprite.y = this.viewportHeight - roleSprite.height - 30; // Anchored to bottom left safely
-      roleSprite.eventMode = "static";
-      roleSprite.cursor = "pointer";
-      roleSprite.on("pointerdown", () => {
-        this.roleCardRevealed = !this.roleCardRevealed;
-        this.render();
-      });
-      this.content.addChild(roleSprite);
 
-      this.addText(
-        "Thân Phận",
-        30 + roleSprite.width / 2,
-        roleSprite.y - 15,
-        16,
-        THEME.colors.gold,
-        0.5,
-        "center",
-      );
-    }
 
     const requiredActorID = this.requiredActorID(G);
     if (
@@ -1049,7 +1070,7 @@ export class MainScreen extends Container {
     }
 
     const dashboard = new Dashboard(G, viewerID, {
-      viewportWidth: this.viewportWidth,
+      viewportWidth: this.viewportWidth - 280,
       selectedCardIDs: this.selectedCardIDs,
       handScrollX: this.handScrollX,
       onCardTap: (cardID: string) => {
@@ -1157,140 +1178,62 @@ export class MainScreen extends Container {
     // Dim the background
     const bg = new Graphics()
       .rect(0, 0, this.viewportWidth, this.viewportHeight)
-      .fill({ color: THEME.colors.black, alpha: 0.7 });
-    bg.eventMode = "static"; // Block clicks to underlying UI
+      .fill({ color: THEME.colors.black, alpha: 0.85 });
+    bg.eventMode = "static";
     this.content.addChild(bg);
 
     this.addText(
-      "CHỌN VÕ TƯỚNG",
+      "LƯỢT CỦA BẠN — CHỌN TƯỚNG",
       centerX,
-      centerY - 220,
-      36,
+      centerY - 270,
+      20,
+      THEME.colors.gray,
+      0.5,
+      "center",
+    );
+    this.addText(
+      `Lượt của bạn — lật và chọn 1 trong ${candidates.length} tướng`,
+      centerX,
+      centerY - 240,
+      14,
       THEME.colors.gold,
       0.5,
       "center",
     );
 
     const gap = 24;
-    let cardW = 180;
+    const baseW = 280;
+    const baseH = 560;
+    let cardW = baseW;
+    let cardH = baseH;
     let totalW = candidates.length * cardW + (candidates.length - 1) * gap;
     if (totalW > this.viewportWidth - 60) {
       cardW =
         (this.viewportWidth - 60 - (candidates.length - 1) * gap) /
         candidates.length;
+      cardH = (cardW / baseW) * baseH;
       totalW = candidates.length * cardW + (candidates.length - 1) * gap;
     }
-    const cardH = cardW * 1.4; // Standard ratio
     const startX = centerX - totalW / 2 + cardW / 2;
 
     candidates.forEach((generalID, index) => {
-      const isSelected = this.selectedCandidateID === generalID;
       const x = startX + index * (cardW + gap);
-      const y = centerY - 40;
+      const y = centerY + 10;
 
       const cardContainer = new Container();
-      // PlayerAvatar draws from top-left, so adjust position
       cardContainer.position.set(x - cardW / 2, y - cardH / 2);
 
       const card = new GeneralCardView(generalID, {
         width: cardW,
         height: cardH,
-        isSelected: isSelected,
-        onTap: () => {
-          if (this.selectedCandidateID !== generalID) {
-            this.selectedCandidateID = generalID;
-            this.render();
-          }
+        onConfirm: () => {
+          this.match!.move("selectGeneral", generalID);
         },
       });
 
       cardContainer.addChild(card);
-
       this.content.addChild(cardContainer);
     });
-
-    if (this.selectedCandidateID) {
-      const general = GENERALS_BY_ID[this.selectedCandidateID];
-
-      // Info Panel
-      const panelW = 600;
-
-      let skillsText = "";
-      general.skillIDs.forEach((skillID) => {
-        const skill = SKILLS[skillID];
-        if (skill) {
-          skillsText += `[${skill.name}]: ${skill.description || ""}\n\n`;
-        }
-      });
-      if (hasLordSkill(general.id) && viewer.role === "lord") {
-        skillsText +=
-          "[Chủ Công Kỹ] Tướng này có Chủ Công Kỹ, thích hợp làm Chủ Công.\n";
-      }
-
-      const skillsLabel = new Text({
-        text: skillsText.trim().normalize("NFC"),
-        style: {
-          fontFamily: GAME_FONT_FAMILY,
-          fontSize: 16,
-          fill: THEME.colors.white,
-          align: "left",
-          wordWrap: true,
-          wordWrapWidth: panelW - 40,
-          lineHeight: 24,
-        },
-      });
-
-      // Calculate dynamic panel height
-      const panelH = Math.max(160, 60 + skillsLabel.height + 20);
-
-      // Dynamic panel Y placement based on card size
-      const currentCardW = Math.min(
-        180,
-        (this.viewportWidth - 60 - (candidates.length - 1) * gap) /
-          candidates.length,
-      );
-      const currentCardH = currentCardW * 1.4;
-      const cardCenterY = centerY - 20;
-      const panelY = cardCenterY + currentCardH / 2 + 20;
-
-      const panel = new Graphics()
-        .roundRect(centerX - panelW / 2, panelY, panelW, panelH, 8)
-        .fill({ color: THEME.colors.black, alpha: 0.85 })
-        .stroke({ color: THEME.colors.gold, width: 2 });
-      this.content.addChild(panel);
-
-      this.addText(
-        `${general.name} - Thể Lực: ${general.maxHP}`,
-        centerX,
-        panelY + 24,
-        24,
-        THEME.colors.gold,
-        0.5,
-        "center",
-      );
-
-      skillsLabel.anchor.set(0, 0);
-      skillsLabel.position.set(centerX - panelW / 2 + 20, panelY + 54);
-      this.content.addChild(skillsLabel);
-
-      // Confirm Button
-      this.addButton(
-        "Xác Nhận",
-        centerX,
-        panelY + panelH + 34,
-        180,
-        50,
-        () => {
-          const selected = this.selectedCandidateID;
-          this.selectedCandidateID = null; // Clear state
-          this.match!.move("selectGeneral", selected!);
-        },
-        THEME.colors.red,
-        THEME.colors.paper,
-        false,
-        { fontSize: 20, fontWeight: "700" },
-      );
-    }
   }
 
   private drawActions(G: TqsPlayerViewState, viewerID: PlayerID): void {
@@ -1451,7 +1394,7 @@ export class MainScreen extends Container {
           actionRow.centers[conversionIndex],
           actionRow.centerY,
           actionRow.widths[conversionIndex],
-          48,
+          40,
           () => {
             if (!this.virtualAs) {
               this.virtualAs = conversions[0];
@@ -1558,7 +1501,7 @@ export class MainScreen extends Container {
         actionRow.centers[playActionIndex],
         actionRow.centerY,
         actionRow.widths[playActionIndex],
-        48,
+        40,
         () => {
           if (this.pendingSkill) {
             if (this.pendingSkill === "zhi-heng")
@@ -1629,7 +1572,7 @@ export class MainScreen extends Container {
           actionRow.centers[spearIndex],
           actionRow.centerY,
           actionRow.widths[spearIndex],
-          48,
+          40,
           () => {
             this.serpentSpearMode = !this.serpentSpearMode;
             this.selectedCardIDs.clear();
@@ -1896,7 +1839,11 @@ export class MainScreen extends Container {
     prompt: NonNullable<TqsPlayerViewState["prompt"]>,
   ): void {
     if (prompt.kind === "card-response") {
-      this.drawCardResponsePrompt(G, prompt);
+      if (prompt.reason === "rescue") {
+        this.drawRescuePopup(G, prompt);
+      } else {
+        this.drawCardResponsePrompt(G, prompt);
+      }
       return;
     }
     if (prompt.kind === "option") {
@@ -2024,24 +1971,26 @@ export class MainScreen extends Container {
     >,
   ): void {
     const y = this.viewportHeight - 340;
+    const boardW = this.viewportWidth - 280;
     const width = Math.min(
       120,
-      (this.viewportWidth - 68) / Math.max(1, prompt.candidates.length),
+      (boardW - 68) / Math.max(1, prompt.candidates.length),
     );
     this.addText(
       `Đột Tập: chọn từ ${prompt.minimum} đến ${prompt.maximum} người chơi`,
-      this.viewportWidth / 2,
+      boardW / 2,
       y - 40,
       13,
       THEME.colors.paperDark,
     );
+    const startX = boardW / 2 - (width * prompt.candidates.length) / 2 + width / 2;
     prompt.candidates.forEach((playerID, index) => {
       const selected = this.selectedPromptPlayerIDs.includes(playerID);
       const canToggle =
         selected || this.selectedPromptPlayerIDs.length < prompt.maximum;
       this.addButton(
         `P${G.players[playerID].seat + 1}`,
-        34 + width / 2 + index * width,
+        startX + index * width,
         y,
         width - 6,
         54,
@@ -2182,6 +2131,80 @@ export class MainScreen extends Container {
     );
   }
 
+  private drawRescuePopup(
+    G: TqsPlayerViewState,
+    prompt: CardResponsePrompt,
+  ): void {
+    const overlay = new Graphics()
+      .rect(0, 0, this.viewportWidth, this.viewportHeight)
+      .fill({ color: 0x000000, alpha: 0.75 });
+    overlay.eventMode = "static";
+    this.content.addChild(overlay);
+
+    const targetName = this.generalName(G, prompt.targetID);
+    this.addText(
+      `Người chơi [${targetName}] đang hấp hối!`,
+      this.viewportWidth / 2,
+      this.viewportHeight / 2 - 80,
+      36,
+      THEME.colors.redBright,
+    );
+    this.addText(
+      `Bạn có muốn dùng Đào để cứu không?`,
+      this.viewportWidth / 2,
+      this.viewportHeight / 2 - 30,
+      24,
+      THEME.colors.gold,
+    );
+
+    let validCardID: string | undefined;
+    const responder = G.players[prompt.responderID];
+    for (const cardID of responder.hand) {
+      if (canRespondWithCard(G, prompt.responderID, cardID, prompt.response)) {
+        validCardID = cardID;
+        break;
+      }
+    }
+    if (!validCardID) {
+      for (const cardID of Object.values(responder.equipment)) {
+        if (cardID && canRespondWithCard(G, prompt.responderID, cardID as string, prompt.response)) {
+          validCardID = cardID as string;
+          break;
+        }
+      }
+    }
+
+    const cx1 = this.viewportWidth / 2 - 120;
+    const cx2 = this.viewportWidth / 2 + 120;
+    const cy = this.viewportHeight / 2 + 50;
+
+    this.addButton(
+      "Dùng 【Đào】",
+      cx1,
+      cy,
+      200,
+      48,
+      () => {
+        if (validCardID) {
+          this.answerPrompt(prompt.id, { kind: "card", cardID: validCardID });
+        }
+      },
+      THEME.colors.red,
+      THEME.colors.white,
+      !validCardID
+    );
+
+    this.addButton(
+      "Không cứu",
+      cx2,
+      cy,
+      200,
+      48,
+      () => this.answerPrompt(prompt.id, { kind: "pass" }),
+      THEME.colors.ink,
+    );
+  }
+
   private responsePassLabel(prompt: CardResponsePrompt): string {
     if (prompt.reason === "rescue") return "Không cứu";
     if (prompt.reason === "borrowed-sword") return "Giao Vũ Khí";
@@ -2293,19 +2316,25 @@ export class MainScreen extends Container {
     }
 
     const y = (this.viewportHeight - 80) / 2;
+    const boardW = this.viewportWidth - 280;
     this.addText(
       "Chọn bài",
-      this.viewportWidth / 2,
+      boardW / 2,
       y - 120,
       20,
       THEME.colors.gold,
     );
 
-    const cardW = 120,
-      cardH = 168,
+    const cardW = 120;
+    const cardH = 168;
+    let gap = 32;
+    const totalRequestedW =
+      choices.length * cardW + (choices.length - 1) * gap;
+    if (totalRequestedW > boardW - 68) {
       gap = 16;
+    }
     const totalW = choices.length * cardW + (choices.length - 1) * gap;
-    const startX = this.viewportWidth / 2 - totalW / 2 + cardW / 2;
+    const startX = boardW / 2 - totalW / 2 + cardW / 2;
 
     choices.forEach(({ label, choice }, index) => {
       const selectedIndex = this.selectedZoneChoices.findIndex(
@@ -2363,7 +2392,7 @@ export class MainScreen extends Container {
       actionRow.centers[0],
       actionRow.centerY,
       actionRow.widths[0],
-      48,
+      40,
       () =>
         this.answerPrompt(prompt.id, {
           kind: "zone-cards",
@@ -2380,7 +2409,7 @@ export class MainScreen extends Container {
         actionRow.centers[1],
         actionRow.centerY,
         actionRow.widths[1],
-        48,
+        40,
         () => this.answerPrompt(prompt.id, { kind: "pass" }),
         THEME.colors.ink,
       );
@@ -2394,9 +2423,10 @@ export class MainScreen extends Container {
     >,
   ): void {
     const y = (this.viewportHeight - 80) / 2;
+    const boardW = this.viewportWidth - 280;
     this.addText(
       "Chọn một lá bài",
-      this.viewportWidth / 2,
+      boardW / 2,
       y - 120,
       20,
       THEME.colors.gold,
@@ -2409,7 +2439,7 @@ export class MainScreen extends Container {
 
     const totalW =
       visibleCardIDs.length * cardW + (visibleCardIDs.length - 1) * gap;
-    const startX = this.viewportWidth / 2 - totalW / 2 + cardW / 2;
+    const startX = boardW / 2 - totalW / 2 + cardW / 2;
 
     visibleCardIDs.forEach((cardID, index) => {
       const card = G.cards[cardID];
@@ -2554,6 +2584,7 @@ export class MainScreen extends Container {
     align: "left" | "center" | "right" = "center",
     letterSpacing = 0,
     maxWidth?: number,
+    wrap = false,
   ): Text {
     const label = new Text({
       text: text.normalize("NFC"),
@@ -2563,11 +2594,12 @@ export class MainScreen extends Container {
         fill: color,
         align,
         letterSpacing,
+        ...(wrap && maxWidth ? { wordWrap: true, wordWrapWidth: maxWidth } : {}),
       },
     });
     label.anchor.set(anchor, anchor === 0 ? 0 : 0.5);
     label.position.set(x, y);
-    if (maxWidth && label.width > maxWidth) {
+    if (!wrap && maxWidth && label.width > maxWidth) {
       label.scale.set(maxWidth / label.width);
     }
     this.content.addChild(label);
@@ -2590,7 +2622,8 @@ export class MainScreen extends Container {
       paddingX?: number;
       paddingY?: number;
     } = {},
-  ): Container {
+  ): Button {
+    if (height === 48) height = 40; // force smaller buttons for action rows
     const button = new Button({
       label,
       width,

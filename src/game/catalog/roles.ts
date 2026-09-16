@@ -58,7 +58,7 @@ export const ROLE_NAMES: Record<Role, string> = {
   lord: "Chủ Công",
   loyalist: "Trung Thần",
   rebel: "Phản Tặc",
-  renegade: "Nội Gian",
+  renegade: "Nội Gián",
 };
 
 export function getRoleDeck(
