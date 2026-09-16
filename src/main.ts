@@ -37,7 +37,8 @@ setEngine(engine);
 
   const launchMainScreen = () => engine.navigation.showScreen(MainScreen);
 
-  const credentials = urlParams.get("credentials");
+  const stateCredentials = window.history.state?.credentials;
+  const credentials = urlParams.get("credentials") || stateCredentials; // Fallback to URL in case of old links, but prefer state
 
   if (inviteMatchID && !credentials) {
     // If the room has password, user might fail, but let's just let LobbyUI handle join flow
@@ -50,35 +51,49 @@ setEngine(engine);
         newCredentials?: string,
         serverUrl?: string,
       ) => {
-        // Modify URL to pass state to MainScreen (in memory or query string)
+        // Pass sensitive info in state, keep only matchID in URL
         window.history.replaceState(
-          {},
+          { mode: "remote", playerID, credentials: newCredentials, serverUrl },
           "",
-          `/?mode=remote&matchID=${matchID}&playerID=${playerID}&credentials=${newCredentials}&serverUrl=${serverUrl}`,
+          `/?matchID=${matchID}`,
         );
         launchMainScreen();
       },
     );
   } else if (inviteMatchID && credentials) {
+    // Note: If credentials are in URL from old link, we keep them, or we could replace state here.
+    // For now, if we have them, just launch.
+    if (urlParams.has("credentials")) {
+      window.history.replaceState(
+        { 
+          mode: "remote", 
+          playerID: urlParams.get("playerID"), 
+          credentials: urlParams.get("credentials"), 
+          serverUrl: urlParams.get("serverUrl") 
+        },
+        "",
+        `/?matchID=${inviteMatchID}`,
+      );
+    }
     launchMainScreen();
   } else {
     LobbyUI.show(
       (
         matchID: string,
         playerID: string,
-        credentials?: string,
+        newCredentials?: string,
         serverUrl?: string,
       ) => {
         window.history.pushState(
-          {},
+          { mode: "remote", playerID, credentials: newCredentials, serverUrl },
           "",
-          `/?mode=remote&matchID=${matchID}&playerID=${playerID}&credentials=${credentials}&serverUrl=${serverUrl}`,
+          `/?matchID=${matchID}`,
         );
         launchMainScreen();
       },
       (numPlayers: number) => {
         window.history.pushState(
-          {},
+          { mode: "local", numPlayers },
           "",
           `/?mode=local&numPlayers=${numPlayers}`,
         );

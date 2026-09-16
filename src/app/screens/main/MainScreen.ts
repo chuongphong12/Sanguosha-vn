@@ -172,19 +172,20 @@ export class MainScreen extends Container {
   }
 
   public prepare(): void {
+    const state = window.history.state || {};
     const urlParams = new URLSearchParams(window.location.search);
-    const mode = urlParams.get("mode") as "local" | "remote" | null;
+    const mode = state.mode || urlParams.get("mode") || "local";
     const config: MatchConfig = {};
 
     if (mode === "remote") {
       config.mode = "remote";
       config.matchID = urlParams.get("matchID") || undefined;
-      config.playerID = urlParams.get("playerID") || undefined;
-      config.credentials = urlParams.get("credentials") || undefined;
-      config.serverUrl = urlParams.get("serverUrl") || undefined;
+      config.playerID = state.playerID || urlParams.get("playerID") || undefined;
+      config.credentials = state.credentials || urlParams.get("credentials") || undefined;
+      config.serverUrl = state.serverUrl || urlParams.get("serverUrl") || undefined;
     } else {
       config.mode = "local";
-      const numPlayersParam = parseInt(urlParams.get("numPlayers") || "4", 10);
+      const numPlayersParam = parseInt(state.numPlayers || urlParams.get("numPlayers") || "4", 10);
       config.numPlayers = isNaN(numPlayersParam) ? 4 : numPlayersParam;
     }
 
@@ -693,11 +694,12 @@ export class MainScreen extends Container {
   private async leaveMatchAndExit(): Promise<void> {
     if (this.match?.isRemote) {
       try {
+        const state = window.history.state || {};
         const urlParams = new URLSearchParams(window.location.search);
-        const serverUrl = urlParams.get("serverUrl");
+        const serverUrl = state.serverUrl || urlParams.get("serverUrl");
         const matchID = urlParams.get("matchID");
-        const playerID = urlParams.get("playerID");
-        const credentials = urlParams.get("credentials");
+        const playerID = state.playerID || urlParams.get("playerID");
+        const credentials = state.credentials || urlParams.get("credentials");
         if (serverUrl && matchID && playerID && credentials) {
           const lc = new LobbyClient({ server: serverUrl });
           await lc.leaveMatch("tam-quoc-sat-standard-2013", matchID, {
