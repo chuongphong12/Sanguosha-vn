@@ -1,17 +1,8 @@
 diff --git a/dist/boardgameio.es.js b/dist/boardgameio.es.js
-index d6bda465802ac8ca2b2c8e2ac21fd3341bdb3095..63d9cb6ccd785ca826db020ec1aefc2ab7860459 100644
+index d6bda465802ac8ca2b2c8e2ac21fd3341bdb3095..f95698f605b68206346d830d14b315b409691806 100644
 --- a/dist/boardgameio.es.js	
 +++ b/dist/boardgameio.es.js	
-@@ -2526,7 +2526,7 @@ function Flow({ moves, phases, endIf, onEnd, turn, events, plugins, }) {
-         state = { ...state, ctx: { ...state.ctx, gameover: arg } };
-         // Run game end hook.
-         const G = wrapped.onEnd(state);
--        return { ...state, G };
-+        const res = { ...state, G }; if (res.plugins && res.plugins.random && res.plugins.random.data) { res.plugins = { ...res.plugins, random: { ...res.plugins.random, data: undefined } }; } return res;
-     }
-     function EndPhase(state, { arg, next, turn: initialTurn, automatic }) {
-         // End the turn first.
-@@ -13888,6 +13888,7 @@ const getFilterPlayerView = (game) => (playerID, payload) => {
+@@ -13888,9 +13888,11 @@ const getFilterPlayerView = (game) => (playerID, payload) => {
          case 'sync': {
              const [matchID, syncInfo] = payload.args;
              const filteredState = applyPlayerView(game, playerID, syncInfo.state);
@@ -19,20 +10,15 @@ index d6bda465802ac8ca2b2c8e2ac21fd3341bdb3095..63d9cb6ccd785ca826db020ec1aefc2a
              const log = redactLog(syncInfo.log, playerID);
              const newSyncInfo = {
                  ...syncInfo,
++                initialState: filteredInitialState,
+                 state: filteredState,
+                 log,
+             };
 diff --git a/dist/boardgameio.js b/dist/boardgameio.js
-index deea92d5649d7b6af12b0eaeb1fa67d342435f29..464b595d2574bc3cef56d970dc51d63fbeda3f11 100644
+index deea92d5649d7b6af12b0eaeb1fa67d342435f29..04bd3e1de5a330171e8149bb2032d598bb11db0a 100644
 --- a/dist/boardgameio.js	
 +++ b/dist/boardgameio.js	
-@@ -2533,7 +2533,7 @@ function Flow({ moves, phases, endIf, onEnd, turn, events, plugins, }) {
-         state = { ...state, ctx: { ...state.ctx, gameover: arg } };
-         // Run game end hook.
-         const G = wrapped.onEnd(state);
--        return { ...state, G };
-+        const res = { ...state, G }; if (res.plugins && res.plugins.random && res.plugins.random.data) { res.plugins = { ...res.plugins, random: { ...res.plugins.random, data: undefined } }; } return res;
-     }
-     function EndPhase(state, { arg, next, turn: initialTurn, automatic }) {
-         // End the turn first.
-@@ -13895,6 +13895,7 @@ const getFilterPlayerView = (game) => (playerID, payload) => {
+@@ -13895,9 +13895,11 @@ const getFilterPlayerView = (game) => (playerID, payload) => {
          case 'sync': {
              const [matchID, syncInfo] = payload.args;
              const filteredState = applyPlayerView(game, playerID, syncInfo.state);
@@ -40,3 +26,55 @@ index deea92d5649d7b6af12b0eaeb1fa67d342435f29..464b595d2574bc3cef56d970dc51d63f
              const log = redactLog(syncInfo.log, playerID);
              const newSyncInfo = {
                  ...syncInfo,
++                initialState: filteredInitialState,
+                 state: filteredState,
+                 log,
+             };
+diff --git a/dist/cjs/filter-player-view-a8eeb11e.js b/dist/cjs/filter-player-view-a8eeb11e.js
+index 707efb964012c97d30085b67af36a2ac8bd51e26..0f834f33904528cad726ec1721a651a3589ed0c1 100644
+--- a/dist/cjs/filter-player-view-a8eeb11e.js	
++++ b/dist/cjs/filter-player-view-a8eeb11e.js	
+@@ -38,9 +38,11 @@ const getFilterPlayerView = (game) => (playerID, payload) => {
+         case 'sync': {
+             const [matchID, syncInfo] = payload.args;
+             const filteredState = applyPlayerView(game, playerID, syncInfo.state);
++            const filteredInitialState = applyPlayerView(game, playerID, syncInfo.initialState);
+             const log = redactLog(syncInfo.log, playerID);
+             const newSyncInfo = {
+                 ...syncInfo,
++                initialState: filteredInitialState,
+                 state: filteredState,
+                 log,
+             };
+diff --git a/dist/cjs/server.js b/dist/cjs/server.js
+index e6848d4a594e3019a521a26fccea7d440da18162..f3f625a478d671521d6376d1657bd8c7e5ed072b 100644
+--- a/dist/cjs/server.js	
++++ b/dist/cjs/server.js	
+@@ -3707,9 +3707,11 @@ const getFilterPlayerView = (game) => (playerID, payload) => {
+         case 'sync': {
+             const [matchID, syncInfo] = payload.args;
+             const filteredState = applyPlayerView(game, playerID, syncInfo.state);
++            const filteredInitialState = applyPlayerView(game, playerID, syncInfo.initialState);
+             const log = redactLog(syncInfo.log, playerID);
+             const newSyncInfo = {
+                 ...syncInfo,
++                initialState: filteredInitialState,
+                 state: filteredState,
+                 log,
+             };
+diff --git a/dist/esm/filter-player-view-43ed49b0.js b/dist/esm/filter-player-view-43ed49b0.js
+index 906c3dfe6c1295048f9497fc7ae0c63635dccb6d..1a9c6d62812320a521d1c24ae942b6c9b1b4d386 100644
+--- a/dist/esm/filter-player-view-43ed49b0.js	
++++ b/dist/esm/filter-player-view-43ed49b0.js	
+@@ -36,9 +36,11 @@ const getFilterPlayerView = (game) => (playerID, payload) => {
+         case 'sync': {
+             const [matchID, syncInfo] = payload.args;
+             const filteredState = applyPlayerView(game, playerID, syncInfo.state);
++            const filteredInitialState = applyPlayerView(game, playerID, syncInfo.initialState);
+             const log = redactLog(syncInfo.log, playerID);
+             const newSyncInfo = {
+                 ...syncInfo,
++                initialState: filteredInitialState,
+                 state: filteredState,
+                 log,
+             };

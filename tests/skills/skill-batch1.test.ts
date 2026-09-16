@@ -199,8 +199,17 @@ describe("passive rule skills (batch 1)", () => {
     const targetID = G.seatOrder[1];
     assignGeneral(G, targetID, "lu-xun");
     giveCard(G, targetID, "dodge");
+    const indulgenceID = giveCard(G, sourceID, "indulgence");
     const dismantleID = giveCard(G, sourceID, "dismantle");
 
+    expect(
+      declareCardUse(
+        G,
+        sourceID,
+        { cardID: indulgenceID, targetIDs: [targetID] },
+        identityShuffle,
+      ),
+    ).toBe(false);
     expect(
       declareCardUse(
         G,
@@ -208,8 +217,7 @@ describe("passive rule skills (batch 1)", () => {
         { cardID: dismantleID, targetIDs: [targetID] },
         identityShuffle,
       ),
-    ).toBe(false);
-    expect(G.players[sourceID].hand).toContain(dismantleID);
+    ).toBe(true);
   });
 
   it("requires two Dodges against Wu Shuang's Slash", () => {

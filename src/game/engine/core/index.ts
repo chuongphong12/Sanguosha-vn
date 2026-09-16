@@ -716,7 +716,7 @@ export function canSelectCardTarget(
   }
   if (selectedTargetIDs.length > 0) return false;
   if (
-    (cardName === "snatch" || cardName === "dismantle") &&
+    (cardName === "snatch" || cardName === "indulgence") &&
     hasSkill(G, candidateID, "qian-xun")
   )
     return false;
@@ -3301,9 +3301,12 @@ export function useSkill(
     const player = G.players[playerID];
     player.hp -= 1;
     writeLog(G, `${playerName(G, playerID)} dùng 【Khổ Nhục】, mất 1 Thể Lực.`);
-    markSkillUsed(G, playerID, skillID);
-    drawCards(G, playerID, 2, shuffle);
-    writeLog(G, `${playerName(G, playerID)} rút 2 lá.`);
+    G.effectStack.unshift({
+      id: resolutionID(G),
+      kind: "draw",
+      targetID: playerID,
+      amount: 2,
+    });
     if (player.hp <= 0)
       G.effectStack.unshift({
         id: resolutionID(G),
@@ -3386,7 +3389,6 @@ export function useSkill(
         `${playerName(G, playerID)} hồi phục 1 Thể Lực nhờ 【Nhân Đức】.`,
       );
     }
-    markSkillUsed(G, playerID, skillID);
     return true;
   }
 

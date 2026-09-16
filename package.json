@@ -1,8 +1,5 @@
 {
   "pnpm": {
-    "patchedDependencies": {
-      "boardgame.io@0.50.2": "patches/boardgame.io@0.50.2.patch"
-    },
     "onlyBuiltDependencies": [
       "cpu-features",
       "esbuild",

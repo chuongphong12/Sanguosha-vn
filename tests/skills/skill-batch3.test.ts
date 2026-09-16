@@ -105,6 +105,14 @@ describe("damage and judgement trigger skills (batch 3)", () => {
       { kind: "pass" },
       identityShuffle,
     );
+    answerCardPrompt(
+      G,
+      targetID,
+      G.prompt!.id,
+      { kind: "option", choice: "activate" },
+      identityShuffle,
+    );
+    console.log("SOURCE HP AFTER ACTIVATE:", G.players[sourceID].hp, "EFFECT STACK:", G.effectStack, "PROMPT:", G.prompt);
 
     expect(G.players[targetID].hp).toBe(G.players[targetID].maxHP - 1);
     expect(G.players[sourceID].hp).toBe(hpSource - 1);
@@ -135,6 +143,13 @@ describe("damage and judgement trigger skills (batch 3)", () => {
       targetID,
       G.prompt!.id,
       { kind: "pass" },
+      identityShuffle,
+    );
+    answerCardPrompt(
+      G,
+      targetID,
+      G.prompt!.id,
+      { kind: "option", choice: "activate" },
       identityShuffle,
     );
 
@@ -168,6 +183,28 @@ describe("damage and judgement trigger skills (batch 3)", () => {
       targetID,
       G.prompt!.id,
       { kind: "pass" },
+      identityShuffle,
+    );
+    expect(G.prompt).toMatchObject({
+      reason: "gang-lie",
+      responderID: targetID,
+    });
+    answerCardPrompt(
+      G,
+      targetID,
+      G.prompt!.id,
+      { kind: "option", choice: "activate" },
+      identityShuffle,
+    );
+    expect(G.prompt).toMatchObject({
+      reason: "gang-lie-punish",
+      responderID: sourceID,
+    });
+    answerCardPrompt(
+      G,
+      sourceID,
+      G.prompt!.id,
+      { kind: "option", choice: "discard-2" },
       identityShuffle,
     );
     expect(G.prompt).toMatchObject({
