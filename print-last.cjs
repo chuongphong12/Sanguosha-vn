@@ -1,1 +1,0 @@
-const fs = require('fs'); const lines = fs.readFileSync('C:/Users/Hudson Brekker/.gemini/antigravity-cli/brain/dc4a9a20-ed69-4a71-973c-2d682adf023a/.system_generated/logs/transcript.jsonl', 'utf8').trim().split('\n'); console.log(lines[lines.length - 1]); console.log(lines[lines.length - 2]); console.log(lines[lines.length - 3]);
