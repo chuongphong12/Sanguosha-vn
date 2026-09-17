@@ -10,6 +10,11 @@ export function assetpackPlugin() {
     pipes: [
       ...pixiPipes({
         cacheBust: false,
+        // Skip @0.5x generation on CI to halve AssetPack processing time.
+        // Set SKIP_LOW_RES=true in Vercel environment variables to enable.
+        resolutions: process.env.SKIP_LOW_RES === "true"
+          ? { default: 1 }
+          : { default: 1, low: 0.5 },
         manifest: {
           output: "./src/manifest.json",
         },

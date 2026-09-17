@@ -24,7 +24,6 @@ dist-ssr
 *.sw?
 
 public/assets
-.assetpack
 src/manifest.json
 .env
 .env.*
