@@ -66,8 +66,7 @@ const SUIT_LABELS = {
 const MIN_LAYOUT_HEIGHT = 860;
 
 export class MainScreen extends Container {
-  // We remove assetBundles = ["main"] so WaitingRoom loads instantly.
-  // Assets are still background-loaded by engine.
+  public static assetBundles = ["main"];
 
   private readonly content = new Container();
   private match?: MatchClient;
@@ -96,8 +95,6 @@ export class MainScreen extends Container {
   private viewportWidth = 768;
   private viewportHeight = 1024;
 
-  private mainBundleLoaded = false;
-  private isAwaitingBundle = false;
   private autoSkipWuxie = true;
   private rolePopupDismissedFor: string | null = null;
 
@@ -271,51 +268,7 @@ export class MainScreen extends Container {
 
   private receiveState(state: MatchClientState): void {
     this.state = state;
-    if (state && state.G.status !== "waiting-room" && !this.mainBundleLoaded) {
-      if (!this.isAwaitingBundle) {
-        this.isAwaitingBundle = true;
-        // Draw a simple loading screen so it's not purely black
-        this.clearContent();
-        this.addText(
-          "Đang tải tài nguyên Game...",
-          this.viewportWidth / 2,
-          this.viewportHeight / 2 - 20,
-          24,
-          THEME.colors.gold,
-          0.5,
-          "center",
-        );
-        this.addText(
-          "Vui lòng chờ...",
-          this.viewportWidth / 2,
-          this.viewportHeight / 2 + 20,
-          16,
-          THEME.colors.muted,
-          0.5,
-          "center",
-        );
-
-        Assets.loadBundle("main")
-          .then(() => {
-            this.mainBundleLoaded = true;
-            this.isAwaitingBundle = false;
-            this.render();
-          })
-          .catch((err) => {
-            console.error("Lỗi tải tài nguyên:", err);
-            this.addText(
-              "Lỗi tải tài nguyên! Hãy thử làm mới trang.",
-              this.viewportWidth / 2,
-              this.viewportHeight / 2 + 60,
-              16,
-              THEME.colors.redBright,
-              0.5,
-              "center",
-            );
-          });
-      }
-      return; // Skip normal rendering until loaded
-    }
+    if (!state) return;
 
     const promptID = state?.G.prompt?.id ?? null;
     if (promptID !== this.lastPromptID) {
@@ -395,17 +348,6 @@ export class MainScreen extends Container {
       this.showRolePopup(G.players[this.match!.currentViewerID].role || "");
     }
 
-    if (!this.mainBundleLoaded) {
-      this.addText(
-        "Đang tải dữ liệu trò chơi...",
-        this.viewportWidth / 2,
-        this.viewportHeight / 2,
-        24,
-        THEME.colors.gold,
-      );
-      return;
-    }
-
     this.drawViewerSelector(G);
     this.drawStatus(G);
     this.drawSeats(G);
@@ -458,7 +400,7 @@ export class MainScreen extends Container {
     let joinedPlayers: MatchPlayer[] = [];
     if (this.match!.isRemote) {
       joinedPlayers =
-        (this.state!.matchData as MatchPlayer[])?.filter((p) => p.name) || [];
+        ((this.state!.matchData as any[])?.filter((p) => p.name) as MatchPlayer[]) || [];
     } else {
       const numPlayers = this.match!.playerIDs.length;
       for (let i = 0; i < numPlayers; i++) {

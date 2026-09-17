@@ -20,15 +20,9 @@ export async function loadGameFonts(): Promise<void> {
   await document.fonts.ready;
 }
 
-const gradient = new FillGradient({
-  type: "linear",
-  start: { x: 0, y: 0 },
-  end: { x: 0, y: 100 },
-  colorStops: [
-    { offset: 0, color: 0xd4af37 },
-    { offset: 1, color: 0xaa801a },
-  ],
-});
+const gradient = new FillGradient(0, 0, 0, 100);
+gradient.addColorStop(0, 0xd4af37);
+gradient.addColorStop(1, 0xaa801a);
 
 export const TitleTextStyle = new TextStyle({
   fontFamily: GAME_FONT_FAMILY,
