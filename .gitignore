@@ -27,7 +27,8 @@ public/assets
 .assetpack
 src/manifest.json
 .env
-.env.*
+.env.local
+.env.*.local
 
 # Documents and AI Resources
 .references/
