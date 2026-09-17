@@ -34,7 +34,10 @@ export default defineConfig(({ mode }) => ({
     rollupOptions: {
       output: {
         manualChunks(id) {
-          if (id.includes("node_modules/pixi.js") || id.includes("node_modules/@pixi")) {
+          if (
+            id.includes("node_modules/pixi.js") ||
+            id.includes("node_modules/@pixi")
+          ) {
             return "vendor-pixi";
           }
           if (

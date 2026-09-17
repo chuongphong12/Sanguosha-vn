@@ -81,7 +81,9 @@ export const TqsGame: Game<TqsGameState> = {
         if (actualNumPlayers < 4 || actualNumPlayers > 10) return INVALID_MOVE;
         const options: TqsSetupOptions = {
           numPlayers: actualNumPlayers,
-          joinedPlayerIDs: clientOptions?.joinedPlayerIDs ?? ctx.playOrder.slice(0, actualNumPlayers),
+          joinedPlayerIDs:
+            clientOptions?.joinedPlayerIDs ??
+            ctx.playOrder.slice(0, actualNumPlayers),
           roleVariant: "standard",
           autoSkipWuxie: clientOptions?.autoSkipWuxie ?? true,
           lordExtraHp: clientOptions?.lordExtraHp,

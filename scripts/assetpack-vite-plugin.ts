@@ -2,6 +2,7 @@
 import type { AssetPackConfig } from "@assetpack/core";
 import { AssetPack } from "@assetpack/core";
 import { pixiPipes } from "@assetpack/core/pixi";
+import path from "path";
 import type { Plugin, ResolvedConfig } from "vite";
 
 export function assetpackPlugin() {
@@ -12,9 +13,10 @@ export function assetpackPlugin() {
         cacheBust: false,
         // Skip @0.5x generation on CI to halve AssetPack processing time.
         // Set SKIP_LOW_RES=true in Vercel environment variables to enable.
-        resolutions: process.env.SKIP_LOW_RES === "true"
-          ? { default: 1 }
-          : { default: 1, low: 0.5 },
+        resolutions:
+          process.env.SKIP_LOW_RES === "true"
+            ? { default: 1 }
+            : { default: 1, low: 0.5 },
         manifest: {
           output: "./src/manifest.json",
         },
@@ -36,13 +38,11 @@ export function assetpackPlugin() {
       if (!resolvedConfig.publicDir) return;
       if (apConfig.output) return;
       // remove the root from the public dir
-      const publicDir = resolvedConfig.publicDir.replace(process.cwd(), "");
-
-      if (process.platform === "win32") {
-        apConfig.output = `${publicDir}/assets/`;
-      } else {
-        apConfig.output = `.${publicDir}/assets/`;
-      }
+      const relativePublicDir = path.relative(
+        process.cwd(),
+        resolvedConfig.publicDir,
+      );
+      apConfig.output = `./${relativePublicDir}/assets/`.replace(/\\/g, "/");
     },
     buildStart: async () => {
       if (mode === "serve") {

@@ -184,7 +184,9 @@ export class PlayerAvatar extends Container {
       let tex: Texture | undefined;
       try {
         tex = Assets.get<Texture>(textureAlias);
-      } catch (e) {}
+      } catch (e) {
+        /* ignore */
+      }
       if (tex) {
         const magatama = new Sprite(tex);
         magatama.width = dotSize;
@@ -212,7 +214,9 @@ export class PlayerAvatar extends Container {
     if (alias) {
       try {
         return Assets.get<Texture>(alias) ?? null;
-      } catch (e) {}
+      } catch (e) {
+        /* ignore */
+      }
     }
     return null;
   }
@@ -220,7 +224,9 @@ export class PlayerAvatar extends Container {
   private resolveFactionIcon(faction: Faction): Texture | null {
     try {
       return Assets.get<Texture>(FACTION_ICON_ALIAS[faction]) ?? null;
-    } catch (e) {}
+    } catch (e) {
+      /* ignore */
+    }
     return null;
   }
 }

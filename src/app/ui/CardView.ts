@@ -139,7 +139,9 @@ export class CardView extends Container {
     if (alias) {
       try {
         return Assets.get<Texture>(alias) ?? null;
-      } catch (e) {}
+      } catch (e) {
+        /* ignore */
+      }
     }
     return null;
   }

@@ -22,16 +22,20 @@ An open-source browser-based adaptation of the famous card board game **Sanguosh
 ## 🚀 Setup & Installation
 
 ### 1. Prerequisites
+
 - Node.js (v18+ recommended)
 - A package manager like `npm`, `yarn`, or `pnpm`
 
 ### 2. Install Dependencies
+
 Clone the repository and install the dependencies in the root directory:
+
 ```bash
 npm install
 ```
 
 ### 3. Running Locally (Development)
+
 You will need to start both the Frontend Client and the Backend Server for multiplayer functionality:
 
 ```bash
@@ -41,9 +45,11 @@ npm run dev
 # Start Backend Server (Boardgame.io server handling game state)
 npm run serve
 ```
-*Note: Running `npm run dev` triggers a pre-script (`npm run clean`) to automatically clean up old assets and prepare the environment.*
+
+_Note: Running `npm run dev` triggers a pre-script (`npm run clean`) to automatically clean up old assets and prepare the environment._
 
 ### 4. Production Build
+
 ```bash
 npm run build
 ```
@@ -69,4 +75,5 @@ npm run test:watch
 - `tests/` - Vitest test suites categorized by rules, skills, UI, and security.
 
 ## 📝 License
+
 This project is built for educational and open-source sharing purposes. Graphical assets and original character designs are subject to the copyright of their respective owners (Yoka Games).

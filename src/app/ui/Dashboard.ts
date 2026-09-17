@@ -61,12 +61,16 @@ export class Dashboard extends Container {
     let backTex: Texture | undefined;
     try {
       backTex = Assets.get<Texture>("cards/roles/back.jpg");
-    } catch (e) {}
+    } catch (e) {
+      /* ignore */
+    }
     let faceTex: Texture | undefined;
     if (player.role) {
       try {
         faceTex = Assets.get<Texture>(`cards/roles/${player.role}.jpg`);
-      } catch (e) {}
+      } catch (e) {
+        /* ignore */
+      }
     }
 
     const roleSprite = backTex ? new Sprite(backTex) : new Sprite();
