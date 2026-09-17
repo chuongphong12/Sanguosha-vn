@@ -1425,7 +1425,15 @@ function resolveNullification(
           canRespondWithCard(G, playerID, cID as string, "nullification"),
       );
 
-    if (G.config && G.config.autoSkipWuxie && !hasWuxie) {
+    const isBeneficialForSelf =
+      ["harvest", "peach-garden", "ex-nihilo"].includes(effect.cardName) &&
+      effect.targetID === playerID;
+
+    if (
+      G.config &&
+      G.config.autoSkipWuxie &&
+      (!hasWuxie || isBeneficialForSelf)
+    ) {
       effect.passedPlayerIDs.push(playerID);
       continue;
     }
