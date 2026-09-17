@@ -2146,16 +2146,22 @@ export class MainScreen extends Container {
     overlay.eventMode = "static";
     this.content.addChild(overlay);
 
+    const isSelf = prompt.targetID === this.match!.currentViewerID;
     const targetName = this.generalName(G, prompt.targetID);
+
     this.addText(
-      `Người chơi [${targetName}] đang hấp hối!`,
+      isSelf
+        ? `Bạn đang hấp hối!`
+        : `Người chơi [${targetName}] đang hấp hối!`,
       this.viewportWidth / 2,
       this.viewportHeight / 2 - 80,
       36,
       THEME.colors.redBright,
     );
     this.addText(
-      `Bạn có muốn dùng Đào để cứu không?`,
+      isSelf
+        ? `Bạn có muốn dùng Đào để tự cứu không?`
+        : `Bạn có muốn dùng Đào để cứu không?`,
       this.viewportWidth / 2,
       this.viewportHeight / 2 - 30,
       24,
@@ -2505,8 +2511,12 @@ export class MainScreen extends Container {
     const prompt = G.prompt;
     if (!prompt) return "";
     if (prompt.kind === "card-response") {
-      if (prompt.reason === "rescue")
-        return `Đang chờ ${responder} cứu ${this.generalName(G, prompt.targetID)}.`;
+      if (prompt.reason === "rescue") {
+        const isSelf = prompt.responderID === prompt.targetID;
+        return isSelf
+          ? `Đang chờ ${responder} tự cứu.`
+          : `Đang chờ ${responder} cứu ${this.generalName(G, prompt.targetID)}.`;
+      }
       if (prompt.reason === "nullification")
         return `【${prompt.subjectCardName ? CARD_DEFINITIONS[prompt.subjectCardName].name : "Cẩm Nang"}】 · ${responder} quyết định dùng 【Vô Giải Khả Kích】 · Chuỗi ${prompt.chainDepth} · ${prompt.currentlyNegated ? "Đang bị vô hiệu" : "Đang có hiệu lực"}.`;
       return `Đang chờ ${responder} đánh ra 【${CARD_DEFINITIONS[prompt.response].name}】.`;
