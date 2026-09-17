@@ -71,6 +71,9 @@ export class GeneralCardView extends Container {
       });
       nameText.anchor.set(0.5, 0);
       nameText.position.set(w / 2, imgHeight + 12);
+      if (nameText.width > w - 24) {
+        nameText.scale.set((w - 24) / nameText.width);
+      }
       innerContainer.addChild(nameText);
 
       // Faction / HP
@@ -198,7 +201,9 @@ export class GeneralCardView extends Container {
       try {
         const t = Assets.get<Texture>(alias);
         if (t) return t;
-      } catch (e) {}
+      } catch (e) {
+        /* ignore */
+      }
     }
     return null;
   }
