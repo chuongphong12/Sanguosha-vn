@@ -79,6 +79,8 @@ export class MainScreen extends Container {
   private selectedPromptPlayerIDs: PlayerID[] = [];
   private lastPromptID: number | null = null;
   private nullificationTimeout: ReturnType<typeof setTimeout> | null = null;
+  private nullificationEndTime: number = 0;
+  private nullificationInterval: ReturnType<typeof setInterval> | null = null;
   private handScrollX = 0;
   private serpentSpearMode = false;
   private virtualAs: "slash" | "snatch" | "indulgence" | null = null;
@@ -290,12 +292,13 @@ export class MainScreen extends Container {
         prompt.kind === "card-response" &&
         prompt.reason === "nullification"
       ) {
+        this.nullificationEndTime = Date.now() + 15000;
         this.nullificationTimeout = setTimeout(() => {
           this.nullificationTimeout = null;
           if (this.state?.G.prompt?.id === promptID) {
             this.match!.move("timeoutPrompt", promptID);
           }
-        }, 4000);
+        }, 15000);
       }
     }
     const requiredActorID = state ? this.requiredActorID(state.G) : null;
@@ -1856,6 +1859,8 @@ export class MainScreen extends Container {
     if (prompt.kind === "card-response") {
       if (prompt.reason === "rescue") {
         this.drawRescuePopup(G, prompt);
+      } else if (prompt.reason === "nullification") {
+        this.drawNullificationPopup(G, prompt);
       } else {
         this.drawCardResponsePrompt(G, prompt);
       }
@@ -2179,10 +2184,13 @@ export class MainScreen extends Container {
       THEME.colors.gold,
     );
 
+    const viewerID = this.match!.currentViewerID;
+    if (!viewerID) return;
+
     let validCardID: string | undefined;
-    const responder = G.players[prompt.responderID];
+    const responder = G.players[viewerID];
     for (const cardID of responder.hand) {
-      if (canRespondWithCard(G, prompt.responderID, cardID, prompt.response)) {
+      if (canRespondWithCard(G, viewerID, cardID, prompt.response)) {
         validCardID = cardID;
         break;
       }
@@ -2193,7 +2201,7 @@ export class MainScreen extends Container {
           cardID &&
           canRespondWithCard(
             G,
-            prompt.responderID,
+            viewerID,
             cardID as string,
             prompt.response,
           )
@@ -2226,6 +2234,95 @@ export class MainScreen extends Container {
 
     this.addButton(
       "Không cứu",
+      cx2,
+      cy,
+      200,
+      48,
+      () => this.answerPrompt(prompt.id, { kind: "pass" }),
+      THEME.colors.ink,
+    );
+  }
+
+  private drawNullificationPopup(
+    G: TqsPlayerViewState,
+    prompt: CardResponsePrompt,
+  ): void {
+    const overlay = new Graphics()
+      .rect(0, 0, this.viewportWidth, this.viewportHeight)
+      .fill({ color: 0x000000, alpha: 0.75 });
+    overlay.eventMode = "static";
+    this.content.addChild(overlay);
+
+    const viewerID = this.match!.currentViewerID;
+    if (!viewerID) return;
+
+    const sourceName = prompt.sourceID ? this.generalName(G, prompt.sourceID) : "Hệ thống";
+    const targetName = this.generalName(G, prompt.targetID);
+    const cardName = prompt.subjectCardName ? CARD_DEFINITIONS[prompt.subjectCardName].name : "Cẩm Nang";
+    const actionText = prompt.currentlyNegated ? "VÔ HIỆU HÓA" : "ĐANG CÓ HIỆU LỰC";
+
+    this.addText(
+      `【${cardName}】 · Chuỗi ${prompt.chainDepth} · ${actionText}`,
+      this.viewportWidth / 2,
+      this.viewportHeight / 2 - 100,
+      30,
+      prompt.currentlyNegated ? THEME.colors.gold : THEME.colors.redBright,
+    );
+
+    this.addText(
+      `Bạn có muốn dùng 【Vô Giải Khả Kích】 không?`,
+      this.viewportWidth / 2,
+      this.viewportHeight / 2 - 40,
+      24,
+      THEME.colors.paper,
+    );
+
+    const timerText = this.addText(
+      "",
+      this.viewportWidth / 2,
+      this.viewportHeight / 2,
+      28,
+      THEME.colors.redBright,
+    );
+
+    const updateTimer = () => {
+      const remaining = Math.max(0, this.nullificationEndTime - Date.now());
+      timerText.text = `(${Math.ceil(remaining / 1000)}s)`;
+    };
+    updateTimer();
+    this.nullificationInterval = setInterval(updateTimer, 100);
+
+    let validCardID: string | undefined;
+    const responder = G.players[viewerID];
+    for (const cardID of responder.hand) {
+      if (canRespondWithCard(G, viewerID, cardID, prompt.response)) {
+        validCardID = cardID;
+        break;
+      }
+    }
+
+    const cx1 = this.viewportWidth / 2 - 120;
+    const cx2 = this.viewportWidth / 2 + 120;
+    const cy = this.viewportHeight / 2 + 70;
+
+    this.addButton(
+      "Sử dụng",
+      cx1,
+      cy,
+      200,
+      48,
+      () => {
+        if (validCardID) {
+          this.answerPrompt(prompt.id, { kind: "card", cardID: validCardID });
+        }
+      },
+      THEME.colors.red,
+      THEME.colors.white,
+      !validCardID,
+    );
+
+    this.addButton(
+      "Không",
       cx2,
       cy,
       200,
@@ -2666,6 +2763,10 @@ export class MainScreen extends Container {
   }
 
   private clearContent(): void {
+    if (this.nullificationInterval) {
+      clearInterval(this.nullificationInterval);
+      this.nullificationInterval = null;
+    }
     for (const child of this.content.removeChildren())
       child.destroy({ children: true });
   }
