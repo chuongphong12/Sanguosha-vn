@@ -1395,6 +1395,7 @@ function promptNullification(
       subjectCardName: effect.cardName,
       chainDepth: effect.nullificationCardIDs.length,
       currentlyNegated: effect.negated,
+      passedPlayerIDs: effect.passedPlayerIDs,
     },
   );
 }
@@ -2522,30 +2523,47 @@ function answerNullification(
   G: TqsGameState,
   effect: NullificationEffect,
   prompt: CardResponsePrompt,
+  playerID: PlayerID,
   answer: PromptAnswer,
 ): boolean {
   if (answer.kind === "card") {
-    if (!hasCardInHand(G, prompt.responderID, answer.cardID, "nullification"))
+    if (!matchesResponse(G, playerID, answer.cardID, "nullification"))
       return false;
-    handToProcessing(G, prompt.responderID, answer.cardID);
+    zoneToProcessing(G, playerID, answer.cardID);
     effect.nullificationCardIDs.push(answer.cardID);
     effect.negated = !effect.negated;
     writeLog(
       G,
-      `${playerName(G, prompt.responderID)} sử dụng 【Vô Giải Khả Kích】.`,
+      `${playerName(G, playerID)} sử dụng 【Vô Giải Khả Kích】.`,
     );
     effect.passedPlayerIDs = [];
-    effect.responderID = nextLivingPlayer(G, prompt.responderID);
+    effect.responderID = nextLivingPlayer(G, playerID);
+    
+    // Regenerate prompt to reset client timers
+    prompt.id = resolutionID(G);
+    prompt.responderID = effect.responderID;
+    prompt.passedPlayerIDs = [];
+    prompt.chainDepth = effect.nullificationCardIDs.length;
+    prompt.currentlyNegated = effect.negated;
+    
     return true;
   }
   if (answer.kind !== "pass") return false;
-  effect.passedPlayerIDs.push(prompt.responderID);
-  const living = aliveInActionOrder(G);
-  if (living.every((playerID) => effect.passedPlayerIDs.includes(playerID))) {
-    closeNullification(G, effect);
-  } else {
-    effect.responderID = nextLivingPlayer(G, prompt.responderID);
+  if (!effect.passedPlayerIDs.includes(playerID)) {
+    effect.passedPlayerIDs.push(playerID);
   }
+  const living = aliveInActionOrder(G);
+  if (living.every((p) => effect.passedPlayerIDs.includes(p))) {
+    closeNullification(G, effect);
+  } else if (effect.responderID === playerID) {
+    let next = nextLivingPlayer(G, effect.responderID);
+    while (effect.passedPlayerIDs.includes(next)) {
+      next = nextLivingPlayer(G, next);
+    }
+    effect.responderID = next;
+    prompt.responderID = next;
+  }
+  prompt.passedPlayerIDs = [...effect.passedPlayerIDs];
   return true;
 }
 
@@ -3537,7 +3555,10 @@ export function answerCardPrompt(
     !effect ||
     prompt.id !== promptID ||
     (prompt.responderID !== playerID &&
-      !(prompt.kind === "card-response" && prompt.reason === "rescue")) ||
+      !(
+        prompt.kind === "card-response" &&
+        (prompt.reason === "rescue" || prompt.reason === "nullification")
+      )) ||
     !("effectID" in prompt) ||
     prompt.effectID !== effect.id
   ) {
@@ -3588,7 +3609,7 @@ export function answerCardPrompt(
     ) {
       accepted = answerAllySummon(G, effect, prompt, answer);
     } else if (effect.kind === "nullification")
-      accepted = answerNullification(G, effect, prompt, answer);
+      accepted = answerNullification(G, effect, prompt, playerID, answer);
     else if (effect.kind === "slash")
       accepted =
         prompt.reason === "green-dragon-blade"

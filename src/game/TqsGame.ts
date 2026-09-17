@@ -138,12 +138,11 @@ export const TqsGame: Game<TqsGameState> = {
           prompt &&
           prompt.id === promptID &&
           prompt.kind === "card-response" &&
-          prompt.reason === "nullification" &&
-          playerID === prompt.responderID
+          prompt.reason === "nullification"
         ) {
           answerCardPrompt(
             G,
-            prompt.responderID,
+            playerID,
             promptID,
             { kind: "pass" },
             shuffleFrom(random),

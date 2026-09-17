@@ -1244,11 +1244,12 @@ export class MainScreen extends Container {
     const prompt = G.prompt;
 
     if (prompt) {
-      const isRescue =
-        prompt.kind === "card-response" && prompt.reason === "rescue";
+      const isSimultaneous =
+        prompt.kind === "card-response" &&
+        (prompt.reason === "rescue" || prompt.reason === "nullification");
       const isResponder = prompt.responderID === viewerID;
       const isAliveAndNotPassed =
-        isRescue &&
+        isSimultaneous &&
         G.players[viewerID]?.alive &&
         !(prompt as any).passedPlayerIDs?.includes(viewerID);
 
