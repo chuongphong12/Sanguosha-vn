@@ -74,15 +74,6 @@ export class LobbyUI {
         <button id="btn-create-room" class="btn-ancient">Tạo Quân Lệnh</button>
         <button id="btn-refresh" class="btn-ancient btn-secondary">Làm Mới</button>
         <div style="display: inline-block; margin-left: 10px; border-left: 1px solid #c59a45; padding-left: 10px;">
-          <select id="offline-num-players" class="input-ancient" style="width: auto; padding: 4px 8px; margin-right: 8px;">
-            <option value="4">4 Người</option>
-            <option value="5">5 Người</option>
-            <option value="6">6 Người</option>
-            <option value="7">7 Người</option>
-            <option value="8">8 Người</option>
-            <option value="9">9 Người</option>
-            <option value="10">10 Người</option>
-          </select>
           <button id="btn-offline" class="btn-ancient btn-secondary">Chơi Offline</button>
         </div>
       </div>
@@ -91,16 +82,6 @@ export class LobbyUI {
         <div class="modal-content">
           <h2>Tạo Lệnh Bài</h2>
           <input type="text" id="input-room-name" class="input-ancient" placeholder="Tên phòng..." />
-          <div class="modal-checkbox" style="margin: 10px 0;">
-            Số người chơi: 
-            <select id="create-num-players" class="input-ancient" style="width: auto;">
-              <option value="4">4 Người</option>
-              <option value="5">5 Người</option>
-              <option value="6">6 Người</option>
-              <option value="8">8 Người</option>
-              <option value="10" selected>10 Người</option>
-            </select>
-          </div>
           <div class="modal-checkbox">
             <input type="checkbox" id="chk-private" /> <label for="chk-private">Phòng Bí Mật (Private)</label>
           </div>
@@ -138,12 +119,8 @@ export class LobbyUI {
       .getElementById("btn-refresh")!
       .addEventListener("click", () => this.refreshRooms(onJoinMatch));
     document.getElementById("btn-offline")!.addEventListener("click", () => {
-      const select = document.getElementById(
-        "offline-num-players",
-      ) as HTMLSelectElement;
-      const numPlayers = parseInt(select.value, 10);
       this.hide();
-      onPlayOffline(numPlayers);
+      onPlayOffline(10);
     });
 
     // Create Modal
@@ -181,16 +158,11 @@ export class LobbyUI {
         const isPrivate = chkPrivate.checked;
         const password = inputPass.value;
 
-        const numPlayersSelect = document.getElementById(
-          "create-num-players",
-        ) as HTMLSelectElement;
-        const numPlayers = parseInt(numPlayersSelect.value, 10);
-
         try {
           const created = await this.lobbyClient.createMatch(
             "tam-quoc-sat-standard-2013",
             {
-              numPlayers,
+              numPlayers: 10,
               setupData: {
                 roomName,
                 hasPassword: isPrivate,

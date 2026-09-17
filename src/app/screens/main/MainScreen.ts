@@ -564,8 +564,8 @@ export class MainScreen extends Container {
         autoSkipWuxie: this.autoSkipWuxie,
         lordExtraHp: this.lordExtraHp,
         turnTimeLimit: this.turnTimeLimit,
-        actualNumPlayers: joinedPlayers.length,
-        joinedPlayerIDs: joinedPlayers.map(p => String(p.id)),
+        actualNumPlayers: this.targetNumPlayers,
+        joinedPlayerIDs: joinedPlayers.slice(0, this.targetNumPlayers).map(p => String(p.id)),
       });
       return;
     }
@@ -680,12 +680,14 @@ export class MainScreen extends Container {
         50,
         () => {
           if (canStart) {
+            const actualNumPlayers = Math.min(joinedPlayers.length, this.targetNumPlayers);
+            const actualPlayers = joinedPlayers.slice(0, actualNumPlayers);
             this.match!.move("startGame", {
               autoSkipWuxie: this.autoSkipWuxie,
               lordExtraHp: this.lordExtraHp,
               turnTimeLimit: this.turnTimeLimit,
-              actualNumPlayers: joinedPlayers.length,
-              joinedPlayerIDs: joinedPlayers.map(p => String(p.id)),
+              actualNumPlayers: actualNumPlayers,
+              joinedPlayerIDs: actualPlayers.map(p => String(p.id)),
             });
           }
         },
