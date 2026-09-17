@@ -15,6 +15,7 @@ import type {
   GamePrompt,
   HarvestEffect,
   NullificationEffect,
+  AoeSimultaneousEffect,
   PhysicalCard,
   PlayCardInput,
   PlayerID,
@@ -26,6 +27,7 @@ import type {
   TqsGameState,
   TqsPlayerViewState,
 } from "../../model";
+import type { AoeSimultaneousEffect } from "../../types/effects";
 import {
   attackRange,
   determineWinner,
@@ -397,7 +399,11 @@ function nullifiable(
   sourceID: PlayerID | null,
   targetID: PlayerID,
   children: GameEffect[],
-  options: Pick<NullificationEffect, "onNegated" | "delayedCardID"> = {
+  options: Pick<
+    NullificationEffect,
+    AoeSimultaneousEffect,
+    "onNegated" | "delayedCardID"
+  > = {
     onNegated: "nothing",
     delayedCardID: null,
   },
@@ -833,23 +839,17 @@ function compileCardUse(G: TqsGameState, use: CardUse): GameEffect[] {
       const targets = aliveInActionOrder(G, use.sourceID).filter(
         (playerID) => playerID !== use.sourceID,
       );
-      const effects = targets.map((affectedID): GameEffect => {
-        const child: RequiredResponseEffect = {
-          id: resolutionID(G),
-          kind: "required-response",
-          sourceID: use.sourceID,
-          targetID: affectedID,
-          response: use.cardName === "arrow-barrage" ? "dodge" : "slash",
-          reason:
-            use.cardName === "arrow-barrage"
-              ? "arrow-barrage"
-              : "barbarian-invasion",
-          baguaTried: false,
-          sourceCardID: use.materialCardIDs[0] ?? null,
-        };
-        return nullifiable(G, use.cardName, use.sourceID, affectedID, [child]);
-      });
-      return [...effects, finishUse(G, use)];
+      const aoeEffect: AoeSimultaneousEffect = {
+        id: resolutionID(G),
+        kind: "aoe-simultaneous",
+        sourceID: use.sourceID,
+        cardName: use.cardName,
+        sourceCardID: use.materialCardIDs[0] ?? null,
+        targetIDs: targets,
+        passedPlayerIDs: [],
+        baguaTriedPlayerIDs: [],
+      };
+      return [aoeEffect, finishUse(G, use)];
     }
     case "peach-garden": {
       const effects = aliveInActionOrder(G, use.sourceID).map(
@@ -1336,10 +1336,14 @@ export function removeZoneCard(
 function closeNullification(
   G: TqsGameState,
   effect: NullificationEffect,
+  AoeSimultaneousEffect,
 ): void {
   for (const cardID of effect.nullificationCardIDs)
     processingToDiscard(G, cardID);
   G.effectStack.shift();
+  if (G.prompt?.reason === "nullification") {
+    G.prompt = null;
+  }
   if (!effect.negated) {
     G.effectStack.unshift(...effect.children);
     return;
@@ -1379,6 +1383,7 @@ function transferLightning(
 function promptNullification(
   G: TqsGameState,
   effect: NullificationEffect,
+  AoeSimultaneousEffect,
 ): void {
   effect.responderID =
     effect.responderID ??
@@ -1403,6 +1408,7 @@ function promptNullification(
 function resolveNullification(
   G: TqsGameState,
   effect: NullificationEffect,
+  AoeSimultaneousEffect,
 ): void {
   const order = aliveInActionOrder(G);
   const startIndex = order.indexOf(effect.sourceID ?? G.turn.activePlayerID);
@@ -1411,9 +1417,7 @@ function resolveNullification(
     ...order.slice(0, startIndex),
   ];
 
-  const excluded: PlayerID[] = [];
-
-  let nextPlayer = null;
+  // Pre-pass: Auto-skip players based on config or rules
   for (const playerID of rotatedOrder) {
     if (effect.passedPlayerIDs.includes(playerID)) continue;
 
@@ -1431,17 +1435,24 @@ function resolveNullification(
       ["harvest", "peach-garden", "ex-nihilo"].includes(effect.cardName) &&
       effect.targetID === playerID;
 
+    const isOwnTrickAtDepth0 =
+      effect.sourceID === playerID && effect.nullificationCardIDs.length === 0;
+
     if (
-      G.config &&
-      G.config.autoSkipWuxie &&
-      (!hasWuxie || isBeneficialForSelf)
+      isOwnTrickAtDepth0 ||
+      (G.config?.autoSkipWuxie && (!hasWuxie || isBeneficialForSelf))
     ) {
       effect.passedPlayerIDs.push(playerID);
-      continue;
     }
+  }
 
-    nextPlayer = playerID;
-    break;
+  // Find next responder
+  let nextPlayer = null;
+  for (const playerID of rotatedOrder) {
+    if (!effect.passedPlayerIDs.includes(playerID)) {
+      nextPlayer = playerID;
+      break;
+    }
   }
 
   if (!nextPlayer) {
@@ -1900,11 +1911,39 @@ function resolveDamage(G: TqsGameState, effect: DamageEffect): void {
   }
 }
 
-function resolveDying(G: TqsGameState, effect: DyingEffect): void {
+export function resolveDying(
+  G: TqsGameState,
+  effect: DyingEffect,
+  shuffle: Shuffle,
+): void {
   if (G.players[effect.dyingPlayerID].hp >= 1) {
     G.effectStack.shift();
     return;
   }
+
+  const living = aliveInActionOrder(G);
+  for (const pid of living) {
+    if (!effect.passedPlayerIDs.includes(pid)) {
+      let hasPeach = false;
+      const responder = G.players[pid];
+      for (const cardID of responder.hand) {
+        if (canRespondWithCard(G, pid, cardID, "peach")) {
+          hasPeach = true;
+          break;
+        }
+      }
+      if (!hasPeach) {
+        effect.passedPlayerIDs.push(pid);
+      }
+    }
+  }
+
+  if (living.every((p) => effect.passedPlayerIDs.includes(p))) {
+    G.effectStack.shift();
+    killPlayer(G, effect.dyingPlayerID, effect.sourceID, shuffle);
+    return;
+  }
+
   G.prompt = responsePrompt(
     G,
     effect.id,
@@ -2375,6 +2414,9 @@ export function resolveCardGame(G: TqsGameState, shuffle: Shuffle): void {
           processingToDiscard(G, cardID);
         G.effectStack.shift();
         break;
+      case "aoe-simultaneous":
+        resolveAoeSimultaneous(G, effect);
+        break;
       case "nullification":
         resolveNullification(G, effect);
         break;
@@ -2464,7 +2506,7 @@ export function resolveCardGame(G: TqsGameState, shuffle: Shuffle): void {
         resolveDamage(G, effect);
         break;
       case "dying":
-        resolveDying(G, effect);
+        resolveDying(G, effect, shuffle);
         break;
     }
   }
@@ -2522,6 +2564,7 @@ function resolveBagua(
 function answerNullification(
   G: TqsGameState,
   effect: NullificationEffect,
+  AoeSimultaneousEffect,
   prompt: CardResponsePrompt,
   playerID: PlayerID,
   answer: PromptAnswer,
@@ -2532,20 +2575,14 @@ function answerNullification(
     zoneToProcessing(G, playerID, answer.cardID);
     effect.nullificationCardIDs.push(answer.cardID);
     effect.negated = !effect.negated;
-    writeLog(
-      G,
-      `${playerName(G, playerID)} sử dụng 【Vô Giải Khả Kích】.`,
-    );
+    writeLog(G, `${playerName(G, playerID)} sử dụng 【Vô Giải Khả Kích】.`);
+
     effect.passedPlayerIDs = [];
-    effect.responderID = nextLivingPlayer(G, playerID);
-    
-    // Regenerate prompt to reset client timers
-    prompt.id = resolutionID(G);
-    prompt.responderID = effect.responderID;
-    prompt.passedPlayerIDs = [];
-    prompt.chainDepth = effect.nullificationCardIDs.length;
-    prompt.currentlyNegated = effect.negated;
-    
+    effect.sourceID = playerID;
+
+    if (G.prompt?.id === prompt.id) {
+      G.prompt = null;
+    }
     return true;
   }
   if (answer.kind !== "pass") return false;
@@ -2555,15 +2592,11 @@ function answerNullification(
   const living = aliveInActionOrder(G);
   if (living.every((p) => effect.passedPlayerIDs.includes(p))) {
     closeNullification(G, effect);
-  } else if (effect.responderID === playerID) {
-    let next = nextLivingPlayer(G, effect.responderID);
-    while (effect.passedPlayerIDs.includes(next)) {
-      next = nextLivingPlayer(G, next);
+  } else {
+    if (G.prompt?.id === prompt.id) {
+      G.prompt.passedPlayerIDs = [...effect.passedPlayerIDs];
     }
-    effect.responderID = next;
-    prompt.responderID = next;
   }
-  prompt.passedPlayerIDs = [...effect.passedPlayerIDs];
   return true;
 }
 
@@ -2795,8 +2828,7 @@ function answerRescue(
   shuffle: Shuffle,
 ): boolean {
   if (answer.kind === "card") {
-    if (!matchesResponse(G, playerID, answer.cardID, "peach"))
-      return false;
+    if (!matchesResponse(G, playerID, answer.cardID, "peach")) return false;
     zoneToDiscard(G, playerID, answer.cardID);
     const dying = G.players[effect.dyingPlayerID];
     const responderGeneral = GENERALS_BY_ID[G.players[playerID].generalID!];
@@ -2813,7 +2845,10 @@ function answerRescue(
         `【Cứu Viện】 tăng hiệu quả hồi phục cho ${playerName(G, dying.id)}.`,
       );
     effect.passedPlayerIDs = [];
-    if (G.players[effect.dyingPlayerID].hp >= 1) G.effectStack.shift();
+    if (G.players[effect.dyingPlayerID].hp >= 1) {
+      G.effectStack.shift();
+      if (G.prompt?.reason === "rescue") G.prompt = null;
+    }
     return true;
   }
   if (answer.kind !== "pass") return false;
@@ -2823,6 +2858,7 @@ function answerRescue(
   const living = aliveInActionOrder(G);
   if (living.every((p) => effect.passedPlayerIDs.includes(p))) {
     G.effectStack.shift();
+    if (G.prompt?.reason === "rescue") G.prompt = null;
     killPlayer(G, effect.dyingPlayerID, effect.sourceID, shuffle);
   } else if (effect.responderID === playerID) {
     let next = nextLivingPlayer(G, effect.responderID);
@@ -3557,7 +3593,10 @@ export function answerCardPrompt(
     (prompt.responderID !== playerID &&
       !(
         prompt.kind === "card-response" &&
-        (prompt.reason === "rescue" || prompt.reason === "nullification")
+        (prompt.reason === "rescue" ||
+          prompt.reason === "nullification" ||
+          prompt.reason === "arrow-barrage" ||
+          prompt.reason === "barbarian-invasion")
       )) ||
     !("effectID" in prompt) ||
     prompt.effectID !== effect.id
@@ -3608,6 +3647,15 @@ export function answerCardPrompt(
       prompt.reason === "ally-summon"
     ) {
       accepted = answerAllySummon(G, effect, prompt, answer);
+    } else if (effect.kind === "aoe-simultaneous") {
+      accepted = answerAoeSimultaneous(
+        G,
+        effect,
+        prompt,
+        playerID,
+        answer,
+        shuffle,
+      );
     } else if (effect.kind === "nullification")
       accepted = answerNullification(G, effect, prompt, playerID, answer);
     else if (effect.kind === "slash")
@@ -3642,7 +3690,15 @@ export function answerCardPrompt(
   }
 
   if (!accepted) return false;
-  if (G.prompt?.id === promptID) G.prompt = null;
+  if (
+    G.prompt?.id === promptID &&
+    G.prompt.reason !== "nullification" &&
+    G.prompt.reason !== "rescue" &&
+    G.prompt.reason !== "arrow-barrage" &&
+    G.prompt.reason !== "barbarian-invasion"
+  ) {
+    G.prompt = null;
+  }
   resolveCardGame(G, shuffle);
   return true;
 }
@@ -3796,6 +3852,11 @@ export function resolveBaguaJudgement(
         allowBagua: false,
       };
     }
+  } else if (slashEffect?.kind === "aoe-simultaneous") {
+    slashEffect.baguaTriedPlayerIDs.push(effect.ownerID);
+    if (success) {
+      slashEffect.passedPlayerIDs.push(effect.ownerID);
+    }
   }
 }
 
@@ -3890,4 +3951,126 @@ export function answerAllySummon(
     return true;
   }
   return false;
+}
+
+function resolveAoeSimultaneous(
+  G: TqsGameState,
+  effect: AoeSimultaneousEffect,
+): void {
+  const targetsLeft = effect.targetIDs.filter(
+    (id) => !effect.passedPlayerIDs.includes(id) && G.players[id]?.alive,
+  );
+  if (targetsLeft.length === 0) {
+    G.effectStack.shift();
+    return;
+  }
+
+  G.prompt = {
+    id: resolutionID(G),
+    kind: "card-response",
+    responderID: G.turn.activePlayerID, // Used just for compatibility, but the UI checks reason
+    response: "aoe-response",
+    reason: effect.cardName,
+    sourceID: effect.sourceID,
+    targetID: G.turn.activePlayerID,
+    allowBagua: effect.cardName === "arrow-barrage",
+    allowSerpentSpear: effect.cardName === "barbarian-invasion",
+    allowPass: true,
+    subjectCardName: effect.cardName,
+    forbidCard: false,
+    summonFaction: null,
+    passedPlayerIDs: effect.passedPlayerIDs,
+    effectID: effect.id,
+    chainDepth: 0,
+    currentlyNegated: false,
+  };
+}
+
+function answerAoeSimultaneous(
+  G: TqsGameState,
+  effect: AoeSimultaneousEffect,
+  prompt: CardResponsePrompt,
+  playerID: PlayerID,
+  answer: PromptAnswer,
+  shuffle: Shuffle,
+): boolean {
+  if (effect.passedPlayerIDs.includes(playerID)) return false;
+  if (!effect.targetIDs.includes(playerID)) return false;
+  if (!G.players[playerID]?.alive) return false;
+
+  const isArrow = effect.cardName === "arrow-barrage";
+
+  if (answer.kind === "bagua") {
+    if (!prompt.allowBagua) return false;
+    if (effect.baguaTriedPlayerIDs.includes(playerID)) return false; // Can only try once
+    G.effectStack.unshift({
+      id: resolutionID(G),
+      kind: "bagua-judgement",
+      ownerID: playerID,
+      judgeCardID: null,
+    });
+    if (G.prompt?.id === prompt.id) G.prompt = null;
+    return true;
+  } else if (answer.kind === "card") {
+    const isWuxie = canRespondWithCard(
+      G,
+      playerID,
+      answer.cardID,
+      "nullification",
+    );
+    const isDodgeOrSlash = canRespondWithCard(
+      G,
+      playerID,
+      answer.cardID,
+      isArrow ? "dodge" : "slash",
+    );
+
+    if (isWuxie) {
+      zoneToProcessing(G, playerID, answer.cardID);
+      processingToDiscard(G, answer.cardID);
+      writeLog(
+        G,
+        `${playerName(G, playerID)} dùng 【Vô Giải Khả Kích】 để vô hiệu hóa 【${CARD_DEFINITIONS[effect.cardName].name}】 lên bản thân.`,
+      );
+    } else if (isDodgeOrSlash) {
+      zoneToProcessing(G, playerID, answer.cardID);
+      processingToDiscard(G, answer.cardID);
+      writeLog(
+        G,
+        `${playerName(G, playerID)} đánh ra 【${isArrow ? "Thiểm" : "Sát"}】.`,
+      );
+    } else {
+      return false; // Invalid card
+    }
+  } else if (answer.kind === "pass") {
+    // Take damage
+    G.effectStack.unshift(
+      damageEffect(
+        G,
+        effect.sourceID,
+        playerID,
+        1,
+        "normal",
+        effect.sourceCardID,
+        effect.cardName,
+      ),
+    );
+  } else {
+    return false;
+  }
+
+  effect.passedPlayerIDs.push(playerID);
+
+  const targetsLeft = effect.targetIDs.filter(
+    (id) => !effect.passedPlayerIDs.includes(id) && G.players[id]?.alive,
+  );
+  if (targetsLeft.length === 0) {
+    G.effectStack.shift();
+    if (G.prompt?.reason === effect.cardName) {
+      G.prompt = null;
+    }
+  } else {
+    prompt.passedPlayerIDs = [...effect.passedPlayerIDs];
+  }
+  return true;
 }

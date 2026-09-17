@@ -16,6 +16,17 @@ export interface FinishUseEffect {
   materialCardIDs: string[];
 }
 
+export interface AoeSimultaneousEffect {
+  id: number;
+  kind: "aoe-simultaneous";
+  sourceID: PlayerID;
+  cardName: "arrow-barrage" | "barbarian-invasion";
+  sourceCardID: string | null;
+  targetIDs: PlayerID[];
+  passedPlayerIDs: PlayerID[];
+  baguaTriedPlayerIDs: PlayerID[];
+}
+
 export interface NullificationEffect {
   id: number;
   kind: "nullification";
@@ -302,6 +313,7 @@ export type GameEffect =
   | SkillTriggerEffect
   | { id: number; kind: "execute-draw"; ownerID: PlayerID }
   | FinishUseEffect
+  | AoeSimultaneousEffect
   | NullificationEffect
   | SlashEffect
   | DuelEffect

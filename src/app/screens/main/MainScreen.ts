@@ -133,7 +133,9 @@ export class MainScreen extends Container {
     if (role) {
       try {
         faceTex = Assets.get<Texture>(roleAlias);
-      } catch (e) {}
+      } catch (e) {
+        /* ignore */
+      }
     }
     if (faceTex) {
       const sprite = new Sprite(faceTex);
@@ -191,10 +193,10 @@ export class MainScreen extends Container {
   }
 
   public prepare(): void {
-    const state = window.history.state || {};
+    const state = window.history.state || {/* ignore */};
     const urlParams = new URLSearchParams(window.location.search);
     const mode = state.mode || urlParams.get("mode") || "local";
-    const config: MatchConfig = {};
+    const config: MatchConfig = {/* ignore */};
 
     if (mode === "remote") {
       config.mode = "remote";
@@ -234,7 +236,9 @@ export class MainScreen extends Container {
               this.state.matchData = matchInfo.players as any;
               this.render();
             }
-          } catch (err) {}
+          } catch (err) {
+            /* ignore */
+          }
         }
       }, 2000);
     }
@@ -403,7 +407,9 @@ export class MainScreen extends Container {
     let joinedPlayers: MatchPlayer[] = [];
     if (this.match!.isRemote) {
       joinedPlayers =
-        ((this.state!.matchData as any[])?.filter((p) => p.name) as MatchPlayer[]) || [];
+        ((this.state!.matchData as any[])?.filter(
+          (p) => p.name,
+        ) as MatchPlayer[]) || [];
     } else {
       const numPlayers = this.match!.playerIDs.length;
       for (let i = 0; i < numPlayers; i++) {
@@ -510,7 +516,9 @@ export class MainScreen extends Container {
         lordExtraHp: this.lordExtraHp,
         turnTimeLimit: this.turnTimeLimit,
         actualNumPlayers: this.targetNumPlayers,
-        joinedPlayerIDs: joinedPlayers.slice(0, this.targetNumPlayers).map(p => String(p.id)),
+        joinedPlayerIDs: joinedPlayers
+          .slice(0, this.targetNumPlayers)
+          .map((p) => String(p.id)),
       });
       return;
     }
@@ -625,14 +633,17 @@ export class MainScreen extends Container {
         50,
         () => {
           if (canStart) {
-            const actualNumPlayers = Math.min(joinedPlayers.length, this.targetNumPlayers);
+            const actualNumPlayers = Math.min(
+              joinedPlayers.length,
+              this.targetNumPlayers,
+            );
             const actualPlayers = joinedPlayers.slice(0, actualNumPlayers);
             this.match!.move("startGame", {
               autoSkipWuxie: this.autoSkipWuxie,
               lordExtraHp: this.lordExtraHp,
               turnTimeLimit: this.turnTimeLimit,
               actualNumPlayers: actualNumPlayers,
-              joinedPlayerIDs: actualPlayers.map(p => String(p.id)),
+              joinedPlayerIDs: actualPlayers.map((p) => String(p.id)),
             });
           }
         },
@@ -696,7 +707,9 @@ export class MainScreen extends Container {
       try {
         texture = Assets.get<Texture>(alias);
         if (texture) break;
-      } catch (e) {}
+      } catch (e) {
+        /* ignore */
+      }
     }
     if (!texture) return;
     const sprite = new TilingSprite({
@@ -712,7 +725,7 @@ export class MainScreen extends Container {
   private async leaveMatchAndExit(): Promise<void> {
     if (this.match?.isRemote) {
       try {
-        const state = window.history.state || {};
+        const state = window.history.state || {/* ignore */};
         const urlParams = new URLSearchParams(window.location.search);
         const serverUrl = state.serverUrl || urlParams.get("serverUrl");
         const matchID = urlParams.get("matchID");
@@ -1249,14 +1262,28 @@ export class MainScreen extends Container {
     if (prompt) {
       const isSimultaneous =
         prompt.kind === "card-response" &&
-        (prompt.reason === "rescue" || prompt.reason === "nullification");
-      const isResponder = prompt.responderID === viewerID;
-      const isAliveAndNotPassed =
-        isSimultaneous &&
-        G.players[viewerID]?.alive &&
-        !(prompt as any).passedPlayerIDs?.includes(viewerID);
+        (prompt.reason === "rescue" ||
+          prompt.reason === "nullification" ||
+          prompt.reason === "arrow-barrage" ||
+          prompt.reason === "barbarian-invasion");
 
-      if (isResponder || isAliveAndNotPassed) {
+      if (isSimultaneous) {
+        const isTarget = prompt.targetID === viewerID;
+        const hasPassed = (prompt as any).passedPlayerIDs?.includes(viewerID);
+        if (G.players[viewerID]?.alive) {
+          const isAoe =
+            prompt.reason === "arrow-barrage" ||
+            prompt.reason === "barbarian-invasion";
+          if (isAoe && prompt.sourceID === viewerID) return;
+          if (!hasPassed || (isTarget && prompt.reason === "rescue")) {
+            this.drawPromptActions(G, prompt as Exclude<typeof prompt, null>);
+          }
+        }
+        return;
+      }
+
+      const isResponder = prompt.responderID === viewerID;
+      if (isResponder) {
         this.drawPromptActions(G, prompt as Exclude<typeof prompt, null>);
         return;
       }
@@ -1865,6 +1892,8 @@ export class MainScreen extends Container {
         this.drawRescuePopup(G, prompt);
       } else if (prompt.reason === "nullification") {
         this.drawNullificationPopup(G, prompt);
+      } else if (prompt.response === "aoe-response") {
+        this.drawAoePopup(G, prompt);
       } else {
         this.drawCardResponsePrompt(G, prompt);
       }
@@ -2166,28 +2195,6 @@ export class MainScreen extends Container {
     overlay.eventMode = "static";
     this.content.addChild(overlay);
 
-    const isSelf = prompt.targetID === this.match!.currentViewerID;
-    const targetName = this.generalName(G, prompt.targetID);
-
-    this.addText(
-      isSelf
-        ? `Bạn đang hấp hối!`
-        : `Người chơi [${targetName}] đang hấp hối!`,
-      this.viewportWidth / 2,
-      this.viewportHeight / 2 - 80,
-      36,
-      THEME.colors.redBright,
-    );
-    this.addText(
-      isSelf
-        ? `Bạn có muốn dùng Đào để tự cứu không?`
-        : `Bạn có muốn dùng Đào để cứu không?`,
-      this.viewportWidth / 2,
-      this.viewportHeight / 2 - 30,
-      24,
-      THEME.colors.gold,
-    );
-
     const viewerID = this.match!.currentViewerID;
     if (!viewerID) return;
 
@@ -2203,17 +2210,55 @@ export class MainScreen extends Container {
       for (const cardID of Object.values(responder.equipment)) {
         if (
           cardID &&
-          canRespondWithCard(
-            G,
-            viewerID,
-            cardID as string,
-            prompt.response,
-          )
+          canRespondWithCard(G, viewerID, cardID as string, prompt.response)
         ) {
           validCardID = cardID as string;
           break;
         }
       }
+    }
+
+    const isSelf = prompt.targetID === viewerID;
+    const targetName = this.generalName(G, prompt.targetID);
+
+    this.addText(
+      isSelf
+        ? `Bạn đang trong cơn nguy kịch!`
+        : `Người chơi [${targetName}] đang hấp hối!`,
+      this.viewportWidth / 2,
+      this.viewportHeight / 2 - 80,
+      36,
+      THEME.colors.redBright,
+    );
+
+    if (isSelf) {
+      if (validCardID) {
+        this.addText(
+          `Khí số chưa tận! Bạn có muốn dùng 【Đào】 để tự xoay chuyển càn khôn?`,
+          this.viewportWidth / 2,
+          this.viewportHeight / 2 - 30,
+          24,
+          THEME.colors.gold,
+        );
+      } else {
+        this.addText(
+          `Khí số đã tận! Bạn không có Đào, đang mong ngóng chư hầu tương cứu...`,
+          this.viewportWidth / 2,
+          this.viewportHeight / 2 - 30,
+          24,
+          THEME.colors.gold,
+        );
+        // Do not draw buttons if they don't have a Peach (they have been auto-passed)
+        return;
+      }
+    } else {
+      this.addText(
+        `Sinh mệnh ngàn cân treo sợi tóc! Bạn có muốn dùng 【Đào】 để ứng cứu không?`,
+        this.viewportWidth / 2,
+        this.viewportHeight / 2 - 30,
+        24,
+        THEME.colors.gold,
+      );
     }
 
     const cx1 = this.viewportWidth / 2 - 120;
@@ -2247,6 +2292,126 @@ export class MainScreen extends Container {
     );
   }
 
+  private drawAoePopup(
+    G: TqsPlayerViewState,
+    prompt: CardResponsePrompt,
+  ): void {
+    const overlay = new Graphics()
+      .rect(0, 0, this.viewportWidth, this.viewportHeight)
+      .fill({ color: 0x000000, alpha: 0.75 });
+    overlay.eventMode = "static";
+    this.content.addChild(overlay);
+
+    const viewerID = this.match!.currentViewerID;
+    if (!viewerID) return;
+
+    const sourceName = prompt.sourceID
+      ? this.generalName(G, prompt.sourceID)
+      : "Hệ thống";
+
+    const cardName =
+      prompt.reason === "arrow-barrage"
+        ? "Vạn Tiễn Tề Phát"
+        : "Nam Man Nhập Xâm";
+    const requiredCard = prompt.reason === "arrow-barrage" ? "dodge" : "slash";
+    const requiredCardName = requiredCard === "dodge" ? "Thiểm" : "Sát";
+
+    this.addText(
+      `${sourceName} vừa đánh ra 【${cardName}】`,
+      this.viewportWidth / 2,
+      this.viewportHeight / 2 - 100,
+      30,
+      THEME.colors.redBright,
+    );
+
+    this.addText(
+      `Bạn bị tấn công, hãy chọn cách ứng phó:`,
+      this.viewportWidth / 2,
+      this.viewportHeight / 2 - 40,
+      24,
+      THEME.colors.paper,
+    );
+
+    let wuxieCardID: string | undefined;
+    let respCardID: string | undefined;
+    const responder = G.players[viewerID];
+
+    for (const cardID of responder.hand) {
+      if (
+        !wuxieCardID &&
+        canRespondWithCard(G, viewerID, cardID, "nullification")
+      ) {
+        wuxieCardID = cardID;
+      }
+      if (
+        !respCardID &&
+        canRespondWithCard(G, viewerID, cardID, requiredCard)
+      ) {
+        respCardID = cardID;
+      }
+    }
+
+    const hasBagua = Object.values(responder.equipment).includes(
+      "eight-diagrams",
+    );
+    const canBagua = prompt.allowBagua && hasBagua;
+
+    const cy = this.viewportHeight / 2 + 70;
+
+    // Determine buttons to show
+    let buttonsCount = 1; // "Bỏ qua" is always there
+    if (wuxieCardID) buttonsCount++;
+    if (respCardID || canBagua) buttonsCount++;
+
+    const startX = this.viewportWidth / 2 - ((buttonsCount - 1) * 220) / 2;
+    let currentX = startX;
+
+    if (wuxieCardID) {
+      this.addButton(
+        "Dùng Vô Giải",
+        currentX,
+        cy,
+        200,
+        48,
+        () =>
+          this.answerPrompt(prompt.id, { kind: "card", cardID: wuxieCardID! }),
+        THEME.colors.gold,
+        THEME.colors.ink,
+      );
+      currentX += 220;
+    }
+
+    if (respCardID || canBagua) {
+      this.addButton(
+        canBagua ? "Bát Quái Trận" : `Dùng ${requiredCardName}`,
+        currentX,
+        cy,
+        200,
+        48,
+        () => {
+          if (canBagua) {
+            this.answerPrompt(prompt.id, { kind: "bagua" });
+          } else {
+            this.answerPrompt(prompt.id, { kind: "card", cardID: respCardID! });
+          }
+        },
+        THEME.colors.red,
+        THEME.colors.white,
+      );
+      currentX += 220;
+    }
+
+    this.addButton(
+      "Bỏ qua",
+      currentX,
+      cy,
+      200,
+      48,
+      () => this.answerPrompt(prompt.id, { kind: "pass" }),
+      THEME.colors.ink,
+    );
+  }
+
   private drawNullificationPopup(
     G: TqsPlayerViewState,
     prompt: CardResponsePrompt,
@@ -2260,10 +2425,16 @@ export class MainScreen extends Container {
     const viewerID = this.match!.currentViewerID;
     if (!viewerID) return;
 
-    const sourceName = prompt.sourceID ? this.generalName(G, prompt.sourceID) : "Hệ thống";
+    const sourceName = prompt.sourceID
+      ? this.generalName(G, prompt.sourceID)
+      : "Hệ thống";
     const targetName = this.generalName(G, prompt.targetID);
-    const cardName = prompt.subjectCardName ? CARD_DEFINITIONS[prompt.subjectCardName].name : "Cẩm Nang";
-    const actionText = prompt.currentlyNegated ? "VÔ HIỆU HÓA" : "ĐANG CÓ HIỆU LỰC";
+    const cardName = prompt.subjectCardName
+      ? CARD_DEFINITIONS[prompt.subjectCardName].name
+      : "Cẩm Nang";
+    const actionText = prompt.currentlyNegated
+      ? "VÔ HIỆU HÓA"
+      : "ĐANG CÓ HIỆU LỰC";
 
     this.addText(
       `【${cardName}】 · Chuỗi ${prompt.chainDepth} · ${actionText}`,
@@ -2290,10 +2461,18 @@ export class MainScreen extends Container {
     );
 
     const updateTimer = () => {
+      if (timerText.destroyed) {
+        if (this.nullificationInterval)
+          clearInterval(this.nullificationInterval);
+        return;
+      }
       const remaining = Math.max(0, this.nullificationEndTime - Date.now());
       timerText.text = `(${Math.ceil(remaining / 1000)}s)`;
     };
     updateTimer();
+    if (this.nullificationInterval) {
+      clearInterval(this.nullificationInterval!);
+    }
     this.nullificationInterval = setInterval(updateTimer, 100);
 
     let validCardID: string | undefined;
@@ -2440,7 +2619,8 @@ export class MainScreen extends Container {
         const card = G.cards[cardID];
         if (!card) return;
         choices.push({
-          label: `【${CARD_DEFINITIONS[card.definitionID].name}】\n${SUIT_LABELS[card.suit]} ${card.rank}`,
+          label: `【${CARD_DEFINITIONS[card.definitionID].name}】
+${SUIT_LABELS[card.suit]} ${card.rank}`,
           choice: { zone: "processing", cardID },
         });
       });
@@ -2718,7 +2898,7 @@ export class MainScreen extends Container {
         letterSpacing,
         ...(wrap && maxWidth
           ? { wordWrap: true, wordWrapWidth: maxWidth }
-          : {}),
+          : {/* ignore */}),
       },
     });
     label.anchor.set(anchor, anchor === 0 ? 0 : 0.5);
@@ -2745,7 +2925,7 @@ export class MainScreen extends Container {
       fontWeight?: "400" | "700";
       paddingX?: number;
       paddingY?: number;
-    } = {},
+    } = {/* ignore */},
   ): Button {
     if (height === 48) height = 40; // force smaller buttons for action rows
     const button = new Button({

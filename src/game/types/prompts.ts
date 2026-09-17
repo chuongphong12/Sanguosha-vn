@@ -6,9 +6,12 @@ export interface PromptBase {
   responderID: PlayerID;
 }
 
+export type ResponseKind =
+  "slash" | "dodge" | "peach" | "nullification" | "aoe-response";
+
 export interface CardResponsePrompt extends PromptBase {
   kind: "card-response";
-  response: "slash" | "dodge" | "peach" | "nullification";
+  response: ResponseKind;
   summonFaction: "wei" | "shu" | null;
   forbidCard: boolean;
   passedPlayerIDs?: PlayerID[];
