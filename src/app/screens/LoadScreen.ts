@@ -28,7 +28,7 @@ export class LoadScreen extends Container {
   constructor() {
     super();
 
-    this.background = new Sprite(Assets.get<Texture>("preload/epic_bg.jpg"));
+    this.background = new Sprite(Assets.get<Texture>("preload/bg.jpg"));
     this.addChild(this.background);
 
     const overlay = new Graphics();

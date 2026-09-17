@@ -58,7 +58,10 @@ export class Dashboard extends Container {
     const roleLeft = vw - 60 - avatarW - 8;
     roleCardContainer.position.set(roleLeft, 8);
 
-    const backTex = Assets.get<Texture>("cards/roles/back.jpg");
+    let backTex: Texture | undefined;
+    try {
+      backTex = Assets.get<Texture>("cards/roles/back.jpg");
+    } catch (e) {}
     let faceTex: Texture | undefined;
     if (player.role) {
       try {
@@ -66,7 +69,7 @@ export class Dashboard extends Container {
       } catch (e) {}
     }
 
-    const roleSprite = new Sprite(backTex);
+    const roleSprite = backTex ? new Sprite(backTex) : new Sprite();
     roleSprite.width = avatarW;
     roleSprite.height = avatarH;
     roleCardContainer.addChild(roleSprite);
