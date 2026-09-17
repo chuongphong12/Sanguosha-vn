@@ -1476,7 +1476,11 @@ export class MainScreen extends Container {
         this.selectedTargetIDs.length <= effectiveTargetCount.maximum;
       const skillTargetID = this.selectedTargetIDs[0];
       const requiredCards =
-        this.pendingSkill === "jie-yin" ? 2 : this.pendingSkill ? 1 : 0;
+        this.pendingSkill === "jie-yin"
+          ? 2
+          : this.pendingSkill === "fan-jian" || !this.pendingSkill
+            ? 0
+            : 1;
       const skillReady = !this.pendingSkill
         ? null
         : this.selectedCardIDs.size >= requiredCards &&
