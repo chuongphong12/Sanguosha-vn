@@ -11,6 +11,7 @@ export interface CardResponsePrompt extends PromptBase {
   response: "slash" | "dodge" | "peach" | "nullification";
   summonFaction: "wei" | "shu" | null;
   forbidCard: boolean;
+  passedPlayerIDs?: PlayerID[];
   reason:
     | "slash"
     | "duel"

@@ -500,6 +500,7 @@ function responsePrompt(
       | "chainDepth"
       | "currentlyNegated"
       | "forbidCard"
+      | "passedPlayerIDs"
     >
   > = {},
 ): CardResponsePrompt {
@@ -1911,6 +1912,7 @@ function resolveDying(G: TqsGameState, effect: DyingEffect): void {
     "rescue",
     effect.sourceID,
     effect.dyingPlayerID,
+    { passedPlayerIDs: effect.passedPlayerIDs },
   );
 }
 
@@ -2770,18 +2772,18 @@ function answerRescue(
   G: TqsGameState,
   effect: DyingEffect,
   prompt: CardResponsePrompt,
+  playerID: PlayerID,
   answer: PromptAnswer,
   shuffle: Shuffle,
 ): boolean {
   if (answer.kind === "card") {
-    if (!matchesResponse(G, prompt.responderID, answer.cardID, "peach"))
+    if (!matchesResponse(G, playerID, answer.cardID, "peach"))
       return false;
-    zoneToDiscard(G, prompt.responderID, answer.cardID);
+    zoneToDiscard(G, playerID, answer.cardID);
     const dying = G.players[effect.dyingPlayerID];
-    const responderGeneral =
-      GENERALS_BY_ID[G.players[prompt.responderID].generalID!];
+    const responderGeneral = GENERALS_BY_ID[G.players[playerID].generalID!];
     const jiuYuanBonus =
-      prompt.responderID !== effect.dyingPlayerID &&
+      playerID !== effect.dyingPlayerID &&
       hasSkill(G, dying.id, "jiu-yuan") &&
       responderGeneral?.faction === "wu"
         ? 1
@@ -2797,14 +2799,24 @@ function answerRescue(
     return true;
   }
   if (answer.kind !== "pass") return false;
-  effect.passedPlayerIDs.push(prompt.responderID);
+  if (!effect.passedPlayerIDs.includes(playerID)) {
+    effect.passedPlayerIDs.push(playerID);
+  }
   const living = aliveInActionOrder(G);
-  if (living.every((playerID) => effect.passedPlayerIDs.includes(playerID))) {
+  if (living.every((p) => effect.passedPlayerIDs.includes(p))) {
     G.effectStack.shift();
     killPlayer(G, effect.dyingPlayerID, effect.sourceID, shuffle);
-  } else {
-    effect.responderID = nextLivingPlayer(G, prompt.responderID);
+  } else if (effect.responderID === playerID) {
+    let next = nextLivingPlayer(G, effect.responderID);
+    while (effect.passedPlayerIDs.includes(next)) {
+      next = nextLivingPlayer(G, next);
+    }
+    effect.responderID = next;
+    // Update the prompt so UI knows who is the next required responder (for hotseat)
+    prompt.responderID = next;
   }
+  // Make sure we always update passedPlayerIDs on the prompt for the UI
+  prompt.passedPlayerIDs = [...effect.passedPlayerIDs];
   return true;
 }
 
@@ -3524,7 +3536,8 @@ export function answerCardPrompt(
     !prompt ||
     !effect ||
     prompt.id !== promptID ||
-    prompt.responderID !== playerID ||
+    (prompt.responderID !== playerID &&
+      !(prompt.kind === "card-response" && prompt.reason === "rescue")) ||
     !("effectID" in prompt) ||
     prompt.effectID !== effect.id
   ) {
@@ -3588,7 +3601,7 @@ export function answerCardPrompt(
     else if (effect.kind === "borrowed-sword")
       accepted = answerBorrowedSword(G, effect, prompt, answer);
     else if (effect.kind === "dying")
-      accepted = answerRescue(G, effect, prompt, answer, shuffle);
+      accepted = answerRescue(G, effect, prompt, playerID, answer, shuffle);
   } else if (prompt.kind === "select-cards") {
     accepted = answerSelectCards(G, effect, prompt, answer, shuffle);
   } else if (prompt.kind === "option") {

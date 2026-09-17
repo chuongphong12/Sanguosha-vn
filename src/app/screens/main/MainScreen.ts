@@ -1243,9 +1243,19 @@ export class MainScreen extends Container {
   private drawActions(G: TqsPlayerViewState, viewerID: PlayerID): void {
     const prompt = G.prompt;
 
-    if (prompt?.responderID === viewerID) {
-      this.drawPromptActions(G, prompt as Exclude<typeof prompt, null>);
-      return;
+    if (prompt) {
+      const isRescue =
+        prompt.kind === "card-response" && prompt.reason === "rescue";
+      const isResponder = prompt.responderID === viewerID;
+      const isAliveAndNotPassed =
+        isRescue &&
+        G.players[viewerID]?.alive &&
+        !(prompt as any).passedPlayerIDs?.includes(viewerID);
+
+      if (isResponder || isAliveAndNotPassed) {
+        this.drawPromptActions(G, prompt as Exclude<typeof prompt, null>);
+        return;
+      }
     }
 
     if (G.status !== "playing" || G.turn.activePlayerID !== viewerID || prompt)
