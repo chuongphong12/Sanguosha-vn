@@ -35,8 +35,7 @@ src/manifest.json
 .gitnexus/
 .codegraph/
 .gemini/
-*.md
-!README.md
+# Ignore specific AI agent markdown files, but allow all other .md files
 AGENTS.md
 CLAUDE.md
 Agent.md
