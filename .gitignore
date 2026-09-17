@@ -58,7 +58,6 @@ plan/
 !docs/plans/ui-upgrade/**
 
 # Generated assets and test results
-raw-assets/
 test-results/
 playwright-report/
 playwright/.cache/
