@@ -22,7 +22,7 @@ import {
   createWaitingRoomState,
   selectGeneral,
 } from "./setup";
-import { drawCards, writeLog } from "./rules";
+import { getHeuristicMoves } from "./ai/ai-heuristics";
 import { registerAllSkills } from "./engine/skills";
 
 registerAllSkills();
@@ -55,96 +55,7 @@ export const TqsGame: Game<TqsGameState> = {
   },
 
   ai: {
-    enumerate: (G, ctx, playerID) => {
-      const moves: any[] = [];
-      const prompt = G.prompt;
-      const player = G.players[playerID];
-
-      if (prompt && prompt.responderID === playerID) {
-        let answered = false;
-
-        if (prompt.kind === "card-response") {
-          const needed = prompt.response;
-          if (needed === "dodge" || needed === "slash" || needed === "peach") {
-            const cardID = player.hand.find(
-              (c) => G.cards[c].definitionID === needed,
-            );
-            if (cardID) {
-              moves.push({
-                move: "answerPrompt",
-                args: [prompt.id, { kind: "card", cardID }],
-              });
-              answered = true;
-            }
-          } else if (needed === "aoe-response") {
-            const reason = (prompt as any).reason;
-            const required = reason === "arrow-barrage" ? "dodge" : "slash";
-            const cardID = player.hand.find(
-              (c) => G.cards[c].definitionID === required,
-            );
-            if (cardID) {
-              moves.push({
-                move: "answerPrompt",
-                args: [prompt.id, { kind: "card", cardID }],
-              });
-              answered = true;
-            }
-          }
-        }
-
-        if (!answered) {
-          moves.push({
-            move: "answerPrompt",
-            args: [prompt.id, { kind: "pass" }],
-          });
-        }
-        return moves;
-      }
-
-      if (G.status === "lord-selection" || G.status === "general-selection") {
-        if (
-          player &&
-          !player.generalID &&
-          player.generalCandidates.length > 0
-        ) {
-          moves.push({
-            move: "selectGeneral",
-            args: [player.generalCandidates[0]],
-          });
-        }
-        return moves;
-      }
-
-      const activeStage = ctx.activePlayers?.[playerID];
-      if (activeStage === "play") {
-        let acted = false;
-        // Basic AI: Use Peach if injured
-        if (player.hp < player.maxHP) {
-          const peachID = player.hand.find(
-            (c) => G.cards[c].definitionID === "peach",
-          );
-          if (peachID) {
-            moves.push({ move: "declareCardUse", args: [{ cardID: peachID }] });
-            acted = true;
-          }
-        }
-
-        if (!acted) {
-          moves.push({ move: "endPlayPhase", args: [] });
-        }
-      } else if (activeStage === "discard") {
-        const limit = player.hp;
-        if (player.hand.length > Math.max(0, limit)) {
-          const numToDiscard = player.hand.length - Math.max(0, limit);
-          const discards = player.hand.slice(0, numToDiscard);
-          moves.push({ move: "discardCards", args: [discards] });
-        } else {
-          moves.push({ move: "discardCards", args: [[]] });
-        }
-      }
-
-      return moves;
-    },
+    enumerate: getHeuristicMoves,
   },
 
   setup: ({ ctx, random }, setupData) => {
