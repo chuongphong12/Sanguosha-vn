@@ -100,10 +100,9 @@ export class MainScreen extends Container {
 
   private autoSkipWuxie = true;
   private rolePopupDismissedFor: string | null = null;
+  private isShowingRolePopup = false;
 
-  private rolePopupContainer?: Container;
-  private showRolePopup(role: string) {
-    if (this.rolePopupContainer) return;
+  private drawRolePopup(role: string) {
     const popup = new Container();
 
     const overlay = new Graphics();
@@ -141,8 +140,6 @@ export class MainScreen extends Container {
     if (faceTex) {
       const sprite = new Sprite(faceTex);
       sprite.anchor.set(0.5);
-      // Playing cards are around 300x400 usually.
-      // If we want it big in the center, scale 1.0 or 1.2 is good.
       sprite.scale.set(1.0);
       sprite.position.set(0, -20);
       content.addChild(sprite);
@@ -166,18 +163,12 @@ export class MainScreen extends Container {
 
     popup.addChild(overlay, content);
 
-    const dismiss = () => {
-      if (this.rolePopupContainer && !this.rolePopupContainer.destroyed) {
-        this.rolePopupContainer.destroy();
-        this.rolePopupContainer = undefined;
-        this.render();
-      }
-    };
-    overlay.on("pointerdown", dismiss);
-    setTimeout(dismiss, 3500);
+    overlay.on("pointerdown", () => {
+      this.isShowingRolePopup = false;
+      this.render();
+    });
 
-    this.addChild(popup);
-    this.rolePopupContainer = popup;
+    this.content.addChild(popup);
   }
 
   private lordExtraHp = 1;
@@ -358,7 +349,11 @@ export class MainScreen extends Container {
 
     if (this.rolePopupDismissedFor !== this.match!.currentViewerID) {
       this.rolePopupDismissedFor = this.match!.currentViewerID;
-      this.showRolePopup(G.players[this.match!.currentViewerID].role || "");
+      this.isShowingRolePopup = true;
+      setTimeout(() => {
+        this.isShowingRolePopup = false;
+        this.render();
+      }, 3500);
     }
 
     this.drawViewerSelector(G);
@@ -379,6 +374,10 @@ export class MainScreen extends Container {
 
     if (canSelectGeneral) {
       this.drawGeneralCandidates(G, viewer.generalCandidates);
+    }
+
+    if (this.isShowingRolePopup) {
+      this.drawRolePopup(viewer.role || "");
     }
   }
   private drawWaitingRoom(): void {
@@ -772,7 +771,8 @@ export class MainScreen extends Container {
     const buttonGap = 8;
     const selectorWidth =
       G.seatOrder.length * buttonWidth + (G.seatOrder.length - 1) * buttonGap;
-    const selectorLeft = this.viewportWidth - 34 - selectorWidth;
+    // The Log Sidebar takes up 280px on the right. We want to place this selector to the left of it.
+    const selectorLeft = this.viewportWidth - 280 - 16 - selectorWidth;
 
     this.addText(
       "Góc nhìn",
@@ -1006,43 +1006,30 @@ export class MainScreen extends Container {
       2,
     );
 
-    const entries = G.log.slice(-30); // show more logs
+    // Calculate total height needed for the logs
+    // But since we don't know the exact wrapped height without rendering, we'll render from bottom up, 
+    // ensuring the newest is at the bottom, but clustered together.
+    const entries = G.log.slice(-20);
     if (entries.length === 0) {
-      this.addText(
-        "Chưa có diễn biến nào.",
-        x + 20,
-        y + 60,
-        14,
-        THEME.colors.muted,
-        0,
-        "left",
-      );
+      this.addText("Chưa có diễn biến nào.", x + 20, y + 60, 14, THEME.colors.muted, 0, "left");
       return;
     }
 
-    // Draw logs from bottom up so newest is at the bottom
-    const startY = height - 40;
-    let currentY = startY;
+    // Render texts invisibly first to get heights
+    const texts = entries.map((entry) => {
+      const t = this.addText(entry.message, x + 20, 0, 14, entry.isImportant ? THEME.colors.redBright : THEME.colors.paper, 0, "left", 0, width - 40, true);
+      return t;
+    });
 
-    for (let i = entries.length - 1; i >= 0; i--) {
-      const entry = entries[i];
-      const text = this.addText(
-        entry.message,
-        x + 20,
-        0,
-        13,
-        THEME.colors.paper,
-        0,
-        "left",
-        0,
-        width - 40,
-        true,
-      );
-      currentY -= text.height;
-      text.y = currentY;
-      currentY -= 10;
-      if (currentY < 60) break; // Don't overflow title
-    }
+    const totalHeight = texts.reduce((sum, t) => sum + t.height + 8, 0);
+    
+    // Start drawing from either just below the title, or anchored to the bottom if it fills the screen
+    let currentY = Math.max(y + 60, height - 40 - totalHeight);
+
+    texts.forEach((t) => {
+      t.y = currentY;
+      currentY += t.height + 8;
+    });
   }
 
   private drawPrivateArea(G: TqsPlayerViewState): void {
