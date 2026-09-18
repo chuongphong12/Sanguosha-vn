@@ -93,28 +93,42 @@ export class LobbyUI {
       </div>
 
       <div id="modal-create" class="modal-overlay hidden">
-        <div class="modal-content">
-          <h2>Tạo Lệnh Bài</h2>
-          <input type="text" id="input-room-name" class="input-ancient" placeholder="Tên phòng..." />
-          <div class="modal-checkbox">
-            <input type="checkbox" id="chk-private" /> <label for="chk-private">Phòng Bí Mật (Private)</label>
+        <div class="modal-content" style="max-width: 450px; padding: 25px 35px; border-radius: 8px; background: linear-gradient(135deg, #2a110a 0%, #1a0a05 100%);">
+          <h2 style="font-size: 24px; margin-bottom: 20px;">Tạo Lệnh Bài</h2>
+          
+          <div style="margin-top: 15px; text-align: left; background: rgba(0,0,0,0.3); padding: 15px; border-radius: 6px; border: 1px solid #5a3a20;">
+            <label style="display:block; margin-bottom: 8px; color: #d4af37; font-weight: bold;">Tên phòng:</label>
+            <input type="text" id="input-room-name" class="input-ancient" placeholder="Nhập tên phòng..." style="width: 100%; padding: 10px; font-size: 16px; margin: 0; background-color: #110502;" />
           </div>
-          <input type="password" id="input-room-password" class="input-ancient hidden" placeholder="Mật khẩu..." />
-          <div class="modal-actions">
-            <button id="btn-confirm-create" class="btn-ancient">Khởi Tạo</button>
-            <button id="btn-cancel-create" class="btn-ancient btn-secondary">Huỷ</button>
+
+          <div style="margin-top: 15px; text-align: left; background: rgba(0,0,0,0.3); padding: 15px; border-radius: 6px; border: 1px solid #5a3a20;">
+            <label style="display:flex; align-items:center; gap: 12px; cursor: pointer;">
+              <input type="checkbox" id="chk-private" style="width: 22px; height: 22px; accent-color: #d4af37;" />
+              <span style="color: #e0ca95; font-size: 16px; font-weight: bold;">Phòng Bí Mật (Private)</span>
+            </label>
+            <input type="password" id="input-room-password" class="input-ancient hidden" placeholder="Nhập mật khẩu..." style="width: 100%; padding: 10px; font-size: 16px; margin-top: 10px; background-color: #110502;" />
+          </div>
+
+          <div class="modal-actions" style="margin-top: 30px; gap: 15px; justify-content: center;">
+            <button id="btn-cancel-create" class="btn-ancient btn-secondary" style="flex: 1;">Huỷ Bỏ</button>
+            <button id="btn-confirm-create" class="btn-ancient" style="flex: 1;">Khởi Tạo</button>
           </div>
         </div>
       </div>
 
       <!-- Join Password Modal -->
       <div id="modal-join" class="modal-overlay hidden">
-        <div class="modal-content">
-          <h2>Khẩu Lệnh</h2>
-          <input type="password" id="input-join-password" class="input-ancient" placeholder="Nhập khẩu lệnh..." />
-          <div class="modal-actions">
-            <button id="btn-confirm-join" class="btn-ancient">Tiến Vào</button>
-            <button id="btn-cancel-join" class="btn-ancient btn-secondary">Huỷ</button>
+        <div class="modal-content" style="max-width: 450px; padding: 25px 35px; border-radius: 8px; background: linear-gradient(135deg, #2a110a 0%, #1a0a05 100%);">
+          <h2 style="font-size: 24px; margin-bottom: 20px;">Khẩu Lệnh</h2>
+          
+          <div style="margin-top: 15px; text-align: left; background: rgba(0,0,0,0.3); padding: 15px; border-radius: 6px; border: 1px solid #5a3a20;">
+            <label style="display:block; margin-bottom: 8px; color: #d4af37; font-weight: bold;">Yêu cầu mật khẩu:</label>
+            <input type="password" id="input-join-password" class="input-ancient" placeholder="Nhập khẩu lệnh..." style="width: 100%; padding: 10px; font-size: 16px; margin: 0; background-color: #110502;" />
+          </div>
+
+          <div class="modal-actions" style="margin-top: 30px; gap: 15px; justify-content: center;">
+            <button id="btn-cancel-join" class="btn-ancient btn-secondary" style="flex: 1;">Huỷ Bỏ</button>
+            <button id="btn-confirm-join" class="btn-ancient" style="flex: 1;">Tiến Vào</button>
           </div>
         </div>
       </div>
