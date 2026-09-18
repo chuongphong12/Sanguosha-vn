@@ -2096,6 +2096,7 @@ export class MainScreen extends Container {
     G: TqsPlayerViewState,
     prompt: CardResponsePrompt,
   ): void {
+    if (prompt.response === "aoe-response") return;
     const selectedCardIDs = [...this.selectedCardIDs];
     const selectedCardID = selectedCardIDs[0];
     const canUsePhysical =
@@ -2811,7 +2812,9 @@ ${SUIT_LABELS[card.suit]} ${card.rank}`,
       }
       if (prompt.reason === "nullification")
         return `【${prompt.subjectCardName ? CARD_DEFINITIONS[prompt.subjectCardName].name : "Cẩm Nang"}】 · ${responder} quyết định dùng 【Vô Giải Khả Kích】 · Chuỗi ${prompt.chainDepth} · ${prompt.currentlyNegated ? "Đang bị vô hiệu" : "Đang có hiệu lực"}.`;
-      return `Đang chờ ${responder} đánh ra 【${CARD_DEFINITIONS[prompt.response].name}】.`;
+      if (prompt.response === "aoe-response")
+        return `Tất cả mục tiêu đang phản hồi 【${prompt.reason === "arrow-barrage" ? "Vạn Tiễn Tề Phát" : "Nam Man Nhập Xâm"}】...`;
+      return `Đang chờ ${responder} đánh ra 【${CARD_DEFINITIONS[prompt.response as CardName].name}】.`;
     }
     if (prompt.kind === "option")
       return `Đang chờ ${responder} quyết định kích hoạt Trang Bị.`;

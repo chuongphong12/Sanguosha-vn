@@ -268,7 +268,8 @@ export function canSelectCardTarget(
   return false;
 }
 
-export type ResponseKind = "slash" | "dodge" | "peach" | "nullification";
+export type ResponseKind =
+  "slash" | "dodge" | "peach" | "nullification" | "aoe-response";
 
 export function matchesResponse(
   G: TqsGameState,

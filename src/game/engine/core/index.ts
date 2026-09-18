@@ -27,7 +27,7 @@ import type {
   TqsGameState,
   TqsPlayerViewState,
 } from "../../model";
-import type { AoeSimultaneousEffect } from "../../types/effects";
+
 import {
   attackRange,
   determineWinner,
@@ -162,7 +162,8 @@ export function hasSkill(
   return G.players[playerID]?.activeSkillIDs.includes(skillID) === true;
 }
 
-type ResponseKind = "slash" | "dodge" | "peach" | "nullification";
+type ResponseKind =
+  "slash" | "dodge" | "peach" | "nullification" | "aoe-response";
 
 function matchesResponse(
   G: TqsGameState,
@@ -399,11 +400,7 @@ function nullifiable(
   sourceID: PlayerID | null,
   targetID: PlayerID,
   children: GameEffect[],
-  options: Pick<
-    NullificationEffect,
-    AoeSimultaneousEffect,
-    "onNegated" | "delayedCardID"
-  > = {
+  options: Pick<NullificationEffect, "onNegated" | "delayedCardID"> = {
     onNegated: "nothing",
     delayedCardID: null,
   },
@@ -1336,7 +1333,6 @@ export function removeZoneCard(
 function closeNullification(
   G: TqsGameState,
   effect: NullificationEffect,
-  AoeSimultaneousEffect,
 ): void {
   for (const cardID of effect.nullificationCardIDs)
     processingToDiscard(G, cardID);
@@ -1383,7 +1379,6 @@ function transferLightning(
 function promptNullification(
   G: TqsGameState,
   effect: NullificationEffect,
-  AoeSimultaneousEffect,
 ): void {
   effect.responderID =
     effect.responderID ??
@@ -1408,7 +1403,6 @@ function promptNullification(
 function resolveNullification(
   G: TqsGameState,
   effect: NullificationEffect,
-  AoeSimultaneousEffect,
 ): void {
   const order = aliveInActionOrder(G);
   const startIndex = order.indexOf(effect.sourceID ?? G.turn.activePlayerID);
@@ -2564,7 +2558,6 @@ function resolveBagua(
 function answerNullification(
   G: TqsGameState,
   effect: NullificationEffect,
-  AoeSimultaneousEffect,
   prompt: CardResponsePrompt,
   playerID: PlayerID,
   answer: PromptAnswer,
@@ -2594,7 +2587,9 @@ function answerNullification(
     closeNullification(G, effect);
   } else {
     if (G.prompt?.id === prompt.id) {
-      G.prompt.passedPlayerIDs = [...effect.passedPlayerIDs];
+      (G.prompt as CardResponsePrompt).passedPlayerIDs = [
+        ...effect.passedPlayerIDs,
+      ];
     }
   }
   return true;
@@ -4051,7 +4046,7 @@ function answerAoeSimultaneous(
         playerID,
         1,
         "normal",
-        effect.sourceCardID,
+        effect.sourceCardID ? [effect.sourceCardID] : [],
         effect.cardName,
       ),
     );
