@@ -362,7 +362,7 @@ export class MainScreen extends Container {
     this.drawLog(G);
     this.drawPrivateArea(G);
     // Overlay for General Selection
-    const viewer = G.players[this.match!.currentViewerID];
+    const viewer = G.players[this.match!.currentViewerID] as any;
     const canSelectGeneral =
       this.rolePopupDismissedFor === this.match!.currentViewerID &&
       viewer.generalID === null &&
@@ -1030,7 +1030,7 @@ export class MainScreen extends Container {
         x + 20,
         0,
         14,
-        entry.isImportant ? THEME.colors.redBright : THEME.colors.paper,
+        THEME.colors.paper,
         0,
         "left",
         0,
