@@ -87,7 +87,7 @@ export const TqsGame: Game<TqsGameState> = {
         moves.push({ move: "endPlayPhase", args: [] });
       } else if (activeStage === "discard") {
         const player = G.players[playerID];
-        const limit = player.maxCards ?? player.hp;
+        const limit = player.hp;
         if (player.hand.length > Math.max(0, limit)) {
           const numToDiscard = player.hand.length - Math.max(0, limit);
           const discards = player.hand.slice(0, numToDiscard);

@@ -72,18 +72,23 @@ export class MatchClient {
         localMultiplayer = Local({ bots });
       }
 
+      const customGame = {
+        ...TqsGame,
+        setup: (setupCtx: any) =>
+          TqsGame.setup!(setupCtx, {
+            autoSkipWuxie: config.autoSkipWuxie,
+            fastPick: config.fastPick,
+          }),
+      };
+
       for (let index = 0; index < numPlayers; index += 1) {
         const id = String(index);
         const client = Client<TqsGameState>({
-          game: TqsGame,
+          game: customGame,
           numPlayers,
           matchID,
           playerID: id,
           multiplayer: localMultiplayer,
-          setupData: {
-            autoSkipWuxie: config.autoSkipWuxie,
-            fastPick: config.fastPick,
-          },
           debug: false,
         });
         client.start();

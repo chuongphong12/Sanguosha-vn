@@ -16,7 +16,7 @@
   "scripts": {
     "start": "npm run dev",
     "clean": "node -e \"const fs=require('fs'); ['.assetpack', 'public/assets', 'src/manifest.json'].forEach(f => fs.rmSync(f, {recursive:true, force:true}))\"",
-    "build": "vite build",
+    "build": "node scripts/cache-assets.mjs restore && tsc --noEmit && vite build && node scripts/cache-assets.mjs save",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "dev": "vite",
