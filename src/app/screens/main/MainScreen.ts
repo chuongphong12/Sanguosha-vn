@@ -21,7 +21,7 @@ import {
   getVirtualConversions,
 } from "../../../game/cardEngine";
 import { CARD_DEFINITIONS } from "../../../game/catalog/cards";
-import type { CardName } from "../../../game/types/cards";
+import type { CardName } from "../../../game/types/core";
 import {
   GENERALS_BY_ID,
   hasLordSkill,
