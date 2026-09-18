@@ -30,10 +30,19 @@ This project uses a specialized set of agent skills to ensure high code quality,
 ### 6. Diagnosing Bugs (`.agents/skills/diagnosing-bugs`)
 - When faced with a bug, use a structured diagnosis loop: reproduce, isolate, and verify. Do not guess blindly.
 
+### 7. Code Intelligence (`CLAUDE.md` / `gitnexus-*` skills)
+- **GitNexus & CodeGraph**: Treat `risk: UNKNOWN` as unresolved. Never edit a function/class without checking `impact`. Use graph queries instead of plain text search for dependencies, callers, and execution flow.
+
 ## Execution Workflow
 
-1. **Plan & Align**: Use `brainstorming` for new features or `diagnosing-bugs` for issues.
-2. **Execute Cautiously**: Follow `karpathy-guidelines`, write tests (`tdd`), and `implement` surgical changes.
-3. **Verify & Review**: Run tests/typechecks and perform a `code-review` on your own diff.
+1. **Information Retrieval & Impact Analysis (GitNexus / CodeGraph)**:
+   - **MUST run impact analysis before editing.** Never guess blast radius. Use `gitnexus` or `codegraph` tools to query callers, processes, and check risks.
+   - For codebase exploration, understanding architecture, or finding references, **always query the graph first** before relying on brute-force grep/text searches.
+2. **Plan & Align**: Use `brainstorming` for new features or `diagnosing-bugs` for issues.
+3. **Execute Cautiously**: Follow `karpathy-guidelines`, write tests (`tdd`), and `implement` surgical changes.
+4. **Verify & Review**: 
+   - Run tests/typechecks.
+   - Perform a `code-review` on your own diff.
+   - **Analyze graph changes** via GitNexus CLI/MCP before finalizing commits to ensure no unintended architectural breakages.
 
 Failure to follow these steps violates the project's quality standards. Always prioritize simplicity, isolation of changes, and verifiable success criteria.
