@@ -34,6 +34,7 @@ export class MatchClient {
   private viewerID: PlayerID = "0";
   private unsubscribeViewer?: () => void;
   public readonly isRemote: boolean;
+  public readonly isHotseat: boolean;
 
   constructor(config: MatchConfig = {}) {
     const {
@@ -46,6 +47,7 @@ export class MatchClient {
     } = config;
 
     this.isRemote = mode === "remote";
+    this.isHotseat = !this.isRemote && !config.botsEnabled;
 
     if (this.isRemote) {
       if (!playerID) throw new Error("Cần playerID cho chế độ remote");
@@ -81,7 +83,8 @@ export class MatchClient {
           }),
       };
 
-      for (let index = 0; index < numPlayers; index += 1) {
+      const numHumans = config.botsEnabled ? 1 : numPlayers;
+      for (let index = 0; index < numHumans; index += 1) {
         const id = String(index);
         const client = Client<TqsGameState>({
           game: customGame,

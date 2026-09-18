@@ -1051,8 +1051,9 @@ export class MainScreen extends Container {
     const top = this.viewportHeight - 250;
 
     const requiredActorID = this.requiredActorID(G);
+    // Draw Handoff screen if in hotseat mode and it's someone else's turn
     if (
-      !this.match!.isRemote &&
+      this.match!.isHotseat &&
       requiredActorID &&
       (viewerID !== requiredActorID ||
         this.handoffConfirmedFor !== requiredActorID)
@@ -1079,7 +1080,9 @@ export class MainScreen extends Container {
 
     if (G.status !== "playing" && G.status !== "ended") {
       const instruction = requiredActorID
-        ? `Hãy chuyển sang góc nhìn của P${G.players[requiredActorID].seat + 1} để chọn Võ Tướng.`
+        ? this.match!.isHotseat
+          ? `Hãy chuyển sang góc nhìn của P${G.players[requiredActorID].seat + 1} để chọn Võ Tướng.`
+          : `Đang chờ P${G.players[requiredActorID].seat + 1} (Bot/Remote) chọn Võ Tướng...`
         : "Đang chờ các người chơi hoàn tất việc chọn Võ Tướng.";
       this.addText(
         instruction,
