@@ -1007,22 +1007,41 @@ export class MainScreen extends Container {
     );
 
     // Calculate total height needed for the logs
-    // But since we don't know the exact wrapped height without rendering, we'll render from bottom up, 
+    // But since we don't know the exact wrapped height without rendering, we'll render from bottom up,
     // ensuring the newest is at the bottom, but clustered together.
     const entries = G.log.slice(-20);
     if (entries.length === 0) {
-      this.addText("Chưa có diễn biến nào.", x + 20, y + 60, 14, THEME.colors.muted, 0, "left");
+      this.addText(
+        "Chưa có diễn biến nào.",
+        x + 20,
+        y + 60,
+        14,
+        THEME.colors.muted,
+        0,
+        "left",
+      );
       return;
     }
 
     // Render texts invisibly first to get heights
     const texts = entries.map((entry) => {
-      const t = this.addText(entry.message, x + 20, 0, 14, entry.isImportant ? THEME.colors.redBright : THEME.colors.paper, 0, "left", 0, width - 40, true);
+      const t = this.addText(
+        entry.message,
+        x + 20,
+        0,
+        14,
+        entry.isImportant ? THEME.colors.redBright : THEME.colors.paper,
+        0,
+        "left",
+        0,
+        width - 40,
+        true,
+      );
       return t;
     });
 
     const totalHeight = texts.reduce((sum, t) => sum + t.height + 8, 0);
-    
+
     // Start drawing from either just below the title, or anchored to the bottom if it fills the screen
     let currentY = Math.max(y + 60, height - 40 - totalHeight);
 
