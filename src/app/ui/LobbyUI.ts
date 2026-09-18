@@ -121,45 +121,45 @@ export class LobbyUI {
 
       <!-- Offline Config Modal -->
       <div id="modal-offline" class="modal-overlay hidden">
-        <div class="modal-content">
-          <h2>Thiết lập Chơi Offline (Local)</h2>
+        <div class="modal-content" style="max-width: 450px; padding: 25px 35px; border-radius: 8px; background: linear-gradient(135deg, #2a110a 0%, #1a0a05 100%);">
+          <h2 style="font-size: 24px; margin-bottom: 20px;">Thiết lập Chơi Offline</h2>
           
-          <div style="margin-top: 15px; text-align: left;">
-            <label style="display:block; margin-bottom: 5px;">Số lượng người chơi:</label>
-            <select id="select-offline-players" class="input-ancient" style="width: 100%; padding: 5px;">
-              <option value="2">2 Người (Solo)</option>
-              <option value="4">4 Người</option>
+          <div style="margin-top: 15px; text-align: left; background: rgba(0,0,0,0.3); padding: 15px; border-radius: 6px; border: 1px solid #5a3a20;">
+            <label style="display:block; margin-bottom: 8px; color: #d4af37; font-weight: bold;">Số lượng người chơi:</label>
+            <select id="select-offline-players" class="input-ancient" style="width: 100%; padding: 10px; font-size: 16px; margin: 0; background-color: #110502; cursor: pointer;">
+              <option value="2">2 Người (Solo Đối Kháng)</option>
+              <option value="4">4 Người (Cơ Bản)</option>
               <option value="5">5 Người (Chuẩn)</option>
-              <option value="8" selected>8 Người (Tiêu chuẩn)</option>
-              <option value="10">10 Người</option>
+              <option value="8" selected>8 Người (Tiêu Chuẩn)</option>
+              <option value="10">10 Người (Hỗn Chiến)</option>
             </select>
           </div>
 
-          <div style="margin-top: 15px; text-align: left;">
-            <label style="display:flex; align-items:center; gap: 10px; cursor: pointer;">
-              <input type="checkbox" id="chk-offline-bots" style="width: 20px; height: 20px;" />
-              <span>
-                <b>Bật AI (Bot)</b><br/>
-                <small style="color: #ccc;">Người chơi 1 (Bạn) đấu với máy. Các ghế còn lại sẽ do Bot (Thử nghiệm) điều khiển.</small>
+          <div style="margin-top: 15px; text-align: left; background: rgba(0,0,0,0.3); padding: 15px; border-radius: 6px; border: 1px solid #5a3a20;">
+            <label style="display:flex; align-items:flex-start; gap: 12px; cursor: pointer;">
+              <input type="checkbox" id="chk-offline-bots" style="width: 22px; height: 22px; margin-top: 2px; accent-color: #d4af37;" />
+              <span style="flex: 1;">
+                <b style="color: #e0ca95; font-size: 16px;">Bật AI (Bot Điều Khiển)</b><br/>
+                <span style="color: #aaa; font-size: 13px; line-height: 1.4; display: inline-block; margin-top: 4px;">Người chơi 1 (Bạn) đấu với máy. Các ghế còn lại sẽ do Bot Heuristic điều khiển, tự động nhắm mục tiêu, hồi máu và phản đòn.</span>
               </span>
             </label>
           </div>
 
-          <div style="margin-top: 15px; text-align: left; padding-top: 10px; border-top: 1px dashed #c59a45;">
-            <p style="margin-bottom: 5px; color: #e0ca95;"><b>Tùy chỉnh thêm (Đề xuất):</b></p>
-            <label style="display:flex; align-items:center; gap: 10px; cursor: pointer; margin-bottom: 8px;">
-              <input type="checkbox" id="chk-offline-autoskip" checked style="width: 16px; height: 16px;" />
-              <span>Tự động lướt Vô Giải Khả Kích khi không có bài</span>
+          <div style="margin-top: 15px; text-align: left; background: rgba(0,0,0,0.3); padding: 15px; border-radius: 6px; border: 1px solid #5a3a20;">
+            <p style="margin: 0 0 10px 0; color: #d4af37; font-weight: bold;">Tùy chỉnh hệ thống:</p>
+            <label style="display:flex; align-items:center; gap: 10px; cursor: pointer; margin-bottom: 12px;">
+              <input type="checkbox" id="chk-offline-autoskip" checked style="width: 18px; height: 18px; accent-color: #d4af37;" />
+              <span style="color: #e0ca95; font-size: 15px;">Lướt Vô Giải Khả Kích (Khuyên dùng)</span>
             </label>
-            <label style="display:flex; align-items:center; gap: 10px; cursor: pointer; margin-bottom: 8px;">
-              <input type="checkbox" id="chk-offline-fastpick" style="width: 16px; height: 16px;" />
-              <span>Chọn Tướng nhanh (Ngẫu nhiên lập tức)</span>
+            <label style="display:flex; align-items:center; gap: 10px; cursor: pointer;">
+              <input type="checkbox" id="chk-offline-fastpick" style="width: 18px; height: 18px; accent-color: #d4af37;" />
+              <span style="color: #e0ca95; font-size: 15px;">Giao tướng ngẫu nhiên (Fast Pick)</span>
             </label>
           </div>
 
-          <div class="modal-actions" style="margin-top: 25px;">
-            <button id="btn-confirm-offline" class="btn-ancient">Khởi Tạo Trận</button>
-            <button id="btn-cancel-offline" class="btn-ancient btn-secondary">Huỷ</button>
+          <div class="modal-actions" style="margin-top: 30px; gap: 15px; justify-content: center;">
+            <button id="btn-cancel-offline" class="btn-ancient btn-secondary" style="flex: 1;">Huỷ Bỏ</button>
+            <button id="btn-confirm-offline" class="btn-ancient" style="flex: 1;">Khởi Tạo Trận</button>
           </div>
         </div>
       </div>
