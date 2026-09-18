@@ -55,11 +55,18 @@ setEngine(engine);
         );
         launchMainScreen();
       },
-      (numPlayers: number) => {
+      (
+        numPlayers: number,
+        options?: {
+          botsEnabled?: boolean;
+          autoSkipWuxie?: boolean;
+          fastPick?: boolean;
+        },
+      ) => {
         window.history.pushState(
-          { mode: "local", numPlayers },
+          { mode: "local", numPlayers, ...options },
           "",
-          `/?mode=local&numPlayers=${numPlayers}`,
+          `/?mode=local&numPlayers=${numPlayers}${options?.botsEnabled ? "&bots=1" : ""}`,
         );
         launchMainScreen();
       },

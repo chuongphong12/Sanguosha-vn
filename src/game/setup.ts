@@ -182,7 +182,7 @@ export function createInitialState(
     STANDARD_2013_DECK.map((card) => [card.id, { ...card }]),
   );
 
-  return {
+  const G: TqsGameState = {
     rulesVersion: "standard-2013-v2",
     status: "lord-selection",
     seatOrder,
@@ -215,6 +215,14 @@ export function createInitialState(
       autoSkipWuxie: options.autoSkipWuxie ?? true,
     },
   };
+
+  if (options.fastPick) {
+    for (const pID of seatOrder) {
+      selectGeneral(G, pID, G.players[pID].generalCandidates[0], shuffle);
+    }
+  }
+
+  return G;
 }
 
 export function selectGeneral(

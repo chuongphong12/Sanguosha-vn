@@ -54,13 +54,69 @@ export const TqsGame: Game<TqsGameState> = {
     setActivePlayers: false,
   },
 
+  ai: {
+    enumerate: (G, ctx, playerID) => {
+      const moves: any[] = [];
+      const prompt = G.prompt;
+
+      if (prompt && prompt.responderID === playerID) {
+        moves.push({
+          move: "answerPrompt",
+          args: [prompt.id, { kind: "pass" }],
+        });
+        return moves;
+      }
+
+      if (G.status === "lord-selection" || G.status === "general-selection") {
+        const player = G.players[playerID];
+        if (
+          player &&
+          !player.generalID &&
+          player.generalCandidates.length > 0
+        ) {
+          moves.push({
+            move: "selectGeneral",
+            args: [player.generalCandidates[0]],
+          });
+        }
+        return moves;
+      }
+
+      const activeStage = ctx.activePlayers?.[playerID];
+      if (activeStage === "play") {
+        moves.push({ move: "endPlayPhase", args: [] });
+      } else if (activeStage === "discard") {
+        const player = G.players[playerID];
+        const limit = player.maxCards ?? player.hp;
+        if (player.hand.length > Math.max(0, limit)) {
+          const numToDiscard = player.hand.length - Math.max(0, limit);
+          const discards = player.hand.slice(0, numToDiscard);
+          moves.push({ move: "discardCards", args: [discards] });
+        } else {
+          moves.push({ move: "discardCards", args: [[]] });
+        }
+      }
+
+      return moves;
+    },
+  },
+
   setup: ({ ctx, random }, setupData) => {
-    const data = setupData as { isOnline?: boolean };
+    const data = setupData as {
+      isOnline?: boolean;
+      autoSkipWuxie?: boolean;
+      fastPick?: boolean;
+    };
     if (data?.isOnline) {
       return createWaitingRoomState({ numPlayers: ctx.numPlayers });
     }
     return createInitialState(
-      { numPlayers: ctx.numPlayers, roleVariant: "standard" },
+      {
+        numPlayers: ctx.numPlayers,
+        roleVariant: "standard",
+        autoSkipWuxie: data?.autoSkipWuxie ?? true,
+        fastPick: data?.fastPick ?? false,
+      },
       shuffleFrom(random),
     );
   },

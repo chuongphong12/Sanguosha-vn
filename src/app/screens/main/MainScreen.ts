@@ -214,6 +214,11 @@ export class MainScreen extends Container {
         10,
       );
       config.numPlayers = isNaN(numPlayersParam) ? 4 : numPlayersParam;
+
+      const botsParam = state.botsEnabled || urlParams.get("bots") === "1";
+      config.botsEnabled = botsParam;
+      config.autoSkipWuxie = state.autoSkipWuxie !== false;
+      config.fastPick = state.fastPick === true;
     }
 
     this.match = new MatchClient(config);

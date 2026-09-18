@@ -92,6 +92,7 @@ export interface TqsPlayerViewState extends Omit<
 export interface TqsSetupOptions {
   joinedPlayerIDs?: string[];
   autoSkipWuxie?: boolean;
+  fastPick?: boolean;
   lordExtraHp?: number;
   turnTimeLimit?: number | null;
   numPlayers: number;

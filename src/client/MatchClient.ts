@@ -1,5 +1,6 @@
 import { Client } from "boardgame.io/client";
 import { Local, SocketIO } from "boardgame.io/multiplayer";
+import { RandomBot } from "boardgame.io/ai";
 
 import { TqsGame } from "../game/TqsGame";
 import type { PlayerID, TqsGameState, TqsPlayerViewState } from "../game/model";
@@ -23,6 +24,9 @@ export interface MatchConfig {
   playerID?: PlayerID; // Required for remote
   serverUrl?: string; // Required for remote
   credentials?: string; // Required if joining via lobby
+  botsEnabled?: boolean;
+  autoSkipWuxie?: boolean;
+  fastPick?: boolean;
 }
 
 export class MatchClient {
@@ -59,6 +63,15 @@ export class MatchClient {
       this.clients.set(playerID, client);
     } else {
       // Local hotseat mode
+      let localMultiplayer = Local();
+      if (config.botsEnabled) {
+        const bots: Record<string, any> = {};
+        for (let index = 1; index < numPlayers; index += 1) {
+          bots[String(index)] = RandomBot;
+        }
+        localMultiplayer = Local({ bots });
+      }
+
       for (let index = 0; index < numPlayers; index += 1) {
         const id = String(index);
         const client = Client<TqsGameState>({
@@ -66,7 +79,11 @@ export class MatchClient {
           numPlayers,
           matchID,
           playerID: id,
-          multiplayer: Local(),
+          multiplayer: localMultiplayer,
+          setupData: {
+            autoSkipWuxie: config.autoSkipWuxie,
+            fastPick: config.fastPick,
+          },
           debug: false,
         });
         client.start();

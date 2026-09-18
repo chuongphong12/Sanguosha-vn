@@ -13,7 +13,14 @@ export class LobbyUI {
       credentials?: string,
       serverUrl?: string,
     ) => void,
-    onPlayOffline: (numPlayers: number) => void,
+    onPlayOffline: (
+      numPlayers: number,
+      options?: {
+        botsEnabled?: boolean;
+        autoSkipWuxie?: boolean;
+        fastPick?: boolean;
+      },
+    ) => void,
   ): void {
     const isLocalhost =
       window.location.hostname === "localhost" ||
@@ -43,7 +50,14 @@ export class LobbyUI {
       credentials?: string,
       serverUrl?: string,
     ) => void,
-    onPlayOffline: (numPlayers: number) => void,
+    onPlayOffline: (
+      numPlayers: number,
+      options?: {
+        botsEnabled?: boolean;
+        autoSkipWuxie?: boolean;
+        fastPick?: boolean;
+      },
+    ) => void,
   ) {
     const appDiv = document.body;
     this.container = document.createElement("div");
@@ -104,6 +118,51 @@ export class LobbyUI {
           </div>
         </div>
       </div>
+
+      <!-- Offline Config Modal -->
+      <div id="modal-offline" class="modal-overlay hidden">
+        <div class="modal-content">
+          <h2>Thiết lập Chơi Offline (Local)</h2>
+          
+          <div style="margin-top: 15px; text-align: left;">
+            <label style="display:block; margin-bottom: 5px;">Số lượng người chơi:</label>
+            <select id="select-offline-players" class="input-ancient" style="width: 100%; padding: 5px;">
+              <option value="2">2 Người (Solo)</option>
+              <option value="4">4 Người</option>
+              <option value="5">5 Người (Chuẩn)</option>
+              <option value="8" selected>8 Người (Tiêu chuẩn)</option>
+              <option value="10">10 Người</option>
+            </select>
+          </div>
+
+          <div style="margin-top: 15px; text-align: left;">
+            <label style="display:flex; align-items:center; gap: 10px; cursor: pointer;">
+              <input type="checkbox" id="chk-offline-bots" style="width: 20px; height: 20px;" />
+              <span>
+                <b>Bật AI (Bot)</b><br/>
+                <small style="color: #ccc;">Người chơi 1 (Bạn) đấu với máy. Các ghế còn lại sẽ do Bot (Thử nghiệm) điều khiển.</small>
+              </span>
+            </label>
+          </div>
+
+          <div style="margin-top: 15px; text-align: left; padding-top: 10px; border-top: 1px dashed #c59a45;">
+            <p style="margin-bottom: 5px; color: #e0ca95;"><b>Tùy chỉnh thêm (Đề xuất):</b></p>
+            <label style="display:flex; align-items:center; gap: 10px; cursor: pointer; margin-bottom: 8px;">
+              <input type="checkbox" id="chk-offline-autoskip" checked style="width: 16px; height: 16px;" />
+              <span>Tự động lướt Vô Giải Khả Kích khi không có bài</span>
+            </label>
+            <label style="display:flex; align-items:center; gap: 10px; cursor: pointer; margin-bottom: 8px;">
+              <input type="checkbox" id="chk-offline-fastpick" style="width: 16px; height: 16px;" />
+              <span>Chọn Tướng nhanh (Ngẫu nhiên lập tức)</span>
+            </label>
+          </div>
+
+          <div class="modal-actions" style="margin-top: 25px;">
+            <button id="btn-confirm-offline" class="btn-ancient">Khởi Tạo Trận</button>
+            <button id="btn-cancel-offline" class="btn-ancient btn-secondary">Huỷ</button>
+          </div>
+        </div>
+      </div>
     `;
 
     appDiv.appendChild(this.container);
@@ -118,10 +177,40 @@ export class LobbyUI {
     document
       .getElementById("btn-refresh")!
       .addEventListener("click", () => this.refreshRooms(onJoinMatch));
+    const modalOffline = document.getElementById("modal-offline")!;
     document.getElementById("btn-offline")!.addEventListener("click", () => {
-      this.hide();
-      onPlayOffline(10);
+      modalOffline.classList.remove("hidden");
     });
+    document
+      .getElementById("btn-cancel-offline")!
+      .addEventListener("click", () => {
+        modalOffline.classList.add("hidden");
+      });
+    document
+      .getElementById("btn-confirm-offline")!
+      .addEventListener("click", () => {
+        const numPlayers = parseInt(
+          (
+            document.getElementById(
+              "select-offline-players",
+            ) as HTMLSelectElement
+          ).value,
+          10,
+        );
+        const botsEnabled = (
+          document.getElementById("chk-offline-bots") as HTMLInputElement
+        ).checked;
+        const autoSkipWuxie = (
+          document.getElementById("chk-offline-autoskip") as HTMLInputElement
+        ).checked;
+        const fastPick = (
+          document.getElementById("chk-offline-fastpick") as HTMLInputElement
+        ).checked;
+
+        modalOffline.classList.add("hidden");
+        this.hide();
+        onPlayOffline(numPlayers, { botsEnabled, autoSkipWuxie, fastPick });
+      });
 
     // Create Modal
     const modalCreate = document.getElementById("modal-create")!;
