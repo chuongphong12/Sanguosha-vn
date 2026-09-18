@@ -30,35 +30,14 @@ src/manifest.json
 
 # Documents and AI Resources
 .references/
-.agents/
 .claude/
 .gitnexus/
 .codegraph/
 .gemini/
-# Ignore specific AI agent markdown files, but allow all other .md files
-AGENTS.md
-CLAUDE.md
-Agent.md
-agent.md
-claude.md
 
-# Agent generated planning and docs
-docs/
-plans/
-plan/
-
-# Keep the UI research package reviewable instead of silently ignoring it.
-!docs/
-!docs/plans/
-!docs/plans/2026-09-16-ui-upgrade-plan-v2.md
-!docs/plans/2026-09-16-ui-upgrade-plan-v3.md
-!docs/plans/ui-upgrade/
-!docs/plans/ui-upgrade/**
-
-# Generated assets and test results
+# Keep generated patch scripts and local test outputs out of version control
 test-results/
 playwright-report/
 playwright/.cache/
 patch*.js
-# Agent patch scripts
 *.py
