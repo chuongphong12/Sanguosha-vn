@@ -2945,7 +2945,6 @@ ${SUIT_LABELS[card.suit]} ${card.rank}`,
       paddingY?: number;
     } = {/* ignore */},
   ): Button {
-    if (height === 48) height = 40; // force smaller buttons for action rows
     const button = new Button({
       label,
       width,

@@ -1918,14 +1918,12 @@ export function resolveDying(
   const living = aliveInActionOrder(G);
   for (const pid of living) {
     if (!effect.passedPlayerIDs.includes(pid)) {
-      let hasPeach = false;
       const responder = G.players[pid];
-      for (const cardID of responder.hand) {
-        if (canRespondWithCard(G, pid, cardID, "peach")) {
-          hasPeach = true;
-          break;
-        }
-      }
+      let hasPeach = responder.hand.some((cID) =>
+        canRespondWithCard(G, pid, cID, "peach")
+      ) || Object.values(responder.equipment).some(
+        (cID) => cID && canRespondWithCard(G, pid, cID as string, "peach")
+      );
       if (!hasPeach) {
         effect.passedPlayerIDs.push(pid);
       }
@@ -3687,8 +3685,6 @@ export function answerCardPrompt(
   if (!accepted) return false;
   if (
     G.prompt?.id === promptID &&
-    G.prompt.reason !== "nullification" &&
-    G.prompt.reason !== "rescue" &&
     G.prompt.reason !== "arrow-barrage" &&
     G.prompt.reason !== "barbarian-invasion"
   ) {
@@ -3960,6 +3956,14 @@ function resolveAoeSimultaneous(
     return;
   }
 
+  const isBarbarian = effect.cardName === "barbarian-invasion";
+  const isArrow = effect.cardName === "arrow-barrage";
+  const summonFaction = isBarbarian
+    ? hasSkill(G, G.turn.activePlayerID, "ji-jiang") ? "shu" : null
+    : isArrow
+      ? hasSkill(G, G.turn.activePlayerID, "hu-jia") ? "wei" : null
+      : null;
+
   G.prompt = {
     id: resolutionID(G),
     kind: "card-response",
@@ -3968,12 +3972,12 @@ function resolveAoeSimultaneous(
     reason: effect.cardName,
     sourceID: effect.sourceID,
     targetID: G.turn.activePlayerID,
-    allowBagua: effect.cardName === "arrow-barrage",
-    allowSerpentSpear: effect.cardName === "barbarian-invasion",
+    allowBagua: isArrow,
+    allowSerpentSpear: isBarbarian,
     allowPass: true,
     subjectCardName: effect.cardName,
     forbidCard: false,
-    summonFaction: null,
+    summonFaction,
     passedPlayerIDs: effect.passedPlayerIDs,
     effectID: effect.id,
     chainDepth: 0,

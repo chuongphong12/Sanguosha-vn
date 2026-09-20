@@ -4,7 +4,7 @@ import "./typography.css";
 export const GAME_FONT_FAMILY = "Noto Serif";
 
 const VIETNAMESE_FONT_SAMPLE =
-  "Tam Quá»‘c SÃ¡t Chá»§ CÃ´ng VÃµ TÆ°á»›ng Thá»ƒ Lá»±c PhÃ¡n XÃ©t Háº¥p Há»‘i Ná»™i Gian";
+  "Tam Quốc Sát Chủ Công Võ Tướng Thể Lực Phán Xét Hấp Hối Nội Gian";
 
 export async function loadGameFonts(): Promise<void> {
   await Promise.all([
