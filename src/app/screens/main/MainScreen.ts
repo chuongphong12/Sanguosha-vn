@@ -42,6 +42,7 @@ import { Dashboard } from "../../ui/Dashboard";
 import { SeatView } from "../../ui/SeatView";
 import { getEquipmentSlotViews } from "../../ui/equipmentView";
 import { layoutActionRow } from "../../ui/layout";
+import { FlexContainer } from "../../ui/FlexContainer";
 import { GAME_FONT_FAMILY } from "../../ui/typography";
 import { THEME } from "../../ui/theme";
 import { Button } from "../../ui/components/Button";
@@ -2074,37 +2075,29 @@ export class MainScreen extends Container {
         selected ? THEME.colors.redBright : THEME.colors.ink,
       );
     });
-    const actionRow = layoutActionRow(
-      this.viewportWidth,
-      this.viewportHeight,
-      [180, 150],
-      { bottomInset: 260 },
-    );
-    this.addButton(
-      "Xác nhận",
-      actionRow.centers[0],
-      actionRow.centerY,
-      actionRow.widths[0],
-      48,
-      () =>
-        this.answerPrompt(prompt.id, {
-          kind: "players",
-          playerIDs: [...this.selectedPromptPlayerIDs],
-        }),
-      THEME.colors.red,
-      THEME.colors.white,
-      this.selectedPromptPlayerIDs.length < prompt.minimum,
-    );
-    if (prompt.minimum === 0)
-      this.addButton(
-        "Bỏ qua",
-        actionRow.centers[1],
-        actionRow.centerY,
-        actionRow.widths[1],
-        48,
-        () => this.answerPrompt(prompt.id, { kind: "pass" }),
-        THEME.colors.ink,
-      );
+    const buttons: any[] = [
+      {
+        label: "Xác nhận",
+        width: 180,
+        onPress: () =>
+          this.answerPrompt(prompt.id, {
+            kind: "players",
+            playerIDs: [...this.selectedPromptPlayerIDs],
+          }),
+        color: THEME.colors.red,
+        textColor: THEME.colors.white,
+        disabled: this.selectedPromptPlayerIDs.length < prompt.minimum,
+      },
+    ];
+    if (prompt.minimum === 0) {
+      buttons.push({
+        label: "Bỏ qua",
+        width: 150,
+        onPress: () => this.answerPrompt(prompt.id, { kind: "pass" }),
+        color: THEME.colors.ink,
+      });
+    }
+    this.createActionRow(buttons, { bottomInset: 260 });
   }
 
   private drawCardResponsePrompt(
@@ -2702,37 +2695,33 @@ ${SUIT_LABELS[card.suit]} ${card.rank}`,
         );
       }
     });
-    const actionRow = layoutActionRow(
-      this.viewportWidth,
-      this.viewportHeight,
-      prompt.allowPass ? [180, 150] : [180],
-    );
-    this.addButton(
-      "Xác nhận",
-      actionRow.centers[0],
-      actionRow.centerY,
-      actionRow.widths[0],
-      40,
-      () =>
-        this.answerPrompt(prompt.id, {
-          kind: "zone-cards",
-          choices: [...this.selectedZoneChoices],
-        }),
-      THEME.colors.red,
-      THEME.colors.white,
-      this.selectedZoneChoices.length < prompt.minimum ||
-        this.selectedZoneChoices.length > prompt.maximum,
-    );
-    if (prompt.allowPass)
-      this.addButton(
-        "Bỏ qua",
-        actionRow.centers[1],
-        actionRow.centerY,
-        actionRow.widths[1],
-        40,
-        () => this.answerPrompt(prompt.id, { kind: "pass" }),
-        THEME.colors.ink,
-      );
+    const buttons: any[] = [
+      {
+        label: "Xác nhận",
+        width: 180,
+        height: 40,
+        onPress: () =>
+          this.answerPrompt(prompt.id, {
+            kind: "zone-cards",
+            choices: [...this.selectedZoneChoices],
+          }),
+        color: THEME.colors.red,
+        textColor: THEME.colors.white,
+        disabled:
+          this.selectedZoneChoices.length < prompt.minimum ||
+          this.selectedZoneChoices.length > prompt.maximum,
+      },
+    ];
+    if (prompt.allowPass) {
+      buttons.push({
+        label: "Bỏ qua",
+        width: 150,
+        height: 40,
+        onPress: () => this.answerPrompt(prompt.id, { kind: "pass" }),
+        color: THEME.colors.ink,
+      });
+    }
+    this.createActionRow(buttons);
   }
 
   private drawHarvestSelection(
@@ -2779,25 +2768,22 @@ ${SUIT_LABELS[card.suit]} ${card.rank}`,
     const selectedID = [...this.selectedCardIDs].find((cardID) =>
       prompt.availableCardIDs.includes(cardID),
     );
-    const actionRow = layoutActionRow(
-      this.viewportWidth,
-      this.viewportHeight,
-      [180],
-    );
-    this.addButton(
-      "Nhận lá đã chọn",
-      actionRow.centers[0],
-      actionRow.centerY,
-      actionRow.widths[0],
-      48,
-      () => {
-        if (selectedID)
-          this.answerPrompt(prompt.id, { kind: "harvest", cardID: selectedID });
+    this.createActionRow([
+      {
+        label: "Nhận lá đã chọn",
+        width: 180,
+        onPress: () => {
+          if (selectedID)
+            this.answerPrompt(prompt.id, {
+              kind: "harvest",
+              cardID: selectedID,
+            });
+        },
+        color: THEME.colors.red,
+        textColor: THEME.colors.white,
+        disabled: !selectedID,
       },
-      THEME.colors.red,
-      THEME.colors.white,
-      !selectedID,
-    );
+    ]);
   }
 
   private answerPrompt(promptID: number, answer: PromptAnswer): void {
@@ -2926,6 +2912,48 @@ ${SUIT_LABELS[card.suit]} ${card.rank}`,
     }
     this.content.addChild(label);
     return label;
+  }
+
+  private createActionRow(
+    buttons: Array<{
+      label: string;
+      width: number;
+      height?: number;
+      color?: number;
+      textColor?: number;
+      disabled?: boolean;
+      onPress: () => void;
+    }>,
+    options: { rightInset?: number; bottomInset?: number; gap?: number } = {},
+  ): void {
+    const container = new FlexContainer({
+      direction: "row",
+      gap: options.gap ?? 8,
+    });
+    for (const b of buttons) {
+      const btn = this.addButton(
+        b.label,
+        0,
+        0,
+        b.width,
+        b.height ?? 48,
+        b.onPress,
+        b.color,
+        b.textColor,
+        b.disabled,
+      );
+      container.addChild(btn);
+    }
+    container.layout();
+    const rightInset = options.rightInset ?? 314;
+    const bottomInset = options.bottomInset ?? 280;
+    container.position.set(
+      this.viewportWidth - rightInset - container.width,
+      this.viewportHeight -
+        bottomInset -
+        Math.floor((buttons[0]?.height ?? 48) / 2),
+    );
+    this.content.addChild(container);
   }
 
   private addButton(

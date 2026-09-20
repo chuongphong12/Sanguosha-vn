@@ -1919,11 +1919,13 @@ export function resolveDying(
   for (const pid of living) {
     if (!effect.passedPlayerIDs.includes(pid)) {
       const responder = G.players[pid];
-      let hasPeach = responder.hand.some((cID) =>
-        canRespondWithCard(G, pid, cID, "peach")
-      ) || Object.values(responder.equipment).some(
-        (cID) => cID && canRespondWithCard(G, pid, cID as string, "peach")
-      );
+      const hasPeach =
+        responder.hand.some((cID) =>
+          canRespondWithCard(G, pid, cID, "peach"),
+        ) ||
+        Object.values(responder.equipment).some(
+          (cID) => cID && canRespondWithCard(G, pid, cID as string, "peach"),
+        );
       if (!hasPeach) {
         effect.passedPlayerIDs.push(pid);
       }
@@ -3959,9 +3961,13 @@ function resolveAoeSimultaneous(
   const isBarbarian = effect.cardName === "barbarian-invasion";
   const isArrow = effect.cardName === "arrow-barrage";
   const summonFaction = isBarbarian
-    ? hasSkill(G, G.turn.activePlayerID, "ji-jiang") ? "shu" : null
+    ? hasSkill(G, G.turn.activePlayerID, "ji-jiang")
+      ? "shu"
+      : null
     : isArrow
-      ? hasSkill(G, G.turn.activePlayerID, "hu-jia") ? "wei" : null
+      ? hasSkill(G, G.turn.activePlayerID, "hu-jia")
+        ? "wei"
+        : null
       : null;
 
   G.prompt = {
