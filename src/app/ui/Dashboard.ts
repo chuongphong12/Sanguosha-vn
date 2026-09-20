@@ -338,14 +338,15 @@ export class Dashboard extends Container {
     const newHandSet = new Set(hand);
     const cardW = 120;
     const cardH = 168;
-    const radius = 1200;
-    const centerX = (handLeft + roleLeft) / 2;
-    const centerY = this.panelHeight + radius - 90;
 
-    const maxSpan = Math.PI / 4;
-    const anglePerCard = Math.min(0.08, maxSpan / Math.max(1, hand.length));
-    const totalAngle = anglePerCard * (hand.length - 1);
-    const startAngle = -totalAngle / 2;
+    // Horizontal layout
+    const maxSpacing = 80;
+    const totalAvailable = handAreaWidth - cardW;
+    const requiredSpacing =
+      hand.length > 1 ? totalAvailable / (hand.length - 1) : maxSpacing;
+    const spacing = Math.min(maxSpacing, requiredSpacing);
+    const startX =
+      handLeft + (handAreaWidth - (cardW + (hand.length - 1) * spacing)) / 2;
 
     // Remove missing
     for (const [id, view] of this.handCardViews) {
@@ -361,29 +362,37 @@ export class Dashboard extends Container {
       if (!card) return;
 
       const selected = options.selectedCardIDs.has(cardID);
-      const angle = startAngle + index * anglePerCard;
 
-      const baseX = centerX + radius * Math.sin(angle) - cardW / 2;
-      const baseY = centerY - radius * Math.cos(angle) - cardH / 2;
-      const baseRotation = angle;
+      const baseX = startX + index * spacing;
+      const baseY = this.panelHeight - cardH - 10;
+      const baseRotation = 0;
 
       let cardView = this.handCardViews.get(cardID);
       if (!cardView) {
         cardView = new CardView(card, {
-          selected,
           width: cardW,
           height: cardH,
+          selected,
           onTap: () => options.onCardTap(cardID),
         });
         this.handCardViews.set(cardID, cardView);
         this.cardContainer.addChild(cardView);
+        cardView.x = baseX + cardW / 2;
+        cardView.y = baseY + cardH + 100;
+        cardView.rotation = baseRotation;
+        cardView.alpha = 0;
 
-        cardView.pivot.set(cardW / 2, cardH);
+        (cardView as any)._anim = animate(
+          cardView as any,
+          {
+            y: baseY + cardH - (selected ? 20 : 0),
+            alpha: 1,
+          },
+          { duration: 0.3, ease: "backOut" },
+        );
 
         cardView.on("pointerenter", () => {
           Dashboard.hoveredCardID = cardID;
-          cardView!.zIndex = 1000;
-          if ((cardView as any)._anim) (cardView as any)._anim.stop();
           (cardView as any)._anim = animate(
             cardView as any,
             {
@@ -398,8 +407,6 @@ export class Dashboard extends Container {
         cardView.on("pointerleave", () => {
           if (Dashboard.hoveredCardID === cardID)
             Dashboard.hoveredCardID = null;
-          cardView!.zIndex = index;
-          if ((cardView as any)._anim) (cardView as any)._anim.stop();
           (cardView as any)._anim = animate(
             cardView as any,
             {
@@ -422,6 +429,7 @@ export class Dashboard extends Container {
       }
 
       const isHovered = Dashboard.hoveredCardID === cardID;
+
       if (isHovered) {
         cardView.zIndex = 1000;
         cardView.x = baseX + cardW / 2;
@@ -438,7 +446,7 @@ export class Dashboard extends Container {
     });
 
     if (hand.length === 0) {
-      this.emptyText.position.set(centerX, this.panelHeight - 80);
+      this.emptyText.position.set(vw / 2, this.panelHeight - 80);
       this.emptyText.anchor.set(0.5);
       this.emptyText.visible = true;
     } else {

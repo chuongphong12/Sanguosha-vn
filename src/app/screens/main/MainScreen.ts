@@ -81,6 +81,10 @@ export class MainScreen extends Container {
   private selectedCandidateID: string | null = null;
   private selectedZoneChoices: ZoneCardChoice[] = [];
   private selectedPromptPlayerIDs: PlayerID[] = [];
+  private isLogOpen = true;
+  private get effectiveWidth(): number {
+    return this.isLogOpen ? this.viewportWidth - 280 : this.viewportWidth;
+  }
   private lastPromptID: number | null = null;
   private nullificationTimeout: ReturnType<typeof setTimeout> | null = null;
   private nullificationEndTime: number = 0;
@@ -339,7 +343,7 @@ export class MainScreen extends Container {
         this.state.ctx,
         this.match.currentViewerID,
         {
-          viewportWidth: this.viewportWidth,
+          viewportWidth: this.effectiveWidth,
           viewportHeight: this.viewportHeight,
           selectedCardIDs: this.selectedCardIDs,
           selectedTargetIDs: this.selectedTargetIDs,
@@ -403,6 +407,50 @@ export class MainScreen extends Container {
       this.drawRolePopup(viewer.role || "");
     }
   }
+
+  private handleSeatTap(playerID: string): void {
+    const G = this.state?.G;
+    if (!G) return;
+    const isChoosingTarget =
+      this.selectedCardIDs.size > 0 || this.selectedCandidateID !== null;
+    const targetOrder = this.selectedTargetIDs.indexOf(playerID);
+    const selected = targetOrder >= 0;
+    const selectableTarget = selected || this.canSelectTarget(G, playerID);
+
+    if (selectableTarget) {
+      if (selected) {
+        // Deselect logic
+        const selectedCardID = [...this.selectedCardIDs][0];
+        const selectedCardName = selectedCardID
+          ? G.cards[selectedCardID]?.definitionID
+          : null;
+        if (selectedCardName === "borrowed-sword")
+          this.selectedTargetIDs.splice(targetOrder);
+        else this.selectedTargetIDs.splice(targetOrder, 1);
+      } else {
+        // Select logic
+        const maximum = 10;
+        if (this.selectedTargetIDs.length < maximum)
+          this.selectedTargetIDs.push(playerID);
+      }
+      this.render();
+    }
+  }
+
+  private handleCardTap(cardID: string): void {
+    const selected = this.selectedCardIDs.has(cardID);
+    if (selected) {
+      this.selectedCardIDs.delete(cardID);
+    } else {
+      this.selectedCardIDs.add(cardID);
+    }
+    // Automatically deselect targets if card changes and targets become invalid
+    this.selectedTargetIDs = this.selectedTargetIDs.filter((id) =>
+      this.canSelectTarget(this.state!.G, id),
+    );
+    this.render();
+  }
+
   private drawWaitingRoom(): void {
     const viewerID = this.match!.currentViewerID;
 
@@ -795,7 +843,7 @@ export class MainScreen extends Container {
     const selectorWidth =
       G.seatOrder.length * buttonWidth + (G.seatOrder.length - 1) * buttonGap;
     // The Log Sidebar takes up 280px on the right. We want to place this selector to the left of it.
-    const selectorLeft = this.viewportWidth - 280 - 16 - selectorWidth;
+    const selectorLeft = this.effectiveWidth - 16 - selectorWidth;
 
     this.addText(
       "Góc nhìn",
@@ -1418,7 +1466,7 @@ export class MainScreen extends Container {
         });
       }
       const actionRow = layoutActionRow(
-        this.viewportWidth,
+        this.effectiveWidth,
         this.viewportHeight,
         [
           ...(conversions.length > 0 ? [150] : []),
@@ -1693,7 +1741,7 @@ export class MainScreen extends Container {
     if (G.turn.step === "discard") {
       const canResumePlay = !G.turn.skippedSteps.includes("play");
       const actionRow = layoutActionRow(
-        this.viewportWidth,
+        this.effectiveWidth,
         this.viewportHeight,
         canResumePlay ? [190, 220] : [220],
       );
@@ -1904,7 +1952,7 @@ export class MainScreen extends Container {
           spade: "♠ Hắc Đào",
         };
         const row = layoutActionRow(
-          this.viewportWidth,
+          this.effectiveWidth,
           this.viewportHeight,
           [150, 150, 150, 150],
         );
@@ -1923,7 +1971,7 @@ export class MainScreen extends Container {
       }
       if (prompt.reason === "gender-swords-target") {
         const actionRow = layoutActionRow(
-          this.viewportWidth,
+          this.effectiveWidth,
           this.viewportHeight,
           [180, 220],
         );
@@ -1955,7 +2003,7 @@ export class MainScreen extends Container {
           draw: "Rút 1 lá",
         };
         const actionRow = layoutActionRow(
-          this.viewportWidth,
+          this.effectiveWidth,
           this.viewportHeight,
           prompt.choices.map(() => 200),
         );
@@ -1973,7 +2021,7 @@ export class MainScreen extends Container {
         return;
       }
       const actionRow = layoutActionRow(
-        this.viewportWidth,
+        this.effectiveWidth,
         this.viewportHeight,
         [180, 160],
       );
@@ -2105,7 +2153,7 @@ export class MainScreen extends Container {
       160,
     ];
     const actionRow = layoutActionRow(
-      this.viewportWidth,
+      this.effectiveWidth,
       this.viewportHeight,
       widths,
     );
