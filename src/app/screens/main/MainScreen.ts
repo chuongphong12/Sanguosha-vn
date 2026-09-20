@@ -8,6 +8,7 @@ import {
   Sprite,
 } from "pixi.js";
 
+import { BattleScene } from "./BattleScene";
 import { LobbyClient } from "boardgame.io/client";
 import type {
   MatchClientState,
@@ -71,6 +72,7 @@ export class MainScreen extends Container {
   public static assetBundles = ["main"];
 
   private readonly content = new Container();
+  private readonly battleScene = new BattleScene();
   private match?: MatchClient;
   private unsubscribe?: () => void;
   private state: MatchClientState = null;
@@ -182,6 +184,7 @@ export class MainScreen extends Container {
 
   constructor() {
     super();
+    this.addChild(this.battleScene);
     this.addChild(this.content);
   }
 
@@ -328,7 +331,26 @@ export class MainScreen extends Container {
 
   private render(): void {
     this.clearContent();
-    this.drawBackground();
+
+    if (this.state && this.match && this.state.G.status !== "waiting-room") {
+      this.battleScene.visible = true;
+      this.battleScene.sync(
+        this.state.G,
+        this.state.ctx,
+        this.match.currentViewerID,
+        {
+          viewportWidth: this.viewportWidth,
+          viewportHeight: this.viewportHeight,
+          selectedCardIDs: this.selectedCardIDs,
+          selectedTargetIDs: this.selectedTargetIDs,
+          onSeatTap: (pid) => this.handleSeatTap(pid),
+          onDashboardCardTap: (cid) => this.handleCardTap(cid),
+        },
+      );
+    } else {
+      this.battleScene.visible = false;
+      this.drawBackground();
+    }
     this.drawTitle();
 
     if (!this.state || !this.match) {
@@ -1105,49 +1127,7 @@ export class MainScreen extends Container {
       return;
     }
 
-    const dashboard = new Dashboard(G, viewerID, {
-      viewportWidth: this.viewportWidth - 280,
-      selectedCardIDs: this.selectedCardIDs,
-      handScrollX: this.handScrollX,
-      onCardTap: (cardID: string) => {
-        if (G.turn.step === "discard") {
-          if (this.selectedCardIDs.has(cardID))
-            this.selectedCardIDs.delete(cardID);
-          else this.selectedCardIDs.add(cardID);
-        } else {
-          const viewerWeaponID = player.equipment.weapon;
-          const promptAllowsSpear =
-            G.prompt?.kind === "card-response" &&
-            G.prompt.response === "slash" &&
-            G.prompt.allowSerpentSpear;
-          const playAllowsSpear =
-            !G.prompt &&
-            this.serpentSpearMode &&
-            viewerWeaponID !== undefined &&
-            G.cards[viewerWeaponID]?.definitionID === "serpent-spear";
-          const multiSelect = promptAllowsSpear || playAllowsSpear;
-
-          if (this.selectedCardIDs.has(cardID)) {
-            this.selectedCardIDs.delete(cardID);
-          } else {
-            if (!multiSelect) this.selectedCardIDs.clear();
-            else if (this.selectedCardIDs.size >= 2) return;
-            this.selectedCardIDs.add(cardID);
-          }
-          if (this.virtualAs === "slash" && this.selectedCardIDs.size === 0) {
-            this.virtualAs = null;
-          }
-        }
-        this.render();
-      },
-      onScroll: (scrollX: number) => {
-        this.handScrollX = scrollX;
-        this.render();
-      },
-    });
-
-    dashboard.position.set(30, top);
-    this.content.addChild(dashboard);
+    // Dashboard is now rendered by BattleScene
 
     this.drawActions(G, viewerID);
   }
@@ -2699,7 +2679,7 @@ ${SUIT_LABELS[card.suit]} ${card.rank}`,
       {
         label: "Xác nhận",
         width: 180,
-        height: 40,
+        height: 48,
         onPress: () =>
           this.answerPrompt(prompt.id, {
             kind: "zone-cards",
@@ -2716,7 +2696,7 @@ ${SUIT_LABELS[card.suit]} ${card.rank}`,
       buttons.push({
         label: "Bỏ qua",
         width: 150,
-        height: 40,
+        height: 48,
         onPress: () => this.answerPrompt(prompt.id, { kind: "pass" }),
         color: THEME.colors.ink,
       });

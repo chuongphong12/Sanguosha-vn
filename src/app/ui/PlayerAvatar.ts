@@ -11,14 +11,28 @@ import { THEME } from "./theme";
 const AVATAR_WIDTH = 120;
 const AVATAR_HEIGHT = 140;
 
-/**
- * PlayerAvatar — Renders a general's portrait with faction border,
- * HP bar, and general name label.
- *
- * Uses synchronous Assets.get() for compatibility with MainScreen's
- * immediate-mode redraw cycle.
- */
 export class PlayerAvatar extends Container {
+  private bg = new Graphics();
+  private portrait = new Sprite();
+  private placeholder = new Container();
+  private deathOverlay = new Container();
+  private hpContainer = new Container();
+  private nameText = new Text({
+    style: {
+      fontFamily: GAME_FONT_FAMILY,
+      fontSize: 11,
+      fill: 0xf3e5c8,
+      fontWeight: "bold",
+    },
+  });
+  private factionIcon = new Sprite();
+  private factionDot = new Graphics();
+
+  private w: number;
+  private h: number;
+  private portraitH: number;
+  private onTap?: () => void;
+
   constructor(
     player: PlayerViewPlayer,
     options?: {
@@ -31,14 +45,62 @@ export class PlayerAvatar extends Container {
   ) {
     super();
 
-    const w = options?.width ?? AVATAR_WIDTH;
-    const h = options?.height ?? AVATAR_HEIGHT;
+    this.w = options?.width ?? AVATAR_WIDTH;
+    this.h = options?.height ?? AVATAR_HEIGHT;
+    this.portraitH = this.h - 38;
+    this.onTap = options?.onTap;
+
+    this.addChild(
+      this.bg,
+      this.portrait,
+      this.placeholder,
+      this.deathOverlay,
+      this.hpContainer,
+      this.nameText,
+      this.factionIcon,
+      this.factionDot,
+    );
+
+    this.setupDeathOverlay();
+
+    this.nameText.anchor.set(0.5, 0);
+    this.nameText.position.set(this.w / 2, this.h - 16);
+
+    this.factionIcon.width = 20;
+    this.factionIcon.height = 20;
+    this.factionIcon.position.set(this.w - 24, 6);
+
+    this.sync(player, options);
+  }
+
+  public sync(
+    player: PlayerViewPlayer,
+    options?: {
+      isActiveActor?: boolean;
+      isSelected?: boolean;
+      onTap?: () => void;
+    },
+  ): void {
+    if (options && "onTap" in options) {
+      this.onTap = options.onTap;
+    }
+
+    this.removeAllListeners("pointertap");
+    if (this.onTap) {
+      this.eventMode = "static";
+      this.cursor = "pointer";
+      this.on("pointertap", this.onTap);
+    } else {
+      this.eventMode = "none";
+      this.cursor = "auto";
+    }
+
     const isActive = options?.isActiveActor ?? false;
     const isSelected = options?.isSelected ?? false;
     const general = player.generalID ? GENERALS_BY_ID[player.generalID] : null;
     const faction = general?.faction ?? null;
 
-    // --- Background frame ---
+    // Background
     const borderColor = isSelected
       ? 0xb93730
       : isActive
@@ -46,103 +108,92 @@ export class PlayerAvatar extends Container {
         : faction
           ? THEME.colors.factions[faction]
           : 0x555555;
-    const bg = new Graphics()
-      .roundRect(0, 0, w, h, 6)
+
+    this.bg
+      .clear()
+      .roundRect(0, 0, this.w, this.h, 6)
       .fill({ color: 0x1a1510, alpha: 0.95 })
       .stroke({ color: borderColor, width: isSelected ? 3 : 2, alpha: 0.95 });
-    this.addChild(bg);
 
-    // --- Portrait image ---
-    const portraitH = h - 38;
+    // Portrait
+    this.portrait.visible = false;
+    this.placeholder.visible = false;
+    this.placeholder.removeChildren();
+
     if (general) {
       const tex = this.resolvePortrait(general.id);
       if (tex) {
-        const portrait = new Sprite(tex);
-        portrait.width = w - 8;
-        portrait.height = portraitH;
-        portrait.position.set(4, 4);
-        if (!player.alive) portrait.alpha = 0.35;
-        this.addChild(portrait);
+        this.portrait.texture = tex;
+        this.portrait.width = this.w - 8;
+        this.portrait.height = this.portraitH;
+        this.portrait.position.set(4, 4);
+        this.portrait.alpha = player.alive ? 1.0 : 0.35;
+        this.portrait.visible = true;
       } else {
-        this.drawPlaceholder(w, portraitH, general.chineseName);
+        this.drawPlaceholder(general.chineseName);
+        this.placeholder.visible = true;
       }
     } else {
-      this.drawPlaceholder(w, portraitH, "?");
+      this.drawPlaceholder("?");
+      this.placeholder.visible = true;
     }
 
-    // --- Death overlay ---
-    if (!player.alive) {
-      const deathOverlay = new Graphics()
-        .roundRect(0, 0, w, h, 6)
-        .fill({ color: 0x000000, alpha: 0.5 });
-      this.addChild(deathOverlay);
+    // Death overlay
+    this.deathOverlay.visible = !player.alive;
 
-      const deathText = new Text({
-        text: "阵亡",
-        style: {
-          fontFamily: GAME_FONT_FAMILY,
-          fontSize: 22,
-          fill: 0xb93730,
-          fontWeight: "bold",
-        },
-      });
-      deathText.anchor.set(0.5);
-      deathText.position.set(w / 2, portraitH / 2 + 4);
-      this.addChild(deathText);
+    // HP Bar
+    this.drawHPBar(player.hp, player.maxHP, 4, this.h - 32, this.w - 8);
+
+    // Name label
+    this.nameText.text = general?.name ?? `P\${player.seat + 1}`;
+    this.nameText.scale.set(1);
+    if (this.nameText.width > this.w - 12) {
+      this.nameText.scale.set((this.w - 12) / this.nameText.width);
     }
 
-    // --- HP bar ---
-    const hpBarY = h - 32;
-    this.drawHPBar(player.hp, player.maxHP, 4, hpBarY, w - 8);
+    // Faction
+    this.factionIcon.visible = false;
+    this.factionDot.visible = false;
+    this.factionDot.clear();
 
-    // --- Name label ---
-    const nameLabel = general?.name ?? `P${player.seat + 1}`;
-    const nameText = new Text({
-      text: nameLabel,
-      style: {
-        fontFamily: GAME_FONT_FAMILY,
-        fontSize: 11,
-        fill: 0xf3e5c8,
-        fontWeight: "bold",
-      },
-    });
-    nameText.anchor.set(0.5, 0);
-    nameText.position.set(w / 2, h - 16);
-    if (nameText.width > w - 12) {
-      nameText.scale.set((w - 12) / nameText.width);
-    }
-    this.addChild(nameText);
-
-    // --- Faction icon (small badge) ---
     if (faction) {
       const factionTex = this.resolveFactionIcon(faction);
       if (factionTex) {
-        const factionIcon = new Sprite(factionTex);
-        factionIcon.width = 20;
-        factionIcon.height = 20;
-        factionIcon.position.set(w - 24, 6);
-        this.addChild(factionIcon);
+        this.factionIcon.texture = factionTex;
+        this.factionIcon.visible = true;
       } else {
-        // Fallback: small colored circle
-        const dot = new Graphics()
-          .circle(w - 14, 16, 8)
+        this.factionDot
+          .circle(this.w - 14, 16, 8)
           .fill(THEME.colors.factions[faction]);
-        this.addChild(dot);
+        this.factionDot.visible = true;
       }
-    }
-
-    // --- Interaction ---
-    if (options?.onTap) {
-      this.eventMode = "static";
-      this.cursor = "pointer";
-      this.on("pointertap", options.onTap);
     }
   }
 
-  private drawPlaceholder(w: number, h: number, label: string): void {
-    const placeholder = new Graphics().rect(4, 4, w - 8, h).fill(0x2a2520);
-    this.addChild(placeholder);
+  private setupDeathOverlay() {
+    const bg = new Graphics()
+      .roundRect(0, 0, this.w, this.h, 6)
+      .fill({ color: 0x000000, alpha: 0.5 });
 
+    const deathText = new Text({
+      text: "阵亡",
+      style: {
+        fontFamily: GAME_FONT_FAMILY,
+        fontSize: 22,
+        fill: 0xb93730,
+        fontWeight: "bold",
+      },
+    });
+    deathText.anchor.set(0.5);
+    deathText.position.set(this.w / 2, this.portraitH / 2 + 4);
+
+    this.deathOverlay.addChild(bg, deathText);
+  }
+
+  private drawPlaceholder(label: string): void {
+    const bg = new Graphics()
+      .rect(4, 4, this.w - 8, this.portraitH)
+      .fill(0x2a2520);
     const text = new Text({
       text: label,
       style: {
@@ -153,8 +204,8 @@ export class PlayerAvatar extends Container {
       },
     });
     text.anchor.set(0.5);
-    text.position.set(w / 2, h / 2 + 4);
-    this.addChild(text);
+    text.position.set(this.w / 2, this.portraitH / 2 + 4);
+    this.placeholder.addChild(bg, text);
   }
 
   private drawHPBar(
@@ -164,10 +215,11 @@ export class PlayerAvatar extends Container {
     y: number,
     totalWidth: number,
   ): void {
+    this.hpContainer.removeChildren();
+
     const gap = 2;
     const dotSize = Math.min(12, (totalWidth - gap * (maxHP - 1)) / maxHP);
 
-    // 5 = green (hp >= max), 4 = green (ratio > 0.5), 3 = yellow, 2 = red, 1 = red, 0 = empty
     let colorSuffix = "0";
     if (hp > 0) {
       const ratio = hp / maxHP;
@@ -179,7 +231,7 @@ export class PlayerAvatar extends Container {
     for (let i = 0; i < maxHP; i++) {
       const filled = i < hp;
       const textureAlias = filled
-        ? `main/ui/system/magatamas/${colorSuffix}.png`
+        ? `main/ui/system/magatamas/\${colorSuffix}.png`
         : `main/ui/system/magatamas/0.png`;
       let tex: Texture | undefined;
       try {
@@ -187,14 +239,14 @@ export class PlayerAvatar extends Container {
       } catch (e) {
         /* ignore */
       }
+
       if (tex) {
         const magatama = new Sprite(tex);
         magatama.width = dotSize;
         magatama.height = dotSize;
         magatama.position.set(x + i * (dotSize + gap), y);
-        this.addChild(magatama);
+        this.hpContainer.addChild(magatama);
       } else {
-        // Fallback to simple graphics if texture is missing
         const fallbackColor =
           colorSuffix === "1"
             ? 0x2aaa44
@@ -204,7 +256,7 @@ export class PlayerAvatar extends Container {
         const dot = new Graphics()
           .roundRect(x + i * (dotSize + gap), y, dotSize, dotSize, 3)
           .fill(filled ? fallbackColor : 0x333333);
-        this.addChild(dot);
+        this.hpContainer.addChild(dot);
       }
     }
   }
