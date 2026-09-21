@@ -2,6 +2,7 @@ import { CARD_DEFINITIONS } from "../../catalog/cards";
 import { GENERALS_BY_ID } from "../../catalog/generals";
 import { ROLE_NAMES } from "../../catalog/roles";
 import { SKILL_REGISTRY } from "../SkillRegistry";
+import { emitPresentationEvent } from "../presentation";
 import { emitEvent } from "../EventBus";
 import type {
   CardColor,
@@ -1215,6 +1216,15 @@ export function killPlayer(
   const player = G.players[playerID];
   player.alive = false;
   player.roleRevealed = true;
+  emitPresentationEvent(G, {
+    kind: "player-died",
+    playerID: playerID,
+  });
+  emitPresentationEvent(G, {
+    kind: "role-revealed",
+    playerID: playerID,
+    role: player.role,
+  });
   G.discard.push(
     ...player.hand,
     ...Object.values(player.equipment),
@@ -1486,7 +1496,22 @@ function resolveSlash(G: TqsGameState, effect: SlashEffect): void {
     effect.ignoreArmor =
       equipmentName(G, sourceID, "weapon") === "qinggang-sword";
     if (hasSkill(G, targetID, "liu-li")) {
-      G.prompt = {
+      (function (p) {
+        G.prompt = p;
+        if (p) {
+          emitPresentationEvent(G, {
+            kind: "response-window-opened",
+            promptID: p.id,
+            windowID: p.reason || p.kind,
+            eligibleActorIDs: p.responderID ? [p.responderID] : [],
+            targetID: p.targetID || undefined,
+            response:
+              p.kind === "card-response" || p.kind === "play-card"
+                ? "played-card"
+                : "selected-option",
+          });
+        }
+      })({
         id: resolutionID(G),
         effectID: effect.id,
         kind: "option",
@@ -1495,7 +1520,7 @@ function resolveSlash(G: TqsGameState, effect: SlashEffect): void {
         sourceID,
         targetID,
         choices: ["activate", "decline"],
-      };
+      });
       return;
     }
     const sourceGeneral = GENERALS_BY_ID[G.players[sourceID].generalID!];
@@ -1505,7 +1530,22 @@ function resolveSlash(G: TqsGameState, effect: SlashEffect): void {
       sourceGeneral.gender !== targetGeneral.gender
     ) {
       effect.stage = "gender-swords";
-      G.prompt = {
+      (function (p) {
+        G.prompt = p;
+        if (p) {
+          emitPresentationEvent(G, {
+            kind: "response-window-opened",
+            promptID: p.id,
+            windowID: p.reason || p.kind,
+            eligibleActorIDs: p.responderID ? [p.responderID] : [],
+            targetID: p.targetID || undefined,
+            response:
+              p.kind === "card-response" || p.kind === "play-card"
+                ? "played-card"
+                : "selected-option",
+          });
+        }
+      })({
         id: resolutionID(G),
         effectID: effect.id,
         kind: "option",
@@ -1514,7 +1554,7 @@ function resolveSlash(G: TqsGameState, effect: SlashEffect): void {
         sourceID,
         targetID,
         choices: ["activate", "decline"],
-      };
+      });
       return;
     }
     effect.stage = "dodge";
@@ -1531,7 +1571,22 @@ function resolveSlash(G: TqsGameState, effect: SlashEffect): void {
     }
     if (!effect.tieJiTried && hasSkill(G, sourceID, "tie-ji")) {
       effect.tieJiTried = true;
-      G.prompt = {
+      (function (p) {
+        G.prompt = p;
+        if (p) {
+          emitPresentationEvent(G, {
+            kind: "response-window-opened",
+            promptID: p.id,
+            windowID: p.reason || p.kind,
+            eligibleActorIDs: p.responderID ? [p.responderID] : [],
+            targetID: p.targetID || undefined,
+            response:
+              p.kind === "card-response" || p.kind === "play-card"
+                ? "played-card"
+                : "selected-option",
+          });
+        }
+      })({
         id: resolutionID(G),
         effectID: effect.id,
         kind: "option",
@@ -1540,7 +1595,7 @@ function resolveSlash(G: TqsGameState, effect: SlashEffect): void {
         sourceID,
         targetID,
         choices: ["activate", "decline"],
-      };
+      });
       return;
     }
     if (effect.ignoreDodge) {
@@ -1577,7 +1632,22 @@ function resolveSlash(G: TqsGameState, effect: SlashEffect): void {
         advanceSlashTarget(effect);
         return;
       }
-      G.prompt = {
+      (function (p) {
+        G.prompt = p;
+        if (p) {
+          emitPresentationEvent(G, {
+            kind: "response-window-opened",
+            promptID: p.id,
+            windowID: p.reason || p.kind,
+            eligibleActorIDs: p.responderID ? [p.responderID] : [],
+            targetID: p.targetID || undefined,
+            response:
+              p.kind === "card-response" || p.kind === "play-card"
+                ? "played-card"
+                : "selected-option",
+          });
+        }
+      })({
         id: resolutionID(G),
         effectID: effect.id,
         kind: "option",
@@ -1589,7 +1659,7 @@ function resolveSlash(G: TqsGameState, effect: SlashEffect): void {
         sourceID,
         targetID,
         choices: ["activate", "decline"],
-      };
+      });
       return;
     }
     advanceSlashTarget(effect);
@@ -1602,7 +1672,22 @@ function resolveSlash(G: TqsGameState, effect: SlashEffect): void {
       (G.players[targetID].hand.length > 0 ||
         Object.values(G.players[targetID].equipment).length > 0)
     ) {
-      G.prompt = {
+      (function (p) {
+        G.prompt = p;
+        if (p) {
+          emitPresentationEvent(G, {
+            kind: "response-window-opened",
+            promptID: p.id,
+            windowID: p.reason || p.kind,
+            eligibleActorIDs: p.responderID ? [p.responderID] : [],
+            targetID: p.targetID || undefined,
+            response:
+              p.kind === "card-response" || p.kind === "play-card"
+                ? "played-card"
+                : "selected-option",
+          });
+        }
+      })({
         id: resolutionID(G),
         effectID: effect.id,
         kind: "option",
@@ -1611,7 +1696,7 @@ function resolveSlash(G: TqsGameState, effect: SlashEffect): void {
         sourceID,
         targetID,
         choices: ["activate", "decline"],
-      };
+      });
       return;
     }
     effect.stage = "after-damage";
@@ -1636,7 +1721,22 @@ function resolveSlash(G: TqsGameState, effect: SlashEffect): void {
       (target.equipment["offensive-mount"] ||
         target.equipment["defensive-mount"])
     ) {
-      G.prompt = {
+      (function (p) {
+        G.prompt = p;
+        if (p) {
+          emitPresentationEvent(G, {
+            kind: "response-window-opened",
+            promptID: p.id,
+            windowID: p.reason || p.kind,
+            eligibleActorIDs: p.responderID ? [p.responderID] : [],
+            targetID: p.targetID || undefined,
+            response:
+              p.kind === "card-response" || p.kind === "play-card"
+                ? "played-card"
+                : "selected-option",
+          });
+        }
+      })({
         id: resolutionID(G),
         effectID: effect.id,
         kind: "option",
@@ -1645,7 +1745,7 @@ function resolveSlash(G: TqsGameState, effect: SlashEffect): void {
         sourceID,
         targetID,
         choices: ["activate", "decline"],
-      };
+      });
       return;
     }
     advanceSlashTarget(effect);
@@ -1714,7 +1814,22 @@ function resolveTargetCard(
     G.effectStack.shift();
     return;
   }
-  G.prompt = {
+  (function (p) {
+    G.prompt = p;
+    if (p) {
+      emitPresentationEvent(G, {
+        kind: "response-window-opened",
+        promptID: p.id,
+        windowID: p.reason || p.kind,
+        eligibleActorIDs: p.responderID ? [p.responderID] : [],
+        targetID: p.targetID || undefined,
+        response:
+          p.kind === "card-response" || p.kind === "play-card"
+            ? "played-card"
+            : "selected-option",
+      });
+    }
+  })({
     id: resolutionID(G),
     effectID: effect.id,
     kind: "select-cards",
@@ -1725,7 +1840,7 @@ function resolveTargetCard(
     minimum: 1,
     maximum: 1,
     allowPass: false,
-  };
+  });
 }
 
 function resolveBorrowedSword(
@@ -1819,7 +1934,22 @@ function resolveDelayed(
       G.players[playerID].hand.length > 0,
   );
   if (guiCaiUser) {
-    G.prompt = {
+    (function (p) {
+      G.prompt = p;
+      if (p) {
+        emitPresentationEvent(G, {
+          kind: "response-window-opened",
+          promptID: p.id,
+          windowID: p.reason || p.kind,
+          eligibleActorIDs: p.responderID ? [p.responderID] : [],
+          targetID: p.targetID || undefined,
+          response:
+            p.kind === "card-response" || p.kind === "play-card"
+              ? "played-card"
+              : "selected-option",
+        });
+      }
+    })({
       id: resolutionID(G),
       effectID: effect.id,
       kind: "option",
@@ -1828,7 +1958,7 @@ function resolveDelayed(
       sourceID: guiCaiUser,
       targetID: effect.ownerID,
       choices: ["activate", "decline"],
-    };
+    });
     return;
   }
   G.effectStack.shift();
@@ -1876,7 +2006,22 @@ function resolveDamage(G: TqsGameState, effect: DamageEffect): void {
     return;
   }
   if (effect.stage === "apply") {
+    const prevHp = G.players[effect.targetID].hp;
     G.players[effect.targetID].hp -= effect.amount;
+    emitPresentationEvent(G, {
+      kind: "hp-changed",
+      targetID: effect.targetID,
+      from: prevHp,
+      to: G.players[effect.targetID].hp,
+      cause: "damage",
+    });
+    emitPresentationEvent(G, {
+      kind: "target-outcome",
+      targetID: effect.targetID,
+      outcome: "damaged",
+      amount: effect.amount,
+      nature: effect.nature,
+    });
     writeLog(
       G,
       `\${playerName(G, effect.targetID)} chịu \${effect.amount} điểm Sát Thương.`,
@@ -2003,7 +2148,22 @@ function resolveWangZun(
     G.effectStack.shift();
     return;
   }
-  G.prompt = {
+  (function (p) {
+    G.prompt = p;
+    if (p) {
+      emitPresentationEvent(G, {
+        kind: "response-window-opened",
+        promptID: p.id,
+        windowID: p.reason || p.kind,
+        eligibleActorIDs: p.responderID ? [p.responderID] : [],
+        targetID: p.targetID || undefined,
+        response:
+          p.kind === "card-response" || p.kind === "play-card"
+            ? "played-card"
+            : "selected-option",
+      });
+    }
+  })({
     id: resolutionID(G),
     effectID: effect.id,
     kind: "option",
@@ -2012,7 +2172,7 @@ function resolveWangZun(
     sourceID: effect.ownerID,
     targetID: effect.lordID,
     choices: ["activate", "decline"],
-  };
+  });
 }
 
 function resolveAllySummon(
@@ -2107,7 +2267,22 @@ function resolveGuanXing(
     return;
   }
   if (effect.stage === "offer") {
-    G.prompt = {
+    (function (p) {
+      G.prompt = p;
+      if (p) {
+        emitPresentationEvent(G, {
+          kind: "response-window-opened",
+          promptID: p.id,
+          windowID: p.reason || p.kind,
+          eligibleActorIDs: p.responderID ? [p.responderID] : [],
+          targetID: p.targetID || undefined,
+          response:
+            p.kind === "card-response" || p.kind === "play-card"
+              ? "played-card"
+              : "selected-option",
+        });
+      }
+    })({
       id: resolutionID(G),
       effectID: effect.id,
       kind: "option",
@@ -2116,13 +2291,28 @@ function resolveGuanXing(
       sourceID: effect.ownerID,
       targetID: effect.ownerID,
       choices: ["activate", "decline"],
-    };
+    });
     return;
   }
   const remaining = effect.poolCardIDs.filter(
     (cardID) => !effect.topCardIDs.includes(cardID),
   );
-  G.prompt = {
+  (function (p) {
+    G.prompt = p;
+    if (p) {
+      emitPresentationEvent(G, {
+        kind: "response-window-opened",
+        promptID: p.id,
+        windowID: p.reason || p.kind,
+        eligibleActorIDs: p.responderID ? [p.responderID] : [],
+        targetID: p.targetID || undefined,
+        response:
+          p.kind === "card-response" || p.kind === "play-card"
+            ? "played-card"
+            : "selected-option",
+      });
+    }
+  })({
     id: resolutionID(G),
     effectID: effect.id,
     kind: "select-cards",
@@ -2134,7 +2324,7 @@ function resolveGuanXing(
     maximum:
       effect.stage === "top" ? effect.poolCardIDs.length : remaining.length,
     allowPass: effect.stage === "top",
-  };
+  });
 }
 
 function finishGuanXing(
@@ -2166,7 +2356,22 @@ function resolveLuoShen(
   }
 
   if (effect.judgeCardID === undefined) {
-    G.prompt = {
+    (function (p) {
+      G.prompt = p;
+      if (p) {
+        emitPresentationEvent(G, {
+          kind: "response-window-opened",
+          promptID: p.id,
+          windowID: p.reason || p.kind,
+          eligibleActorIDs: p.responderID ? [p.responderID] : [],
+          targetID: p.targetID || undefined,
+          response:
+            p.kind === "card-response" || p.kind === "play-card"
+              ? "played-card"
+              : "selected-option",
+        });
+      }
+    })({
       id: resolutionID(G),
       effectID: effect.id,
       kind: "option",
@@ -2175,7 +2380,7 @@ function resolveLuoShen(
       sourceID: effect.ownerID,
       targetID: effect.ownerID,
       choices: ["activate", "decline"],
-    };
+    });
     return;
   }
 
@@ -2202,7 +2407,22 @@ function resolveLuoShen(
         G.players[playerID].hand.length > 0,
     );
     if (guiCaiUser) {
-      G.prompt = {
+      (function (p) {
+        G.prompt = p;
+        if (p) {
+          emitPresentationEvent(G, {
+            kind: "response-window-opened",
+            promptID: p.id,
+            windowID: p.reason || p.kind,
+            eligibleActorIDs: p.responderID ? [p.responderID] : [],
+            targetID: p.targetID || undefined,
+            response:
+              p.kind === "card-response" || p.kind === "play-card"
+                ? "played-card"
+                : "selected-option",
+          });
+        }
+      })({
         id: resolutionID(G),
         effectID: effect.id,
         kind: "option",
@@ -2211,7 +2431,7 @@ function resolveLuoShen(
         sourceID: guiCaiUser,
         targetID: effect.ownerID,
         choices: ["activate", "decline"],
-      };
+      });
       return;
     }
   }
@@ -2262,7 +2482,22 @@ function resolveOptionalSkill(
     G.effectStack.shift();
     return;
   }
-  G.prompt = {
+  (function (p) {
+    G.prompt = p;
+    if (p) {
+      emitPresentationEvent(G, {
+        kind: "response-window-opened",
+        promptID: p.id,
+        windowID: p.reason || p.kind,
+        eligibleActorIDs: p.responderID ? [p.responderID] : [],
+        targetID: p.targetID || undefined,
+        response:
+          p.kind === "card-response" || p.kind === "play-card"
+            ? "played-card"
+            : "selected-option",
+      });
+    }
+  })({
     id: resolutionID(G),
     effectID: effect.id,
     kind: "option",
@@ -2271,7 +2506,7 @@ function resolveOptionalSkill(
     sourceID: effect.ownerID,
     targetID: effect.ownerID,
     choices: ["activate", "decline"],
-  };
+  });
 }
 
 function resolveTurnFlow(G: TqsGameState, shuffle: Shuffle): boolean {
@@ -2472,7 +2707,22 @@ export function resolveCardGame(G: TqsGameState, shuffle: Shuffle): void {
         )
           G.effectStack.shift();
         else
-          G.prompt = {
+          (function (p) {
+            G.prompt = p;
+            if (p) {
+              emitPresentationEvent(G, {
+                kind: "response-window-opened",
+                promptID: p.id,
+                windowID: p.reason || p.kind,
+                eligibleActorIDs: p.responderID ? [p.responderID] : [],
+                targetID: p.targetID || undefined,
+                response:
+                  p.kind === "card-response" || p.kind === "play-card"
+                    ? "played-card"
+                    : "selected-option",
+              });
+            }
+          })({
             id: resolutionID(G),
             effectID: effect.id,
             kind: "harvest-choice",
@@ -2480,7 +2730,7 @@ export function resolveCardGame(G: TqsGameState, shuffle: Shuffle): void {
             availableCardIDs: effect.poolCardIDs.filter((cardID) =>
               G.processing.includes(cardID),
             ),
-          };
+          });
         break;
       case "harvest-cleanup":
         for (const cardID of effect.poolCardIDs) processingToDiscard(G, cardID);
@@ -2810,6 +3060,12 @@ function answerBorrowedSword(
   } else return false;
 
   G.effectStack.shift();
+  emitPresentationEvent(G, {
+    kind: "card-committed",
+    actorID: use.sourceID,
+    card: { id: use.cardName }, // This is virtual ref or cardName
+    targetIDs: [...use.targetIDs],
+  });
   G.effectStack.unshift(...compileCardUse(G, use));
   return true;
 }
@@ -2950,7 +3206,22 @@ function answerSelectCards(
           distanceBetween(G, prompt.responderID, id) <=
             attackRange(G, prompt.responderID),
       );
-      G.prompt = {
+      (function (p) {
+        G.prompt = p;
+        if (p) {
+          emitPresentationEvent(G, {
+            kind: "response-window-opened",
+            promptID: p.id,
+            windowID: p.reason || p.kind,
+            eligibleActorIDs: p.responderID ? [p.responderID] : [],
+            targetID: p.targetID || undefined,
+            response:
+              p.kind === "card-response" || p.kind === "play-card"
+                ? "played-card"
+                : "selected-option",
+          });
+        }
+      })({
         id: resolutionID(G),
         effectID: effect.id,
         kind: "choose-players",
@@ -2959,7 +3230,7 @@ function answerSelectCards(
         candidates,
         minimum: 1,
         maximum: 1,
-      };
+      });
       return true;
     }
     for (const cardID of cardIDs) {
@@ -3038,7 +3309,22 @@ function answerOption(
         return true;
       }
       if (answer.choice !== "discard") return false;
-      G.prompt = {
+      (function (p) {
+        G.prompt = p;
+        if (p) {
+          emitPresentationEvent(G, {
+            kind: "response-window-opened",
+            promptID: p.id,
+            windowID: p.reason || p.kind,
+            eligibleActorIDs: p.responderID ? [p.responderID] : [],
+            targetID: p.targetID || undefined,
+            response:
+              p.kind === "card-response" || p.kind === "play-card"
+                ? "played-card"
+                : "selected-option",
+          });
+        }
+      })({
         id: resolutionID(G),
         effectID: effect.id,
         kind: "select-cards",
@@ -3049,7 +3335,7 @@ function answerOption(
         minimum: 1,
         maximum: 1,
         allowPass: true,
-      };
+      });
       return true;
     }
     if (answer.choice === "decline") {
@@ -3079,7 +3365,22 @@ function answerOption(
         drawCards(G, effect.use.sourceID, 1, shuffle);
         effect.stage = "dodge";
       } else {
-        G.prompt = {
+        (function (p) {
+          G.prompt = p;
+          if (p) {
+            emitPresentationEvent(G, {
+              kind: "response-window-opened",
+              promptID: p.id,
+              windowID: p.reason || p.kind,
+              eligibleActorIDs: p.responderID ? [p.responderID] : [],
+              targetID: p.targetID || undefined,
+              response:
+                p.kind === "card-response" || p.kind === "play-card"
+                  ? "played-card"
+                  : "selected-option",
+            });
+          }
+        })({
           id: resolutionID(G),
           effectID: effect.id,
           kind: "option",
@@ -3088,7 +3389,7 @@ function answerOption(
           sourceID: effect.use.sourceID,
           targetID,
           choices: ["discard", "draw"],
-        };
+        });
       }
       return true;
     }
@@ -3097,7 +3398,22 @@ function answerOption(
       const available =
         G.players[targetID].hand.length +
         Object.values(G.players[targetID].equipment).length;
-      G.prompt = {
+      (function (p) {
+        G.prompt = p;
+        if (p) {
+          emitPresentationEvent(G, {
+            kind: "response-window-opened",
+            promptID: p.id,
+            windowID: p.reason || p.kind,
+            eligibleActorIDs: p.responderID ? [p.responderID] : [],
+            targetID: p.targetID || undefined,
+            response:
+              p.kind === "card-response" || p.kind === "play-card"
+                ? "played-card"
+                : "selected-option",
+          });
+        }
+      })({
         id: resolutionID(G),
         effectID: effect.id,
         kind: "select-cards",
@@ -3108,7 +3424,7 @@ function answerOption(
         minimum: Math.min(2, available),
         maximum: Math.min(2, available),
         allowPass: true,
-      };
+      });
       return true;
     }
     if (prompt.reason === "rock-cleaving-axe") {
@@ -3119,7 +3435,22 @@ function answerOption(
         advanceSlashTarget(effect);
         return true;
       }
-      G.prompt = {
+      (function (p) {
+        G.prompt = p;
+        if (p) {
+          emitPresentationEvent(G, {
+            kind: "response-window-opened",
+            promptID: p.id,
+            windowID: p.reason || p.kind,
+            eligibleActorIDs: p.responderID ? [p.responderID] : [],
+            targetID: p.targetID || undefined,
+            response:
+              p.kind === "card-response" || p.kind === "play-card"
+                ? "played-card"
+                : "selected-option",
+          });
+        }
+      })({
         id: resolutionID(G),
         effectID: effect.id,
         kind: "select-cards",
@@ -3130,11 +3461,26 @@ function answerOption(
         minimum: 2,
         maximum: 2,
         allowPass: true,
-      };
+      });
       return true;
     }
     if (prompt.reason === "liu-li") {
-      G.prompt = {
+      (function (p) {
+        G.prompt = p;
+        if (p) {
+          emitPresentationEvent(G, {
+            kind: "response-window-opened",
+            promptID: p.id,
+            windowID: p.reason || p.kind,
+            eligibleActorIDs: p.responderID ? [p.responderID] : [],
+            targetID: p.targetID || undefined,
+            response:
+              p.kind === "card-response" || p.kind === "play-card"
+                ? "played-card"
+                : "selected-option",
+          });
+        }
+      })({
         id: resolutionID(G),
         effectID: effect.id,
         kind: "select-cards",
@@ -3145,11 +3491,26 @@ function answerOption(
         minimum: 1,
         maximum: 1,
         allowPass: true,
-      };
+      });
       return true;
     }
     if (prompt.reason === "qilin-bow") {
-      G.prompt = {
+      (function (p) {
+        G.prompt = p;
+        if (p) {
+          emitPresentationEvent(G, {
+            kind: "response-window-opened",
+            promptID: p.id,
+            windowID: p.reason || p.kind,
+            eligibleActorIDs: p.responderID ? [p.responderID] : [],
+            targetID: p.targetID || undefined,
+            response:
+              p.kind === "card-response" || p.kind === "play-card"
+                ? "played-card"
+                : "selected-option",
+          });
+        }
+      })({
         id: resolutionID(G),
         effectID: effect.id,
         kind: "select-cards",
@@ -3160,7 +3521,7 @@ function answerOption(
         minimum: 1,
         maximum: 1,
         allowPass: true,
-      };
+      });
       return true;
     }
     if (prompt.reason === "green-dragon-blade") {
@@ -3184,7 +3545,22 @@ function answerOption(
       return true;
     }
     if (answer.choice !== "activate") return false;
-    G.prompt = {
+    (function (p) {
+      G.prompt = p;
+      if (p) {
+        emitPresentationEvent(G, {
+          kind: "response-window-opened",
+          promptID: p.id,
+          windowID: p.reason || p.kind,
+          eligibleActorIDs: p.responderID ? [p.responderID] : [],
+          targetID: p.targetID || undefined,
+          response:
+            p.kind === "card-response" || p.kind === "play-card"
+              ? "played-card"
+              : "selected-option",
+        });
+      }
+    })({
       id: resolutionID(G),
       effectID: effect.id,
       kind: "select-cards",
@@ -3195,7 +3571,7 @@ function answerOption(
       minimum: 1,
       maximum: 1,
       allowPass: false,
-    };
+    });
     return true;
   }
 
@@ -3779,7 +4155,22 @@ export function resolveBaguaJudgement(
         G.players[playerID].hand.length > 0,
     );
     if (guiCaiUser) {
-      G.prompt = {
+      (function (p) {
+        G.prompt = p;
+        if (p) {
+          emitPresentationEvent(G, {
+            kind: "response-window-opened",
+            promptID: p.id,
+            windowID: p.reason || p.kind,
+            eligibleActorIDs: p.responderID ? [p.responderID] : [],
+            targetID: p.targetID || undefined,
+            response:
+              p.kind === "card-response" || p.kind === "play-card"
+                ? "played-card"
+                : "selected-option",
+          });
+        }
+      })({
         id: resolutionID(G),
         effectID: effect.id,
         kind: "option",
@@ -3788,7 +4179,7 @@ export function resolveBaguaJudgement(
         sourceID: guiCaiUser,
         targetID: effect.ownerID,
         choices: ["activate", "decline"],
-      };
+      });
       return;
     }
   }
@@ -3820,7 +4211,22 @@ export function resolveBaguaJudgement(
     if (success) {
       slashEffect.dodgesUsed += 1;
     } else {
-      G.prompt = {
+      (function (p) {
+        G.prompt = p;
+        if (p) {
+          emitPresentationEvent(G, {
+            kind: "response-window-opened",
+            promptID: p.id,
+            windowID: p.reason || p.kind,
+            eligibleActorIDs: p.responderID ? [p.responderID] : [],
+            targetID: p.targetID || undefined,
+            response:
+              p.kind === "card-response" || p.kind === "play-card"
+                ? "played-card"
+                : "selected-option",
+          });
+        }
+      })({
         id: resolutionID(G),
         effectID: slashEffect.id,
         kind: "play-card",
@@ -3828,14 +4234,29 @@ export function resolveBaguaJudgement(
         reason: "slash",
         ownerID: effect.ownerID,
         allowBagua: false,
-      };
+      });
     }
   } else if (slashEffect?.kind === "required-response") {
     slashEffect.baguaTried = true;
     if (success) {
       G.effectStack.shift(); // remove required-response
     } else {
-      G.prompt = {
+      (function (p) {
+        G.prompt = p;
+        if (p) {
+          emitPresentationEvent(G, {
+            kind: "response-window-opened",
+            promptID: p.id,
+            windowID: p.reason || p.kind,
+            eligibleActorIDs: p.responderID ? [p.responderID] : [],
+            targetID: p.targetID || undefined,
+            response:
+              p.kind === "card-response" || p.kind === "play-card"
+                ? "played-card"
+                : "selected-option",
+          });
+        }
+      })({
         id: resolutionID(G),
         effectID: slashEffect.id,
         kind: "play-card",
@@ -3843,7 +4264,7 @@ export function resolveBaguaJudgement(
         reason: slashEffect.reason,
         ownerID: effect.ownerID,
         allowBagua: false,
-      };
+      });
     }
   } else if (slashEffect?.kind === "aoe-simultaneous") {
     slashEffect.baguaTriedPlayerIDs.push(effect.ownerID);
@@ -3876,7 +4297,22 @@ export function resolveTieJiJudgement(
         G.players[playerID].hand.length > 0,
     );
     if (guiCaiUser) {
-      G.prompt = {
+      (function (p) {
+        G.prompt = p;
+        if (p) {
+          emitPresentationEvent(G, {
+            kind: "response-window-opened",
+            promptID: p.id,
+            windowID: p.reason || p.kind,
+            eligibleActorIDs: p.responderID ? [p.responderID] : [],
+            targetID: p.targetID || undefined,
+            response:
+              p.kind === "card-response" || p.kind === "play-card"
+                ? "played-card"
+                : "selected-option",
+          });
+        }
+      })({
         id: resolutionID(G),
         effectID: effect.id,
         kind: "option",
@@ -3885,7 +4321,7 @@ export function resolveTieJiJudgement(
         sourceID: guiCaiUser,
         targetID: effect.ownerID,
         choices: ["activate", "decline"],
-      };
+      });
       return;
     }
   }
@@ -3970,7 +4406,22 @@ function resolveAoeSimultaneous(
         : null
       : null;
 
-  G.prompt = {
+  (function (p) {
+    G.prompt = p;
+    if (p) {
+      emitPresentationEvent(G, {
+        kind: "response-window-opened",
+        promptID: p.id,
+        windowID: p.reason || p.kind,
+        eligibleActorIDs: p.responderID ? [p.responderID] : [],
+        targetID: p.targetID || undefined,
+        response:
+          p.kind === "card-response" || p.kind === "play-card"
+            ? "played-card"
+            : "selected-option",
+      });
+    }
+  })({
     id: resolutionID(G),
     kind: "card-response",
     responderID: G.turn.activePlayerID, // Used just for compatibility, but the UI checks reason
@@ -3988,7 +4439,7 @@ function resolveAoeSimultaneous(
     effectID: effect.id,
     chainDepth: 0,
     currentlyNegated: false,
-  };
+  });
 }
 
 function answerAoeSimultaneous(
@@ -4078,4 +4529,21 @@ function answerAoeSimultaneous(
     prompt.passedPlayerIDs = [...effect.passedPlayerIDs];
   }
   return true;
+}
+
+function setPrompt(G: TqsGameState, p: GamePrompt | null) {
+  G.prompt = p;
+  if (p) {
+    emitPresentationEvent(G, {
+      kind: "response-window-opened",
+      promptID: p.id,
+      windowID: "reason" in p && p.reason ? p.reason : p.kind,
+      eligibleActorIDs: "responderID" in p ? [p.responderID as PlayerID] : [],
+      targetID: "targetID" in p ? p.targetID : undefined,
+      response:
+        p.kind === "card-response" || p.kind === "play-card"
+          ? "played-card"
+          : "selected-option",
+    });
+  }
 }

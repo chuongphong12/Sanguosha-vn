@@ -97,6 +97,7 @@ export function createWaitingRoomState(options: {
     winner: null,
     log: [],
     nextLogID: 1,
+    stream: { epoch: 1, retentionFloor: 1, highWatermark: 1, events: [] },
     config: {
       autoSkipWuxie: true,
     },
@@ -211,6 +212,7 @@ export function createInitialState(
     winner: null,
     log: [],
     nextLogID: 1,
+    stream: { epoch: 1, retentionFloor: 1, highWatermark: 1, events: [] },
     config: {
       autoSkipWuxie: options.autoSkipWuxie ?? true,
     },

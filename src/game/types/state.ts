@@ -9,6 +9,7 @@ import {
 import { PhysicalCard } from "./cards";
 import { GameEffect } from "./effects";
 import { GamePrompt } from "./prompts";
+import { PresentationStream } from "./presentation";
 
 export interface PlayerState {
   id: PlayerID;
@@ -69,6 +70,7 @@ export interface TqsGameState {
   winner: GameWinner | null;
   log: GameLogEntry[];
   nextLogID: number;
+  stream: PresentationStream;
 }
 
 export interface PlayerViewPlayer extends Omit<
