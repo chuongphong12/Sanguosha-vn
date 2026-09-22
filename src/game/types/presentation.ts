@@ -1,6 +1,6 @@
 import { PlayerID, Role, DamageNature } from "./core";
 
-export type ResponseKind = "played-card" | "selected-option" | "passed";
+export type PresentationResponseKind = "played-card" | "selected-option" | "passed";
 
 export interface PublicCardRef {
   id: string; // The specific card ID if public, or "hidden" if hidden
@@ -31,14 +31,14 @@ export type PresentationEvent =
       windowID: string;
       eligibleActorIDs: PlayerID[];
       targetID?: PlayerID;
-      response: ResponseKind;
+      response: PresentationResponseKind;
     })
   | (PresentationBase & {
       kind: "response-accepted";
       promptID: number;
       windowID: string;
       actorID: PlayerID;
-      response: ResponseKind;
+      response: PresentationResponseKind;
       remainingRequired?: number;
     })
   | (PresentationBase & {

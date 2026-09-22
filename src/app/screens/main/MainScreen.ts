@@ -373,27 +373,26 @@ export class MainScreen extends Container {
           viewportHeight: this.viewportHeight,
           selectedCardIDs: this.selectedCardIDs,
           selectedTargetIDs: this.selectedTargetIDs,
-          selectedZoneChoices: this.selectedZoneChoices,
-          hoveredCandidateID: this.selectedCandidateID,
-          onSeatTap: (pid) => this.handleSeatTap(pid),
-          onDashboardCardTap: (cid) => this.handleCardTap(cid),
-          onDashboardActionTap: (action) => console.log("action tap:", action),
-          onDashboardAvatarTap: () => console.log("avatar tap"),
+          
+          
+          onSeatTap: (pid) => console.log('seat tap', pid),
+          onDashboardCardTap: (cid) => console.log('card tap', cid),
+           
+          
         });
       }
 
-      this.drawBackground();
+      
 
       if (G.status !== "waiting-room") {
-        this.drawTitle();
+        
       }
       if (G.status === "playing") {
-        this.drawViewerSelector(G);
-        this.drawLog(G);
-        this.drawPrivateArea(G);
-        this.drawStatus(G);
-        const viewerID = this.match.currentViewerID;
-        this.drawActions(G, viewerID);
+        
+        
+        
+        
+        
       }
     } else {
       this.waitingRoomScene.visible = false;

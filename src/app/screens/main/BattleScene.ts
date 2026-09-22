@@ -7,12 +7,15 @@ import type {
 import { SeatView } from "../../ui/SeatView";
 import { Dashboard } from "../../ui/Dashboard";
 import { THEME } from "../../ui/theme";
+import { AnimationManager } from "./AnimationManager";
 
 export class BattleScene extends Container {
   private bgContainer = new Container();
   private boardContainer = new Container();
   private seatViews = new Map<PlayerID, SeatView>();
   private dashboard?: Dashboard;
+  private animationManager?: AnimationManager;
+  private lastSequence = 0;
 
   constructor() {
     super();
@@ -40,6 +43,18 @@ export class BattleScene extends Container {
     },
   ): void {
     this.syncBackground(options.viewportWidth, options.viewportHeight);
+
+    if (!this.animationManager) {
+      this.animationManager = new AnimationManager(this, this.seatViews, () => viewerID);
+    }
+
+    if (G.stream) {
+      const newEvents = G.stream.events.filter(e => e.sequence > this.lastSequence);
+      if (newEvents.length > 0) {
+        this.lastSequence = newEvents[newEvents.length - 1].sequence;
+        this.animationManager.enqueue(newEvents);
+      }
+    }
 
     // Sync seats
     const newPlayers = new Set(Object.keys(G.players));

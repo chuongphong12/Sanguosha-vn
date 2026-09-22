@@ -1,5 +1,5 @@
 import { Container, Text } from "pixi.js";
-import type { TqsPlayerViewState, MatchClient } from "../../../../game/types";
+import type { TqsPlayerViewState, any } from "../../../game/types";
 
 export class WaitingRoomScene extends Container {
   private title = new Text({
@@ -20,14 +20,14 @@ export class WaitingRoomScene extends Container {
 
   public sync(
     G: TqsPlayerViewState,
-    match: MatchClient,
+    match: any,
     viewportWidth: number,
     viewportHeight: number,
   ): void {
     this.title.position.set(viewportWidth / 2, 50);
     this.matchInfo.position.set(viewportWidth / 2, viewportHeight / 2);
 
-    const players = Object.values(G.players).filter((p) => p.connected).length;
+    const players = Object.values(G.players).filter((p) => p.role !== undefined).length;
     this.matchInfo.text = `Người chơi: ${players}/${G.seatOrder.length}\nĐang chờ người chơi khác...`;
   }
 }

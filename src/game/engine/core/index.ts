@@ -170,7 +170,7 @@ function matchesResponse(
   G: TqsGameState,
   playerID: PlayerID,
   cardID: string,
-  response: ResponseKind,
+  response: any,
 ): boolean {
   const card = G.cards[cardID];
   if (!card) return false;
@@ -218,7 +218,7 @@ export function canRespondWithCard(
   G: TqsGameState | TqsPlayerViewState,
   playerID: PlayerID,
   cardID: string,
-  response: ResponseKind,
+  response: any,
 ): boolean {
   return matchesResponse(G as TqsGameState, playerID, cardID, response);
 }
@@ -1496,22 +1496,7 @@ function resolveSlash(G: TqsGameState, effect: SlashEffect): void {
     effect.ignoreArmor =
       equipmentName(G, sourceID, "weapon") === "qinggang-sword";
     if (hasSkill(G, targetID, "liu-li")) {
-      (function (p) {
-        G.prompt = p;
-        if (p) {
-          emitPresentationEvent(G, {
-            kind: "response-window-opened",
-            promptID: p.id,
-            windowID: p.reason || p.kind,
-            eligibleActorIDs: p.responderID ? [p.responderID] : [],
-            targetID: p.targetID || undefined,
-            response:
-              p.kind === "card-response" || p.kind === "play-card"
-                ? "played-card"
-                : "selected-option",
-          });
-        }
-      })({
+      setPrompt(G, {
         id: resolutionID(G),
         effectID: effect.id,
         kind: "option",
@@ -1530,22 +1515,7 @@ function resolveSlash(G: TqsGameState, effect: SlashEffect): void {
       sourceGeneral.gender !== targetGeneral.gender
     ) {
       effect.stage = "gender-swords";
-      (function (p) {
-        G.prompt = p;
-        if (p) {
-          emitPresentationEvent(G, {
-            kind: "response-window-opened",
-            promptID: p.id,
-            windowID: p.reason || p.kind,
-            eligibleActorIDs: p.responderID ? [p.responderID] : [],
-            targetID: p.targetID || undefined,
-            response:
-              p.kind === "card-response" || p.kind === "play-card"
-                ? "played-card"
-                : "selected-option",
-          });
-        }
-      })({
+      setPrompt(G, {
         id: resolutionID(G),
         effectID: effect.id,
         kind: "option",
@@ -1571,22 +1541,7 @@ function resolveSlash(G: TqsGameState, effect: SlashEffect): void {
     }
     if (!effect.tieJiTried && hasSkill(G, sourceID, "tie-ji")) {
       effect.tieJiTried = true;
-      (function (p) {
-        G.prompt = p;
-        if (p) {
-          emitPresentationEvent(G, {
-            kind: "response-window-opened",
-            promptID: p.id,
-            windowID: p.reason || p.kind,
-            eligibleActorIDs: p.responderID ? [p.responderID] : [],
-            targetID: p.targetID || undefined,
-            response:
-              p.kind === "card-response" || p.kind === "play-card"
-                ? "played-card"
-                : "selected-option",
-          });
-        }
-      })({
+      setPrompt(G, {
         id: resolutionID(G),
         effectID: effect.id,
         kind: "option",
@@ -1632,22 +1587,7 @@ function resolveSlash(G: TqsGameState, effect: SlashEffect): void {
         advanceSlashTarget(effect);
         return;
       }
-      (function (p) {
-        G.prompt = p;
-        if (p) {
-          emitPresentationEvent(G, {
-            kind: "response-window-opened",
-            promptID: p.id,
-            windowID: p.reason || p.kind,
-            eligibleActorIDs: p.responderID ? [p.responderID] : [],
-            targetID: p.targetID || undefined,
-            response:
-              p.kind === "card-response" || p.kind === "play-card"
-                ? "played-card"
-                : "selected-option",
-          });
-        }
-      })({
+      setPrompt(G, {
         id: resolutionID(G),
         effectID: effect.id,
         kind: "option",
@@ -1672,22 +1612,7 @@ function resolveSlash(G: TqsGameState, effect: SlashEffect): void {
       (G.players[targetID].hand.length > 0 ||
         Object.values(G.players[targetID].equipment).length > 0)
     ) {
-      (function (p) {
-        G.prompt = p;
-        if (p) {
-          emitPresentationEvent(G, {
-            kind: "response-window-opened",
-            promptID: p.id,
-            windowID: p.reason || p.kind,
-            eligibleActorIDs: p.responderID ? [p.responderID] : [],
-            targetID: p.targetID || undefined,
-            response:
-              p.kind === "card-response" || p.kind === "play-card"
-                ? "played-card"
-                : "selected-option",
-          });
-        }
-      })({
+      setPrompt(G, {
         id: resolutionID(G),
         effectID: effect.id,
         kind: "option",
@@ -1721,22 +1646,7 @@ function resolveSlash(G: TqsGameState, effect: SlashEffect): void {
       (target.equipment["offensive-mount"] ||
         target.equipment["defensive-mount"])
     ) {
-      (function (p) {
-        G.prompt = p;
-        if (p) {
-          emitPresentationEvent(G, {
-            kind: "response-window-opened",
-            promptID: p.id,
-            windowID: p.reason || p.kind,
-            eligibleActorIDs: p.responderID ? [p.responderID] : [],
-            targetID: p.targetID || undefined,
-            response:
-              p.kind === "card-response" || p.kind === "play-card"
-                ? "played-card"
-                : "selected-option",
-          });
-        }
-      })({
+      setPrompt(G, {
         id: resolutionID(G),
         effectID: effect.id,
         kind: "option",
@@ -1814,22 +1724,7 @@ function resolveTargetCard(
     G.effectStack.shift();
     return;
   }
-  (function (p) {
-    G.prompt = p;
-    if (p) {
-      emitPresentationEvent(G, {
-        kind: "response-window-opened",
-        promptID: p.id,
-        windowID: p.reason || p.kind,
-        eligibleActorIDs: p.responderID ? [p.responderID] : [],
-        targetID: p.targetID || undefined,
-        response:
-          p.kind === "card-response" || p.kind === "play-card"
-            ? "played-card"
-            : "selected-option",
-      });
-    }
-  })({
+  setPrompt(G, {
     id: resolutionID(G),
     effectID: effect.id,
     kind: "select-cards",
@@ -1934,22 +1829,7 @@ function resolveDelayed(
       G.players[playerID].hand.length > 0,
   );
   if (guiCaiUser) {
-    (function (p) {
-      G.prompt = p;
-      if (p) {
-        emitPresentationEvent(G, {
-          kind: "response-window-opened",
-          promptID: p.id,
-          windowID: p.reason || p.kind,
-          eligibleActorIDs: p.responderID ? [p.responderID] : [],
-          targetID: p.targetID || undefined,
-          response:
-            p.kind === "card-response" || p.kind === "play-card"
-              ? "played-card"
-              : "selected-option",
-        });
-      }
-    })({
+    setPrompt(G, {
       id: resolutionID(G),
       effectID: effect.id,
       kind: "option",
@@ -2148,22 +2028,7 @@ function resolveWangZun(
     G.effectStack.shift();
     return;
   }
-  (function (p) {
-    G.prompt = p;
-    if (p) {
-      emitPresentationEvent(G, {
-        kind: "response-window-opened",
-        promptID: p.id,
-        windowID: p.reason || p.kind,
-        eligibleActorIDs: p.responderID ? [p.responderID] : [],
-        targetID: p.targetID || undefined,
-        response:
-          p.kind === "card-response" || p.kind === "play-card"
-            ? "played-card"
-            : "selected-option",
-      });
-    }
-  })({
+  setPrompt(G, {
     id: resolutionID(G),
     effectID: effect.id,
     kind: "option",
@@ -2267,22 +2132,7 @@ function resolveGuanXing(
     return;
   }
   if (effect.stage === "offer") {
-    (function (p) {
-      G.prompt = p;
-      if (p) {
-        emitPresentationEvent(G, {
-          kind: "response-window-opened",
-          promptID: p.id,
-          windowID: p.reason || p.kind,
-          eligibleActorIDs: p.responderID ? [p.responderID] : [],
-          targetID: p.targetID || undefined,
-          response:
-            p.kind === "card-response" || p.kind === "play-card"
-              ? "played-card"
-              : "selected-option",
-        });
-      }
-    })({
+    setPrompt(G, {
       id: resolutionID(G),
       effectID: effect.id,
       kind: "option",
@@ -2297,22 +2147,7 @@ function resolveGuanXing(
   const remaining = effect.poolCardIDs.filter(
     (cardID) => !effect.topCardIDs.includes(cardID),
   );
-  (function (p) {
-    G.prompt = p;
-    if (p) {
-      emitPresentationEvent(G, {
-        kind: "response-window-opened",
-        promptID: p.id,
-        windowID: p.reason || p.kind,
-        eligibleActorIDs: p.responderID ? [p.responderID] : [],
-        targetID: p.targetID || undefined,
-        response:
-          p.kind === "card-response" || p.kind === "play-card"
-            ? "played-card"
-            : "selected-option",
-      });
-    }
-  })({
+  setPrompt(G, {
     id: resolutionID(G),
     effectID: effect.id,
     kind: "select-cards",
@@ -2356,22 +2191,7 @@ function resolveLuoShen(
   }
 
   if (effect.judgeCardID === undefined) {
-    (function (p) {
-      G.prompt = p;
-      if (p) {
-        emitPresentationEvent(G, {
-          kind: "response-window-opened",
-          promptID: p.id,
-          windowID: p.reason || p.kind,
-          eligibleActorIDs: p.responderID ? [p.responderID] : [],
-          targetID: p.targetID || undefined,
-          response:
-            p.kind === "card-response" || p.kind === "play-card"
-              ? "played-card"
-              : "selected-option",
-        });
-      }
-    })({
+    setPrompt(G, {
       id: resolutionID(G),
       effectID: effect.id,
       kind: "option",
@@ -2407,22 +2227,7 @@ function resolveLuoShen(
         G.players[playerID].hand.length > 0,
     );
     if (guiCaiUser) {
-      (function (p) {
-        G.prompt = p;
-        if (p) {
-          emitPresentationEvent(G, {
-            kind: "response-window-opened",
-            promptID: p.id,
-            windowID: p.reason || p.kind,
-            eligibleActorIDs: p.responderID ? [p.responderID] : [],
-            targetID: p.targetID || undefined,
-            response:
-              p.kind === "card-response" || p.kind === "play-card"
-                ? "played-card"
-                : "selected-option",
-          });
-        }
-      })({
+      setPrompt(G, {
         id: resolutionID(G),
         effectID: effect.id,
         kind: "option",
@@ -2482,22 +2287,7 @@ function resolveOptionalSkill(
     G.effectStack.shift();
     return;
   }
-  (function (p) {
-    G.prompt = p;
-    if (p) {
-      emitPresentationEvent(G, {
-        kind: "response-window-opened",
-        promptID: p.id,
-        windowID: p.reason || p.kind,
-        eligibleActorIDs: p.responderID ? [p.responderID] : [],
-        targetID: p.targetID || undefined,
-        response:
-          p.kind === "card-response" || p.kind === "play-card"
-            ? "played-card"
-            : "selected-option",
-      });
-    }
-  })({
+  setPrompt(G, {
     id: resolutionID(G),
     effectID: effect.id,
     kind: "option",
@@ -2707,22 +2497,7 @@ export function resolveCardGame(G: TqsGameState, shuffle: Shuffle): void {
         )
           G.effectStack.shift();
         else
-          (function (p) {
-            G.prompt = p;
-            if (p) {
-              emitPresentationEvent(G, {
-                kind: "response-window-opened",
-                promptID: p.id,
-                windowID: p.reason || p.kind,
-                eligibleActorIDs: p.responderID ? [p.responderID] : [],
-                targetID: p.targetID || undefined,
-                response:
-                  p.kind === "card-response" || p.kind === "play-card"
-                    ? "played-card"
-                    : "selected-option",
-              });
-            }
-          })({
+          setPrompt(G, {
             id: resolutionID(G),
             effectID: effect.id,
             kind: "harvest-choice",
@@ -3206,22 +2981,7 @@ function answerSelectCards(
           distanceBetween(G, prompt.responderID, id) <=
             attackRange(G, prompt.responderID),
       );
-      (function (p) {
-        G.prompt = p;
-        if (p) {
-          emitPresentationEvent(G, {
-            kind: "response-window-opened",
-            promptID: p.id,
-            windowID: p.reason || p.kind,
-            eligibleActorIDs: p.responderID ? [p.responderID] : [],
-            targetID: p.targetID || undefined,
-            response:
-              p.kind === "card-response" || p.kind === "play-card"
-                ? "played-card"
-                : "selected-option",
-          });
-        }
-      })({
+      setPrompt(G, {
         id: resolutionID(G),
         effectID: effect.id,
         kind: "choose-players",
@@ -3309,22 +3069,7 @@ function answerOption(
         return true;
       }
       if (answer.choice !== "discard") return false;
-      (function (p) {
-        G.prompt = p;
-        if (p) {
-          emitPresentationEvent(G, {
-            kind: "response-window-opened",
-            promptID: p.id,
-            windowID: p.reason || p.kind,
-            eligibleActorIDs: p.responderID ? [p.responderID] : [],
-            targetID: p.targetID || undefined,
-            response:
-              p.kind === "card-response" || p.kind === "play-card"
-                ? "played-card"
-                : "selected-option",
-          });
-        }
-      })({
+      setPrompt(G, {
         id: resolutionID(G),
         effectID: effect.id,
         kind: "select-cards",
@@ -3365,22 +3110,7 @@ function answerOption(
         drawCards(G, effect.use.sourceID, 1, shuffle);
         effect.stage = "dodge";
       } else {
-        (function (p) {
-          G.prompt = p;
-          if (p) {
-            emitPresentationEvent(G, {
-              kind: "response-window-opened",
-              promptID: p.id,
-              windowID: p.reason || p.kind,
-              eligibleActorIDs: p.responderID ? [p.responderID] : [],
-              targetID: p.targetID || undefined,
-              response:
-                p.kind === "card-response" || p.kind === "play-card"
-                  ? "played-card"
-                  : "selected-option",
-            });
-          }
-        })({
+        setPrompt(G, {
           id: resolutionID(G),
           effectID: effect.id,
           kind: "option",
@@ -3398,22 +3128,7 @@ function answerOption(
       const available =
         G.players[targetID].hand.length +
         Object.values(G.players[targetID].equipment).length;
-      (function (p) {
-        G.prompt = p;
-        if (p) {
-          emitPresentationEvent(G, {
-            kind: "response-window-opened",
-            promptID: p.id,
-            windowID: p.reason || p.kind,
-            eligibleActorIDs: p.responderID ? [p.responderID] : [],
-            targetID: p.targetID || undefined,
-            response:
-              p.kind === "card-response" || p.kind === "play-card"
-                ? "played-card"
-                : "selected-option",
-          });
-        }
-      })({
+      setPrompt(G, {
         id: resolutionID(G),
         effectID: effect.id,
         kind: "select-cards",
@@ -3435,22 +3150,7 @@ function answerOption(
         advanceSlashTarget(effect);
         return true;
       }
-      (function (p) {
-        G.prompt = p;
-        if (p) {
-          emitPresentationEvent(G, {
-            kind: "response-window-opened",
-            promptID: p.id,
-            windowID: p.reason || p.kind,
-            eligibleActorIDs: p.responderID ? [p.responderID] : [],
-            targetID: p.targetID || undefined,
-            response:
-              p.kind === "card-response" || p.kind === "play-card"
-                ? "played-card"
-                : "selected-option",
-          });
-        }
-      })({
+      setPrompt(G, {
         id: resolutionID(G),
         effectID: effect.id,
         kind: "select-cards",
@@ -3465,22 +3165,7 @@ function answerOption(
       return true;
     }
     if (prompt.reason === "liu-li") {
-      (function (p) {
-        G.prompt = p;
-        if (p) {
-          emitPresentationEvent(G, {
-            kind: "response-window-opened",
-            promptID: p.id,
-            windowID: p.reason || p.kind,
-            eligibleActorIDs: p.responderID ? [p.responderID] : [],
-            targetID: p.targetID || undefined,
-            response:
-              p.kind === "card-response" || p.kind === "play-card"
-                ? "played-card"
-                : "selected-option",
-          });
-        }
-      })({
+      setPrompt(G, {
         id: resolutionID(G),
         effectID: effect.id,
         kind: "select-cards",
@@ -3495,22 +3180,7 @@ function answerOption(
       return true;
     }
     if (prompt.reason === "qilin-bow") {
-      (function (p) {
-        G.prompt = p;
-        if (p) {
-          emitPresentationEvent(G, {
-            kind: "response-window-opened",
-            promptID: p.id,
-            windowID: p.reason || p.kind,
-            eligibleActorIDs: p.responderID ? [p.responderID] : [],
-            targetID: p.targetID || undefined,
-            response:
-              p.kind === "card-response" || p.kind === "play-card"
-                ? "played-card"
-                : "selected-option",
-          });
-        }
-      })({
+      setPrompt(G, {
         id: resolutionID(G),
         effectID: effect.id,
         kind: "select-cards",
@@ -3545,22 +3215,7 @@ function answerOption(
       return true;
     }
     if (answer.choice !== "activate") return false;
-    (function (p) {
-      G.prompt = p;
-      if (p) {
-        emitPresentationEvent(G, {
-          kind: "response-window-opened",
-          promptID: p.id,
-          windowID: p.reason || p.kind,
-          eligibleActorIDs: p.responderID ? [p.responderID] : [],
-          targetID: p.targetID || undefined,
-          response:
-            p.kind === "card-response" || p.kind === "play-card"
-              ? "played-card"
-              : "selected-option",
-        });
-      }
-    })({
+    setPrompt(G, {
       id: resolutionID(G),
       effectID: effect.id,
       kind: "select-cards",
@@ -4155,22 +3810,7 @@ export function resolveBaguaJudgement(
         G.players[playerID].hand.length > 0,
     );
     if (guiCaiUser) {
-      (function (p) {
-        G.prompt = p;
-        if (p) {
-          emitPresentationEvent(G, {
-            kind: "response-window-opened",
-            promptID: p.id,
-            windowID: p.reason || p.kind,
-            eligibleActorIDs: p.responderID ? [p.responderID] : [],
-            targetID: p.targetID || undefined,
-            response:
-              p.kind === "card-response" || p.kind === "play-card"
-                ? "played-card"
-                : "selected-option",
-          });
-        }
-      })({
+      setPrompt(G, {
         id: resolutionID(G),
         effectID: effect.id,
         kind: "option",
@@ -4211,22 +3851,7 @@ export function resolveBaguaJudgement(
     if (success) {
       slashEffect.dodgesUsed += 1;
     } else {
-      (function (p) {
-        G.prompt = p;
-        if (p) {
-          emitPresentationEvent(G, {
-            kind: "response-window-opened",
-            promptID: p.id,
-            windowID: p.reason || p.kind,
-            eligibleActorIDs: p.responderID ? [p.responderID] : [],
-            targetID: p.targetID || undefined,
-            response:
-              p.kind === "card-response" || p.kind === "play-card"
-                ? "played-card"
-                : "selected-option",
-          });
-        }
-      })({
+      setPrompt(G, {
         id: resolutionID(G),
         effectID: slashEffect.id,
         kind: "play-card",
@@ -4241,22 +3866,7 @@ export function resolveBaguaJudgement(
     if (success) {
       G.effectStack.shift(); // remove required-response
     } else {
-      (function (p) {
-        G.prompt = p;
-        if (p) {
-          emitPresentationEvent(G, {
-            kind: "response-window-opened",
-            promptID: p.id,
-            windowID: p.reason || p.kind,
-            eligibleActorIDs: p.responderID ? [p.responderID] : [],
-            targetID: p.targetID || undefined,
-            response:
-              p.kind === "card-response" || p.kind === "play-card"
-                ? "played-card"
-                : "selected-option",
-          });
-        }
-      })({
+      setPrompt(G, {
         id: resolutionID(G),
         effectID: slashEffect.id,
         kind: "play-card",
@@ -4297,22 +3907,7 @@ export function resolveTieJiJudgement(
         G.players[playerID].hand.length > 0,
     );
     if (guiCaiUser) {
-      (function (p) {
-        G.prompt = p;
-        if (p) {
-          emitPresentationEvent(G, {
-            kind: "response-window-opened",
-            promptID: p.id,
-            windowID: p.reason || p.kind,
-            eligibleActorIDs: p.responderID ? [p.responderID] : [],
-            targetID: p.targetID || undefined,
-            response:
-              p.kind === "card-response" || p.kind === "play-card"
-                ? "played-card"
-                : "selected-option",
-          });
-        }
-      })({
+      setPrompt(G, {
         id: resolutionID(G),
         effectID: effect.id,
         kind: "option",
@@ -4406,22 +4001,7 @@ function resolveAoeSimultaneous(
         : null
       : null;
 
-  (function (p) {
-    G.prompt = p;
-    if (p) {
-      emitPresentationEvent(G, {
-        kind: "response-window-opened",
-        promptID: p.id,
-        windowID: p.reason || p.kind,
-        eligibleActorIDs: p.responderID ? [p.responderID] : [],
-        targetID: p.targetID || undefined,
-        response:
-          p.kind === "card-response" || p.kind === "play-card"
-            ? "played-card"
-            : "selected-option",
-      });
-    }
-  })({
+  setPrompt(G, {
     id: resolutionID(G),
     kind: "card-response",
     responderID: G.turn.activePlayerID, // Used just for compatibility, but the UI checks reason

@@ -1,6 +1,6 @@
 import { Container, Text } from "pixi.js";
-import type { TqsPlayerViewState } from "../../../../game/types";
-import { getPlayerName } from "../../../utils/playerNames";
+import type { TqsPlayerViewState } from "../../../game/types";
+import { getPlayerName } from "../../utils/playerNames";
 
 export class FormationScene extends Container {
   private title = new Text({

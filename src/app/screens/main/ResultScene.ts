@@ -1,5 +1,5 @@
 import { Container, Text } from "pixi.js";
-import type { TqsPlayerViewState } from "../../../../game/types";
+import type { TqsPlayerViewState } from "../../../game/types";
 
 export class ResultScene extends Container {
   private title = new Text({
