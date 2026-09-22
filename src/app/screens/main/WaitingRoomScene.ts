@@ -1,5 +1,5 @@
 import { Container, Text } from "pixi.js";
-import type { TqsPlayerViewState, any } from "../../../game/types";
+import type { TqsPlayerViewState } from "../../../game/types";
 
 export class WaitingRoomScene extends Container {
   private title = new Text({
