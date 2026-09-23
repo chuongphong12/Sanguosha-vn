@@ -1,4 +1,5 @@
 import { Container, Text } from "pixi.js";
+import { Button } from "../../ui/Button";
 import type { TqsPlayerViewState } from "../../../game/types";
 
 export class ResultScene extends Container {
@@ -11,11 +12,22 @@ export class ResultScene extends Container {
     style: { fontSize: 24, fill: "#FFFFFF", align: "center" },
   });
 
+  
+  private btnLobby = new Button({
+    width: 200,
+    height: 48,
+    text: "Quay lại sảnh",
+    color: 0xaa2222,
+    onClick: () => {
+      window.location.reload(); // Quick CTA implementation since we don't have routing yet
+    }
+  });
+
   constructor() {
     super();
     this.title.anchor.set(0.5);
     this.details.anchor.set(0.5);
-    this.addChild(this.title, this.details);
+    this.addChild(this.title, this.details, this.btnLobby);
   }
 
   public sync(
@@ -28,5 +40,6 @@ export class ResultScene extends Container {
 
     this.title.text = G.winner?.reason ?? "Ván đấu kết thúc.";
     this.details.text = `Chồng Bài Rút: ${G.deckSize} · Chồng Bài Bỏ: ${G.discard.length}`;
+    this.btnLobby.position.set(viewportWidth / 2 - 100, viewportHeight / 2 + 100);
   }
 }

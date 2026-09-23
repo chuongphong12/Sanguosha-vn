@@ -1,22 +1,14 @@
 const fs = require('fs');
-let code = fs.readFileSync('src/game/engine/core/index.ts', 'utf8');
 
-let replaced = false;
-while (true) {
-  const match = code.match(/\(function\s*\(\s*p\s*\)\s*\{\s*G\.prompt\s*=\s*p;\s*if\s*\(p\)\s*\{[\s\S]*?\}\s*\}\)\s*\(([\s\S]*?)\)\s*(?:;|,|)/);
-  if (!match) break;
-  replaced = true;
-  
-  const fullMatch = match[0];
-  const innerArg = match[1];
-  
-  let replacer = `setPrompt(G, ${innerArg})`;
-  if (fullMatch.endsWith(';')) replacer += ';';
-  if (fullMatch.endsWith(',')) replacer += ',';
-  
-  // Replace the match in the code
-  code = code.substring(0, match.index) + replacer + code.substring(match.index + fullMatch.length);
+// Fix AnimationManager
+let anim = fs.readFileSync('src/app/screens/main/AnimationManager.ts', 'utf8');
+if (!anim.includes('import { Graphics }')) {
+  anim = anim.replace(/import \{ Text \}/, 'import { Text }\nimport { Graphics }');
 }
+anim = anim.replace(/ease: "ease-out"/, 'ease: "easeOut"');
+fs.writeFileSync('src/app/screens/main/AnimationManager.ts', anim, 'utf8');
 
-fs.writeFileSync('src/game/engine/core/index.ts', code, 'utf8');
-console.log("Replaced:", replaced);
+// Fix ResultScene
+let result = fs.readFileSync('src/app/screens/main/ResultScene.ts', 'utf8');
+result = result.replace(/label: "Quay lại sảnh"/, 'text: "Quay lại sảnh"');
+fs.writeFileSync('src/app/screens/main/ResultScene.ts', result, 'utf8');
