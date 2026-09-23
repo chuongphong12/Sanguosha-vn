@@ -1,18 +1,11 @@
-import { Container, Text } from "pixi.js";
-import { Button } from "../../ui/Button";
-import type { TqsPlayerViewState } from "../../../game/types";
+const fs = require('fs');
 
-export class WaitingRoomScene extends Container {
-  private title = new Text({
-    text: "Phòng chờ",
-    style: { fontSize: 36, fill: "#E2C373" },
-  });
-  private matchInfo = new Text({
-    text: "",
-    style: { fontSize: 24, fill: "#FFFFFF", align: "center" },
-  });
+let c = fs.readFileSync('src/app/screens/main/WaitingRoomScene.ts', 'utf8');
 
+if (!c.includes('Button')) {
+  c = c.replace(/import \{ Container, Text \} from "pixi.js";/, 'import { Container, Text } from "pixi.js";\nimport { Button } from "../../ui/Button";');
   
+  const inject = `
   private btnStart = new Button({
     width: 200,
     height: 48,
@@ -27,8 +20,11 @@ export class WaitingRoomScene extends Container {
     this.btnStart.cursor = 'pointer';
     this.addChild(this.title, this.matchInfo, this.btnStart);
   }
+`;
 
+  c = c.replace(/constructor\(\) \{[\s\S]*?\}\n/, inject);
   
+  const syncInject = `
   public sync(
     G: TqsPlayerViewState,
     match: any,
@@ -49,6 +45,10 @@ export class WaitingRoomScene extends Container {
     }
 
     const players = Object.keys(G.players).length;
-    this.matchInfo.text = `Người chơi: ${players}/${G.seatOrder.length}\nĐang chờ người chơi khác...`;
+    this.matchInfo.text = \`Người chơi: \${players}/\${G.seatOrder.length}\\nĐang chờ người chơi khác...\`;
   }
+`;
+
+  c = c.replace(/public sync\([\s\S]*?\}\n/m, syncInject);
+  fs.writeFileSync('src/app/screens/main/WaitingRoomScene.ts', c, 'utf8');
 }
