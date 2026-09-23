@@ -13,20 +13,20 @@ export class ResultScene extends Container {
   });
 
   
+  
   private btnLobby = new Button({
     width: 200,
     height: 48,
     text: "Quay lại sảnh",
-    color: 0xaa2222,
-    onClick: () => {
-      window.location.reload(); // Quick CTA implementation since we don't have routing yet
-    }
   });
 
   constructor() {
     super();
     this.title.anchor.set(0.5);
     this.details.anchor.set(0.5);
+    this.btnLobby.on('pointerdown', () => window.location.reload());
+    this.btnLobby.eventMode = 'static';
+    this.btnLobby.cursor = 'pointer';
     this.addChild(this.title, this.details, this.btnLobby);
   }
 

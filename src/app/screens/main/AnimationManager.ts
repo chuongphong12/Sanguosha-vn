@@ -9,6 +9,7 @@ import { THEME } from "../../ui/theme";
 export class AnimationManager {
   private queue: PresentationEvent[] = [];
   private isPlaying = false;
+    private isDisposed = false;
   
   constructor(
     private parentContainer: Container,
@@ -16,13 +17,24 @@ export class AnimationManager {
     private getViewerID: () => PlayerID
   ) {}
 
-  public enqueue(events: PresentationEvent[]) {
+  
+    public dispose() {
+      this.queue = [];
+      this.isPlaying = false;
+      this.isDisposed = true;
+    }
+
+    private get prefersReducedMotion() {
+      return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    }
+
+    public enqueue(events: PresentationEvent[]) {
     this.queue.push(...events);
     this.playNext();
   }
 
   private async playNext() {
-    if (this.isPlaying || this.queue.length === 0) return;
+    if (this.isDisposed || this.isPlaying || this.queue.length === 0) return;
     this.isPlaying = true;
 
     const event = this.queue.shift()!;
@@ -33,6 +45,7 @@ export class AnimationManager {
   }
 
   private async playEvent(event: PresentationEvent) {
+      if (this.prefersReducedMotion) return;
     // Basic switch for M3 implementations
     switch (event.kind) {
       case "card-committed":
