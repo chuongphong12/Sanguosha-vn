@@ -79,6 +79,7 @@ export class MainScreen extends Container {
   private readonly formationScene = new FormationScene();
   private readonly resultScene = new ResultScene();
   private readonly battleScene = new BattleScene();
+  private readonly connectingText = new Text({ text: "Đang kết nối...", style: { fontSize: 24, fill: "#FFFFFF", align: "center" } });
   private match?: MatchClient;
   private unsubscribe?: () => void;
   private state: MatchClientState = null;
@@ -195,10 +196,11 @@ export class MainScreen extends Container {
   constructor() {
     super();
     this.addChild(
-      this.waitingRoomScene,
-      this.formationScene,
-      this.resultScene,
-      this.battleScene,
+        this.waitingRoomScene,
+        this.formationScene,
+        this.resultScene,
+        this.battleScene,
+        this.connectingText,
     );
     this.addChild(this.content);
   }

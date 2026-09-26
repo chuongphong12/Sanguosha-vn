@@ -1,4 +1,4 @@
-import { Container, Text, Sprite, Assets } from "pixi.js";
+import { Container, Text, Sprite, Assets, Graphics } from "pixi.js";
 import { animate } from "motion";
 import type { PresentationEvent } from "../../../game/types/presentation";
 import type { PlayerID, TqsPlayerViewState } from "../../../game/model";
