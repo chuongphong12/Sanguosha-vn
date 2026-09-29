@@ -25,6 +25,7 @@ export interface AoeSimultaneousEffect {
   targetIDs: PlayerID[];
   passedPlayerIDs: PlayerID[];
   baguaTriedPlayerIDs: PlayerID[];
+  summonTriedPlayerIDs: PlayerID[];
 }
 
 export interface NullificationEffect {
