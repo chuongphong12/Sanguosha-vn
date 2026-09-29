@@ -7,7 +7,14 @@ import type {
 import { SeatView } from "../../ui/SeatView";
 import { Dashboard } from "../../ui/Dashboard";
 import { THEME } from "../../ui/theme";
+import { TABLE_BACKGROUND_ALIAS } from "../../ui/assetAliases";
 import { AnimationManager } from "./AnimationManager";
+
+const DASHBOARD_HEIGHT = 240;
+const SEAT_WIDTH = 140;
+const SEAT_HEIGHT = 160;
+/** Keeps the top seat clear of the status panel. */
+const SEAT_TOP_MIN = 84;
 
 export class BattleScene extends Container {
   private bgContainer = new Container();
@@ -38,6 +45,11 @@ export class BattleScene extends Container {
       viewportHeight: number;
       selectedCardIDs: Set<string>;
       selectedTargetIDs: PlayerID[];
+      selectableTargetIDs: Set<PlayerID>;
+      highlightedTargetIDs: Set<PlayerID>;
+      /** False during a hot-seat handoff so the previous viewer's hand stays hidden. */
+      showDashboard: boolean;
+      handScrollX: number;
       onSeatTap: (playerID: PlayerID) => void;
       onDashboardCardTap: (cardID: string) => void;
     },
@@ -45,11 +57,17 @@ export class BattleScene extends Container {
     this.syncBackground(options.viewportWidth, options.viewportHeight);
 
     if (!this.animationManager) {
-      this.animationManager = new AnimationManager(this, this.seatViews, () => viewerID);
+      this.animationManager = new AnimationManager(
+        this,
+        this.seatViews,
+        () => viewerID,
+      );
     }
 
     if (G.stream) {
-      const newEvents = G.stream.events.filter(e => e.sequence > this.lastSequence);
+      const newEvents = G.stream.events.filter(
+        (e) => e.sequence > this.lastSequence,
+      );
       if (newEvents.length > 0) {
         this.lastSequence = newEvents[newEvents.length - 1].sequence;
         this.animationManager.enqueue(newEvents);
@@ -66,81 +84,90 @@ export class BattleScene extends Container {
     }
 
     const { viewportWidth, viewportHeight } = options;
-    const padding = 60;
-    const w = viewportWidth - padding * 2;
-    const h = viewportHeight - padding * 2 - 240; // leaving room for dashboard
+    // Opponent ring between the status bar (top) and the action row above the dashboard.
+    const centerX = viewportWidth / 2;
+    const centerY = (viewportHeight - DASHBOARD_HEIGHT) / 2 + 20;
+    const radiusX = viewportWidth / 2 - SEAT_WIDTH / 2 - 30;
+    const radiusY = centerY - SEAT_TOP_MIN - SEAT_HEIGHT / 2;
 
-    // Very basic circle layout, matching MainScreen behavior (or better)
-    const numPlayers = Object.keys(G.players).length;
-    const angleStep = (2 * Math.PI) / Math.max(1, numPlayers);
-    let currentAngle = Math.PI / 2; // start bottom
+    // Seats sit on an ellipse, starting with the viewer at the bottom (hidden behind the dashboard).
+    const viewerIndex = Math.max(0, G.seatOrder.indexOf(viewerID));
+    const seatOrder = [
+      ...G.seatOrder.slice(viewerIndex),
+      ...G.seatOrder.slice(0, viewerIndex),
+    ];
+    const angleStep = (2 * Math.PI) / Math.max(1, seatOrder.length);
 
-    Object.keys(G.players).forEach((pid) => {
-      const isActor = G.turn.activePlayerID === pid;
-      const isSelected = options.selectedTargetIDs.includes(pid);
-      const isHighlighted = false; // TODO: canSelectTarget(G, pid)
+    seatOrder.forEach((pid, index) => {
+      const seatOptions = {
+        isActor: G.turn.activePlayerID === pid,
+        selected: options.selectedTargetIDs.includes(pid),
+        isHighlighted: options.highlightedTargetIDs.has(pid),
+        onTap: options.selectableTargetIDs.has(pid)
+          ? () => options.onSeatTap(pid)
+          : undefined,
+      };
 
       let seat = this.seatViews.get(pid);
       if (!seat) {
-        seat = new SeatView(G, pid, {
-          isActor,
-          selected: isSelected,
-          isHighlighted,
-          onTap: () => options.onSeatTap(pid),
-        });
+        seat = new SeatView(G, pid, seatOptions);
         this.seatViews.set(pid, seat);
         this.boardContainer.addChild(seat);
       } else {
-        seat.sync(G, {
-          isActor,
-          selected: isSelected,
-          isHighlighted,
-          onTap: () => options.onSeatTap(pid),
-        });
+        seat.sync(G, seatOptions);
       }
 
-      // Position (this should be replaced by a proper SeatLayout function later)
-      if (pid === viewerID) {
-        seat.position.set(viewportWidth / 2, viewportHeight - 240 - 100);
-      } else {
-        const radiusX = w / 2;
-        const radiusY = h / 2;
-        seat.position.set(
-          viewportWidth / 2 + radiusX * Math.cos(currentAngle),
-          viewportHeight / 2 - 120 + radiusY * Math.sin(currentAngle),
-        );
-      }
-      currentAngle += angleStep;
+      seat.visible = pid !== viewerID;
+      const angle = Math.PI / 2 + index * angleStep;
+      seat.position.set(
+        centerX + radiusX * Math.cos(angle) - SEAT_WIDTH / 2,
+        centerY + radiusY * Math.sin(angle) - SEAT_HEIGHT / 2,
+      );
     });
 
-    // Sync dashboard
+    this.syncDashboard(G, viewerID, options);
+  }
+
+  private syncDashboard(
+    G: TqsPlayerViewState,
+    viewerID: PlayerID,
+    options: {
+      viewportWidth: number;
+      viewportHeight: number;
+      selectedCardIDs: Set<string>;
+      showDashboard: boolean;
+      handScrollX: number;
+      onDashboardCardTap: (cardID: string) => void;
+    },
+  ): void {
+    // A Dashboard belongs to one viewer; rebuild it on a hot-seat switch so no private state carries over.
+    if (this.dashboard && this.dashboard.viewerID !== viewerID) {
+      this.dashboard.destroy({ children: true });
+      this.dashboard = undefined;
+    }
+
+    const dashboardOptions = {
+      viewportWidth: options.viewportWidth,
+      selectedCardIDs: options.selectedCardIDs,
+      handScrollX: options.handScrollX,
+      onCardTap: options.onDashboardCardTap,
+      onScroll: () => {},
+    };
     if (!this.dashboard) {
-      this.dashboard = new Dashboard(G, viewerID, {
-        viewportWidth,
-        selectedCardIDs: options.selectedCardIDs,
-        handScrollX: 0,
-        onCardTap: options.onDashboardCardTap,
-        onScroll: () => {},
-      });
-      this.dashboard.position.set(30, viewportHeight - 240);
+      this.dashboard = new Dashboard(G, viewerID, dashboardOptions);
       this.addChild(this.dashboard);
     } else {
-      this.dashboard.sync(G, {
-        viewportWidth,
-        selectedCardIDs: options.selectedCardIDs,
-        handScrollX: 0,
-        onCardTap: options.onDashboardCardTap,
-        onScroll: () => {},
-      });
-      this.dashboard.position.set(30, viewportHeight - 240);
+      this.dashboard.sync(G, dashboardOptions);
     }
+    this.dashboard.position.set(30, options.viewportHeight - DASHBOARD_HEIGHT);
+    this.dashboard.visible = options.showDashboard;
   }
 
   private syncBackground(width: number, height: number): void {
     let bgTex: Texture | undefined;
     try {
-      bgTex = Assets.get<Texture>("main/ui/system/background/table.jpg");
-    } catch (e) {
+      bgTex = Assets.get<Texture>(TABLE_BACKGROUND_ALIAS);
+    } catch {
       /* ignore */
     }
 

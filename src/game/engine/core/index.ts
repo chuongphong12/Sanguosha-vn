@@ -1905,7 +1905,7 @@ function resolveDamage(G: TqsGameState, effect: DamageEffect): void {
     });
     writeLog(
       G,
-      `\${playerName(G, effect.targetID)} chịu \${effect.amount} điểm Sát Thương.`,
+      `${playerName(G, effect.targetID)} chịu ${effect.amount} điểm Sát Thương.`,
     );
     effect.stage = "after-dying";
     if (G.players[effect.targetID].hp <= 0) {

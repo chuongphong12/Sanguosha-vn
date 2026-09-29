@@ -10,6 +10,11 @@ import {
   FACTION_ICON_ALIAS,
   GENERAL_PORTRAIT_ALIAS,
   GENERALS_WITHOUT_PORTRAIT,
+  MAGATAMA_ALIAS,
+  ROLE_CARD_ALIAS,
+  ROLE_CARD_BACK_ALIAS,
+  TABLE_BACKGROUND_ALIAS,
+  UI_BUTTON_ALIAS,
 } from "../../src/app/ui/assetAliases";
 import { CARD_DEFINITIONS } from "../../src/game/catalog/cards";
 import { GENERALS } from "../../src/game/catalog/generals";
@@ -57,5 +62,21 @@ describe("visual asset aliases", () => {
     );
     for (const alias of Object.values(FACTION_ICON_ALIAS))
       expectTrackedAsset(alias);
+  });
+
+  it("maps every role card, the card back and the HP magatamas to tracked assets", () => {
+    expect(Object.keys(ROLE_CARD_ALIAS).sort()).toEqual(
+      ["lord", "loyalist", "rebel", "renegade"].sort(),
+    );
+    for (const alias of Object.values(ROLE_CARD_ALIAS))
+      expectTrackedAsset(alias);
+    expectTrackedAsset(ROLE_CARD_BACK_ALIAS);
+    for (const alias of Object.values(MAGATAMA_ALIAS))
+      expectTrackedAsset(alias);
+  });
+
+  it("maps the battle table background and button skin to tracked assets", () => {
+    expectTrackedAsset(TABLE_BACKGROUND_ALIAS);
+    expectTrackedAsset(UI_BUTTON_ALIAS);
   });
 });

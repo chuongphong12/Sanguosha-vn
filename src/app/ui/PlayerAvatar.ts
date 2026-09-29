@@ -3,13 +3,33 @@ import { Assets } from "pixi.js";
 
 import type { Faction, PlayerViewPlayer } from "../../game/model";
 import { GENERALS_BY_ID } from "../../game/catalog/generals";
-import { FACTION_ICON_ALIAS, GENERAL_PORTRAIT_ALIAS } from "./assetAliases";
+import {
+  FACTION_ICON_ALIAS,
+  GENERAL_PORTRAIT_ALIAS,
+  MAGATAMA_ALIAS,
+  type MagatamaTone,
+} from "./assetAliases";
 import { GAME_FONT_FAMILY } from "./typography";
 
 import { THEME } from "./theme";
 
 const AVATAR_WIDTH = 120;
 const AVATAR_HEIGHT = 140;
+
+const MAGATAMA_FALLBACK_COLOR: Record<MagatamaTone, number> = {
+  empty: 0x333333,
+  healthy: 0x2aaa44,
+  wounded: 0xddaa22,
+  critical: 0xcc3322,
+};
+
+export const getMagatamaTone = (hp: number, maxHP: number): MagatamaTone => {
+  if (hp <= 0 || maxHP <= 0) return "empty";
+  const ratio = hp / maxHP;
+  if (ratio > 0.5) return "healthy";
+  if (ratio > 0.25) return "wounded";
+  return "critical";
+};
 
 export class PlayerAvatar extends Container {
   private bg = new Graphics();
@@ -118,7 +138,7 @@ export class PlayerAvatar extends Container {
     // Portrait
     this.portrait.visible = false;
     this.placeholder.visible = false;
-    this.placeholder.removeChildren();
+    for (const child of this.placeholder.removeChildren()) child.destroy();
 
     if (general) {
       const tex = this.resolvePortrait(general.id);
@@ -145,7 +165,7 @@ export class PlayerAvatar extends Container {
     this.drawHPBar(player.hp, player.maxHP, 4, this.h - 32, this.w - 8);
 
     // Name label
-    this.nameText.text = general?.name ?? `P\${player.seat + 1}`;
+    this.nameText.text = general?.name ?? `P${player.seat + 1}`;
     this.nameText.scale.set(1);
     if (this.nameText.width > this.w - 12) {
       this.nameText.scale.set((this.w - 12) / this.nameText.width);
@@ -215,28 +235,19 @@ export class PlayerAvatar extends Container {
     y: number,
     totalWidth: number,
   ): void {
-    this.hpContainer.removeChildren();
+    for (const child of this.hpContainer.removeChildren()) child.destroy();
 
     const gap = 2;
     const dotSize = Math.min(12, (totalWidth - gap * (maxHP - 1)) / maxHP);
-
-    let colorSuffix = "0";
-    if (hp > 0) {
-      const ratio = hp / maxHP;
-      if (ratio > 0.5) colorSuffix = "1";
-      else if (ratio > 0.25) colorSuffix = "2";
-      else colorSuffix = "3";
-    }
+    const tone = getMagatamaTone(hp, maxHP);
 
     for (let i = 0; i < maxHP; i++) {
       const filled = i < hp;
-      const textureAlias = filled
-        ? `main/ui/system/magatamas/\${colorSuffix}.png`
-        : `main/ui/system/magatamas/0.png`;
+      const textureAlias = MAGATAMA_ALIAS[filled ? tone : "empty"];
       let tex: Texture | undefined;
       try {
         tex = Assets.get<Texture>(textureAlias);
-      } catch (e) {
+      } catch {
         /* ignore */
       }
 
@@ -247,15 +258,9 @@ export class PlayerAvatar extends Container {
         magatama.position.set(x + i * (dotSize + gap), y);
         this.hpContainer.addChild(magatama);
       } else {
-        const fallbackColor =
-          colorSuffix === "1"
-            ? 0x2aaa44
-            : colorSuffix === "2"
-              ? 0xddaa22
-              : 0xcc3322;
         const dot = new Graphics()
           .roundRect(x + i * (dotSize + gap), y, dotSize, dotSize, 3)
-          .fill(filled ? fallbackColor : 0x333333);
+          .fill(filled ? MAGATAMA_FALLBACK_COLOR[tone] : 0x333333);
         this.hpContainer.addChild(dot);
       }
     }
@@ -266,7 +271,7 @@ export class PlayerAvatar extends Container {
     if (alias) {
       try {
         return Assets.get<Texture>(alias) ?? null;
-      } catch (e) {
+      } catch {
         /* ignore */
       }
     }
@@ -276,7 +281,7 @@ export class PlayerAvatar extends Container {
   private resolveFactionIcon(faction: Faction): Texture | null {
     try {
       return Assets.get<Texture>(FACTION_ICON_ALIAS[faction]) ?? null;
-    } catch (e) {
+    } catch {
       /* ignore */
     }
     return null;
