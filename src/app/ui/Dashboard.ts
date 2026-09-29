@@ -36,7 +36,7 @@ const HAND_HOVER_SCALE = 1.2;
 export class Dashboard extends Container {
   static hoveredCardID: string | null = null;
 
-  private viewerID: PlayerID;
+  public readonly viewerID: PlayerID;
   private panelHeight = 240;
 
   private bg: Panel;

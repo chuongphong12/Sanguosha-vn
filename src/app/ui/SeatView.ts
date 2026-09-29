@@ -68,17 +68,8 @@ export class SeatView extends Container {
     this.avatar.sync(player, {
       isActiveActor: options.isActor,
       isSelected: options.selected,
+      onTap: options.onTap,
     });
-
-    if (options.onTap && this.avatar.eventMode !== "static") {
-      this.avatar.eventMode = "static";
-      this.avatar.cursor = "pointer";
-      this.avatar.on("pointertap", options.onTap);
-    } else if (!options.onTap) {
-      this.avatar.eventMode = "none";
-      this.avatar.cursor = "auto";
-      this.avatar.removeAllListeners("pointertap");
-    }
 
     if (options.isHighlighted) {
       this.glow

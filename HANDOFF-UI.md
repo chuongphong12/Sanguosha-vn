@@ -24,8 +24,9 @@ boardgame.io 0.50.2 + PixiJS v8 and how this repo wires them.
 | `eslint .` | ❌ red, **pre-existing on `ui-upgrade`** (~99 errors, mostly prettier in `MainScreen.ts`, engine and scene files). The UI component files touched here lint clean. |
 | `CardView` / `PlayerAvatar` / `Dashboard` / `SeatView` | Live: `BattleScene` (child of `MainScreen`) renders seats + `Dashboard` with `sync()`. Art, text, HP magatamas, role card and hover lift now display correctly (see §0). |
 | Asset aliases (old Blocker 1) | ✅ Done — `src/app/ui/assetAliases.ts`, every alias verified against the generated spritesheet frames. |
-| **Battle controls** | ❌ **Not wired.** `MainScreen.render()` for `playing` only calls `battleScene.sync()`; card/seat taps are `console.log`, and `drawActions` / prompts / handoff / log / status / viewer selector are not drawn. Hot-seat general selection has no UI either. **The game cannot be played past setup on this branch.** |
-| Next task | Task 5 in §0: re-wire the battle controls around `BattleScene` (plan option 3b). |
+| **Battle controls** | ✅ Re-wired (Task 5 in §0): card/seat taps, action row, prompts, hot-seat handoff, log drawer, status bar, general picker, viewer switch. Hot-seat verified in the browser through selection → play Slash with a target → Dodge prompt. |
+| Bot matches | ❌ **Bots never act** (pre-existing, engine/AI side): boardgame.io's `RandomBot` gets an empty move list from `getHeuristicMoves` for an active bot with nothing to do and crashes (`reading 'payload'`), so a bot lord never picks a general. See §0. |
+| Next task | Fix bot enumeration (engine/AI), then M3 visuals (card flight, target marker) — see §0. |
 
 ## 0. Session 2026-09-29 — what changed and what's next
 
@@ -65,15 +66,31 @@ Browser-verified at 1366×768 with a 4-player hot-seat match (Playwright + `pnpm
   compress instead of scrolling).
 - `MainScreen.effectiveWidth` reserves 280px for a log that isn't drawn.
 
-**Task 5 — re-wire battle controls (next)**
-- `onDashboardCardTap` → the existing selection logic (`selectedCardIDs` toggle, as `drawHand` did on
-  `main`); `onSeatTap` → target selection.
-- Draw into `content` (above `BattleScene`) what `main`'s `drawPrivateArea` drew besides the hand:
-  handoff (`drawHandoff`, still in the file), `drawActions` / prompt renderers (still in the file,
-  never called), plus the deleted `drawLog`, `drawStatus`, `drawViewerSelector`,
-  `drawGeneralCandidates` (restore from `main`, adapted to the drawer/`effectiveWidth`).
-- **Verify:** hot-seat and bots matches playable end to end (pick general, play Slash, respond, use a
-  skill, discard, switch viewer), `tsc` + `vitest` green, browser screenshot.
+**Task 5 — re-wire battle controls (DONE 2026-09-29)**
+- `MainScreen.render()` is now: scene sync → per-status overlay drawn into `content`
+  (exit button, viewer selector + `drawSelectionArea` during selection; `drawStatus`, `drawLog`,
+  then `drawHandoff` **or** `drawActions` during play).
+- `handleDashboardCardTap` / `handleSeatTap` are stable arrow methods that read `this.state`, so
+  components never hold stale closures. `targetSelectionState()` feeds `BattleScene` which seats
+  are tappable / highlighted.
+- Hot-seat privacy: while a handoff is pending the dashboard is hidden (`showDashboard: false`),
+  and `BattleScene` rebuilds the `Dashboard` when the viewer changes. The viewer selector only
+  shows during general selection.
+- Seats are placed on a ring starting with the viewer (hidden, bottom), clear of the status bar,
+  log drawer and action row.
+- Log is a drawer (`LOG_DRAWER_WIDTH`), with a close button and a "Diễn biến" button to reopen.
+
+**Next**
+1. **Bots never act** (engine/AI, pre-existing on `ui-upgrade` and `main`): boardgame.io `Local`
+   picks the first active bot (`GetBotPlayer`); if `getHeuristicMoves` returns `[]` for it,
+   `RandomBot.play` returns no action and the master throws `reading 'payload'`, forever. Seen with
+   a bot lord in lord selection. Make `getHeuristicMoves` never return `[]` for an active player,
+   or only mark bots active when they have a move.
+2. **Player naming is inconsistent**: status/FormationScene use `getPlayerName(id)` → "Player 3"
+   (raw id); handoff/selector use `P${seat + 1}`. Pick one (seat-based) in
+   `src/app/utils/playerNames.ts`.
+3. FormationScene's long title overlaps the "Thoát" button at 1366px.
+4. M3 visuals (card flight, target marker, response-window events), see "Known issues" above.
 
 ## 1. What this workstream is
 

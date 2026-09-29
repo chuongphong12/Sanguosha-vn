@@ -19,6 +19,7 @@ import type {
 } from "../../../client/MatchClient";
 import { MatchClient } from "../../../client/MatchClient";
 import { GeneralCardView } from "../../ui/components/GeneralCardView";
+import { getPlayerName } from "../../utils/playerNames";
 import {
   canRespondWithCard,
   canSelectCardTarget,
@@ -70,6 +71,7 @@ const SUIT_LABELS = {
 };
 
 const MIN_LAYOUT_HEIGHT = 860;
+const LOG_DRAWER_WIDTH = 280;
 
 export class MainScreen extends Container {
   public static assetBundles = ["main"];
@@ -90,7 +92,9 @@ export class MainScreen extends Container {
   private selectedPromptPlayerIDs: PlayerID[] = [];
   private isLogOpen = true;
   private get effectiveWidth(): number {
-    return this.isLogOpen ? this.viewportWidth - 280 : this.viewportWidth;
+    return this.isLogOpen
+      ? this.viewportWidth - LOG_DRAWER_WIDTH
+      : this.viewportWidth;
   }
   private lastPromptID: number | null = null;
   private nullificationTimeout: ReturnType<typeof setTimeout> | null = null;
@@ -358,58 +362,433 @@ export class MainScreen extends Container {
     this.clearContent();
     this.connectingText.visible = !this.state;
 
-    if (this.state && this.match) {
-      const G = this.state.G;
-      this.waitingRoomScene.visible = G.status === "waiting-room";
-      this.formationScene.visible =
-        G.status === "lord-selection" || G.status === "general-selection";
-      this.battleScene.visible = G.status === "playing";
-      this.resultScene.visible = G.status === "ended";
-
-      if (this.waitingRoomScene.visible)
-        this.waitingRoomScene.sync(
-          G,
-          this.match,
-          this.viewportWidth,
-          this.viewportHeight,
-        );
-      if (this.formationScene.visible)
-        this.formationScene.sync(G, this.viewportWidth, this.viewportHeight);
-      if (this.resultScene.visible)
-        this.resultScene.sync(G, this.viewportWidth, this.viewportHeight);
-
-      if (this.battleScene.visible) {
-        this.battleScene.sync(G, this.state.ctx, this.match.currentViewerID, {
-          viewportWidth: this.effectiveWidth,
-          viewportHeight: this.viewportHeight,
-          selectedCardIDs: this.selectedCardIDs,
-          selectedTargetIDs: this.selectedTargetIDs,
-          
-          
-          onSeatTap: (pid) => console.log('seat tap', pid),
-          onDashboardCardTap: (cid) => console.log('card tap', cid),
-           
-          
-        });
-      }
-
-      
-
-      if (G.status !== "waiting-room") {
-        
-      }
-      if (G.status === "playing") {
-        
-        
-        
-        
-        
-      }
-    } else {
+    if (!this.state || !this.match) {
       this.waitingRoomScene.visible = false;
       this.formationScene.visible = false;
       this.battleScene.visible = false;
       this.resultScene.visible = false;
+      return;
+    }
+
+    const G = this.state.G;
+    const viewerID = this.match.currentViewerID;
+    const isSelecting =
+      G.status === "lord-selection" || G.status === "general-selection";
+    this.waitingRoomScene.visible = G.status === "waiting-room";
+    this.formationScene.visible = isSelecting;
+    this.battleScene.visible = G.status === "playing";
+    this.resultScene.visible = G.status === "ended";
+
+    if (this.waitingRoomScene.visible) {
+      this.waitingRoomScene.sync(
+        G,
+        this.match,
+        this.viewportWidth,
+        this.viewportHeight,
+      );
+      return;
+    }
+
+    this.drawExitButton();
+
+    if (isSelecting) {
+      this.drawViewerSelector(G);
+      this.formationScene.sync(G, this.viewportWidth, this.viewportHeight);
+      this.drawSelectionArea(G, viewerID);
+      return;
+    }
+
+    if (this.resultScene.visible) {
+      this.resultScene.sync(G, this.viewportWidth, this.viewportHeight);
+      return;
+    }
+
+    const handoffActorID = this.pendingHandoffActorID(G);
+    this.battleScene.sync(G, this.state.ctx, viewerID, {
+      viewportWidth: this.effectiveWidth,
+      viewportHeight: this.viewportHeight,
+      selectedCardIDs: this.selectedCardIDs,
+      selectedTargetIDs: this.selectedTargetIDs,
+      ...this.targetSelectionState(G, viewerID),
+      showDashboard: handoffActorID === null,
+      handScrollX: this.handScrollX,
+      onSeatTap: this.handleSeatTap,
+      onDashboardCardTap: this.handleDashboardCardTap,
+    });
+    this.drawStatus(G);
+    this.drawLog(G);
+
+    if (handoffActorID !== null) {
+      this.drawHandoff(G, handoffActorID, this.viewportHeight - 250);
+      return;
+    }
+    this.drawActions(G, viewerID);
+  }
+
+  /** Hot-seat only: the player who must take the device before anything private is shown. */
+  private pendingHandoffActorID(G: TqsPlayerViewState): PlayerID | null {
+    if (!this.match?.isHotseat) return null;
+    const requiredActorID = this.requiredActorID(G);
+    if (!requiredActorID) return null;
+    const isReady =
+      this.match.currentViewerID === requiredActorID &&
+      this.handoffConfirmedFor === requiredActorID;
+    return isReady ? null : requiredActorID;
+  }
+
+  private targetSelectionState(
+    G: TqsPlayerViewState,
+    viewerID: PlayerID,
+  ): {
+    selectableTargetIDs: Set<PlayerID>;
+    highlightedTargetIDs: Set<PlayerID>;
+  } {
+    const isChoosingTarget =
+      this.selectedCardIDs.size > 0 || this.pendingSkill !== null;
+    const selectableTargetIDs = new Set<PlayerID>();
+    for (const playerID of G.seatOrder) {
+      if (playerID === viewerID) continue;
+      if (
+        this.selectedTargetIDs.includes(playerID) ||
+        this.canSelectTarget(G, playerID)
+      )
+        selectableTargetIDs.add(playerID);
+    }
+    return {
+      selectableTargetIDs,
+      highlightedTargetIDs: isChoosingTarget
+        ? selectableTargetIDs
+        : new Set<PlayerID>(),
+    };
+  }
+
+  private readonly handleSeatTap = (playerID: PlayerID): void => {
+    const G = this.state?.G;
+    if (!G) return;
+
+    const targetOrder = this.selectedTargetIDs.indexOf(playerID);
+    if (targetOrder >= 0) {
+      const selectedCardID = [...this.selectedCardIDs][0];
+      const selectedCardName = selectedCardID
+        ? G.cards[selectedCardID]?.definitionID
+        : undefined;
+      // Borrowed Sword targets are ordered: dropping the wielder drops the victim too.
+      if (selectedCardName === "borrowed-sword")
+        this.selectedTargetIDs.splice(targetOrder);
+      else this.selectedTargetIDs.splice(targetOrder, 1);
+    } else {
+      if (!this.canSelectTarget(G, playerID)) return;
+      if (this.selectedTargetIDs.length >= this.maximumTargets(G)) return;
+      this.selectedTargetIDs.push(playerID);
+    }
+    this.render();
+  };
+
+  private readonly handleDashboardCardTap = (cardID: string): void => {
+    const G = this.state?.G;
+    if (!G || !this.match) return;
+    const player = G.players[this.match.currentViewerID];
+
+    if (G.turn.step === "discard") {
+      if (this.selectedCardIDs.has(cardID)) this.selectedCardIDs.delete(cardID);
+      else this.selectedCardIDs.add(cardID);
+      this.render();
+      return;
+    }
+
+    const viewerWeaponID = player.equipment.weapon;
+    const promptAllowsSpear =
+      G.prompt?.kind === "card-response" &&
+      G.prompt.response === "slash" &&
+      G.prompt.allowSerpentSpear;
+    const playAllowsSpear =
+      !G.prompt &&
+      this.serpentSpearMode &&
+      viewerWeaponID !== undefined &&
+      G.cards[viewerWeaponID]?.definitionID === "serpent-spear";
+    const multiSelect = promptAllowsSpear || playAllowsSpear;
+
+    if (this.selectedCardIDs.has(cardID)) {
+      this.selectedCardIDs.delete(cardID);
+    } else {
+      if (!multiSelect) this.selectedCardIDs.clear();
+      else if (this.selectedCardIDs.size >= 2) return;
+      this.selectedCardIDs.add(cardID);
+    }
+    if (this.virtualAs === "slash" && this.selectedCardIDs.size === 0) {
+      this.virtualAs = null;
+    }
+    this.render();
+  };
+
+  private drawSelectionArea(G: TqsPlayerViewState, viewerID: PlayerID): void {
+    const top = this.viewportHeight - 250;
+    const handoffActorID = this.pendingHandoffActorID(G);
+    if (handoffActorID !== null) {
+      this.drawHandoff(G, handoffActorID, top);
+      return;
+    }
+
+    const player = G.players[viewerID];
+    const canSelectGeneral =
+      player.generalID === null &&
+      player.generalCandidates.length > 0 &&
+      ((G.status === "lord-selection" && viewerID === G.lordID) ||
+        (G.status === "general-selection" && viewerID !== G.lordID));
+    if (canSelectGeneral) {
+      this.drawGeneralCandidates(player.generalCandidates);
+      return;
+    }
+
+    const requiredActorID = this.requiredActorID(G);
+    const instruction = requiredActorID
+      ? `Đang chờ P${G.players[requiredActorID].seat + 1} chọn Võ Tướng...`
+      : "Đang chờ các người chơi hoàn tất việc chọn Võ Tướng.";
+    this.addText(
+      instruction,
+      this.viewportWidth / 2,
+      top + 48,
+      15,
+      THEME.colors.muted,
+    );
+  }
+
+  private drawGeneralCandidates(candidates: string[]): void {
+    const centerY = this.viewportHeight / 2;
+    const centerX = this.viewportWidth / 2;
+
+    const gap = 24;
+    const baseW = 280;
+    const baseH = 560;
+    const maxRowWidth = this.viewportWidth - 60;
+    const naturalWidth =
+      candidates.length * baseW + (candidates.length - 1) * gap;
+    const cardW =
+      naturalWidth > maxRowWidth
+        ? (maxRowWidth - (candidates.length - 1) * gap) / candidates.length
+        : baseW;
+    const cardH = Math.min((cardW / baseW) * baseH, this.viewportHeight - 360);
+    const totalW = candidates.length * cardW + (candidates.length - 1) * gap;
+    const startX = centerX - totalW / 2;
+
+    this.addText(
+      `Lượt của bạn — chọn 1 trong ${candidates.length} tướng`,
+      centerX,
+      centerY + 10 - cardH / 2 - 24,
+      16,
+      THEME.colors.gold,
+    );
+
+    candidates.forEach((generalID, index) => {
+      const card = new GeneralCardView(generalID, {
+        width: cardW,
+        height: cardH,
+        onConfirm: () => this.match?.move("selectGeneral", generalID),
+      });
+      card.position.set(
+        startX + index * (cardW + gap),
+        centerY + 10 - cardH / 2,
+      );
+      this.content.addChild(card);
+    });
+  }
+
+  private drawExitButton(): void {
+    this.addButton(
+      "Thoát",
+      74,
+      48,
+      80,
+      34,
+      () => void this.leaveMatchAndExit(),
+      THEME.colors.ink,
+      THEME.colors.paper,
+    );
+  }
+
+  private async leaveMatchAndExit(): Promise<void> {
+    if (this.match?.isRemote) {
+      try {
+        const state = window.history.state || {};
+        const urlParams = new URLSearchParams(window.location.search);
+        const serverUrl = state.serverUrl || urlParams.get("serverUrl");
+        const matchID = urlParams.get("matchID");
+        const playerID = state.playerID || urlParams.get("playerID");
+        const credentials = state.credentials || urlParams.get("credentials");
+        if (serverUrl && matchID && playerID && credentials) {
+          const lobbyClient = new LobbyClient({ server: serverUrl });
+          await lobbyClient.leaveMatch("tam-quoc-sat-standard-2013", matchID, {
+            playerID,
+            credentials,
+          });
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    }
+    window.location.href = "/";
+  }
+
+  /** Hot-seat selection only; during play the handoff flow switches viewers so hands stay private. */
+  private drawViewerSelector(G: TqsPlayerViewState): void {
+    if (!this.match || this.match.isRemote || !this.match.isHotseat) return;
+
+    const buttonWidth = 50;
+    const buttonGap = 8;
+    const selectorWidth =
+      G.seatOrder.length * buttonWidth + (G.seatOrder.length - 1) * buttonGap;
+    const selectorLeft = this.viewportWidth - 16 - selectorWidth;
+    const selectorY = this.viewportHeight - 40;
+
+    this.addText(
+      "Góc nhìn",
+      selectorLeft - 16,
+      selectorY,
+      14,
+      THEME.colors.paperDark,
+      1,
+      "right",
+    );
+    G.seatOrder.forEach((playerID, index) => {
+      const isActive = this.match!.currentViewerID === playerID;
+      this.addButton(
+        `P${index + 1}`,
+        selectorLeft + buttonWidth / 2 + index * (buttonWidth + buttonGap),
+        selectorY,
+        buttonWidth,
+        34,
+        () => this.switchViewer(playerID),
+        isActive ? THEME.colors.redBright : THEME.colors.ink,
+        THEME.colors.paper,
+      );
+    });
+  }
+
+  private switchViewer(playerID: PlayerID): void {
+    this.selectedCardIDs.clear();
+    this.selectedTargetIDs = [];
+    this.selectedZoneChoices = [];
+    this.handScrollX = 0;
+    this.serpentSpearMode = false;
+    this.handoffConfirmedFor = null;
+    this.match!.switchViewer(playerID, (state) => this.receiveState(state));
+  }
+
+  private drawStatus(G: TqsPlayerViewState): void {
+    const centerX = this.effectiveWidth / 2;
+    const panelY = 16;
+    const deckDetail = `Chồng Bài Rút: ${G.deckSize} · Chồng Bài Bỏ: ${G.discard.length}`;
+    const status = G.prompt
+      ? this.promptStatus(G, getPlayerName(G.prompt.responderID))
+      : `Lượt ${G.turn.number} · Giai Đoạn ${STEP_NAMES[G.turn.step]} · ${this.generalName(G, G.turn.activePlayerID)}`;
+
+    const statusText = new Text({
+      text: status,
+      style: {
+        fontFamily: GAME_FONT_FAMILY,
+        fontSize: 16,
+        fill: THEME.colors.paper,
+        align: "center",
+      },
+    });
+    const detailText = new Text({
+      text: deckDetail,
+      style: {
+        fontFamily: GAME_FONT_FAMILY,
+        fontSize: 12,
+        fill: THEME.colors.paperDark,
+        align: "center",
+      },
+    });
+
+    const panelWidth = Math.max(statusText.width, detailText.width) + 80;
+    this.addPanel(
+      centerX - panelWidth / 2,
+      panelY,
+      panelWidth,
+      56,
+      THEME.colors.ink,
+      THEME.colors.gold,
+      0.85,
+    );
+
+    statusText.anchor.set(0.5, 0);
+    statusText.position.set(centerX, panelY + 8);
+    detailText.anchor.set(0.5, 0);
+    detailText.position.set(centerX, panelY + 32);
+    this.content.addChild(statusText, detailText);
+  }
+
+  private toggleLog(): void {
+    this.isLogOpen = !this.isLogOpen;
+    this.render();
+  }
+
+  private drawLog(G: TqsPlayerViewState): void {
+    if (!this.isLogOpen) {
+      this.addButton("Diễn biến", this.viewportWidth - 70, 48, 110, 34, () =>
+        this.toggleLog(),
+      );
+      return;
+    }
+
+    const width = LOG_DRAWER_WIDTH;
+    const x = this.viewportWidth - width;
+    this.addPanel(
+      x,
+      0,
+      width,
+      this.viewportHeight,
+      0x181411,
+      THEME.colors.gold,
+      0.85,
+    );
+    this.addText(
+      "DIỄN BIẾN",
+      x + width / 2,
+      24,
+      18,
+      THEME.colors.gold,
+      0.5,
+      "center",
+      2,
+    );
+    this.addButton("✕", x + width - 26, 24, 34, 34, () => this.toggleLog());
+
+    const entries = G.log.slice(-20);
+    if (entries.length === 0) {
+      this.addText(
+        "Chưa có diễn biến nào.",
+        x + 20,
+        60,
+        14,
+        THEME.colors.muted,
+        0,
+        "left",
+      );
+      return;
+    }
+
+    const texts = entries.map((entry) =>
+      this.addText(
+        entry.message,
+        x + 20,
+        0,
+        14,
+        THEME.colors.paper,
+        0,
+        "left",
+        0,
+        width - 40,
+        true,
+      ),
+    );
+    // Newest entry sits at the bottom; older ones scroll off the top.
+    const totalHeight = texts.reduce((sum, text) => sum + text.height + 8, 0);
+    let currentY = Math.max(60, this.viewportHeight - 40 - totalHeight);
+    for (const text of texts) {
+      text.y = currentY;
+      currentY += text.height + 8;
     }
   }
 
@@ -422,28 +801,28 @@ export class MainScreen extends Container {
     this.addPanel(
       30,
       top - 12,
-      this.viewportWidth - 60,
+      this.effectiveWidth - 60,
       154,
       0x181411,
       THEME.colors.gold,
     );
     this.addText(
       `ĐƯA THIẾT BỊ CHO P${seat}`,
-      this.viewportWidth / 2,
+      this.effectiveWidth / 2,
       top + 18,
       20,
       THEME.colors.paper,
     );
     this.addText(
       `P${seat} cần thực hiện hành động tiếp theo.`,
-      this.viewportWidth / 2,
+      this.effectiveWidth / 2,
       top + 52,
       13,
       THEME.colors.paperDark,
     );
     this.addButton(
       `Tôi là P${seat} · Tiếp tục`,
-      this.viewportWidth / 2,
+      this.effectiveWidth / 2,
       top + 102,
       230,
       48,
