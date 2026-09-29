@@ -2,7 +2,7 @@
 
 > Companion to `HANDOFF.md` (which covers the **game engine** workstream — `src/game/**`).
 > This file covers the **PixiJS visual UI** workstream: replacing `MainScreen`'s button-based
-> rendering with real card/portrait art. Last updated **2026-09-03**.
+> rendering with real card/portrait art. Last updated **2026-09-29** (branch `claude/project-thread-gibd1d`, cut from `ui-upgrade`).
 
 An agent should be able to read this file + `.references/FRAMEWORK-NOTES.md` and continue without
 re-deriving context. Read `.references/FRAMEWORK-NOTES.md` first — it is the distilled reference for
@@ -12,15 +12,68 @@ boardgame.io 0.50.2 + PixiJS v8 and how this repo wires them.
 
 ## TL;DR — current status
 
+> **Read this first.** §2–§5 below were written on 2026-09-03 and are kept as history. Since then
+> the `ui-upgrade` branch ran milestones M0–M5 of
+> `docs/plans/2026-09-20-gitnexus-plan-ui-upgrade-handoff.md` (the canonical plan now). This table
+> and §0 are the current truth.
+
 | | |
 |---|---|
-| `pnpm run check` | ✅ GREEN (eslint + `tsc --noEmit` + `vitest` 169/169) as of 2026-09-03 |
-| `CardView` / `PlayerAvatar` / `Dashboard` (`src/app/ui/`) | Compile & lint clean, but **imported by nothing live** — isolated island |
-| `MainScreen.ts` | **Unchanged** — still renders hand as text `Button`s via `drawHand()` / `drawActions()` |
-| Card / general / faction **art** | **Not displaying** — asset aliases don't match catalog IDs (see Blocker 1). Components fall back to hand-drawn placeholders. |
-| Next task | Build ID→asset-alias mapping, then decide how to integrate `Dashboard` into `MainScreen` |
+| Branch | Work lives on `ui-upgrade` (not `main`). This session's fixes are on `claude/project-thread-gibd1d`, cut from `ui-upgrade`. |
+| `tsc --noEmit` / `vitest` | ✅ green — 28 files, 174 passed, 4 skipped (2026-09-29) |
+| `eslint .` | ❌ red, **pre-existing on `ui-upgrade`** (~99 errors, mostly prettier in `MainScreen.ts`, engine and scene files). The UI component files touched here lint clean. |
+| `CardView` / `PlayerAvatar` / `Dashboard` / `SeatView` | Live: `BattleScene` (child of `MainScreen`) renders seats + `Dashboard` with `sync()`. Art, text, HP magatamas, role card and hover lift now display correctly (see §0). |
+| Asset aliases (old Blocker 1) | ✅ Done — `src/app/ui/assetAliases.ts`, every alias verified against the generated spritesheet frames. |
+| **Battle controls** | ❌ **Not wired.** `MainScreen.render()` for `playing` only calls `battleScene.sync()`; card/seat taps are `console.log`, and `drawActions` / prompts / handoff / log / status / viewer selector are not drawn. Hot-seat general selection has no UI either. **The game cannot be played past setup on this branch.** |
+| Next task | Task 5 in §0: re-wire the battle controls around `BattleScene` (plan option 3b). |
 
----
+## 0. Session 2026-09-29 — what changed and what's next
+
+Browser-verified at 1366×768 with a 4-player hot-seat match (Playwright + `pnpm exec vite`).
+
+**Fixed**
+1. **Escaped template placeholders** (`\${...}` inside template strings renders literally) in `CardView`, `PlayerAvatar`,
+   `Dashboard`, `SeatView` and the damage log line in `src/game/engine/core/index.ts`. Cards showed
+   the raw text `${SUIT_SYMBOLS[card.suit]} ${card.rank}`, HP art and the role face never loaded.
+2. **`MainScreen` crashed on construction**: `Button` used texture `"button"`; the real frame is
+   `ui/button.png` (now `UI_BUTTON_ALIAS`).
+3. **Alias paths**: added `ROLE_CARD_ALIAS`, `ROLE_CARD_BACK_ALIAS`, `MAGATAMA_ALIAS`,
+   `TABLE_BACKGROUND_ALIAS` (`BattleScene` asked for a non-existent `main/ui/system/background/table.jpg`),
+   `UI_BUTTON_ALIAS`; all covered by `tests/ui/asset-aliases.test.ts`.
+   **Alias rule:** the whole `main` bundle is one TexturePacker sheet (`{tps}` tag,
+   `nameStyle: "relative"`), so aliases are paths **relative to `raw-assets/main{m}{tps}/` with no
+   `main/` prefix**.
+4. **Hand cards drawn below the panel** (pivot had been dropped): hand `CardView`s are pivoted
+   bottom-centre again, so hover scale grows upward.
+5. **Hover lift used stale positions** (closures captured the layout at creation). Layout now lives
+   in `Dashboard.handCardLayouts`; hover respects reduced motion; animations stop on destroy.
+6. **Role card flip re-synced with stale state** (closure captured the first `G`). Uses the last
+   synced state now.
+7. **Child scenes weren't scaled** while laid out in the 860px logical viewport, so the dashboard
+   was cut off below 860px windows. `MainScreen.resize` scales the scenes like `content`.
+8. `PlayerAvatar` leaked HP/placeholder children on every sync (now destroyed); "Đang kết nối..."
+   stayed on screen after connecting; the viewer's own `SeatView` overlapped the dashboard (hidden,
+   the dashboard avatar shows it).
+
+**Known issues, not fixed**
+- **Audio never loads**: `raw-assets/main{m}{tps}/sounds|audio` are inside the TexturePacker folder,
+  so AssetPack emits no audio. `Button` plays `main/sounds/sfx-*.wav`, which doesn't exist. Needs the
+  audio moved to a non-`{tps}` folder (e.g. `raw-assets/audio{m}/`) and the aliases updated.
+- `AnimationManager` is text-only placeholders (no card flight / target marker); `response-window-*`
+  events are declared but not emitted. That's the M3 slice of the canonical plan.
+- `BattleScene` seat ring is a placeholder ellipse; `Dashboard.handScrollX` is still unused (cards
+  compress instead of scrolling).
+- `MainScreen.effectiveWidth` reserves 280px for a log that isn't drawn.
+
+**Task 5 — re-wire battle controls (next)**
+- `onDashboardCardTap` → the existing selection logic (`selectedCardIDs` toggle, as `drawHand` did on
+  `main`); `onSeatTap` → target selection.
+- Draw into `content` (above `BattleScene`) what `main`'s `drawPrivateArea` drew besides the hand:
+  handoff (`drawHandoff`, still in the file), `drawActions` / prompt renderers (still in the file,
+  never called), plus the deleted `drawLog`, `drawStatus`, `drawViewerSelector`,
+  `drawGeneralCandidates` (restore from `main`, adapted to the drawer/`effectiveWidth`).
+- **Verify:** hot-seat and bots matches playable end to end (pick general, play Slash, respond, use a
+  skill, discard, switch viewer), `tsc` + `vitest` green, browser screenshot.
 
 ## 1. What this workstream is
 

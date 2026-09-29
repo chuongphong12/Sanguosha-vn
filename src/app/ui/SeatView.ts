@@ -110,7 +110,7 @@ export class SeatView extends Container {
       this.handBadge.position.set(140 - 20, 160 - 30);
       this.handBadge.visible = true;
 
-      this.handCount.text = `🂠 \${player.hand.length}`;
+      this.handCount.text = `🂠 ${player.hand.length}`;
       this.handCount.position.set(this.handBadge.x + 18, this.handBadge.y + 12);
       this.handCount.visible = true;
     } else {

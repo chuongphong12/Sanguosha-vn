@@ -1,4 +1,4 @@
-import type { CardName, Faction } from "../../game/model";
+import type { CardName, Faction, Role } from "../../game/model";
 
 export const CARD_ART_ALIAS: Partial<Record<CardName, string>> = {
   slash: "cards/card/slash.jpg",
@@ -126,3 +126,25 @@ export const FACTION_ICON_ALIAS: Record<Faction, string> = {
   wu: "ui/kingdom/icon/wu.png",
   qun: "ui/kingdom/icon/qun.png",
 };
+
+export const ROLE_CARD_ALIAS: Record<Role, string> = {
+  lord: "cards/roles/lord.jpg",
+  loyalist: "cards/roles/loyalist.jpg",
+  rebel: "cards/roles/rebel.jpg",
+  renegade: "cards/roles/renegade.jpg",
+};
+
+export const ROLE_CARD_BACK_ALIAS = "cards/roles/back.jpg";
+
+export type MagatamaTone = "empty" | "healthy" | "wounded" | "critical";
+
+export const MAGATAMA_ALIAS: Record<MagatamaTone, string> = {
+  empty: "ui/system/magatamas/0.png",
+  healthy: "ui/system/magatamas/1.png",
+  wounded: "ui/system/magatamas/2.png",
+  critical: "ui/system/magatamas/3.png",
+};
+
+export const TABLE_BACKGROUND_ALIAS = "table.jpg";
+
+export const UI_BUTTON_ALIAS = "ui/button.png";

@@ -132,7 +132,7 @@ export class CardView extends Container {
       .roundRect(3, 3, Math.min(this.w - 6, 36), Math.min(20, this.h * 0.2), 4)
       .fill({ color: selected ? 0x8f1d20 : 0xf3e5c8, alpha: 0.92 });
 
-    this.metadataText.text = `\${SUIT_SYMBOLS[card.suit]} \${card.rank}`;
+    this.metadataText.text = `${SUIT_SYMBOLS[card.suit]} ${card.rank}`;
     this.metadataText.style.fontSize = Math.max(7, Math.min(11, this.h / 9));
     this.metadataText.style.fill = selected ? 0xffffff : suitColor;
 
@@ -148,7 +148,7 @@ export class CardView extends Container {
       .roundRect(3, this.h - nameBarHeight - 3, this.w - 6, nameBarHeight, 4)
       .fill({ color: selected ? 0x8f1d20 : 0xf3e5c8, alpha: 0.92 });
 
-    this.nameText.text = `【\${definition.name}】`;
+    this.nameText.text = `【${definition.name}】`;
     this.nameText.style.fontSize = Math.max(7, Math.min(10, this.h / 10));
     this.nameText.style.fill = selected ? 0xffffff : 0x201812;
 
@@ -181,7 +181,7 @@ export class CardView extends Container {
     if (alias) {
       try {
         return Assets.get<Texture>(alias) ?? null;
-      } catch (e) {
+      } catch {
         /* ignore */
       }
     }

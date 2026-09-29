@@ -7,6 +7,7 @@ import type {
 import { SeatView } from "../../ui/SeatView";
 import { Dashboard } from "../../ui/Dashboard";
 import { THEME } from "../../ui/theme";
+import { TABLE_BACKGROUND_ALIAS } from "../../ui/assetAliases";
 import { AnimationManager } from "./AnimationManager";
 
 export class BattleScene extends Container {
@@ -45,11 +46,17 @@ export class BattleScene extends Container {
     this.syncBackground(options.viewportWidth, options.viewportHeight);
 
     if (!this.animationManager) {
-      this.animationManager = new AnimationManager(this, this.seatViews, () => viewerID);
+      this.animationManager = new AnimationManager(
+        this,
+        this.seatViews,
+        () => viewerID,
+      );
     }
 
     if (G.stream) {
-      const newEvents = G.stream.events.filter(e => e.sequence > this.lastSequence);
+      const newEvents = G.stream.events.filter(
+        (e) => e.sequence > this.lastSequence,
+      );
       if (newEvents.length > 0) {
         this.lastSequence = newEvents[newEvents.length - 1].sequence;
         this.animationManager.enqueue(newEvents);
@@ -100,6 +107,8 @@ export class BattleScene extends Container {
       }
 
       // Position (this should be replaced by a proper SeatLayout function later)
+      // The viewer's own general is shown by the Dashboard avatar instead.
+      seat.visible = pid !== viewerID;
       if (pid === viewerID) {
         seat.position.set(viewportWidth / 2, viewportHeight - 240 - 100);
       } else {
@@ -139,7 +148,7 @@ export class BattleScene extends Container {
   private syncBackground(width: number, height: number): void {
     let bgTex: Texture | undefined;
     try {
-      bgTex = Assets.get<Texture>("main/ui/system/background/table.jpg");
+      bgTex = Assets.get<Texture>(TABLE_BACKGROUND_ALIAS);
     } catch (e) {
       /* ignore */
     }

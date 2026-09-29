@@ -341,6 +341,14 @@ export class MainScreen extends Container {
   public resize(width: number, height: number): void {
     const scale = Math.min(1, Math.max(0.01, height / MIN_LAYOUT_HEIGHT));
     this.content.scale.set(scale);
+    // Child scenes are laid out in the same logical viewport as `content`.
+    for (const scene of [
+      this.waitingRoomScene,
+      this.formationScene,
+      this.resultScene,
+      this.battleScene,
+    ])
+      scene.scale.set(scale);
     this.viewportWidth = width / scale;
     this.viewportHeight = height / scale;
     this.render();
@@ -348,6 +356,7 @@ export class MainScreen extends Container {
 
   private render(): void {
     this.clearContent();
+    this.connectingText.visible = !this.state;
 
     if (this.state && this.match) {
       const G = this.state.G;
