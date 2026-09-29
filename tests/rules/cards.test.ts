@@ -241,19 +241,43 @@ describe("Standard + EX card engine", () => {
     );
   });
 
-  // TODO: aoe-simultaneous uses a single nullification window for all targets, breaking this test's expectation
-  it.skip("resolves one Nullification window per global-trick target", () => {
+  it("lets each global-trick target Nullify it only for themselves", () => {
     const G = createStartedGame();
     resetHands(G);
     const sourceID = G.turn.activePlayerID;
+    const [nullifierID, ...otherIDs] = G.seatOrder.slice(1);
     const cardID = giveCard(G, sourceID, "arrow-barrage");
+    const nullificationID = giveCard(G, nullifierID, "nullification");
+    const hpBefore = G.seatOrder.map((playerID) => G.players[playerID].hp);
     declareCardUse(G, sourceID, { cardID, targetIDs: [] }, identityShuffle);
 
-    const firstAffectedID = G.seatOrder[1];
     expect(G.effectStack[0]).toMatchObject({
-      kind: "nullification",
-      targetID: firstAffectedID,
+      kind: "aoe-simultaneous",
+      targetIDs: [nullifierID, ...otherIDs],
     });
+    answerCardPrompt(
+      G,
+      nullifierID,
+      G.prompt!.id,
+      { kind: "card", cardID: nullificationID },
+      identityShuffle,
+    );
+    for (const playerID of otherIDs) {
+      answerCardPrompt(
+        G,
+        playerID,
+        G.prompt!.id,
+        { kind: "pass" },
+        identityShuffle,
+      );
+    }
+
+    expect(G.discard).toContain(nullificationID);
+    expect(G.seatOrder.map((playerID) => G.players[playerID].hp)).toEqual(
+      G.seatOrder.map((playerID, index) =>
+        otherIDs.includes(playerID) ? hpBefore[index] - 1 : hpBefore[index],
+      ),
+    );
   });
 
   it("reveals and distributes Harvest cards", () => {

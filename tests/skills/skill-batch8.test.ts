@@ -7,7 +7,6 @@ import {
 } from "../../src/game/cardEngine";
 import type { PlayerID, TqsGameState } from "../../src/game/model";
 import {
-  answerNullificationChain,
   createStartedGame,
   giveCard,
   identityShuffle,
@@ -125,18 +124,16 @@ describe("ally summons and Guan Xing", () => {
     expect(G.players[lordID].hp).toBe(hp);
   });
 
-  // TODO: aoe-simultaneous uses a shared prompt for all targets and hardcodes responderID to activePlayerID.
-  // It cannot provide per-target summonFaction for the Lord to use Ji Jiang/Hu Jia.
-  // This test is skipped until the engine supports per-target prompt configurations for AOE.
-  it.skip("Ji Jiang lets a Shu ally answer Barbarian Invasion", () => {
+  it("Ji Jiang lets a Shu ally answer Barbarian Invasion", () => {
     const G = createStartedGame();
     resetHands(G);
     const sourceID = G.turn.activePlayerID;
     const lordID = G.seatOrder[1];
     const allyID = G.seatOrder[2];
+    const otherID = G.seatOrder[3];
     assignSkills(G, lordID, "shu", ["ji-jiang"]);
     assignSkills(G, allyID, "shu", []);
-    assignSkills(G, G.seatOrder[3], "wu", []);
+    assignSkills(G, otherID, "wu", []);
     const trickID = giveCard(G, sourceID, "barbarian-invasion");
     const allySlash = giveCard(G, allyID, "slash");
     const hp = G.players[lordID].hp;
@@ -147,12 +144,19 @@ describe("ally summons and Guan Xing", () => {
       { cardID: trickID, targetIDs: [] },
       identityShuffle,
     );
-    answerNullificationChain(G, {});
     expect(G.prompt).toMatchObject({
-      response: "slash",
-      responderID: lordID,
-      summonFaction: "shu",
+      response: "aoe-response",
+      reason: "barbarian-invasion",
     });
+    expect(
+      answerCardPrompt(
+        G,
+        allyID,
+        G.prompt!.id,
+        { kind: "summon" },
+        identityShuffle,
+      ),
+    ).toBe(false);
     answerCardPrompt(
       G,
       lordID,
@@ -160,6 +164,11 @@ describe("ally summons and Guan Xing", () => {
       { kind: "summon" },
       identityShuffle,
     );
+    expect(G.prompt).toMatchObject({
+      reason: "ally-summon",
+      responderID: allyID,
+      response: "slash",
+    });
     answerCardPrompt(
       G,
       allyID,
@@ -169,6 +178,19 @@ describe("ally summons and Guan Xing", () => {
     );
     expect(G.players[lordID].hp).toBe(hp);
     expect(G.discard).toContain(allySlash);
+    expect(G.prompt).toMatchObject({
+      response: "aoe-response",
+      passedPlayerIDs: [lordID],
+    });
+    expect(
+      answerCardPrompt(
+        G,
+        lordID,
+        G.prompt!.id,
+        { kind: "summon" },
+        identityShuffle,
+      ),
+    ).toBe(false);
   });
 
   it("Guan Xing arranges revealed cards between top and bottom", () => {
