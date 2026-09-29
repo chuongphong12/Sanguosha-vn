@@ -3816,37 +3816,15 @@ export function resolveBaguaJudgement(
   }
 
   G.effectStack.shift();
+  // On a failed judgement the Slash / required response resolves again and
+  // re-asks for a real Dodge, now without the Bagua option (baguaTried).
   const slashEffect = G.effectStack[0];
   if (slashEffect?.kind === "slash") {
     slashEffect.baguaTried = true;
-    if (success) {
-      slashEffect.dodgesUsed += 1;
-    } else {
-      G.prompt = {
-        id: resolutionID(G),
-        effectID: slashEffect.id,
-        kind: "play-card",
-        responderID: effect.ownerID,
-        reason: "slash",
-        ownerID: effect.ownerID,
-        allowBagua: false,
-      };
-    }
+    if (success) slashEffect.dodgesUsed += 1;
   } else if (slashEffect?.kind === "required-response") {
     slashEffect.baguaTried = true;
-    if (success) {
-      G.effectStack.shift(); // remove required-response
-    } else {
-      G.prompt = {
-        id: resolutionID(G),
-        effectID: slashEffect.id,
-        kind: "play-card",
-        responderID: effect.ownerID,
-        reason: slashEffect.reason,
-        ownerID: effect.ownerID,
-        allowBagua: false,
-      };
-    }
+    if (success) G.effectStack.shift(); // remove required-response
   } else if (slashEffect?.kind === "aoe-simultaneous") {
     slashEffect.baguaTriedPlayerIDs.push(effect.ownerID);
     if (success) {
