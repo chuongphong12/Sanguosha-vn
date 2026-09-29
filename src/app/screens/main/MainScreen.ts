@@ -1547,6 +1547,9 @@ export class MainScreen extends Container {
       "eight-diagrams",
     );
     const canBagua = prompt.allowBagua && hasBagua;
+    const summonSkillID =
+      prompt.reason === "arrow-barrage" ? "hu-jia" : "ji-jiang";
+    const canSummon = responder.activeSkillIDs.includes(summonSkillID);
 
     const cy = this.viewportHeight / 2 + 70;
 
@@ -1554,6 +1557,7 @@ export class MainScreen extends Container {
     let buttonsCount = 1; // "Bỏ qua" is always there
     if (wuxieCardID) buttonsCount++;
     if (respCardID || canBagua) buttonsCount++;
+    if (canSummon) buttonsCount++;
 
     const startX = this.viewportWidth / 2 - ((buttonsCount - 1) * 220) / 2;
     let currentX = startX;
@@ -1589,6 +1593,19 @@ export class MainScreen extends Container {
         },
         THEME.colors.red,
         THEME.colors.white,
+      );
+      currentX += 220;
+    }
+
+    if (canSummon) {
+      this.addButton(
+        summonSkillID === "hu-jia" ? "【Hộ Giá】" : "【Kích Tướng】",
+        currentX,
+        cy,
+        200,
+        48,
+        () => this.answerPrompt(prompt.id, { kind: "summon" }),
+        THEME.colors.green,
       );
       currentX += 220;
     }
