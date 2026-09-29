@@ -14,7 +14,7 @@ boardgame.io 0.50.2 + PixiJS v8 and how this repo wires them.
 
 > **Read this first.** §2–§5 below were written on 2026-09-03 and are kept as history. Since then
 > the `ui-upgrade` branch ran milestones M0–M5 of
-> `docs/plans/2026-09-20-gitnexus-plan-ui-upgrade-handoff.md` (the canonical plan now). This table
+> `docs/plans/2026-09-20-gitnexus-plan-ui-upgrade-handoff.md` (the canonical plan; removed from the tree in PR #2, read it with `git show 3593ad1^:docs/plans/2026-09-20-gitnexus-plan-ui-upgrade-handoff.md`). This table
 > and §0 are the current truth.
 
 | | |
