@@ -1,3 +1,5 @@
+import { fileURLToPath } from "node:url";
+
 import { defineConfig } from "vite";
 
 import { assetpackPlugin } from "./scripts/assetpack-vite-plugin.ts";
@@ -11,10 +13,11 @@ export default defineConfig(({ mode }) => ({
         ? {
             // Stub out the 249KB boardgame.io Debug UI (Svelte) in production.
             // It's statically imported by boardgame.io/client but unused when debug: false.
-            "./Debug-8242c26e.js": new URL(
-              "src/stubs/bgio-debug-stub.ts",
-              import.meta.url,
-            ).pathname,
+            // fileURLToPath, not URL.pathname: the latter keeps %20 and a leading
+            // slash, which breaks on Windows paths that contain spaces.
+            "./Debug-8242c26e.js": fileURLToPath(
+              new URL("src/stubs/bgio-debug-stub.ts", import.meta.url),
+            ),
           }
         : {},
   },
