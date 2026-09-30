@@ -141,7 +141,6 @@ export class LobbyUI {
           <div style="margin-top: 15px; text-align: left; background: rgba(0,0,0,0.3); padding: 15px; border-radius: 6px; border: 1px solid #5a3a20;">
             <label style="display:block; margin-bottom: 8px; color: #d4af37; font-weight: bold;">Số lượng người chơi:</label>
             <select id="select-offline-players" class="input-ancient" style="width: 100%; padding: 10px; font-size: 16px; margin: 0; background-color: #110502; cursor: pointer;">
-              <option value="2">2 Người (Solo Đối Kháng)</option>
               <option value="4">4 Người (Cơ Bản)</option>
               <option value="5">5 Người (Chuẩn)</option>
               <option value="8" selected>8 Người (Tiêu Chuẩn)</option>

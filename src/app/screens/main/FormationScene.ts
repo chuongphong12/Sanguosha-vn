@@ -1,15 +1,21 @@
 import { Container, Text } from "pixi.js";
+import { GAME_FONT_FAMILY } from "../../ui/typography";
 import type { TqsPlayerViewState } from "../../../game/types";
 import { getPlayerName } from "../../utils/playerNames";
 
 export class FormationScene extends Container {
   private title = new Text({
     text: "Chọn tướng",
-    style: { fontSize: 36, fill: "#E2C373" },
+    style: { fontFamily: GAME_FONT_FAMILY, fontSize: 36, fill: "#E2C373" },
   });
   private details = new Text({
     text: "",
-    style: { fontSize: 24, fill: "#FFFFFF", align: "center" },
+    style: {
+      fontFamily: GAME_FONT_FAMILY,
+      fontSize: 24,
+      fill: "#FFFFFF",
+      align: "center",
+    },
   });
 
   constructor() {

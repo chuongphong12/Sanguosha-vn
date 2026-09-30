@@ -16,6 +16,11 @@ import "@pixi/sound";
 const engine = new CreationEngine();
 setEngine(engine);
 
+// e2e tests read the Pixi scene graph to find and click buttons by label.
+if (import.meta.env.DEV) {
+  (window as unknown as { __TQS_APP__: unknown }).__TQS_APP__ = engine;
+}
+
 (async () => {
   // Pixi rasterizes text to canvas, so wait for Vietnamese glyphs first.
   await loadGameFonts();
@@ -114,6 +119,9 @@ setEngine(engine);
         `/?matchID=${inviteMatchID}`,
       );
     }
+    launchMainScreen();
+  } else if (urlParams.get("mode") === "local") {
+    // A local match link (also what the lobby pushes) resumes without the lobby.
     launchMainScreen();
   } else {
     showLobby();

@@ -1,14 +1,11 @@
-import {
-  Assets,
-  Container,
-  Graphics,
-  Text,
-  Texture,
-  TilingSprite,
-  Sprite,
-} from "pixi.js";
+import { Assets, Container, Graphics, Text, Texture, Sprite } from "pixi.js";
 
 import { WaitingRoomScene } from "./WaitingRoomScene";
+import { parseLocalPlayerCount } from "./localConfig";
+import { getRoomMembers } from "./waitingRoomModel";
+import { requiredActorID } from "./requiredActor";
+import { generalPickerLayout, screenScale } from "./formationLayout";
+import { DASHBOARD_TOP_INSET } from "./BattleScene";
 import { FormationScene } from "./FormationScene";
 import { ResultScene } from "./ResultScene";
 import { BattleScene } from "./BattleScene";
@@ -26,11 +23,7 @@ import {
 } from "../../../game/cardEngine";
 import { CARD_DEFINITIONS } from "../../../game/catalog/cards";
 import type { CardName } from "../../../game/types/core";
-import {
-  GENERALS_BY_ID,
-  hasLordSkill,
-  SKILLS,
-} from "../../../game/catalog/generals";
+import { GENERALS_BY_ID } from "../../../game/catalog/generals";
 import { ROLE_NAMES } from "../../../game/catalog/roles";
 import type {
   CardDefinition,
@@ -42,8 +35,6 @@ import type {
   ZoneCardChoice,
 } from "../../../game/model";
 import { CardView } from "../../ui/CardView";
-import { Dashboard } from "../../ui/Dashboard";
-import { SeatView } from "../../ui/SeatView";
 import { getEquipmentSlotViews } from "../../ui/equipmentView";
 import { layoutActionRow } from "../../ui/layout";
 import { FlexContainer } from "../../ui/FlexContainer";
@@ -69,17 +60,26 @@ const SUIT_LABELS = {
   spade: "♠",
 };
 
-const MIN_LAYOUT_HEIGHT = 860;
+const DRAWER_TOGGLE_BOTTOM = DASHBOARD_TOP_INSET + 24;
 
 export class MainScreen extends Container {
   public static assetBundles = ["main"];
 
+  private readonly world = new Container();
   private readonly content = new Container();
   private readonly waitingRoomScene = new WaitingRoomScene();
   private readonly formationScene = new FormationScene();
   private readonly resultScene = new ResultScene();
   private readonly battleScene = new BattleScene();
-  private readonly connectingText = new Text({ text: "Đang kết nối...", style: { fontSize: 24, fill: "#FFFFFF", align: "center" } });
+  private readonly connectingText = new Text({
+    text: "Đang kết nối...",
+    style: {
+      fontFamily: GAME_FONT_FAMILY,
+      fontSize: 24,
+      fill: "#FFFFFF",
+      align: "center",
+    },
+  });
   private match?: MatchClient;
   private unsubscribe?: () => void;
   private state: MatchClientState = null;
@@ -115,6 +115,7 @@ export class MainScreen extends Container {
   private autoSkipWuxie = true;
   private rolePopupDismissedFor: string | null = null;
   private isShowingRolePopup = false;
+  private rolePopupTimer: ReturnType<typeof setTimeout> | null = null;
 
   private drawRolePopup(role: string) {
     const popup = new Container();
@@ -185,24 +186,20 @@ export class MainScreen extends Container {
     this.content.addChild(popup);
   }
 
-  private lordExtraHp = 1;
-  private turnTimeLimit: number | null = null;
-  private targetNumPlayers: number = 8;
-  private autoStartWhenFull: boolean = false;
-  private startingMatch: boolean = false;
-
   private lobbyPollInterval?: number;
 
   constructor() {
     super();
-    this.addChild(
-        this.waitingRoomScene,
-        this.formationScene,
-        this.resultScene,
-        this.battleScene,
-        this.connectingText,
+    // One scaled layer so scenes and overlays share the same logical space.
+    this.world.addChild(
+      this.waitingRoomScene,
+      this.formationScene,
+      this.resultScene,
+      this.battleScene,
+      this.connectingText,
+      this.content,
     );
-    this.addChild(this.content);
+    this.addChild(this.world);
   }
 
   public prepare(): void {
@@ -222,16 +219,16 @@ export class MainScreen extends Container {
         state.serverUrl || urlParams.get("serverUrl") || undefined;
     } else {
       config.mode = "local";
-      const numPlayersParam = parseInt(
-        state.numPlayers || urlParams.get("numPlayers") || "4",
-        10,
+      config.numPlayers = parseLocalPlayerCount(
+        state.numPlayers || urlParams.get("numPlayers"),
       );
-      config.numPlayers = isNaN(numPlayersParam) ? 4 : numPlayersParam;
 
       const botsParam = state.botsEnabled || urlParams.get("bots") === "1";
       config.botsEnabled = botsParam;
       config.autoSkipWuxie = state.autoSkipWuxie !== false;
-      config.fastPick = state.fastPick === true;
+      config.fastPick =
+        state.fastPick === true || urlParams.get("fastpick") === "1";
+      config.seed = state.seed || urlParams.get("seed") || undefined;
     }
 
     this.match = new MatchClient(config);
@@ -287,6 +284,16 @@ export class MainScreen extends Container {
     this.pendingSkill = null;
     this.handoffConfirmedFor = null;
     this.lastRequiredActorID = null;
+    if (this.rolePopupTimer) {
+      clearTimeout(this.rolePopupTimer);
+      this.rolePopupTimer = null;
+    }
+    this.rolePopupDismissedFor = null;
+    this.isShowingRolePopup = false;
+    // BigPool reuses this screen, so per-match scene state must not leak.
+    this.waitingRoomScene.reset();
+    this.battleScene.reset();
+    this.connectingText.visible = true;
     this.clearContent();
   }
 
@@ -339,8 +346,8 @@ export class MainScreen extends Container {
   }
 
   public resize(width: number, height: number): void {
-    const scale = Math.min(1, Math.max(0.01, height / MIN_LAYOUT_HEIGHT));
-    this.content.scale.set(scale);
+    const scale = screenScale(height);
+    this.world.scale.set(scale);
     this.viewportWidth = width / scale;
     this.viewportHeight = height / scale;
     this.render();
@@ -349,59 +356,437 @@ export class MainScreen extends Container {
   private render(): void {
     this.clearContent();
 
-    if (this.state && this.match) {
-      const G = this.state.G;
-      this.waitingRoomScene.visible = G.status === "waiting-room";
-      this.formationScene.visible =
-        G.status === "lord-selection" || G.status === "general-selection";
-      this.battleScene.visible = G.status === "playing";
-      this.resultScene.visible = G.status === "ended";
-
-      if (this.waitingRoomScene.visible)
-        this.waitingRoomScene.sync(
-          G,
-          this.match,
-          this.viewportWidth,
-          this.viewportHeight,
-        );
-      if (this.formationScene.visible)
-        this.formationScene.sync(G, this.viewportWidth, this.viewportHeight);
-      if (this.resultScene.visible)
-        this.resultScene.sync(G, this.viewportWidth, this.viewportHeight);
-
-      if (this.battleScene.visible) {
-        this.battleScene.sync(G, this.state.ctx, this.match.currentViewerID, {
-          viewportWidth: this.effectiveWidth,
-          viewportHeight: this.viewportHeight,
-          selectedCardIDs: this.selectedCardIDs,
-          selectedTargetIDs: this.selectedTargetIDs,
-          
-          
-          onSeatTap: (pid) => console.log('seat tap', pid),
-          onDashboardCardTap: (cid) => console.log('card tap', cid),
-           
-          
-        });
-      }
-
-      
-
-      if (G.status !== "waiting-room") {
-        
-      }
-      if (G.status === "playing") {
-        
-        
-        
-        
-        
-      }
-    } else {
+    if (!this.state || !this.match) {
       this.waitingRoomScene.visible = false;
       this.formationScene.visible = false;
       this.battleScene.visible = false;
       this.resultScene.visible = false;
+      this.connectingText.visible = true;
+      this.connectingText.anchor.set(0.5);
+      this.connectingText.position.set(
+        this.viewportWidth / 2,
+        this.viewportHeight / 2,
+      );
+      return;
     }
+    this.connectingText.visible = false;
+
+    const G = this.state.G;
+    const viewerID = this.match.currentViewerID;
+    this.waitingRoomScene.visible = G.status === "waiting-room";
+    this.formationScene.visible =
+      G.status === "lord-selection" || G.status === "general-selection";
+    this.battleScene.visible = G.status === "playing";
+    this.resultScene.visible = G.status === "ended";
+
+    if (this.waitingRoomScene.visible) {
+      this.waitingRoomScene.sync({
+        members: getRoomMembers(this.state.matchData),
+        viewerID,
+        viewportWidth: this.viewportWidth,
+        viewportHeight: this.viewportHeight,
+        onStart: (payload) => this.match?.move("startGame", payload),
+      });
+      return;
+    }
+
+    if (this.formationScene.visible)
+      this.formationScene.sync(G, this.viewportWidth, this.viewportHeight);
+    if (this.resultScene.visible)
+      this.resultScene.sync(G, this.viewportWidth, this.viewportHeight);
+
+    if (this.battleScene.visible) {
+      const targetableIDs = new Set<PlayerID>(
+        G.seatOrder.filter(
+          (id) => id !== viewerID && this.canSelectTarget(G, id),
+        ),
+      );
+      this.battleScene.sync(G, this.state.ctx, viewerID, {
+        viewportWidth: this.effectiveWidth,
+        viewportHeight: this.viewportHeight,
+        selectedCardIDs: this.selectedCardIDs,
+        selectedTargetIDs: this.selectedTargetIDs,
+        targetableIDs,
+        choosingTarget:
+          this.selectedCardIDs.size > 0 || this.pendingSkill !== null,
+        handScrollX: this.handScrollX,
+        onSeatTap: (playerID) => this.tapSeat(playerID),
+        onDashboardCardTap: (cardID) => this.tapCard(cardID),
+        onScroll: (scrollX) => {
+          this.handScrollX = scrollX;
+          this.render();
+        },
+      });
+    }
+
+    this.drawOverlays(G, viewerID);
+  }
+
+  /** Everything drawn above the scenes: HUD, log, hand-off, prompts, popups. */
+  private drawOverlays(G: TqsPlayerViewState, viewerID: PlayerID): void {
+    if (this.rolePopupDismissedFor !== viewerID) {
+      this.rolePopupDismissedFor = viewerID;
+      this.isShowingRolePopup = true;
+      this.rolePopupTimer = setTimeout(() => {
+        this.rolePopupTimer = null;
+        this.isShowingRolePopup = false;
+        this.render();
+      }, 3500);
+    }
+
+    this.drawViewerSelector(G);
+    if (G.status === "playing") this.drawStatus(G);
+    this.drawLog(G);
+    this.drawPrivateArea(G, viewerID);
+
+    const viewer = G.players[viewerID];
+    const canSelectGeneral =
+      !this.isShowingRolePopup &&
+      viewer.generalID === null &&
+      viewer.generalCandidates.length > 0 &&
+      ((G.status === "lord-selection" && viewerID === G.lordID) ||
+        (G.status === "general-selection" && viewerID !== G.lordID)) &&
+      !this.isHandoffPending(G, viewerID);
+    if (canSelectGeneral)
+      this.drawGeneralCandidates(G, viewer.generalCandidates);
+
+    if (this.isShowingRolePopup) this.drawRolePopup(viewer.role || "");
+  }
+
+  private isHandoffPending(G: TqsPlayerViewState, viewerID: PlayerID): boolean {
+    const requiredActorID = this.requiredActorID(G);
+    return Boolean(
+      this.match?.isHotseat &&
+      requiredActorID &&
+      (viewerID !== requiredActorID ||
+        this.handoffConfirmedFor !== requiredActorID),
+    );
+  }
+
+  private tapCard(cardID: string): void {
+    if (!this.state || !this.match) return;
+    const G = this.state.G;
+    const player = G.players[this.match.currentViewerID];
+    if (G.turn.step === "discard") {
+      if (this.selectedCardIDs.has(cardID)) this.selectedCardIDs.delete(cardID);
+      else this.selectedCardIDs.add(cardID);
+    } else {
+      const viewerWeaponID = player.equipment.weapon;
+      const promptAllowsSpear =
+        G.prompt?.kind === "card-response" &&
+        G.prompt.response === "slash" &&
+        G.prompt.allowSerpentSpear;
+      const playAllowsSpear =
+        !G.prompt &&
+        this.serpentSpearMode &&
+        viewerWeaponID !== undefined &&
+        G.cards[viewerWeaponID]?.definitionID === "serpent-spear";
+      const multiSelect = promptAllowsSpear || playAllowsSpear;
+
+      if (this.selectedCardIDs.has(cardID)) {
+        this.selectedCardIDs.delete(cardID);
+      } else {
+        if (!multiSelect) this.selectedCardIDs.clear();
+        else if (this.selectedCardIDs.size >= 2) return;
+        this.selectedCardIDs.add(cardID);
+      }
+      if (this.virtualAs === "slash" && this.selectedCardIDs.size === 0) {
+        this.virtualAs = null;
+      }
+    }
+    this.render();
+  }
+
+  private tapSeat(playerID: PlayerID): void {
+    if (!this.state || !this.match) return;
+    const G = this.state.G;
+    const targetOrder = this.selectedTargetIDs.indexOf(playerID);
+    if (targetOrder >= 0) {
+      const selectedCardID = [...this.selectedCardIDs][0];
+      const selectedCardName = selectedCardID
+        ? G.cards[selectedCardID]?.definitionID
+        : undefined;
+      if (selectedCardName === "borrowed-sword")
+        this.selectedTargetIDs.splice(targetOrder);
+      else this.selectedTargetIDs.splice(targetOrder, 1);
+    } else if (this.canSelectTarget(G, playerID)) {
+      if (this.selectedTargetIDs.length < this.maximumTargets(G))
+        this.selectedTargetIDs.push(playerID);
+    } else {
+      return;
+    }
+    this.render();
+  }
+
+  private playerLabel(id: PlayerID): string {
+    if (this.match?.isRemote && this.state?.matchData) {
+      const seat = (
+        this.state.matchData as Array<{ id: number; name?: string }>
+      ).find((m) => String(m.id) === id);
+      if (seat?.name) return seat.name;
+    }
+    return `P${Number(id) + 1}`;
+  }
+
+  private drawViewerSelector(G: TqsPlayerViewState): void {
+    // Bots mode has a single human viewer; there is nobody to switch to.
+    if (!this.match || this.match.isRemote || this.match.playerIDs.length < 2)
+      return;
+    const buttonWidth = 50;
+    const buttonGap = 8;
+    const selectorWidth =
+      G.seatOrder.length * buttonWidth + (G.seatOrder.length - 1) * buttonGap;
+    const selectorLeft = this.effectiveWidth - 16 - selectorWidth;
+
+    this.addText(
+      "Góc nhìn",
+      selectorLeft - 16,
+      48,
+      14,
+      THEME.colors.paperDark,
+      1,
+      "right",
+    );
+    G.seatOrder.forEach((playerID, index) => {
+      const active = this.match!.currentViewerID === playerID;
+      const selectorLocked = G.status === "playing" || G.status === "ended";
+      this.addButton(
+        `P${index + 1}`,
+        selectorLeft + buttonWidth / 2 + index * (buttonWidth + buttonGap),
+        48,
+        buttonWidth,
+        34,
+        () => {
+          this.selectedCardIDs.clear();
+          this.selectedTargetIDs = [];
+          this.selectedZoneChoices = [];
+          this.handScrollX = 0;
+          this.serpentSpearMode = false;
+          this.handoffConfirmedFor = null;
+          this.match!.switchViewer(playerID, (state) =>
+            this.receiveState(state),
+          );
+        },
+        active ? THEME.colors.redBright : THEME.colors.ink,
+        THEME.colors.paper,
+        selectorLocked,
+      );
+    });
+  }
+
+  private drawStatus(G: TqsPlayerViewState): void {
+    const centerX = this.effectiveWidth / 2;
+    const panelY = 16;
+
+    let status: string;
+    if (G.prompt) {
+      status = this.promptStatus(G, this.playerLabel(G.prompt.responderID));
+    } else {
+      status = `Lượt ${G.turn.number} · Giai Đoạn ${STEP_NAMES[G.turn.step]} · ${this.generalName(G, G.turn.activePlayerID)}`;
+    }
+    const detail = `Chồng Bài Rút: ${G.deckSize} · Chồng Bài Bỏ: ${G.discard.length}`;
+
+    const statusText = new Text({
+      text: status,
+      style: {
+        fontFamily: GAME_FONT_FAMILY,
+        fontSize: 16,
+        fill: THEME.colors.paper,
+        align: "center",
+      },
+    });
+    const detailText = new Text({
+      text: detail,
+      style: {
+        fontFamily: GAME_FONT_FAMILY,
+        fontSize: 12,
+        fill: THEME.colors.paperDark,
+        align: "center",
+      },
+    });
+
+    const panelWidth = Math.max(statusText.width, detailText.width) + 80;
+    this.addPanel(
+      centerX - panelWidth / 2,
+      panelY,
+      panelWidth,
+      56,
+      THEME.colors.ink,
+      THEME.colors.gold,
+      0.85,
+    );
+    statusText.anchor.set(0.5, 0);
+    statusText.position.set(centerX, panelY + 8);
+    detailText.anchor.set(0.5, 0);
+    detailText.position.set(centerX, panelY + 32);
+    this.content.addChild(statusText, detailText);
+  }
+
+  private drawLog(G: TqsPlayerViewState): void {
+    const width = 280;
+    this.addButton(
+      this.isLogOpen ? "Ẩn nhật ký" : "Nhật ký",
+      this.effectiveWidth - 16 - 60,
+      this.viewportHeight - DRAWER_TOGGLE_BOTTOM,
+      120,
+      30,
+      () => {
+        this.isLogOpen = !this.isLogOpen;
+        this.render();
+      },
+      THEME.colors.ink,
+      THEME.colors.paper,
+      false,
+      { fontSize: 12 },
+    );
+    if (!this.isLogOpen) return;
+
+    const x = this.viewportWidth - width;
+    this.addPanel(
+      x,
+      0,
+      width,
+      this.viewportHeight,
+      0x181411,
+      THEME.colors.gold,
+      0.85,
+    );
+    this.addText(
+      "DIỄN BIẾN",
+      x + width / 2,
+      24,
+      18,
+      THEME.colors.gold,
+      0.5,
+      "center",
+      2,
+    );
+
+    const entries = G.log.slice(-20);
+    if (entries.length === 0) {
+      this.addText(
+        "Chưa có diễn biến nào.",
+        x + 20,
+        60,
+        14,
+        THEME.colors.muted,
+        0,
+        "left",
+      );
+      return;
+    }
+    const texts = entries.map((entry) =>
+      this.addText(
+        entry.message,
+        x + 20,
+        0,
+        14,
+        THEME.colors.paper,
+        0,
+        "left",
+        0,
+        width - 40,
+        true,
+      ),
+    );
+    const totalHeight = texts.reduce((sum, t) => sum + t.height + 8, 0);
+    let currentY = Math.max(60, this.viewportHeight - 40 - totalHeight);
+    for (const t of texts) {
+      t.y = currentY;
+      currentY += t.height + 8;
+    }
+  }
+
+  private drawPrivateArea(G: TqsPlayerViewState, viewerID: PlayerID): void {
+    const top = this.viewportHeight - DASHBOARD_TOP_INSET;
+    const requiredActorID = this.requiredActorID(G);
+
+    if (this.isHandoffPending(G, viewerID) && requiredActorID) {
+      this.drawHandoff(G, requiredActorID, top);
+      return;
+    }
+
+    const player = G.players[viewerID];
+    const canSelectGeneral =
+      player.generalID === null &&
+      player.generalCandidates.length > 0 &&
+      ((G.status === "lord-selection" && viewerID === G.lordID) ||
+        (G.status === "general-selection" && viewerID !== G.lordID));
+    if (canSelectGeneral) return;
+
+    if (G.status === "lord-selection" || G.status === "general-selection") {
+      const instruction = requiredActorID
+        ? this.match!.isHotseat
+          ? `Hãy chuyển sang góc nhìn của P${G.players[requiredActorID].seat + 1} để chọn Võ Tướng.`
+          : `Đang chờ ${this.playerLabel(requiredActorID)} chọn Võ Tướng...`
+        : "Đang chờ các người chơi hoàn tất việc chọn Võ Tướng.";
+      this.addText(
+        instruction,
+        this.viewportWidth / 2,
+        top + 48,
+        15,
+        THEME.colors.muted,
+        0.5,
+        "center",
+        0,
+        this.viewportWidth - 68,
+      );
+      return;
+    }
+
+    if (G.status === "playing") this.drawActions(G, viewerID);
+  }
+
+  private drawGeneralCandidates(
+    _G: TqsPlayerViewState,
+    candidates: string[],
+  ): void {
+    const centerY = this.viewportHeight / 2;
+    const centerX = this.viewportWidth / 2;
+
+    const bg = new Graphics()
+      .rect(0, 0, this.viewportWidth, this.viewportHeight)
+      .fill({ color: THEME.colors.black, alpha: 0.85 });
+    bg.eventMode = "static";
+    this.content.addChild(bg);
+
+    this.addText(
+      "LƯỢT CỦA BẠN — CHỌN TƯỚNG",
+      centerX,
+      centerY - 270,
+      20,
+      THEME.colors.muted,
+      0.5,
+      "center",
+    );
+    this.addText(
+      `Lượt của bạn — lật và chọn 1 trong ${candidates.length} tướng`,
+      centerX,
+      centerY - 240,
+      14,
+      THEME.colors.gold,
+      0.5,
+      "center",
+    );
+
+    const picker = generalPickerLayout(
+      this.viewportWidth,
+      this.viewportHeight,
+      candidates.length,
+    );
+    candidates.forEach((generalID, index) => {
+      const slot = picker.cards[index];
+      const cardContainer = new Container();
+      cardContainer.position.set(slot.left, slot.top);
+      cardContainer.addChild(
+        new GeneralCardView(generalID, {
+          width: slot.width,
+          height: slot.height,
+          onConfirm: () => this.match!.move("selectGeneral", generalID),
+        }),
+      );
+      this.content.addChild(cardContainer);
+    });
   }
 
   private drawHandoff(
@@ -2010,12 +2395,7 @@ ${SUIT_LABELS[card.suit]} ${card.rank}`,
   }
 
   private requiredActorID(G: TqsPlayerViewState): PlayerID | null {
-    if (G.prompt) return G.prompt.responderID;
-    if (G.status === "lord-selection") return G.lordID;
-    if (G.status === "general-selection")
-      return G.seatOrder.find((id) => !G.players[id].generalSelected) ?? null;
-    if (G.status === "playing") return G.turn.activePlayerID;
-    return null;
+    return requiredActorID(G);
   }
 
   private generalName(G: TqsPlayerViewState, playerID: PlayerID): string {
