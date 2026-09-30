@@ -86,6 +86,15 @@ export class Dashboard extends Container {
   });
 
   private handCardViews = new Map<string, CardView>();
+  private cardLayout = new Map<
+    string,
+    { baseX: number; baseY: number; selected: boolean }
+  >();
+  private cardAnimations = new WeakMap<CardView, { stop: () => void }>();
+  private lastSync?: {
+    G: TqsPlayerViewState;
+    options: Parameters<Dashboard["sync"]>[1];
+  };
 
   constructor(
     G: TqsPlayerViewState,
@@ -174,6 +183,7 @@ export class Dashboard extends Container {
       onScroll: (scrollX: number) => void;
     },
   ): void {
+    this.lastSync = { G, options };
     const player = G.players[this.viewerID];
     const vw = options.viewportWidth;
     const avatarW = 180;
@@ -190,7 +200,7 @@ export class Dashboard extends Container {
 
     if (player.role) {
       try {
-        this.faceTex = Assets.get<Texture>(`cards/roles/\${player.role}.jpg`);
+        this.faceTex = Assets.get<Texture>(`cards/roles/${player.role}.jpg`);
       } catch (e) {
         /* ignore */
       }
@@ -213,7 +223,8 @@ export class Dashboard extends Container {
         this.roleCardContainer.cursor = "pointer";
         this.roleCardContainer.on("pointerdown", () => {
           this.roleRevealed = !this.roleRevealed;
-          this.sync(G, options);
+          // Re-sync with the latest state, not the snapshot from first paint.
+          if (this.lastSync) this.sync(this.lastSync.G, this.lastSync.options);
         });
       }
     }
@@ -309,12 +320,12 @@ export class Dashboard extends Container {
     const delayedEntries = player.judgement
       .map((id) => {
         const c = G.cards[id];
-        return c ? `【\${CARD_DEFINITIONS[c.definitionID].name}】` : "";
+        return c ? `【${CARD_DEFINITIONS[c.definitionID].name}】` : "";
       })
       .filter(Boolean);
 
     if (delayedEntries.length > 0) {
-      this.delayText.text = `Phán xét: \${delayedEntries.join(" ")}`;
+      this.delayText.text = `Phán xét: ${delayedEntries.join(" ")}`;
       this.delayText.position.set(equipLeft + 180, 12);
       this.delayText.visible = true;
     } else {
@@ -325,7 +336,7 @@ export class Dashboard extends Container {
     const handLeft = equipLeft + 160;
     const handAreaWidth = vw - 60 - handLeft;
 
-    this.countBadge.text = `\${player.hand.length} lá`;
+    this.countBadge.text = `${player.hand.length} lá`;
     this.countBadge.anchor.set(1, 0);
     this.countBadge.position.set(roleLeft - 12, 12);
 
@@ -351,8 +362,10 @@ export class Dashboard extends Container {
     // Remove missing
     for (const [id, view] of this.handCardViews) {
       if (!newHandSet.has(id)) {
+        this.stopCardAnimation(view);
         view.destroy();
         this.handCardViews.delete(id);
+        this.cardLayout.delete(id);
       }
     }
 
@@ -366,6 +379,7 @@ export class Dashboard extends Container {
       const baseX = startX + index * spacing;
       const baseY = this.panelHeight - cardH - 10;
       const baseRotation = 0;
+      this.cardLayout.set(cardID, { baseX, baseY, selected });
 
       let cardView = this.handCardViews.get(cardID);
       if (!cardView) {
@@ -376,27 +390,32 @@ export class Dashboard extends Container {
           onTap: () => options.onCardTap(cardID),
         });
         this.handCardViews.set(cardID, cardView);
+        // Positions below are bottom-centre anchored; CardView's origin is its
+        // top-left corner, so without this the hand falls out of the panel.
+        cardView.pivot.set(cardW / 2, cardH);
         this.cardContainer.addChild(cardView);
         cardView.x = baseX + cardW / 2;
         cardView.y = baseY + cardH + 100;
         cardView.rotation = baseRotation;
         cardView.alpha = 0;
 
-        (cardView as any)._anim = animate(
-          cardView as any,
-          {
-            y: baseY + cardH - (selected ? 20 : 0),
-            alpha: 1,
-          },
+        const created = cardView;
+        this.runCardAnimation(
+          created,
+          { y: baseY + cardH - (selected ? 20 : 0), alpha: 1 },
           { duration: 0.3, ease: "backOut" },
         );
 
-        cardView.on("pointerenter", () => {
+        // Handlers read the latest layout; the hand reflows and selection
+        // changes long after this card was created.
+        created.on("pointerenter", () => {
+          const at = this.cardLayout.get(cardID);
+          if (!at) return;
           Dashboard.hoveredCardID = cardID;
-          (cardView as any)._anim = animate(
-            cardView as any,
+          this.runCardAnimation(
+            created,
             {
-              y: baseY + cardH - 60 - (selected ? 20 : 0),
+              y: at.baseY + cardH - 60 - (at.selected ? 20 : 0),
               rotation: 0,
               scale: 1.2,
             },
@@ -404,13 +423,15 @@ export class Dashboard extends Container {
           );
         });
 
-        cardView.on("pointerleave", () => {
+        created.on("pointerleave", () => {
+          const at = this.cardLayout.get(cardID);
+          if (!at) return;
           if (Dashboard.hoveredCardID === cardID)
             Dashboard.hoveredCardID = null;
-          (cardView as any)._anim = animate(
-            cardView as any,
+          this.runCardAnimation(
+            created,
             {
-              y: baseY + cardH - (selected ? 20 : 0),
+              y: at.baseY + cardH - (at.selected ? 20 : 0),
               rotation: baseRotation,
               scale: 1,
             },
@@ -418,9 +439,7 @@ export class Dashboard extends Container {
           );
         });
 
-        cardView.once("destroyed", () => {
-          if ((cardView as any)._anim) (cardView as any)._anim.stop();
-        });
+        created.once("destroyed", () => this.stopCardAnimation(created));
       } else {
         cardView.sync(card, {
           selected,
@@ -454,6 +473,25 @@ export class Dashboard extends Container {
     }
 
     this.setChildIndex(this.popover, this.children.length - 1);
+  }
+
+  /** Only one tween may drive a card at a time, and none may outlive it. */
+  private runCardAnimation(
+    view: CardView,
+    keyframes: Record<string, number>,
+    options: { duration: number; ease: "backOut" | "easeOut" },
+  ): void {
+    this.stopCardAnimation(view);
+    if (view.isDestroying) return;
+    this.cardAnimations.set(
+      view,
+      animate(view as never, keyframes as never, options as never),
+    );
+  }
+
+  private stopCardAnimation(view: CardView): void {
+    this.cardAnimations.get(view)?.stop();
+    this.cardAnimations.delete(view);
   }
 
   private showPopover(card: PhysicalCard, x: number, y: number) {

@@ -65,20 +65,13 @@ export class SeatView extends Container {
   ): void {
     const player = G.players[this.playerID];
 
+    // PlayerAvatar owns the pointertap listener; hand it the latest handler so
+    // it never fires a callback captured before the selection changed.
     this.avatar.sync(player, {
       isActiveActor: options.isActor,
       isSelected: options.selected,
+      onTap: options.onTap,
     });
-
-    if (options.onTap && this.avatar.eventMode !== "static") {
-      this.avatar.eventMode = "static";
-      this.avatar.cursor = "pointer";
-      this.avatar.on("pointertap", options.onTap);
-    } else if (!options.onTap) {
-      this.avatar.eventMode = "none";
-      this.avatar.cursor = "auto";
-      this.avatar.removeAllListeners("pointertap");
-    }
 
     if (options.isHighlighted) {
       this.glow
@@ -110,7 +103,7 @@ export class SeatView extends Container {
       this.handBadge.position.set(140 - 20, 160 - 30);
       this.handBadge.visible = true;
 
-      this.handCount.text = `🂠 \${player.hand.length}`;
+      this.handCount.text = `🂠 ${player.hand.length}`;
       this.handCount.position.set(this.handBadge.x + 18, this.handBadge.y + 12);
       this.handCount.visible = true;
     } else {

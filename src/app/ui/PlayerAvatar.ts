@@ -145,7 +145,7 @@ export class PlayerAvatar extends Container {
     this.drawHPBar(player.hp, player.maxHP, 4, this.h - 32, this.w - 8);
 
     // Name label
-    this.nameText.text = general?.name ?? `P\${player.seat + 1}`;
+    this.nameText.text = general?.name ?? `P${player.seat + 1}`;
     this.nameText.scale.set(1);
     if (this.nameText.width > this.w - 12) {
       this.nameText.scale.set((this.w - 12) / this.nameText.width);
@@ -231,7 +231,7 @@ export class PlayerAvatar extends Container {
     for (let i = 0; i < maxHP; i++) {
       const filled = i < hp;
       const textureAlias = filled
-        ? `main/ui/system/magatamas/\${colorSuffix}.png`
+        ? `main/ui/system/magatamas/${colorSuffix}.png`
         : `main/ui/system/magatamas/0.png`;
       let tex: Texture | undefined;
       try {
