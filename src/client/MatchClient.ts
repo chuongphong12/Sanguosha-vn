@@ -1,8 +1,8 @@
 import { Client } from "boardgame.io/client";
 import { Local, SocketIO } from "boardgame.io/multiplayer";
-import { RandomBot } from "boardgame.io/ai";
 
 import { TqsGame } from "../game/TqsGame";
+import { createTqsBot } from "./TqsBot";
 import type { PlayerID, TqsGameState, TqsPlayerViewState } from "../game/model";
 
 type LocalClient = ReturnType<typeof Client<TqsGameState>>;
@@ -25,6 +25,8 @@ export interface MatchConfig {
   serverUrl?: string; // Required for remote
   credentials?: string; // Required if joining via lobby
   botsEnabled?: boolean;
+  /** Fixes shuffles and deals so a local match can be reproduced (tests, bug reports). */
+  seed?: string;
   autoSkipWuxie?: boolean;
   fastPick?: boolean;
 }
@@ -67,15 +69,18 @@ export class MatchClient {
       // Local hotseat mode
       let localMultiplayer = Local();
       if (config.botsEnabled) {
-        const bots: Record<string, any> = {};
-        for (let index = 1; index < numPlayers; index += 1) {
-          bots[String(index)] = RandomBot;
-        }
+        const botIDs = Array.from({ length: numPlayers - 1 }, (_, i) =>
+          String(i + 1),
+        );
+        const TqsBot = createTqsBot(botIDs);
+        const bots: Record<string, typeof TqsBot> = {};
+        for (const id of botIDs) bots[id] = TqsBot;
         localMultiplayer = Local({ bots });
       }
 
       const customGame = {
         ...TqsGame,
+        ...(config.seed ? { seed: config.seed } : {}),
         setup: (setupCtx: any) =>
           TqsGame.setup!(setupCtx, {
             autoSkipWuxie: config.autoSkipWuxie,
