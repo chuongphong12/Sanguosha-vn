@@ -1904,7 +1904,7 @@ function resolveDamage(G: TqsGameState, effect: DamageEffect): void {
     });
     writeLog(
       G,
-      `\${playerName(G, effect.targetID)} chịu \${effect.amount} điểm Sát Thương.`,
+      `${playerName(G, effect.targetID)} chịu ${effect.amount} điểm Sát Thương.`,
     );
     effect.stage = "after-dying";
     if (G.players[effect.targetID].hp <= 0) {
@@ -4096,6 +4096,14 @@ function answerAoeSimultaneous(
   }
 
   effect.passedPlayerIDs.push(playerID);
+
+  if (answer.kind === "pass") {
+    // The damage effect now sits above the AOE effect. Close the window so the
+    // stack can resolve it; resolveAoeSimultaneous reopens it for whoever is
+    // left (or pops the AOE effect once nobody is).
+    G.prompt = null;
+    return true;
+  }
 
   const targetsLeft = effect.targetIDs.filter(
     (id) => !effect.passedPlayerIDs.includes(id) && G.players[id]?.alive,
