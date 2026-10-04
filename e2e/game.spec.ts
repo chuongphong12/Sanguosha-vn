@@ -200,7 +200,8 @@ test.describe("Full remote game flow", () => {
         timeout: 20000,
       })
       .not.toBe(lordID);
-    await waitForText(lordPage, /Lượt \d+ · Giai Đoạn/);
+    // The status line may show a skill prompt instead; the deck line is always there.
+    await waitForText(lordPage, /Chồng Bài Rút: \d+/);
     expect(errors).toEqual([]);
 
     for (const page of pages) await page.context().close();
