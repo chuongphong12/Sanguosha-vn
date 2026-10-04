@@ -18,7 +18,14 @@ function humanMove(client: MatchClient): void {
   const me = client.currentViewerID;
   const prompt = G.prompt;
   if (prompt) {
-    if (prompt.responderID !== me) return;
+    // Nullification and rescue are open to every seat that has not passed.
+    const open =
+      prompt.kind === "card-response" &&
+      (prompt.reason === "nullification" || prompt.reason === "rescue");
+    const mustAnswer = open
+      ? !prompt.passedPlayerIDs?.includes(me)
+      : prompt.responderID === me;
+    if (!mustAnswer) return;
     if (prompt.kind === "option")
       client.move("answerPrompt", prompt.id, {
         kind: "option",

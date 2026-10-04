@@ -471,6 +471,54 @@ describe("Standard + EX card engine", () => {
     expect(G.players[targetID].hp).toBe(hp);
   });
 
+  it("asks for a real Dodge after a black Bagua Formation judgement", () => {
+    const G = createStartedGame();
+    resetHands(G);
+    const sourceID = G.turn.activePlayerID;
+    const targetID = G.seatOrder[1];
+    const slashID = giveCard(G, sourceID, "slash");
+    const baguaID = giveCard(G, targetID, "bagua-formation");
+    G.players[targetID].hand = [];
+    G.players[targetID].equipment.armor = baguaID;
+    const dodgeID = giveCard(G, targetID, "dodge");
+    const blackJudgement = G.deck.find(
+      (cardID) => G.cards[cardID].suit === "spade",
+    )!;
+    stackDeck(G, [blackJudgement]);
+    const hp = G.players[targetID].hp;
+
+    declareCardUse(
+      G,
+      sourceID,
+      { cardID: slashID, targetIDs: [targetID] },
+      identityShuffle,
+    );
+    answerCardPrompt(
+      G,
+      targetID,
+      G.prompt!.id,
+      { kind: "bagua" },
+      identityShuffle,
+    );
+    expect(G.prompt).toMatchObject({
+      kind: "card-response",
+      response: "dodge",
+      responderID: targetID,
+      allowBagua: false,
+    });
+
+    expect(
+      answerCardPrompt(
+        G,
+        targetID,
+        G.prompt!.id,
+        { kind: "card", cardID: dodgeID },
+        identityShuffle,
+      ),
+    ).toBe(true);
+    expect(G.players[targetID].hp).toBe(hp);
+  });
+
   it("creates a virtual Slash from two hand cards with Serpent Spear", () => {
     const G = createStartedGame();
     resetHands(G);

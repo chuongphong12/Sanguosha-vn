@@ -2,7 +2,7 @@ import { Client } from "boardgame.io/client";
 import { Local, SocketIO } from "boardgame.io/multiplayer";
 
 import { TqsGame } from "../game/TqsGame";
-import { createTqsBot } from "./TqsBot";
+import { createHeuristicBot } from "../game/ai/HeuristicBot";
 import type { PlayerID, TqsGameState, TqsPlayerViewState } from "../game/model";
 
 type LocalClient = ReturnType<typeof Client<TqsGameState>>;
@@ -69,12 +69,13 @@ export class MatchClient {
       // Local hotseat mode
       let localMultiplayer = Local();
       if (config.botsEnabled) {
-        const botIDs = Array.from({ length: numPlayers - 1 }, (_, i) =>
-          String(i + 1),
+        const botIDs = Array.from({ length: numPlayers - 1 }, (_, index) =>
+          String(index + 1),
         );
-        const TqsBot = createTqsBot(botIDs);
-        const bots: Record<string, typeof TqsBot> = {};
-        for (const id of botIDs) bots[id] = TqsBot;
+        const HeuristicBot = createHeuristicBot(botIDs);
+        const bots = Object.fromEntries(
+          botIDs.map((botID) => [botID, HeuristicBot]),
+        );
         localMultiplayer = Local({ bots });
       }
 

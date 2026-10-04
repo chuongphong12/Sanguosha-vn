@@ -1,8 +1,13 @@
 import { PlayerID, TqsGameState } from "../types";
 import { PresentationEvent } from "../types";
 
-type DistributiveOmit<T, K extends keyof any> = T extends any ? Omit<T, K> : never;
-export type PresentationEventInput = DistributiveOmit<PresentationEvent, "sequence" | "matchEpoch" | "turn" | "correlationID"> & { correlationID?: string };
+type DistributiveOmit<T, K extends keyof any> = T extends any
+  ? Omit<T, K>
+  : never;
+export type PresentationEventInput = DistributiveOmit<
+  PresentationEvent,
+  "sequence" | "matchEpoch" | "turn" | "correlationID"
+> & { correlationID?: string };
 
 export function emitPresentationEvent(
   G: TqsGameState,

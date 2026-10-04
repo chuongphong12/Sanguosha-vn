@@ -1,0 +1,35 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    name: Lint, typecheck and test
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      # pnpm-lock.yaml and the allowBuilds key in pnpm-workspace.yaml need pnpm 11.
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      # strict-dep-builds=false: @ffmpeg-installer's postinstall is not needed for checks.
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile --config.strict-dep-builds=false
+
+      - name: Run checks
+        run: npm run check

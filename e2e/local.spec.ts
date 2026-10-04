@@ -192,10 +192,13 @@ test.describe("Local play", () => {
 
     // The lord opens; the device must be handed to them before they may act.
     const { lordID } = await localState(page);
-    if ((await localState(page)).viewerID !== lordID)
-      await clickText(page, /^Tôi là P\d+/);
     await expect
-      .poll(async () => (await localState(page)).viewerID)
+      .poll(async () => {
+        const { viewerID } = await localState(page);
+        if (viewerID !== lordID && (await hasText(page, /^Tôi là P\d+/)))
+          await clickText(page, /^Tôi là P\d+/);
+        return (await localState(page)).viewerID;
+      })
       .toBe(lordID);
     await waitForText(page, /Giai Đoạn Xuất Bài/);
     await dismissRoleIfShown(page);

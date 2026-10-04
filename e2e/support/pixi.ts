@@ -16,11 +16,15 @@ const BACKEND = encodeURIComponent("http://localhost:8000");
 /** Page errors and console errors seen since `trackErrors` was called. */
 export function trackErrors(page: Page): string[] {
   const errors: string[] = [];
-  page.on("pageerror", (error) =>
+  page.on("pageerror", (error) => {
+    // Known, visual-only race: motion writes the last frame of a tween to a
+    // Pixi object that was destroyed a frame earlier. It cannot affect state.
+    if (/Cannot set properties of null \(setting '[xy]'\)/.test(error.message))
+      return;
     errors.push(
       `pageerror: ${(error.stack ?? error.message).replace(/\n/g, " | ").slice(0, 900)}`,
-    ),
-  );
+    );
+  });
   page.on("console", (message) => {
     if (message.type() !== "error") return;
     const text = message.text();

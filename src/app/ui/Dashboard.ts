@@ -1,3 +1,4 @@
+import type { DestroyOptions } from "pixi.js";
 import { Container, Graphics, Text, Sprite, Texture, Assets } from "pixi.js";
 import { animate } from "motion";
 
@@ -108,6 +109,8 @@ export class Dashboard extends Container {
   private handCardLayouts = new Map<string, HandCardLayout>();
   private lastState?: { G: TqsPlayerViewState; options: DashboardOptions };
   private handCardAnimations = new Map<CardView, { stop: () => void }>();
+  private popoverAnimation?: { stop: () => void };
+  private destroying = false;
 
   constructor(
     G: TqsPlayerViewState,
@@ -597,13 +600,40 @@ export class Dashboard extends Container {
     this.popover.position.set(x, y - 160);
 
     clearTimeout(this.hoverTimeout);
-    animate(this.popover as any, { alpha: 1, y: y - 170 }, { duration: 0.2 });
+    this.popoverAnimation?.stop();
+    this.popoverAnimation = animate(
+      this.popover as any,
+      { alpha: 1, y: y - 170 },
+      { duration: 0.2 },
+    );
   }
 
   private hidePopover() {
     clearTimeout(this.hoverTimeout);
     this.hoverTimeout = setTimeout(() => {
-      animate(this.popover as any, { alpha: 0 }, { duration: 0.15 });
+      this.popoverAnimation?.stop();
+      this.popoverAnimation = animate(
+        this.popover as any,
+        { alpha: 0 },
+        { duration: 0.15 },
+      );
     }, 100);
+  }
+
+  /**
+   * motion writes a tween's last frame on the next render and the hover timer
+   * can still fire, so a Dashboard destroyed on a hot-seat viewer switch would
+   * be written to after it was destroyed. Detach now, free it a few frames on.
+   */
+  public override destroy(options?: DestroyOptions): void {
+    if (this.destroying || this.destroyed) return;
+    this.destroying = true;
+    clearTimeout(this.hoverTimeout);
+    this.popoverAnimation?.stop();
+    this.removeFromParent();
+    this.visible = false;
+    requestAnimationFrame(() =>
+      requestAnimationFrame(() => super.destroy(options)),
+    );
   }
 }
