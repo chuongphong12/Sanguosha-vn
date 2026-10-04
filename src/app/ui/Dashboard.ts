@@ -1,6 +1,5 @@
 import { Container, Graphics, Text, Sprite, Texture, Assets } from "pixi.js";
 import { animate } from "motion";
-import { ROLE_NAMES } from "../../game/catalog/roles";
 
 import type {
   PlayerID,
@@ -13,11 +12,31 @@ import { CardView } from "./CardView";
 import { PlayerAvatar } from "./PlayerAvatar";
 import { THEME } from "./theme";
 import { Panel } from "./components/Panel";
+import { ROLE_CARD_ALIAS, ROLE_CARD_BACK_ALIAS } from "./assetAliases";
+
+type DashboardOptions = {
+  viewportWidth: number;
+  selectedCardIDs: Set<string>;
+  handScrollX: number;
+  onCardTap: (cardID: string) => void;
+  onScroll: (scrollX: number) => void;
+};
+
+type HandCardLayout = {
+  x: number;
+  restY: number;
+  hoverY: number;
+  zIndex: number;
+};
+
+const HAND_HOVER_LIFT = 60;
+const HAND_SELECTED_LIFT = 20;
+const HAND_HOVER_SCALE = 1.2;
 
 export class Dashboard extends Container {
   static hoveredCardID: string | null = null;
 
-  private viewerID: PlayerID;
+  public readonly viewerID: PlayerID;
   private panelHeight = 240;
 
   private bg: Panel;
@@ -86,26 +105,14 @@ export class Dashboard extends Container {
   });
 
   private handCardViews = new Map<string, CardView>();
-  private cardLayout = new Map<
-    string,
-    { baseX: number; baseY: number; selected: boolean }
-  >();
-  private cardAnimations = new WeakMap<CardView, { stop: () => void }>();
-  private lastSync?: {
-    G: TqsPlayerViewState;
-    options: Parameters<Dashboard["sync"]>[1];
-  };
+  private handCardLayouts = new Map<string, HandCardLayout>();
+  private lastState?: { G: TqsPlayerViewState; options: DashboardOptions };
+  private handCardAnimations = new Map<CardView, { stop: () => void }>();
 
   constructor(
     G: TqsPlayerViewState,
     viewerID: PlayerID,
-    options: {
-      viewportWidth: number;
-      selectedCardIDs: Set<string>;
-      handScrollX: number;
-      onCardTap: (cardID: string) => void;
-      onScroll: (scrollX: number) => void;
-    },
+    options: DashboardOptions,
   ) {
     super();
     this.viewerID = viewerID;
@@ -147,8 +154,8 @@ export class Dashboard extends Container {
     this.addChild(this.roleCardContainer);
 
     try {
-      this.backTex = Assets.get<Texture>("cards/roles/back.jpg");
-    } catch (e) {
+      this.backTex = Assets.get<Texture>(ROLE_CARD_BACK_ALIAS);
+    } catch {
       /* ignore */
     }
 
@@ -173,21 +180,11 @@ export class Dashboard extends Container {
     this.sync(G, options);
   }
 
-  public sync(
-    G: TqsPlayerViewState,
-    options: {
-      viewportWidth: number;
-      selectedCardIDs: Set<string>;
-      handScrollX: number;
-      onCardTap: (cardID: string) => void;
-      onScroll: (scrollX: number) => void;
-    },
-  ): void {
-    this.lastSync = { G, options };
+  public sync(G: TqsPlayerViewState, options: DashboardOptions): void {
+    this.lastState = { G, options };
     const player = G.players[this.viewerID];
     const vw = options.viewportWidth;
     const avatarW = 180;
-    const avatarH = 224;
 
     this.bg.width = vw - 60;
     this.avatar.sync(player, {
@@ -200,8 +197,8 @@ export class Dashboard extends Container {
 
     if (player.role) {
       try {
-        this.faceTex = Assets.get<Texture>(`cards/roles/${player.role}.jpg`);
-      } catch (e) {
+        this.faceTex = Assets.get<Texture>(ROLE_CARD_ALIAS[player.role]);
+      } catch {
         /* ignore */
       }
     }
@@ -221,11 +218,7 @@ export class Dashboard extends Container {
       if (this.roleCardContainer.eventMode !== "static") {
         this.roleCardContainer.eventMode = "static";
         this.roleCardContainer.cursor = "pointer";
-        this.roleCardContainer.on("pointerdown", () => {
-          this.roleRevealed = !this.roleRevealed;
-          // Re-sync with the latest state, not the snapshot from first paint.
-          if (this.lastSync) this.sync(this.lastSync.G, this.lastSync.options);
-        });
+        this.roleCardContainer.on("pointerdown", this.handleRoleCardToggle);
       }
     }
 
@@ -362,10 +355,10 @@ export class Dashboard extends Container {
     // Remove missing
     for (const [id, view] of this.handCardViews) {
       if (!newHandSet.has(id)) {
-        this.stopCardAnimation(view);
         view.destroy();
         this.handCardViews.delete(id);
-        this.cardLayout.delete(id);
+        this.handCardLayouts.delete(id);
+        if (Dashboard.hoveredCardID === id) Dashboard.hoveredCardID = null;
       }
     }
 
@@ -375,92 +368,36 @@ export class Dashboard extends Container {
       if (!card) return;
 
       const selected = options.selectedCardIDs.has(cardID);
-
-      const baseX = startX + index * spacing;
-      const baseY = this.panelHeight - cardH - 10;
-      const baseRotation = 0;
-      this.cardLayout.set(cardID, { baseX, baseY, selected });
+      // Hand cards are pivoted at their bottom-centre so the hover scale grows upwards.
+      const restY = this.panelHeight - 10 - (selected ? HAND_SELECTED_LIFT : 0);
+      const layout: HandCardLayout = {
+        x: startX + index * spacing + cardW / 2,
+        restY,
+        hoverY: restY - HAND_HOVER_LIFT,
+        zIndex: index,
+      };
+      this.handCardLayouts.set(cardID, layout);
 
       let cardView = this.handCardViews.get(cardID);
       if (!cardView) {
-        cardView = new CardView(card, {
-          width: cardW,
-          height: cardH,
-          selected,
-          onTap: () => options.onCardTap(cardID),
-        });
+        cardView = this.createHandCardView(card, cardW, cardH, selected, () =>
+          options.onCardTap(cardID),
+        );
         this.handCardViews.set(cardID, cardView);
-        // Positions below are bottom-centre anchored; CardView's origin is its
-        // top-left corner, so without this the hand falls out of the panel.
-        cardView.pivot.set(cardW / 2, cardH);
         this.cardContainer.addChild(cardView);
-        cardView.x = baseX + cardW / 2;
-        cardView.y = baseY + cardH + 100;
-        cardView.rotation = baseRotation;
+        cardView.position.set(layout.x, layout.restY + 100);
         cardView.alpha = 0;
-
-        const created = cardView;
-        this.runCardAnimation(
-          created,
-          { y: baseY + cardH - (selected ? 20 : 0), alpha: 1 },
+        this.animateHandCard(
+          cardView,
+          { y: layout.restY, alpha: 1 },
           { duration: 0.3, ease: "backOut" },
         );
-
-        // Handlers read the latest layout; the hand reflows and selection
-        // changes long after this card was created.
-        created.on("pointerenter", () => {
-          const at = this.cardLayout.get(cardID);
-          if (!at) return;
-          Dashboard.hoveredCardID = cardID;
-          this.runCardAnimation(
-            created,
-            {
-              y: at.baseY + cardH - 60 - (at.selected ? 20 : 0),
-              rotation: 0,
-              scale: 1.2,
-            },
-            { duration: 0.15, ease: "easeOut" },
-          );
-        });
-
-        created.on("pointerleave", () => {
-          const at = this.cardLayout.get(cardID);
-          if (!at) return;
-          if (Dashboard.hoveredCardID === cardID)
-            Dashboard.hoveredCardID = null;
-          this.runCardAnimation(
-            created,
-            {
-              y: at.baseY + cardH - (at.selected ? 20 : 0),
-              rotation: baseRotation,
-              scale: 1,
-            },
-            { duration: 0.2, ease: "easeOut" },
-          );
-        });
-
-        created.once("destroyed", () => this.stopCardAnimation(created));
       } else {
         cardView.sync(card, {
           selected,
           onTap: () => options.onCardTap(cardID),
         });
-      }
-
-      const isHovered = Dashboard.hoveredCardID === cardID;
-
-      if (isHovered) {
-        cardView.zIndex = 1000;
-        cardView.x = baseX + cardW / 2;
-        cardView.y = baseY + cardH - 60 - (selected ? 20 : 0);
-        cardView.rotation = 0;
-        cardView.scale.set(1.2);
-      } else {
-        cardView.zIndex = index;
-        cardView.x = baseX + cardW / 2;
-        cardView.y = baseY + cardH - (selected ? 20 : 0);
-        cardView.rotation = baseRotation;
-        cardView.scale.set(1);
+        this.placeHandCard(cardID, cardView, layout);
       }
     });
 
@@ -475,23 +412,100 @@ export class Dashboard extends Container {
     this.setChildIndex(this.popover, this.children.length - 1);
   }
 
-  /** Only one tween may drive a card at a time, and none may outlive it. */
-  private runCardAnimation(
-    view: CardView,
-    keyframes: Record<string, number>,
-    options: { duration: number; ease: "backOut" | "easeOut" },
+  private readonly handleRoleCardToggle = (): void => {
+    this.roleRevealed = !this.roleRevealed;
+    if (!this.lastState) return;
+    this.sync(this.lastState.G, this.lastState.options);
+  };
+
+  private createHandCardView(
+    card: PhysicalCard,
+    cardW: number,
+    cardH: number,
+    selected: boolean,
+    onTap: () => void,
+  ): CardView {
+    const cardID = card.id;
+    const cardView = new CardView(card, {
+      width: cardW,
+      height: cardH,
+      selected,
+      onTap,
+    });
+    cardView.pivot.set(cardW / 2, cardH);
+
+    const handlePointerEnter = (): void => {
+      const layout = this.handCardLayouts.get(cardID);
+      if (!layout) return;
+      Dashboard.hoveredCardID = cardID;
+      cardView.zIndex = 1000;
+      this.animateHandCard(
+        cardView,
+        { x: layout.x, y: layout.hoverY, scale: HAND_HOVER_SCALE },
+        { duration: 0.15, ease: "easeOut" },
+      );
+    };
+
+    const handlePointerLeave = (): void => {
+      const layout = this.handCardLayouts.get(cardID);
+      if (!layout) return;
+      if (Dashboard.hoveredCardID === cardID) Dashboard.hoveredCardID = null;
+      cardView.zIndex = layout.zIndex;
+      this.animateHandCard(
+        cardView,
+        { x: layout.x, y: layout.restY, scale: 1 },
+        { duration: 0.2, ease: "easeOut" },
+      );
+    };
+
+    cardView.on("pointerenter", handlePointerEnter);
+    cardView.on("pointerleave", handlePointerLeave);
+    cardView.once("destroyed", () => {
+      this.handCardAnimations.get(cardView)?.stop();
+      this.handCardAnimations.delete(cardView);
+    });
+
+    return cardView;
+  }
+
+  private placeHandCard(
+    cardID: string,
+    cardView: CardView,
+    layout: HandCardLayout,
   ): void {
-    this.stopCardAnimation(view);
-    if (view.isDestroying) return;
-    this.cardAnimations.set(
-      view,
-      animate(view as never, keyframes as never, options as never),
+    this.handCardAnimations.get(cardView)?.stop();
+    this.handCardAnimations.delete(cardView);
+    cardView.alpha = 1;
+
+    const isHovered = Dashboard.hoveredCardID === cardID;
+    cardView.zIndex = isHovered ? 1000 : layout.zIndex;
+    cardView.position.set(layout.x, isHovered ? layout.hoverY : layout.restY);
+    cardView.scale.set(isHovered ? HAND_HOVER_SCALE : 1);
+  }
+
+  private animateHandCard(
+    cardView: CardView,
+    target: Record<string, number>,
+    transition: { duration: number; ease: "easeOut" | "backOut" },
+  ): void {
+    this.handCardAnimations.get(cardView)?.stop();
+    if (Dashboard.prefersReducedMotion()) {
+      const { scale, ...rest } = target;
+      Object.assign(cardView, rest);
+      if (scale !== undefined) cardView.scale.set(scale);
+      return;
+    }
+    this.handCardAnimations.set(
+      cardView,
+      animate(cardView as never, target as never, transition),
     );
   }
 
-  private stopCardAnimation(view: CardView): void {
-    this.cardAnimations.get(view)?.stop();
-    this.cardAnimations.delete(view);
+  private static prefersReducedMotion(): boolean {
+    return (
+      typeof window !== "undefined" &&
+      window.matchMedia?.("(prefers-reduced-motion: reduce)").matches === true
+    );
   }
 
   private showPopover(card: PhysicalCard, x: number, y: number) {

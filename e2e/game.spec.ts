@@ -54,11 +54,25 @@ async function snapshot(page: Page): Promise<Snapshot> {
   });
 }
 
-/** Dismiss the role reveal by tapping it, as a player would. */
-async function dismissRolePopup(page: Page): Promise<void> {
-  await waitForText(page, "Thân phận của bạn là:");
-  await page.mouse.click(VIEWPORT.width / 2, VIEWPORT.height / 2);
-  await expectNoText(page, "Thân phận của bạn là:");
+/**
+ * Some randomly dealt generals open the turn with an optional-skill prompt
+ * (e.g. Wang Zun). Decline it so the scenario does not depend on the deal.
+ */
+async function declineStartOfTurnPrompt(page: Page): Promise<void> {
+  await page.evaluate(() => {
+    const match = (window as any).__TQS_MATCH__;
+    const G = match.state.G;
+    const prompt = G.prompt;
+    if (!prompt || prompt.responderID !== match.currentViewerID) return;
+    if (prompt.kind === "option")
+      match.move("answerPrompt", prompt.id, {
+        kind: "option",
+        choice: prompt.choices.includes("decline")
+          ? "decline"
+          : prompt.choices[0],
+      });
+    else match.move("answerPrompt", prompt.id, { kind: "pass" });
+  });
 }
 
 async function pickFirstGeneral(page: Page): Promise<void> {
@@ -96,7 +110,6 @@ test.describe("Full remote game flow", () => {
 
     // Lord selection: only the lord gets the picker.
     for (const page of pages) await waitForStatus(page, "lord-selection");
-    for (const page of pages) await dismissRolePopup(page);
     const { lordID } = await snapshot(host);
     const lordPage = pages[Number(lordID)];
     for (const page of pages) {
@@ -118,6 +131,7 @@ test.describe("Full remote game flow", () => {
     await expect
       .poll(
         async () => {
+          await declineStartOfTurnPrompt(lordPage);
           const s = await snapshot(lordPage);
           return s.activePlayerID === lordID && s.step === "play" && !s.prompt;
         },
@@ -140,9 +154,9 @@ test.describe("Full remote game flow", () => {
     }
 
     // The log drawer collapses and re-opens.
-    await clickText(lordPage, "Ẩn nhật ký");
+    await clickText(lordPage, "✕");
     await expectNoText(lordPage, "DIỄN BIẾN");
-    await clickText(lordPage, "Nhật ký");
+    await clickText(lordPage, "Diễn biến");
     await waitForText(lordPage, "DIỄN BIẾN");
 
     // Finish the play phase from the button, then discard if the rules require it.

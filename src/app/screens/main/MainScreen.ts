@@ -1,11 +1,14 @@
-import { Assets, Container, Graphics, Text, Texture, Sprite } from "pixi.js";
+import {
+  Assets,
+  Container,
+  Graphics,
+  Text,
+  Texture,
+  TilingSprite,
+  Sprite,
+} from "pixi.js";
 
 import { WaitingRoomScene } from "./WaitingRoomScene";
-import { parseLocalPlayerCount } from "./localConfig";
-import { getRoomMembers } from "./waitingRoomModel";
-import { requiredActorID } from "./requiredActor";
-import { generalPickerLayout, screenScale } from "./formationLayout";
-import { DASHBOARD_TOP_INSET } from "./BattleScene";
 import { FormationScene } from "./FormationScene";
 import { ResultScene } from "./ResultScene";
 import { BattleScene } from "./BattleScene";
@@ -16,6 +19,10 @@ import type {
 } from "../../../client/MatchClient";
 import { MatchClient } from "../../../client/MatchClient";
 import { GeneralCardView } from "../../ui/components/GeneralCardView";
+import { getPlayerName } from "../../utils/playerNames";
+import { parseLocalPlayerCount } from "./localConfig";
+import { requiredActorID } from "./requiredActor";
+import { getRoomMembers } from "./waitingRoomModel";
 import {
   canRespondWithCard,
   canSelectCardTarget,
@@ -23,7 +30,11 @@ import {
 } from "../../../game/cardEngine";
 import { CARD_DEFINITIONS } from "../../../game/catalog/cards";
 import type { CardName } from "../../../game/types/core";
-import { GENERALS_BY_ID } from "../../../game/catalog/generals";
+import {
+  GENERALS_BY_ID,
+  hasLordSkill,
+  SKILLS,
+} from "../../../game/catalog/generals";
 import { ROLE_NAMES } from "../../../game/catalog/roles";
 import type {
   CardDefinition,
@@ -35,6 +46,8 @@ import type {
   ZoneCardChoice,
 } from "../../../game/model";
 import { CardView } from "../../ui/CardView";
+import { Dashboard } from "../../ui/Dashboard";
+import { SeatView } from "../../ui/SeatView";
 import { getEquipmentSlotViews } from "../../ui/equipmentView";
 import { layoutActionRow } from "../../ui/layout";
 import { FlexContainer } from "../../ui/FlexContainer";
@@ -60,12 +73,12 @@ const SUIT_LABELS = {
   spade: "♠",
 };
 
-const DRAWER_TOGGLE_BOTTOM = DASHBOARD_TOP_INSET + 24;
+const MIN_LAYOUT_HEIGHT = 860;
+const LOG_DRAWER_WIDTH = 280;
 
 export class MainScreen extends Container {
   public static assetBundles = ["main"];
 
-  private readonly world = new Container();
   private readonly content = new Container();
   private readonly waitingRoomScene = new WaitingRoomScene();
   private readonly formationScene = new FormationScene();
@@ -90,7 +103,9 @@ export class MainScreen extends Container {
   private selectedPromptPlayerIDs: PlayerID[] = [];
   private isLogOpen = true;
   private get effectiveWidth(): number {
-    return this.isLogOpen ? this.viewportWidth - 280 : this.viewportWidth;
+    return this.isLogOpen
+      ? this.viewportWidth - LOG_DRAWER_WIDTH
+      : this.viewportWidth;
   }
   private lastPromptID: number | null = null;
   private nullificationTimeout: ReturnType<typeof setTimeout> | null = null;
@@ -115,7 +130,6 @@ export class MainScreen extends Container {
   private autoSkipWuxie = true;
   private rolePopupDismissedFor: string | null = null;
   private isShowingRolePopup = false;
-  private rolePopupTimer: ReturnType<typeof setTimeout> | null = null;
 
   private drawRolePopup(role: string) {
     const popup = new Container();
@@ -186,20 +200,24 @@ export class MainScreen extends Container {
     this.content.addChild(popup);
   }
 
+  private lordExtraHp = 1;
+  private turnTimeLimit: number | null = null;
+  private targetNumPlayers: number = 8;
+  private autoStartWhenFull: boolean = false;
+  private startingMatch: boolean = false;
+
   private lobbyPollInterval?: number;
 
   constructor() {
     super();
-    // One scaled layer so scenes and overlays share the same logical space.
-    this.world.addChild(
+    this.addChild(
       this.waitingRoomScene,
       this.formationScene,
       this.resultScene,
       this.battleScene,
       this.connectingText,
-      this.content,
     );
-    this.addChild(this.world);
+    this.addChild(this.content);
   }
 
   public prepare(): void {
@@ -284,16 +302,9 @@ export class MainScreen extends Container {
     this.pendingSkill = null;
     this.handoffConfirmedFor = null;
     this.lastRequiredActorID = null;
-    if (this.rolePopupTimer) {
-      clearTimeout(this.rolePopupTimer);
-      this.rolePopupTimer = null;
-    }
-    this.rolePopupDismissedFor = null;
-    this.isShowingRolePopup = false;
     // BigPool reuses this screen, so per-match scene state must not leak.
     this.waitingRoomScene.reset();
     this.battleScene.reset();
-    this.connectingText.visible = true;
     this.clearContent();
   }
 
@@ -346,8 +357,16 @@ export class MainScreen extends Container {
   }
 
   public resize(width: number, height: number): void {
-    const scale = screenScale(height);
-    this.world.scale.set(scale);
+    const scale = Math.min(1, Math.max(0.01, height / MIN_LAYOUT_HEIGHT));
+    this.content.scale.set(scale);
+    // Child scenes are laid out in the same logical viewport as `content`.
+    for (const scene of [
+      this.waitingRoomScene,
+      this.formationScene,
+      this.resultScene,
+      this.battleScene,
+    ])
+      scene.scale.set(scale);
     this.viewportWidth = width / scale;
     this.viewportHeight = height / scale;
     this.render();
@@ -355,27 +374,27 @@ export class MainScreen extends Container {
 
   private render(): void {
     this.clearContent();
+    this.connectingText.visible = !this.state;
+    this.connectingText.anchor.set(0.5);
+    this.connectingText.position.set(
+      this.viewportWidth / 2,
+      this.viewportHeight / 2,
+    );
 
     if (!this.state || !this.match) {
       this.waitingRoomScene.visible = false;
       this.formationScene.visible = false;
       this.battleScene.visible = false;
       this.resultScene.visible = false;
-      this.connectingText.visible = true;
-      this.connectingText.anchor.set(0.5);
-      this.connectingText.position.set(
-        this.viewportWidth / 2,
-        this.viewportHeight / 2,
-      );
       return;
     }
-    this.connectingText.visible = false;
 
     const G = this.state.G;
     const viewerID = this.match.currentViewerID;
-    this.waitingRoomScene.visible = G.status === "waiting-room";
-    this.formationScene.visible =
+    const isSelecting =
       G.status === "lord-selection" || G.status === "general-selection";
+    this.waitingRoomScene.visible = G.status === "waiting-room";
+    this.formationScene.visible = isSelecting;
     this.battleScene.visible = G.status === "playing";
     this.resultScene.visible = G.status === "ended";
 
@@ -390,201 +409,298 @@ export class MainScreen extends Container {
       return;
     }
 
-    if (this.formationScene.visible)
+    this.drawExitButton();
+
+    if (isSelecting) {
+      this.drawViewerSelector(G);
       this.formationScene.sync(G, this.viewportWidth, this.viewportHeight);
-    if (this.resultScene.visible)
+      this.drawSelectionArea(G, viewerID);
+      return;
+    }
+
+    if (this.resultScene.visible) {
       this.resultScene.sync(G, this.viewportWidth, this.viewportHeight);
-
-    if (this.battleScene.visible) {
-      const targetableIDs = new Set<PlayerID>(
-        G.seatOrder.filter(
-          (id) => id !== viewerID && this.canSelectTarget(G, id),
-        ),
-      );
-      this.battleScene.sync(G, this.state.ctx, viewerID, {
-        viewportWidth: this.effectiveWidth,
-        viewportHeight: this.viewportHeight,
-        selectedCardIDs: this.selectedCardIDs,
-        selectedTargetIDs: this.selectedTargetIDs,
-        targetableIDs,
-        choosingTarget:
-          this.selectedCardIDs.size > 0 || this.pendingSkill !== null,
-        handScrollX: this.handScrollX,
-        onSeatTap: (playerID) => this.tapSeat(playerID),
-        onDashboardCardTap: (cardID) => this.tapCard(cardID),
-        onScroll: (scrollX) => {
-          this.handScrollX = scrollX;
-          this.render();
-        },
-      });
+      return;
     }
 
-    this.drawOverlays(G, viewerID);
-  }
-
-  /** Everything drawn above the scenes: HUD, log, hand-off, prompts, popups. */
-  private drawOverlays(G: TqsPlayerViewState, viewerID: PlayerID): void {
-    if (this.rolePopupDismissedFor !== viewerID) {
-      this.rolePopupDismissedFor = viewerID;
-      this.isShowingRolePopup = true;
-      this.rolePopupTimer = setTimeout(() => {
-        this.rolePopupTimer = null;
-        this.isShowingRolePopup = false;
-        this.render();
-      }, 3500);
-    }
-
-    this.drawViewerSelector(G);
-    if (G.status === "playing") this.drawStatus(G);
+    const handoffActorID = this.pendingHandoffActorID(G);
+    this.battleScene.sync(G, this.state.ctx, viewerID, {
+      viewportWidth: this.effectiveWidth,
+      viewportHeight: this.viewportHeight,
+      selectedCardIDs: this.selectedCardIDs,
+      selectedTargetIDs: this.selectedTargetIDs,
+      ...this.targetSelectionState(G, viewerID),
+      showDashboard: handoffActorID === null,
+      handScrollX: this.handScrollX,
+      onSeatTap: this.handleSeatTap,
+      onDashboardCardTap: this.handleDashboardCardTap,
+    });
+    this.drawStatus(G);
     this.drawLog(G);
-    this.drawPrivateArea(G, viewerID);
 
-    const viewer = G.players[viewerID];
-    const canSelectGeneral =
-      !this.isShowingRolePopup &&
-      viewer.generalID === null &&
-      viewer.generalCandidates.length > 0 &&
-      ((G.status === "lord-selection" && viewerID === G.lordID) ||
-        (G.status === "general-selection" && viewerID !== G.lordID)) &&
-      !this.isHandoffPending(G, viewerID);
-    if (canSelectGeneral)
-      this.drawGeneralCandidates(G, viewer.generalCandidates);
-
-    if (this.isShowingRolePopup) this.drawRolePopup(viewer.role || "");
-  }
-
-  private isHandoffPending(G: TqsPlayerViewState, viewerID: PlayerID): boolean {
-    const requiredActorID = this.requiredActorID(G);
-    return Boolean(
-      this.match?.isHotseat &&
-      requiredActorID &&
-      (viewerID !== requiredActorID ||
-        this.handoffConfirmedFor !== requiredActorID),
-    );
-  }
-
-  private tapCard(cardID: string): void {
-    if (!this.state || !this.match) return;
-    const G = this.state.G;
-    const player = G.players[this.match.currentViewerID];
-    if (G.turn.step === "discard") {
-      if (this.selectedCardIDs.has(cardID)) this.selectedCardIDs.delete(cardID);
-      else this.selectedCardIDs.add(cardID);
-    } else {
-      const viewerWeaponID = player.equipment.weapon;
-      const promptAllowsSpear =
-        G.prompt?.kind === "card-response" &&
-        G.prompt.response === "slash" &&
-        G.prompt.allowSerpentSpear;
-      const playAllowsSpear =
-        !G.prompt &&
-        this.serpentSpearMode &&
-        viewerWeaponID !== undefined &&
-        G.cards[viewerWeaponID]?.definitionID === "serpent-spear";
-      const multiSelect = promptAllowsSpear || playAllowsSpear;
-
-      if (this.selectedCardIDs.has(cardID)) {
-        this.selectedCardIDs.delete(cardID);
-      } else {
-        if (!multiSelect) this.selectedCardIDs.clear();
-        else if (this.selectedCardIDs.size >= 2) return;
-        this.selectedCardIDs.add(cardID);
-      }
-      if (this.virtualAs === "slash" && this.selectedCardIDs.size === 0) {
-        this.virtualAs = null;
-      }
+    if (handoffActorID !== null) {
+      this.drawHandoff(G, handoffActorID, this.viewportHeight - 250);
+      return;
     }
-    this.render();
+    this.drawActions(G, viewerID);
   }
 
-  private tapSeat(playerID: PlayerID): void {
-    if (!this.state || !this.match) return;
-    const G = this.state.G;
+  /** Hot-seat only: the player who must take the device before anything private is shown. */
+  private pendingHandoffActorID(G: TqsPlayerViewState): PlayerID | null {
+    if (!this.match?.isHotseat) return null;
+    const requiredActorID = this.requiredActorID(G);
+    if (!requiredActorID) return null;
+    const isReady =
+      this.match.currentViewerID === requiredActorID &&
+      this.handoffConfirmedFor === requiredActorID;
+    return isReady ? null : requiredActorID;
+  }
+
+  private targetSelectionState(
+    G: TqsPlayerViewState,
+    viewerID: PlayerID,
+  ): {
+    selectableTargetIDs: Set<PlayerID>;
+    highlightedTargetIDs: Set<PlayerID>;
+  } {
+    const isChoosingTarget =
+      this.selectedCardIDs.size > 0 || this.pendingSkill !== null;
+    const selectableTargetIDs = new Set<PlayerID>();
+    for (const playerID of G.seatOrder) {
+      if (playerID === viewerID) continue;
+      if (
+        this.selectedTargetIDs.includes(playerID) ||
+        this.canSelectTarget(G, playerID)
+      )
+        selectableTargetIDs.add(playerID);
+    }
+    return {
+      selectableTargetIDs,
+      highlightedTargetIDs: isChoosingTarget
+        ? selectableTargetIDs
+        : new Set<PlayerID>(),
+    };
+  }
+
+  private readonly handleSeatTap = (playerID: PlayerID): void => {
+    const G = this.state?.G;
+    if (!G) return;
+
     const targetOrder = this.selectedTargetIDs.indexOf(playerID);
     if (targetOrder >= 0) {
       const selectedCardID = [...this.selectedCardIDs][0];
       const selectedCardName = selectedCardID
         ? G.cards[selectedCardID]?.definitionID
         : undefined;
+      // Borrowed Sword targets are ordered: dropping the wielder drops the victim too.
       if (selectedCardName === "borrowed-sword")
         this.selectedTargetIDs.splice(targetOrder);
       else this.selectedTargetIDs.splice(targetOrder, 1);
-    } else if (this.canSelectTarget(G, playerID)) {
-      if (this.selectedTargetIDs.length < this.maximumTargets(G))
-        this.selectedTargetIDs.push(playerID);
     } else {
-      return;
+      if (!this.canSelectTarget(G, playerID)) return;
+      if (this.selectedTargetIDs.length >= this.maximumTargets(G)) return;
+      this.selectedTargetIDs.push(playerID);
     }
     this.render();
-  }
+  };
 
-  private playerLabel(id: PlayerID): string {
-    if (this.match?.isRemote && this.state?.matchData) {
-      const seat = (
-        this.state.matchData as Array<{ id: number; name?: string }>
-      ).find((m) => String(m.id) === id);
-      if (seat?.name) return seat.name;
-    }
-    return `P${Number(id) + 1}`;
-  }
+  private readonly handleDashboardCardTap = (cardID: string): void => {
+    const G = this.state?.G;
+    if (!G || !this.match) return;
+    const player = G.players[this.match.currentViewerID];
 
-  private drawViewerSelector(G: TqsPlayerViewState): void {
-    // Bots mode has a single human viewer; there is nobody to switch to.
-    if (!this.match || this.match.isRemote || this.match.playerIDs.length < 2)
+    if (G.turn.step === "discard") {
+      if (this.selectedCardIDs.has(cardID)) this.selectedCardIDs.delete(cardID);
+      else this.selectedCardIDs.add(cardID);
+      this.render();
       return;
+    }
+
+    const viewerWeaponID = player.equipment.weapon;
+    const promptAllowsSpear =
+      G.prompt?.kind === "card-response" &&
+      G.prompt.response === "slash" &&
+      G.prompt.allowSerpentSpear;
+    const playAllowsSpear =
+      !G.prompt &&
+      this.serpentSpearMode &&
+      viewerWeaponID !== undefined &&
+      G.cards[viewerWeaponID]?.definitionID === "serpent-spear";
+    const multiSelect = promptAllowsSpear || playAllowsSpear;
+
+    if (this.selectedCardIDs.has(cardID)) {
+      this.selectedCardIDs.delete(cardID);
+    } else {
+      if (!multiSelect) this.selectedCardIDs.clear();
+      else if (this.selectedCardIDs.size >= 2) return;
+      this.selectedCardIDs.add(cardID);
+    }
+    if (this.virtualAs === "slash" && this.selectedCardIDs.size === 0) {
+      this.virtualAs = null;
+    }
+    this.render();
+  };
+
+  private drawSelectionArea(G: TqsPlayerViewState, viewerID: PlayerID): void {
+    const top = this.viewportHeight - 250;
+    const handoffActorID = this.pendingHandoffActorID(G);
+    if (handoffActorID !== null) {
+      this.drawHandoff(G, handoffActorID, top);
+      return;
+    }
+
+    const player = G.players[viewerID];
+    const canSelectGeneral =
+      player.generalID === null &&
+      player.generalCandidates.length > 0 &&
+      ((G.status === "lord-selection" && viewerID === G.lordID) ||
+        (G.status === "general-selection" && viewerID !== G.lordID));
+    if (canSelectGeneral) {
+      this.drawGeneralCandidates(player.generalCandidates);
+      return;
+    }
+
+    const requiredActorID = this.requiredActorID(G);
+    const instruction = requiredActorID
+      ? `Đang chờ P${G.players[requiredActorID].seat + 1} chọn Võ Tướng...`
+      : "Đang chờ các người chơi hoàn tất việc chọn Võ Tướng.";
+    this.addText(
+      instruction,
+      this.viewportWidth / 2,
+      top + 48,
+      15,
+      THEME.colors.muted,
+    );
+  }
+
+  private drawGeneralCandidates(candidates: string[]): void {
+    const centerY = this.viewportHeight / 2;
+    const centerX = this.viewportWidth / 2;
+
+    const gap = 24;
+    const baseW = 280;
+    const baseH = 560;
+    const maxRowWidth = this.viewportWidth - 60;
+    const naturalWidth =
+      candidates.length * baseW + (candidates.length - 1) * gap;
+    const cardW =
+      naturalWidth > maxRowWidth
+        ? (maxRowWidth - (candidates.length - 1) * gap) / candidates.length
+        : baseW;
+    const cardH = Math.min((cardW / baseW) * baseH, this.viewportHeight - 360);
+    const totalW = candidates.length * cardW + (candidates.length - 1) * gap;
+    const startX = centerX - totalW / 2;
+
+    this.addText(
+      `Lượt của bạn — chọn 1 trong ${candidates.length} tướng`,
+      centerX,
+      centerY + 10 - cardH / 2 - 24,
+      16,
+      THEME.colors.gold,
+    );
+
+    candidates.forEach((generalID, index) => {
+      const card = new GeneralCardView(generalID, {
+        width: cardW,
+        height: cardH,
+        onConfirm: () => this.match?.move("selectGeneral", generalID),
+      });
+      card.position.set(
+        startX + index * (cardW + gap),
+        centerY + 10 - cardH / 2,
+      );
+      this.content.addChild(card);
+    });
+  }
+
+  private drawExitButton(): void {
+    this.addButton(
+      "Thoát",
+      74,
+      48,
+      80,
+      34,
+      () => void this.leaveMatchAndExit(),
+      THEME.colors.ink,
+      THEME.colors.paper,
+    );
+  }
+
+  private async leaveMatchAndExit(): Promise<void> {
+    if (this.match?.isRemote) {
+      try {
+        const state = window.history.state || {};
+        const urlParams = new URLSearchParams(window.location.search);
+        const serverUrl = state.serverUrl || urlParams.get("serverUrl");
+        const matchID = urlParams.get("matchID");
+        const playerID = state.playerID || urlParams.get("playerID");
+        const credentials = state.credentials || urlParams.get("credentials");
+        if (serverUrl && matchID && playerID && credentials) {
+          const lobbyClient = new LobbyClient({ server: serverUrl });
+          await lobbyClient.leaveMatch("tam-quoc-sat-standard-2013", matchID, {
+            playerID,
+            credentials,
+          });
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    }
+    window.location.href = "/";
+  }
+
+  /** Hot-seat selection only; during play the handoff flow switches viewers so hands stay private. */
+  private drawViewerSelector(G: TqsPlayerViewState): void {
+    if (!this.match || this.match.isRemote || !this.match.isHotseat) return;
+
     const buttonWidth = 50;
     const buttonGap = 8;
     const selectorWidth =
       G.seatOrder.length * buttonWidth + (G.seatOrder.length - 1) * buttonGap;
-    const selectorLeft = this.effectiveWidth - 16 - selectorWidth;
+    const selectorLeft = this.viewportWidth - 16 - selectorWidth;
+    const selectorY = this.viewportHeight - 40;
 
     this.addText(
       "Góc nhìn",
       selectorLeft - 16,
-      48,
+      selectorY,
       14,
       THEME.colors.paperDark,
       1,
       "right",
     );
     G.seatOrder.forEach((playerID, index) => {
-      const active = this.match!.currentViewerID === playerID;
-      const selectorLocked = G.status === "playing" || G.status === "ended";
+      const isActive = this.match!.currentViewerID === playerID;
       this.addButton(
         `P${index + 1}`,
         selectorLeft + buttonWidth / 2 + index * (buttonWidth + buttonGap),
-        48,
+        selectorY,
         buttonWidth,
         34,
-        () => {
-          this.selectedCardIDs.clear();
-          this.selectedTargetIDs = [];
-          this.selectedZoneChoices = [];
-          this.handScrollX = 0;
-          this.serpentSpearMode = false;
-          this.handoffConfirmedFor = null;
-          this.match!.switchViewer(playerID, (state) =>
-            this.receiveState(state),
-          );
-        },
-        active ? THEME.colors.redBright : THEME.colors.ink,
+        () => this.switchViewer(playerID),
+        isActive ? THEME.colors.redBright : THEME.colors.ink,
         THEME.colors.paper,
-        selectorLocked,
       );
     });
+  }
+
+  private switchViewer(playerID: PlayerID): void {
+    this.selectedCardIDs.clear();
+    this.selectedTargetIDs = [];
+    this.selectedZoneChoices = [];
+    this.handScrollX = 0;
+    this.serpentSpearMode = false;
+    this.handoffConfirmedFor = null;
+    this.match!.switchViewer(playerID, (state) => this.receiveState(state));
   }
 
   private drawStatus(G: TqsPlayerViewState): void {
     const centerX = this.effectiveWidth / 2;
     const panelY = 16;
-
-    let status: string;
-    if (G.prompt) {
-      status = this.promptStatus(G, this.playerLabel(G.prompt.responderID));
-    } else {
-      status = `Lượt ${G.turn.number} · Giai Đoạn ${STEP_NAMES[G.turn.step]} · ${this.generalName(G, G.turn.activePlayerID)}`;
-    }
-    const detail = `Chồng Bài Rút: ${G.deckSize} · Chồng Bài Bỏ: ${G.discard.length}`;
+    const deckDetail = `Chồng Bài Rút: ${G.deckSize} · Chồng Bài Bỏ: ${G.discard.length}`;
+    const status = G.prompt
+      ? this.promptStatus(G, getPlayerName(G.prompt.responderID))
+      : `Lượt ${G.turn.number} · Giai Đoạn ${STEP_NAMES[G.turn.step]} · ${this.generalName(G, G.turn.activePlayerID)}`;
 
     const statusText = new Text({
       text: status,
@@ -596,7 +712,7 @@ export class MainScreen extends Container {
       },
     });
     const detailText = new Text({
-      text: detail,
+      text: deckDetail,
       style: {
         fontFamily: GAME_FONT_FAMILY,
         fontSize: 12,
@@ -615,6 +731,7 @@ export class MainScreen extends Container {
       THEME.colors.gold,
       0.85,
     );
+
     statusText.anchor.set(0.5, 0);
     statusText.position.set(centerX, panelY + 8);
     detailText.anchor.set(0.5, 0);
@@ -622,25 +739,20 @@ export class MainScreen extends Container {
     this.content.addChild(statusText, detailText);
   }
 
-  private drawLog(G: TqsPlayerViewState): void {
-    const width = 280;
-    this.addButton(
-      this.isLogOpen ? "Ẩn nhật ký" : "Nhật ký",
-      this.effectiveWidth - 16 - 60,
-      this.viewportHeight - DRAWER_TOGGLE_BOTTOM,
-      120,
-      30,
-      () => {
-        this.isLogOpen = !this.isLogOpen;
-        this.render();
-      },
-      THEME.colors.ink,
-      THEME.colors.paper,
-      false,
-      { fontSize: 12 },
-    );
-    if (!this.isLogOpen) return;
+  private toggleLog(): void {
+    this.isLogOpen = !this.isLogOpen;
+    this.render();
+  }
 
+  private drawLog(G: TqsPlayerViewState): void {
+    if (!this.isLogOpen) {
+      this.addButton("Diễn biến", this.viewportWidth - 70, 48, 110, 34, () =>
+        this.toggleLog(),
+      );
+      return;
+    }
+
+    const width = LOG_DRAWER_WIDTH;
     const x = this.viewportWidth - width;
     this.addPanel(
       x,
@@ -661,6 +773,7 @@ export class MainScreen extends Container {
       "center",
       2,
     );
+    this.addButton("✕", x + width - 26, 24, 34, 34, () => this.toggleLog());
 
     const entries = G.log.slice(-20);
     if (entries.length === 0) {
@@ -675,6 +788,7 @@ export class MainScreen extends Container {
       );
       return;
     }
+
     const texts = entries.map((entry) =>
       this.addText(
         entry.message,
@@ -689,104 +803,13 @@ export class MainScreen extends Container {
         true,
       ),
     );
-    const totalHeight = texts.reduce((sum, t) => sum + t.height + 8, 0);
+    // Newest entry sits at the bottom; older ones scroll off the top.
+    const totalHeight = texts.reduce((sum, text) => sum + text.height + 8, 0);
     let currentY = Math.max(60, this.viewportHeight - 40 - totalHeight);
-    for (const t of texts) {
-      t.y = currentY;
-      currentY += t.height + 8;
+    for (const text of texts) {
+      text.y = currentY;
+      currentY += text.height + 8;
     }
-  }
-
-  private drawPrivateArea(G: TqsPlayerViewState, viewerID: PlayerID): void {
-    const top = this.viewportHeight - DASHBOARD_TOP_INSET;
-    const requiredActorID = this.requiredActorID(G);
-
-    if (this.isHandoffPending(G, viewerID) && requiredActorID) {
-      this.drawHandoff(G, requiredActorID, top);
-      return;
-    }
-
-    const player = G.players[viewerID];
-    const canSelectGeneral =
-      player.generalID === null &&
-      player.generalCandidates.length > 0 &&
-      ((G.status === "lord-selection" && viewerID === G.lordID) ||
-        (G.status === "general-selection" && viewerID !== G.lordID));
-    if (canSelectGeneral) return;
-
-    if (G.status === "lord-selection" || G.status === "general-selection") {
-      const instruction = requiredActorID
-        ? this.match!.isHotseat
-          ? `Hãy chuyển sang góc nhìn của P${G.players[requiredActorID].seat + 1} để chọn Võ Tướng.`
-          : `Đang chờ ${this.playerLabel(requiredActorID)} chọn Võ Tướng...`
-        : "Đang chờ các người chơi hoàn tất việc chọn Võ Tướng.";
-      this.addText(
-        instruction,
-        this.viewportWidth / 2,
-        top + 48,
-        15,
-        THEME.colors.muted,
-        0.5,
-        "center",
-        0,
-        this.viewportWidth - 68,
-      );
-      return;
-    }
-
-    if (G.status === "playing") this.drawActions(G, viewerID);
-  }
-
-  private drawGeneralCandidates(
-    _G: TqsPlayerViewState,
-    candidates: string[],
-  ): void {
-    const centerY = this.viewportHeight / 2;
-    const centerX = this.viewportWidth / 2;
-
-    const bg = new Graphics()
-      .rect(0, 0, this.viewportWidth, this.viewportHeight)
-      .fill({ color: THEME.colors.black, alpha: 0.85 });
-    bg.eventMode = "static";
-    this.content.addChild(bg);
-
-    this.addText(
-      "LƯỢT CỦA BẠN — CHỌN TƯỚNG",
-      centerX,
-      centerY - 270,
-      20,
-      THEME.colors.muted,
-      0.5,
-      "center",
-    );
-    this.addText(
-      `Lượt của bạn — lật và chọn 1 trong ${candidates.length} tướng`,
-      centerX,
-      centerY - 240,
-      14,
-      THEME.colors.gold,
-      0.5,
-      "center",
-    );
-
-    const picker = generalPickerLayout(
-      this.viewportWidth,
-      this.viewportHeight,
-      candidates.length,
-    );
-    candidates.forEach((generalID, index) => {
-      const slot = picker.cards[index];
-      const cardContainer = new Container();
-      cardContainer.position.set(slot.left, slot.top);
-      cardContainer.addChild(
-        new GeneralCardView(generalID, {
-          width: slot.width,
-          height: slot.height,
-          onConfirm: () => this.match!.move("selectGeneral", generalID),
-        }),
-      );
-      this.content.addChild(cardContainer);
-    });
   }
 
   private drawHandoff(
@@ -798,28 +821,28 @@ export class MainScreen extends Container {
     this.addPanel(
       30,
       top - 12,
-      this.viewportWidth - 60,
+      this.effectiveWidth - 60,
       154,
       0x181411,
       THEME.colors.gold,
     );
     this.addText(
       `ĐƯA THIẾT BỊ CHO P${seat}`,
-      this.viewportWidth / 2,
+      this.effectiveWidth / 2,
       top + 18,
       20,
       THEME.colors.paper,
     );
     this.addText(
       `P${seat} cần thực hiện hành động tiếp theo.`,
-      this.viewportWidth / 2,
+      this.effectiveWidth / 2,
       top + 52,
       13,
       THEME.colors.paperDark,
     );
     this.addButton(
       `Tôi là P${seat} · Tiếp tục`,
-      this.viewportWidth / 2,
+      this.effectiveWidth / 2,
       top + 102,
       230,
       48,
@@ -1932,6 +1955,9 @@ export class MainScreen extends Container {
       "eight-diagrams",
     );
     const canBagua = prompt.allowBagua && hasBagua;
+    const summonSkillID =
+      prompt.reason === "arrow-barrage" ? "hu-jia" : "ji-jiang";
+    const canSummon = responder.activeSkillIDs.includes(summonSkillID);
 
     const cy = this.viewportHeight / 2 + 70;
 
@@ -1939,6 +1965,7 @@ export class MainScreen extends Container {
     let buttonsCount = 1; // "Bỏ qua" is always there
     if (wuxieCardID) buttonsCount++;
     if (respCardID || canBagua) buttonsCount++;
+    if (canSummon) buttonsCount++;
 
     const startX = this.viewportWidth / 2 - ((buttonsCount - 1) * 220) / 2;
     let currentX = startX;
@@ -1974,6 +2001,19 @@ export class MainScreen extends Container {
         },
         THEME.colors.red,
         THEME.colors.white,
+      );
+      currentX += 220;
+    }
+
+    if (canSummon) {
+      this.addButton(
+        summonSkillID === "hu-jia" ? "【Hộ Giá】" : "【Kích Tướng】",
+        currentX,
+        cy,
+        200,
+        48,
+        () => this.answerPrompt(prompt.id, { kind: "summon" }),
+        THEME.colors.green,
       );
       currentX += 220;
     }

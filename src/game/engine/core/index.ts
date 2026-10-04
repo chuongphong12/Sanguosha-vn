@@ -846,6 +846,7 @@ function compileCardUse(G: TqsGameState, use: CardUse): GameEffect[] {
         targetIDs: targets,
         passedPlayerIDs: [],
         baguaTriedPlayerIDs: [],
+        summonTriedPlayerIDs: [],
       };
       return [aoeEffect, finishUse(G, use)];
     }
@@ -2104,6 +2105,14 @@ function completeAllyResponse(
     writeLog(
       G,
       `【Kích Tướng】: ${allyName} đánh 【Sát】 thay ${playerName(G, summon.lordID)}.`,
+    );
+    return;
+  }
+  if (underlying.kind === "aoe-simultaneous") {
+    underlying.passedPlayerIDs.push(summon.lordID);
+    writeLog(
+      G,
+      `【${summon.skillID === "hu-jia" ? "Hộ Giá" : "Kích Tướng"}】: ${allyName} đánh 【${summon.response === "dodge" ? "Thiểm" : "Sát"}】 thay ${playerName(G, summon.lordID)}.`,
     );
     return;
   }
@@ -4047,6 +4056,8 @@ function answerAoeSimultaneous(
     });
     if (G.prompt?.id === prompt.id) G.prompt = null;
     return true;
+  } else if (answer.kind === "summon") {
+    return startAoeAllySummon(G, effect, prompt, playerID);
   } else if (answer.kind === "card") {
     const isWuxie = canRespondWithCard(
       G,
@@ -4097,25 +4108,60 @@ function answerAoeSimultaneous(
 
   effect.passedPlayerIDs.push(playerID);
 
-  if (answer.kind === "pass") {
-    // The damage effect now sits above the AOE effect. Close the window so the
-    // stack can resolve it; resolveAoeSimultaneous reopens it for whoever is
-    // left (or pops the AOE effect once nobody is).
-    G.prompt = null;
-    return true;
-  }
-
   const targetsLeft = effect.targetIDs.filter(
     (id) => !effect.passedPlayerIDs.includes(id) && G.players[id]?.alive,
   );
   if (targetsLeft.length === 0) {
-    G.effectStack.shift();
+    // A damage effect may sit above this one, so remove it by identity.
+    G.effectStack.splice(G.effectStack.indexOf(effect), 1);
     if (G.prompt?.reason === effect.cardName) {
       G.prompt = null;
     }
+  } else if (answer.kind === "pass") {
+    // Close the shared window so the queued damage resolves; the remaining
+    // targets get a fresh prompt once it has.
+    if (G.prompt?.id === prompt.id) G.prompt = null;
   } else {
     prompt.passedPlayerIDs = [...effect.passedPlayerIDs];
   }
+  return true;
+}
+
+function startAoeAllySummon(
+  G: TqsGameState,
+  effect: AoeSimultaneousEffect,
+  prompt: CardResponsePrompt,
+  lordID: PlayerID,
+): boolean {
+  const isArrow = effect.cardName === "arrow-barrage";
+  const skillID = isArrow ? "hu-jia" : "ji-jiang";
+  const faction = isArrow ? "wei" : "shu";
+  if (!hasSkill(G, lordID, skillID)) return false;
+  if (effect.summonTriedPlayerIDs.includes(lordID)) return false;
+
+  effect.summonTriedPlayerIDs.push(lordID);
+  const queueIDs = G.seatOrder.filter(
+    (id) =>
+      id !== lordID &&
+      G.players[id].alive &&
+      GENERALS_BY_ID[G.players[id].generalID!]?.faction === faction,
+  );
+  G.effectStack.unshift({
+    id: resolutionID(G),
+    kind: "ally-summon",
+    skillID,
+    lordID,
+    faction,
+    response: isArrow ? "dodge" : "slash",
+    requesterEffectID: effect.id,
+    queueIDs,
+    passedIDs: [],
+  });
+  writeLog(
+    G,
+    `${playerName(G, lordID)} phát động 【${isArrow ? "Hộ Giá" : "Kích Tướng"}】.`,
+  );
+  if (G.prompt?.id === prompt.id) G.prompt = null;
   return true;
 }
 

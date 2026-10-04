@@ -1,44 +1,26 @@
-import {
-  Assets,
-  Container,
-  Graphics,
-  Text,
-  TilingSprite,
-  Texture,
-} from "pixi.js";
-import type { PlayerID, TqsPlayerViewState } from "../../../game/model";
-import { Dashboard } from "../../ui/Dashboard";
+import { Container, Graphics, TilingSprite, Texture, Assets } from "pixi.js";
+import type {
+  PlayerID,
+  TqsPlayerViewState,
+  ZoneCardChoice,
+} from "../../../game/model";
 import { SeatView } from "../../ui/SeatView";
-import { opponentArcPosition, opponentsInOrder } from "../../ui/seatLayout";
+import { Dashboard } from "../../ui/Dashboard";
 import { THEME } from "../../ui/theme";
-import { GAME_FONT_FAMILY } from "../../ui/typography";
+import { TABLE_BACKGROUND_ALIAS } from "../../ui/assetAliases";
 import { AnimationManager } from "./AnimationManager";
 
-export const DASHBOARD_TOP_INSET = 250;
-
-export interface BattleSyncOptions {
-  /** Width of the board area (the log drawer is already excluded). */
-  viewportWidth: number;
-  viewportHeight: number;
-  selectedCardIDs: Set<string>;
-  selectedTargetIDs: PlayerID[];
-  /** Opponents the current selection may target. */
-  targetableIDs: ReadonlySet<PlayerID>;
-  /** True while a card or skill is selected, so targetable seats glow. */
-  choosingTarget: boolean;
-  handScrollX: number;
-  onSeatTap: (playerID: PlayerID) => void;
-  onDashboardCardTap: (cardID: string) => void;
-  onScroll: (scrollX: number) => void;
-}
+const DASHBOARD_HEIGHT = 240;
+const SEAT_WIDTH = 140;
+const SEAT_HEIGHT = 160;
+/** Keeps the top seat clear of the status panel. */
+const SEAT_TOP_MIN = 84;
 
 export class BattleScene extends Container {
   private bgContainer = new Container();
   private boardContainer = new Container();
   private seatViews = new Map<PlayerID, SeatView>();
-  private orderBadges = new Map<PlayerID, Text>();
   private dashboard?: Dashboard;
-  private dashboardViewerID?: PlayerID;
   private animationManager?: AnimationManager;
   private lastSequence = 0;
 
@@ -56,12 +38,23 @@ export class BattleScene extends Container {
 
   public sync(
     G: TqsPlayerViewState,
-    _ctx: unknown,
+    ctx: any,
     viewerID: PlayerID,
-    options: BattleSyncOptions,
+    options: {
+      viewportWidth: number;
+      viewportHeight: number;
+      selectedCardIDs: Set<string>;
+      selectedTargetIDs: PlayerID[];
+      selectableTargetIDs: Set<PlayerID>;
+      highlightedTargetIDs: Set<PlayerID>;
+      /** False during a hot-seat handoff so the previous viewer's hand stays hidden. */
+      showDashboard: boolean;
+      handScrollX: number;
+      onSeatTap: (playerID: PlayerID) => void;
+      onDashboardCardTap: (cardID: string) => void;
+    },
   ): void {
-    const { viewportWidth, viewportHeight } = options;
-    this.syncBackground();
+    this.syncBackground(options.viewportWidth, options.viewportHeight);
 
     if (!this.animationManager) {
       this.animationManager = new AnimationManager(
@@ -81,28 +74,38 @@ export class BattleScene extends Container {
       }
     }
 
-    // Drop seats of players that are no longer in the match.
-    const present = new Set(Object.keys(G.players));
+    // Sync seats
+    const newPlayers = new Set(Object.keys(G.players));
     for (const [id, seat] of this.seatViews) {
-      if (present.has(id)) continue;
-      seat.destroy();
-      this.seatViews.delete(id);
-      this.orderBadges.get(id)?.destroy();
-      this.orderBadges.delete(id);
+      if (!newPlayers.has(id)) {
+        seat.destroy();
+        this.seatViews.delete(id);
+      }
     }
 
-    const opponents = opponentsInOrder(G.seatOrder, viewerID);
-    for (const pid of Object.keys(G.players)) {
-      const isViewer = pid === viewerID;
-      const targetOrder = options.selectedTargetIDs.indexOf(pid);
-      const selected = targetOrder >= 0;
-      const selectable =
-        !isViewer && (selected || options.targetableIDs.has(pid));
+    const { viewportWidth, viewportHeight } = options;
+    // Opponent ring between the status bar (top) and the action row above the dashboard.
+    const centerX = viewportWidth / 2;
+    const centerY = (viewportHeight - DASHBOARD_HEIGHT) / 2 + 20;
+    const radiusX = viewportWidth / 2 - SEAT_WIDTH / 2 - 30;
+    const radiusY = centerY - SEAT_TOP_MIN - SEAT_HEIGHT / 2;
+
+    // Seats sit on an ellipse, starting with the viewer at the bottom (hidden behind the dashboard).
+    const viewerIndex = Math.max(0, G.seatOrder.indexOf(viewerID));
+    const seatOrder = [
+      ...G.seatOrder.slice(viewerIndex),
+      ...G.seatOrder.slice(0, viewerIndex),
+    ];
+    const angleStep = (2 * Math.PI) / Math.max(1, seatOrder.length);
+
+    seatOrder.forEach((pid, index) => {
       const seatOptions = {
         isActor: G.turn.activePlayerID === pid,
-        selected,
-        isHighlighted: options.choosingTarget && selectable,
-        onTap: selectable ? () => options.onSeatTap(pid) : undefined,
+        selected: options.selectedTargetIDs.includes(pid),
+        isHighlighted: options.highlightedTargetIDs.has(pid),
+        onTap: options.selectableTargetIDs.has(pid)
+          ? () => options.onSeatTap(pid)
+          : undefined,
       };
 
       let seat = this.seatViews.get(pid);
@@ -114,105 +117,74 @@ export class BattleScene extends Container {
         seat.sync(G, seatOptions);
       }
 
-      // The viewer is represented by the dashboard; the hidden seat only
-      // gives animations an anchor.
-      seat.visible = !isViewer;
-      if (isViewer) {
-        seat.position.set(30 + 8, viewportHeight - DASHBOARD_TOP_INSET + 8);
-      } else {
-        const index = opponents.indexOf(pid);
-        const position = opponentArcPosition(
-          index,
-          opponents.length,
-          viewportWidth,
-          viewportHeight,
-        );
-        seat.position.set(position.x, position.y);
-      }
-
-      this.syncOrderBadge(pid, seat, targetOrder);
-    }
+      seat.visible = pid !== viewerID;
+      const angle = Math.PI / 2 + index * angleStep;
+      seat.position.set(
+        centerX + radiusX * Math.cos(angle) - SEAT_WIDTH / 2,
+        centerY + radiusY * Math.sin(angle) - SEAT_HEIGHT / 2,
+      );
+    });
 
     this.syncDashboard(G, viewerID, options);
-  }
-
-  private syncOrderBadge(pid: PlayerID, seat: SeatView, order: number): void {
-    let badge = this.orderBadges.get(pid);
-    if (order < 0) {
-      if (badge) badge.visible = false;
-      return;
-    }
-    if (!badge) {
-      badge = new Text({
-        text: "",
-        style: {
-          fontFamily: GAME_FONT_FAMILY,
-          fontSize: 20,
-          fill: THEME.colors.white,
-        },
-      });
-      badge.anchor.set(0.5);
-      this.orderBadges.set(pid, badge);
-      this.boardContainer.addChild(badge);
-    }
-    badge.text = String(order + 1);
-    badge.position.set(seat.x + 124, seat.y + 18);
-    badge.visible = true;
   }
 
   private syncDashboard(
     G: TqsPlayerViewState,
     viewerID: PlayerID,
-    options: BattleSyncOptions,
+    options: {
+      viewportWidth: number;
+      viewportHeight: number;
+      selectedCardIDs: Set<string>;
+      showDashboard: boolean;
+      handScrollX: number;
+      onDashboardCardTap: (cardID: string) => void;
+    },
   ): void {
+    // A Dashboard belongs to one viewer; rebuild it on a hot-seat switch so no private state carries over.
+    if (this.dashboard && this.dashboard.viewerID !== viewerID) {
+      this.dashboard.destroy({ children: true });
+      this.dashboard = undefined;
+    }
+
     const dashboardOptions = {
       viewportWidth: options.viewportWidth,
       selectedCardIDs: options.selectedCardIDs,
       handScrollX: options.handScrollX,
       onCardTap: options.onDashboardCardTap,
-      onScroll: options.onScroll,
+      onScroll: () => {},
     };
-
-    // A Dashboard is bound to one viewer; hot-seat switches must not leak the
-    // previous viewer's hand or role.
-    if (this.dashboard && this.dashboardViewerID !== viewerID) {
-      this.dashboard.destroy({ children: true });
-      this.dashboard = undefined;
-    }
     if (!this.dashboard) {
       this.dashboard = new Dashboard(G, viewerID, dashboardOptions);
-      this.dashboardViewerID = viewerID;
       this.addChild(this.dashboard);
     } else {
       this.dashboard.sync(G, dashboardOptions);
     }
-    this.dashboard.position.set(
-      30,
-      options.viewportHeight - DASHBOARD_TOP_INSET,
-    );
+    this.dashboard.position.set(30, options.viewportHeight - DASHBOARD_HEIGHT);
+    this.dashboard.visible = options.showDashboard;
   }
 
-  private syncBackground(): void {
+  private syncBackground(width: number, height: number): void {
     let bgTex: Texture | undefined;
     try {
-      bgTex = Assets.get<Texture>("main/ui/system/background/table.jpg");
+      bgTex = Assets.get<Texture>(TABLE_BACKGROUND_ALIAS);
     } catch {
       /* ignore */
     }
 
-    if (
-      bgTex &&
-      this.bgContainer.children.length === 1 &&
-      this.bgContainer.children[0] instanceof Graphics
-    ) {
-      this.bgContainer.removeChildren();
-      const bg = new TilingSprite({
-        texture: bgTex,
-        width: 3000,
-        height: 2000,
-      });
-      bg.tint = 0x666666;
-      this.bgContainer.addChild(bg);
+    if (bgTex) {
+      if (
+        this.bgContainer.children.length === 1 &&
+        this.bgContainer.children[0] instanceof Graphics
+      ) {
+        this.bgContainer.removeChildren();
+        const bg = new TilingSprite({
+          texture: bgTex,
+          width: 3000,
+          height: 2000,
+        });
+        bg.tint = 0x666666;
+        this.bgContainer.addChild(bg);
+      }
     }
   }
 
@@ -223,11 +195,8 @@ export class BattleScene extends Container {
     this.lastSequence = 0;
     for (const seat of this.seatViews.values()) seat.destroy();
     this.seatViews.clear();
-    for (const badge of this.orderBadges.values()) badge.destroy();
-    this.orderBadges.clear();
     this.dashboard?.destroy({ children: true });
     this.dashboard = undefined;
-    this.dashboardViewerID = undefined;
   }
 
   public dispose(): void {
