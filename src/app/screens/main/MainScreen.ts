@@ -50,7 +50,6 @@ import { Dashboard } from "../../ui/Dashboard";
 import { SeatView } from "../../ui/SeatView";
 import { getEquipmentSlotViews } from "../../ui/equipmentView";
 import { layoutActionRow } from "../../ui/layout";
-import { FlexContainer } from "../../ui/FlexContainer";
 import { GAME_FONT_FAMILY } from "../../ui/typography";
 import { THEME } from "../../ui/theme";
 import { Button } from "../../ui/components/Button";
@@ -2529,34 +2528,25 @@ ${SUIT_LABELS[card.suit]} ${card.rank}`,
     }>,
     options: { rightInset?: number; bottomInset?: number; gap?: number } = {},
   ): void {
-    const container = new FlexContainer({
-      direction: "row",
-      gap: options.gap ?? 8,
-    });
-    for (const b of buttons) {
-      const btn = this.addButton(
+    const row = layoutActionRow(
+      this.effectiveWidth,
+      this.viewportHeight,
+      buttons.map((button) => button.width),
+      { ...options, buttonHeight: buttons[0]?.height ?? 48 },
+    );
+    buttons.forEach((b, index) => {
+      this.addButton(
         b.label,
-        0,
-        0,
-        b.width,
+        row.centers[index],
+        row.centerY + (b.height ?? 48) / 2,
+        row.widths[index],
         b.height ?? 48,
         b.onPress,
         b.color,
         b.textColor,
         b.disabled,
       );
-      container.addChild(btn);
-    }
-    container.layout();
-    const rightInset = options.rightInset ?? 314;
-    const bottomInset = options.bottomInset ?? 280;
-    container.position.set(
-      this.viewportWidth - rightInset - container.width,
-      this.viewportHeight -
-        bottomInset -
-        Math.floor((buttons[0]?.height ?? 48) / 2),
-    );
-    this.content.addChild(container);
+    });
   }
 
   private addButton(
