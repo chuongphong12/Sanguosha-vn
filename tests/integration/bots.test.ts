@@ -1,6 +1,8 @@
 import { afterEach, describe, expect, it } from "vitest";
 
 import { MatchClient } from "../../src/client/MatchClient";
+import type { TqsGameState } from "../../src/game/model";
+import { handLimit } from "../../src/game/rules";
 
 let match: MatchClient | undefined;
 
@@ -40,7 +42,8 @@ function humanMove(client: MatchClient): void {
   if (G.turn.step === "play") client.move("endPlayPhase");
   else if (G.turn.step === "discard") {
     const player = G.players[me];
-    const excess = player.hand.length - Math.max(0, player.hp);
+    const excess =
+      player.hand.length - handLimit(G as unknown as TqsGameState, me);
     client.move("discardCards", player.hand.slice(0, Math.max(0, excess)));
   }
 }
@@ -53,6 +56,8 @@ describe("local match with AI bots", () => {
         numPlayers,
         botsEnabled: true,
         fastPick: true,
+        // In the six-player deal, Yuan Shu reduces the human lord's hand limit.
+        seed: "ci-bots-44",
         matchID: `bots-${numPlayers}-${Date.now()}`,
       });
       await expect.poll(() => match!.state).not.toBeNull();
