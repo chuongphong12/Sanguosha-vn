@@ -8,7 +8,7 @@ describe("action row layout", () => {
 
     expect(layout.centers).toEqual([1238, 1431]);
     expect(layout.widths).toEqual([180, 190]);
-    expect(layout.centerY + 48 / 2).toBe(544);
+    expect(layout.centerY + 48 / 2).toBe(540);
   });
 
   it("aligns a single button using the same right and bottom insets", () => {

@@ -46,7 +46,126 @@ export function createPlayerView(
     }),
   );
 
-  const { deck, ...G_rest } = G;
+  const { deck, stream, ...G_rest } = G;
+
+  const filteredEvents = stream.events.map((e) => {
+    // We explicitly destructure allowed keys to prevent leaking anything else
+    switch (e.kind) {
+      case "card-committed":
+        return {
+          sequence: e.sequence,
+          matchEpoch: e.matchEpoch,
+          turn: e.turn,
+          correlationID: e.correlationID,
+          parentCorrelationID: e.parentCorrelationID,
+          kind: e.kind,
+          actorID: e.actorID,
+          card: { ...e.card },
+          material: e.material,
+          targetIDs: [...e.targetIDs],
+        };
+      case "response-window-opened":
+        return {
+          sequence: e.sequence,
+          matchEpoch: e.matchEpoch,
+          turn: e.turn,
+          correlationID: e.correlationID,
+          parentCorrelationID: e.parentCorrelationID,
+          kind: e.kind,
+          promptID: e.promptID,
+          windowID: e.windowID,
+          eligibleActorIDs: [...e.eligibleActorIDs],
+          targetID: e.targetID,
+          response: e.response,
+        };
+      case "response-accepted":
+        return {
+          sequence: e.sequence,
+          matchEpoch: e.matchEpoch,
+          turn: e.turn,
+          correlationID: e.correlationID,
+          parentCorrelationID: e.parentCorrelationID,
+          kind: e.kind,
+          promptID: e.promptID,
+          windowID: e.windowID,
+          actorID: e.actorID,
+          response: e.response,
+          remainingRequired: e.remainingRequired,
+        };
+      case "target-outcome":
+        return {
+          sequence: e.sequence,
+          matchEpoch: e.matchEpoch,
+          turn: e.turn,
+          correlationID: e.correlationID,
+          parentCorrelationID: e.parentCorrelationID,
+          kind: e.kind,
+          targetID: e.targetID,
+          outcome: e.outcome,
+          amount: e.amount,
+          nature: e.nature,
+        };
+      case "hp-changed":
+        return {
+          sequence: e.sequence,
+          matchEpoch: e.matchEpoch,
+          turn: e.turn,
+          correlationID: e.correlationID,
+          parentCorrelationID: e.parentCorrelationID,
+          kind: e.kind,
+          targetID: e.targetID,
+          from: e.from,
+          to: e.to,
+          cause: e.cause,
+        };
+      case "skill-invoked":
+        return {
+          sequence: e.sequence,
+          matchEpoch: e.matchEpoch,
+          turn: e.turn,
+          correlationID: e.correlationID,
+          parentCorrelationID: e.parentCorrelationID,
+          kind: e.kind,
+          ownerID: e.ownerID,
+          skillID: e.skillID,
+          targetIDs: [...e.targetIDs],
+        };
+      case "role-revealed":
+        return {
+          sequence: e.sequence,
+          matchEpoch: e.matchEpoch,
+          turn: e.turn,
+          correlationID: e.correlationID,
+          parentCorrelationID: e.parentCorrelationID,
+          kind: e.kind,
+          playerID: e.playerID,
+          role: e.role,
+        };
+      case "player-died":
+        return {
+          sequence: e.sequence,
+          matchEpoch: e.matchEpoch,
+          turn: e.turn,
+          correlationID: e.correlationID,
+          parentCorrelationID: e.parentCorrelationID,
+          kind: e.kind,
+          playerID: e.playerID,
+        };
+      case "match-ended":
+        return {
+          sequence: e.sequence,
+          matchEpoch: e.matchEpoch,
+          turn: e.turn,
+          correlationID: e.correlationID,
+          parentCorrelationID: e.parentCorrelationID,
+          kind: e.kind,
+          winners: [...e.winners],
+        };
+      default:
+        // @ts-expect-error fallback for unknown events
+        return { ...e };
+    }
+  });
 
   return {
     ...G_rest,
@@ -59,5 +178,11 @@ export function createPlayerView(
       : [...G.processing],
     log: G.log.map((entry) => ({ ...entry })),
     cards: { ...G.cards },
+    stream: {
+      epoch: stream.epoch,
+      retentionFloor: stream.retentionFloor,
+      highWatermark: stream.highWatermark,
+      events: filteredEvents as any,
+    },
   };
 }

@@ -2,6 +2,8 @@ import { FancyButton } from "@pixi/ui";
 
 import { engine } from "../getEngine";
 
+import { UI_BUTTON_ALIAS } from "./assetAliases";
+
 import { Label } from "./Label";
 
 const defaultButtonOptions = {
@@ -21,7 +23,7 @@ export class Button extends FancyButton {
     const opts = { ...defaultButtonOptions, ...options };
 
     super({
-      defaultView: "button.png",
+      defaultView: UI_BUTTON_ALIAS,
       nineSliceSprite: [38, 50, 38, 50],
       anchor: 0.5,
       text: new Label({

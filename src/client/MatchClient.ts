@@ -25,6 +25,8 @@ export interface MatchConfig {
   serverUrl?: string; // Required for remote
   credentials?: string; // Required if joining via lobby
   botsEnabled?: boolean;
+  /** Fixes shuffles and deals so a local match can be reproduced (tests, bug reports). */
+  seed?: string;
   autoSkipWuxie?: boolean;
   fastPick?: boolean;
 }
@@ -79,6 +81,7 @@ export class MatchClient {
 
       const customGame = {
         ...TqsGame,
+        ...(config.seed ? { seed: config.seed } : {}),
         setup: (setupCtx: any) =>
           TqsGame.setup!(setupCtx, {
             autoSkipWuxie: config.autoSkipWuxie,

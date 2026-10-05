@@ -33,6 +33,14 @@ This project uses a specialized set of agent skills to ensure high code quality,
 ### 7. Code Intelligence (`CLAUDE.md` / `gitnexus-*` skills)
 - **GitNexus & CodeGraph**: Treat `risk: UNKNOWN` as unresolved. Never edit a function/class without checking `impact`. Use graph queries instead of plain text search for dependencies, callers, and execution flow.
 
+### 8. Game Engine (`.agents/skills/game-engine`)
+- Use for building web-based game engines and games (HTML5 Canvas, WebGL, Phaser, Three.js).
+- Includes workflows and templates for game loops, physics, collision detection, and rendering.
+
+### 9. ADHD Output Formatting (`.agents/skills/i-have-adhd`)
+- Shape output for a reader with ADHD: lead with the next action, number multi-step work.
+- Restate progress across turns, suppress tangents, give specific time estimates, and make wins visible.
+
 ## Execution Workflow
 
 1. **Information Retrieval & Impact Analysis (GitNexus / CodeGraph)**:

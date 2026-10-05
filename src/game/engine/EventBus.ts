@@ -2,6 +2,7 @@ import { PlayerID, TqsGameState } from "../model";
 // import { GENERALS_BY_ID } from "../catalog/generals";
 
 import { SKILL_REGISTRY } from "./SkillRegistry";
+import { emitPresentationEvent } from "./presentation";
 
 export type GameEventName =
   | "Active"
@@ -33,6 +34,12 @@ export function emitEvent(
       if (!skillDef || skillDef.triggerOn !== eventName) continue;
 
       if (skillDef.canInvoke(G, playerID, context)) {
+        emitPresentationEvent(G, {
+          kind: "skill-invoked",
+          ownerID: playerID,
+          skillID: skillId,
+          targetIDs: [],
+        });
         G.effectStack.unshift({
           id: G.nextResolutionID++,
           kind: "skill-trigger",

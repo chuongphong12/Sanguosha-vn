@@ -1,3 +1,6 @@
+import { FlexContainer } from "./FlexContainer";
+import { Graphics } from "pixi.js";
+
 export interface ActionRowLayout {
   centers: number[];
   widths: number[];
@@ -18,27 +21,33 @@ export function layoutActionRow(
   const rightInset = options.rightInset ?? 314;
   const bottomInset = options.bottomInset ?? 280;
   const gap = options.gap ?? 8;
-  const buttonHeight = options.buttonHeight ?? 40;
-  const gapWidth = Math.max(0, buttonWidths.length - 1) * gap;
-  const requestedWidth = buttonWidths.reduce((sum, width) => sum + width, 0);
-  const availableWidth = Math.max(1, viewportWidth - rightInset * 2);
-  const widthScale =
-    requestedWidth > 0
-      ? Math.min(1, Math.max(1, availableWidth - gapWidth) / requestedWidth)
-      : 1;
-  const widths = buttonWidths.map((width) =>
-    Math.max(1, Math.floor(width * widthScale)),
-  );
-  const totalWidth = widths.reduce((sum, width) => sum + width, 0) + gapWidth;
-  let cursor = viewportWidth - rightInset - totalWidth;
+  const buttonHeight = options.buttonHeight ?? 48;
+
+  const container = new FlexContainer({
+    direction: "row",
+    gap,
+    maxWidth: Math.max(1, viewportWidth - rightInset * 2),
+  });
+
+  const dummies = buttonWidths.map((w) => {
+    const g = new Graphics();
+    g.beginFill(0);
+    g.drawRect(0, 0, w, buttonHeight);
+    g.endFill();
+    container.addChild(g);
+    return g;
+  });
+
+  container.layout();
+
+  const lastChild = dummies[dummies.length - 1];
+  // child.x is the center, child.width is the scaled width
+  const totalWidth = lastChild ? lastChild.x + lastChild.width / 2 : 0;
+  const containerLeft = viewportWidth - rightInset - totalWidth;
 
   return {
-    centers: widths.map((width) => {
-      const center = cursor + width / 2;
-      cursor += width + gap;
-      return center;
-    }),
-    widths,
+    centers: dummies.map((d: any) => containerLeft + d.x),
+    widths: dummies.map((d: any) => Math.max(1, Math.floor(d.width))),
     centerY: viewportHeight - bottomInset - buttonHeight / 2,
   };
 }
