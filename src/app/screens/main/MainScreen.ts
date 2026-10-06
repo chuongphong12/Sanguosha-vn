@@ -29,6 +29,7 @@ import {
   getVirtualConversions,
 } from "../../../game/cardEngine";
 import { CARD_DEFINITIONS } from "../../../game/catalog/cards";
+import { handLimit } from "../../../game/rules";
 import type { CardName } from "../../../game/types/core";
 import {
   GENERALS_BY_ID,
@@ -112,7 +113,7 @@ export class MainScreen extends Container {
   private nullificationInterval: ReturnType<typeof setInterval> | null = null;
   private handScrollX = 0;
   private serpentSpearMode = false;
-  private virtualAs: "slash" | "snatch" | "indulgence" | null = null;
+  private virtualAs: "slash" | "dismantle" | "indulgence" | null = null;
   private pendingSkill:
     | "zhi-heng"
     | "qing-nang"
@@ -311,6 +312,16 @@ export class MainScreen extends Container {
     this.state = state;
     if (!state) return;
 
+    if (
+      state.G.status !== "waiting-room" &&
+      !state.G.players[this.match!.currentViewerID]
+    ) {
+      if (this.nullificationTimeout) clearTimeout(this.nullificationTimeout);
+      this.nullificationTimeout = null;
+      this.render();
+      return;
+    }
+
     const promptID = state?.G.prompt?.id ?? null;
     if (promptID !== this.lastPromptID) {
       if (this.nullificationTimeout) {
@@ -390,6 +401,21 @@ export class MainScreen extends Container {
 
     const G = this.state.G;
     const viewerID = this.match.currentViewerID;
+    if (G.status !== "waiting-room" && !G.players[viewerID]) {
+      this.waitingRoomScene.visible = false;
+      this.formationScene.visible = false;
+      this.battleScene.visible = false;
+      this.resultScene.visible = false;
+      this.drawExitButton();
+      this.addText(
+        "Bạn không nằm trong danh sách người chơi của trận này.",
+        this.viewportWidth / 2,
+        this.viewportHeight / 2,
+        20,
+        THEME.colors.paper,
+      );
+      return;
+    }
     const isSelecting =
       G.status === "lord-selection" || G.status === "general-selection";
     this.waitingRoomScene.visible = G.status === "waiting-room";
@@ -867,11 +893,7 @@ export class MainScreen extends Container {
 
     if (prompt) {
       const isSimultaneous =
-        prompt.kind === "card-response" &&
-        (prompt.reason === "rescue" ||
-          prompt.reason === "nullification" ||
-          prompt.reason === "arrow-barrage" ||
-          prompt.reason === "barbarian-invasion");
+        prompt.kind === "card-response" && prompt.reason === "nullification";
 
       if (isSimultaneous) {
         const isTarget = prompt.targetID === viewerID;
@@ -1070,8 +1092,8 @@ export class MainScreen extends Container {
       const virtualDefinition =
         this.virtualAs === "slash"
           ? CARD_DEFINITIONS.slash
-          : this.virtualAs === "snatch"
-            ? CARD_DEFINITIONS.snatch
+          : this.virtualAs === "dismantle"
+            ? CARD_DEFINITIONS.dismantle
             : this.virtualAs === "indulgence"
               ? CARD_DEFINITIONS.indulgence
               : undefined;
@@ -1301,14 +1323,12 @@ export class MainScreen extends Container {
     }
 
     if (G.turn.step === "discard") {
-      const canResumePlay = !G.turn.skippedSteps.includes("play");
       const actionRow = layoutActionRow(
         this.effectiveWidth,
         this.viewportHeight,
-        canResumePlay ? [190, 220] : [220],
+        [220],
       );
-      const required =
-        G.players[viewerID].hand.length - Math.max(0, G.players[viewerID].hp);
+      const required = G.players[viewerID].hand.length - handLimit(G, viewerID);
       this.addText(
         `Cần bỏ: ${required} lá · Đã chọn: ${this.selectedCardIDs.size} lá`,
         actionRow.centers[0] - actionRow.widths[0] / 2 - 20,
@@ -1318,24 +1338,11 @@ export class MainScreen extends Container {
         1,
         "right",
       );
-      if (canResumePlay)
-        this.addButton(
-          "Quay lại Xuất Bài",
-          actionRow.centers[0],
-          actionRow.centerY,
-          actionRow.widths[0],
-          48,
-          () => {
-            this.selectedCardIDs.clear();
-            this.match!.move("resumePlayPhase");
-          },
-          THEME.colors.ink,
-        );
       this.addButton(
         "Xác nhận bỏ bài",
-        actionRow.centers[canResumePlay ? 1 : 0],
+        actionRow.centers[0],
         actionRow.centerY,
-        actionRow.widths[canResumePlay ? 1 : 0],
+        actionRow.widths[0],
         48,
         () => this.match!.move("discardCards", [...this.selectedCardIDs]),
         THEME.colors.red,
@@ -2165,7 +2172,9 @@ export class MainScreen extends Container {
       "luo-shen": "【Lạc Thần】 tiến hành Phán Xét",
       "bi-yue": "【Bế Nguyệt】 rút 1 lá",
       "ke-ji": "【Khắc Kỷ】 bỏ qua Giai Đoạn Bỏ Bài",
-      "ji-zhi": "【Tập Trí】 rút 1 lá",
+      "ji-zhi": "【Tập Trí】 lật 1 lá",
+      "ying-zi": "【Anh Tư】 rút thêm 1 lá",
+      "tian-du": "【Thiên Đố】 nhận lá phán xét",
     };
     return labels[reason] ?? "Kích hoạt";
   }
@@ -2206,6 +2215,7 @@ export class MainScreen extends Container {
         .filter(
           (slot) =>
             slot.cardID &&
+            !prompt.excludedEquipmentSlots?.includes(slot.slot) &&
             (prompt.reason !== "qilin-bow" ||
               slot.slot === "offensive-mount" ||
               slot.slot === "defensive-mount"),
@@ -2244,7 +2254,11 @@ ${SUIT_LABELS[card.suit]} ${card.rank}`,
 
     const y = (this.viewportHeight - 80) / 2;
     const boardW = this.viewportWidth - 280;
-    this.addText("Chọn bài", boardW / 2, y - 120, 20, THEME.colors.gold);
+    const title =
+      prompt.reason === "ji-zhi"
+        ? "Tập Trí: bỏ 1 lá tay để nhận bài cơ bản vừa lật, hoặc bỏ qua"
+        : "Chọn bài";
+    this.addText(title, boardW / 2, y - 120, 20, THEME.colors.gold);
 
     const cardW = 120;
     const cardH = 168;

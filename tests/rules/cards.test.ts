@@ -241,7 +241,7 @@ describe("Standard + EX card engine", () => {
     );
   });
 
-  it("lets each global-trick target Nullify it only for themselves", () => {
+  it("nullifies one target of a global trick while later targets still resolve", () => {
     const G = createStartedGame();
     resetHands(G);
     const sourceID = G.turn.activePlayerID;
@@ -252,17 +252,12 @@ describe("Standard + EX card engine", () => {
     declareCardUse(G, sourceID, { cardID, targetIDs: [] }, identityShuffle);
 
     expect(G.effectStack[0]).toMatchObject({
-      kind: "aoe-simultaneous",
-      targetIDs: [nullifierID, ...otherIDs],
+      kind: "nullification",
+      targetID: nullifierID,
     });
-    answerCardPrompt(
-      G,
-      nullifierID,
-      G.prompt!.id,
-      { kind: "card", cardID: nullificationID },
-      identityShuffle,
-    );
+    answerNullificationChain(G, { [nullifierID]: nullificationID });
     for (const playerID of otherIDs) {
+      answerNullificationChain(G, {});
       answerCardPrompt(
         G,
         playerID,
@@ -348,15 +343,7 @@ describe("Standard + EX card engine", () => {
       identityShuffle,
     );
 
-    for (const responderID of G.seatOrder) {
-      answerCardPrompt(
-        G,
-        responderID,
-        G.prompt!.id,
-        { kind: "pass" },
-        identityShuffle,
-      );
-    }
+    expect(G.prompt).toBeNull();
     expect(G.players[targetID].judgement).toContain(cardID);
   });
 

@@ -6,15 +6,15 @@ import {
   PlayerID,
   SkillTriggerEffect,
 } from "../../../types";
-import { drawCards, writeLog } from "../../../rules";
+import { drawCards, writeLog, ensureDeck } from "../../../rules";
 import {
   removeZoneCard,
   playerName,
   damageEffect,
   takeTopCard,
-  hasZoneCard,
   moveSelectedCard,
   hasSkill,
+  offerTianDu,
 } from "../../../cardEngine";
 
 export const yiJiSkill: SkillDefinition = {
@@ -103,6 +103,7 @@ export const yiJiSkill: SkillDefinition = {
       if (answer.choice !== "activate" || effect.stage !== "offer")
         return false;
 
+      if (!ensureDeck(G, 2, shuffle)) return true;
       effect.poolCardIDs = [];
       for (let index = 0; index < 2; index += 1) {
         const cardID = takeTopCard(G, shuffle);
@@ -153,6 +154,10 @@ export const yiJiSkill: SkillDefinition = {
       const chosen = [...new Set(answer.playerIDs as string[] as string[])];
       if (
         chosen.length !== 1 ||
+        answer.playerIDs.length !== 1 ||
+        G.prompt?.kind !== "choose-players" ||
+        !G.prompt.candidates.includes(chosen[0]) ||
+        !G.players[chosen[0]]?.alive ||
         !effect.poolCardIDs.includes(effect.selectedCardID) ||
         !G.players[effect.owner].hand.includes(effect.selectedCardID)
       ) {
@@ -317,16 +322,10 @@ export const gangLieSkill: SkillDefinition = {
     if (effect.state === "judging" || effect.state === "gui-cai-changed") {
       const judgeCardID = effect.judgeCardID;
       const judgeCard = G.cards[judgeCardID];
-      if (hasSkill(G, owner, "tian-du")) {
-        const discardIndex = G.discard.indexOf(judgeCardID);
-        if (discardIndex >= 0) {
-          G.discard.splice(discardIndex, 1);
-          G.players[owner].hand.push(judgeCardID);
-          writeLog(
-            G,
-            playerName(G, owner) + " dùng 【Thiên Đố】 nhận lá phán xét.",
-          );
-        }
+      if (!effect.tianDuOffered) {
+        effect.tianDuOffered = true;
+        offerTianDu(G, owner, judgeCardID);
+        if (G.effectStack[0] !== effect) return;
       }
       if (judgeCard.suit !== "heart") {
         effect.state = "punishing";
@@ -444,12 +443,12 @@ export const gangLieSkill: SkillDefinition = {
       const cardIDs = moveSelectedCard(G, G.prompt, answer);
       if (!cardIDs) return false;
       const sourceID = effect.context.effect.sourceID;
+      G.effectStack.splice(G.effectStack.indexOf(effect), 1);
       for (const cardID of cardIDs) {
         removeZoneCard(G, sourceID, cardID);
         G.discard.push(cardID);
       }
       writeLog(G, playerName(G, sourceID) + " bỏ hai lá vì 【Cương Liệt】.");
-      G.effectStack.shift();
       return true;
     }
     return false;
@@ -463,7 +462,11 @@ export const fanKuiSkill: SkillDefinition = {
     if (context.targetID !== playerID) return false;
     const sourceID = context.effect.sourceID;
     if (!sourceID || !G.players[sourceID]?.alive) return false;
-    return hasZoneCard(G, sourceID);
+    return (
+      G.players[sourceID].hand.length +
+        Object.keys(G.players[sourceID].equipment).length >
+      0
+    );
   },
   onTrigger: (G, baseEffect) => {
     const effect = baseEffect as SkillTriggerEffect;
@@ -506,6 +509,7 @@ export const fanKuiSkill: SkillDefinition = {
       if (!cardIDs) return false;
       const sourceID = effect.context.effect.sourceID;
 
+      G.effectStack.splice(G.effectStack.indexOf(effect), 1);
       for (const cardID of cardIDs) {
         removeZoneCard(G, sourceID, cardID);
         G.players[effect.owner].hand.push(cardID);
@@ -514,7 +518,6 @@ export const fanKuiSkill: SkillDefinition = {
           `${playerName(G, effect.owner)} dùng 【Phản Quỹ】 lấy một lá của ${playerName(G, sourceID)}.`,
         );
       }
-      G.effectStack.shift();
       return true;
     }
     return false;

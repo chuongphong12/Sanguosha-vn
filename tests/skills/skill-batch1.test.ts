@@ -311,7 +311,7 @@ describe("passive rule skills (batch 1)", () => {
     expect(G.players[luBuID].hp).toBe(hp - 1);
   });
 
-  it("draws three cards with Ying Zi", () => {
+  it("draws three cards after activating Ying Zi", () => {
     const G = createStartedGame();
     resetHands(G);
     const playerID = G.turn.activePlayerID;
@@ -319,6 +319,14 @@ describe("passive rule skills (batch 1)", () => {
     stackDeck(G, ["card-001", "card-002", "card-003"]);
 
     startCardTurn(G, playerID, identityShuffle);
+    expect(G.prompt).toMatchObject({ reason: "ying-zi" });
+    answerCardPrompt(
+      G,
+      playerID,
+      G.prompt!.id,
+      { kind: "option", choice: "activate" },
+      identityShuffle,
+    );
     expect(G.players[playerID].hand).toHaveLength(3);
   });
 
@@ -369,6 +377,14 @@ describe("passive rule skills (batch 1)", () => {
 
     startCardTurn(G, playerID, identityShuffle);
     answerNullificationChain(G, {});
+    expect(G.prompt).toMatchObject({ reason: "tian-du" });
+    answerCardPrompt(
+      G,
+      playerID,
+      G.prompt!.id,
+      { kind: "option", choice: "activate" },
+      identityShuffle,
+    );
     expect(G.players[playerID].judgement).not.toContain(lightningID);
     expect(G.players[playerID].hand).toContain(judgeID);
     expect(G.discard).not.toContain(judgeID);

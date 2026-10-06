@@ -75,8 +75,6 @@ describe("local hot-seat match", () => {
     match.move("endPlayPhase");
     await expect.poll(() => match!.state!.G.turn.step).toBe("discard");
     match.move("resumePlayPhase");
-    await expect.poll(() => match!.state!.G.turn.step).toBe("play");
-    match.move("endPlayPhase");
     await expect.poll(() => match!.state!.G.turn.step).toBe("discard");
     const lordHand = match.state!.G.players[started.lordID].hand;
     match.move("discardCards", lordHand.slice(0, 2));

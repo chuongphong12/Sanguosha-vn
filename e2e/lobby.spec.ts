@@ -1,17 +1,9 @@
 import { test, expect } from "@playwright/test";
+import { trackErrors, waitForStatus, waitForText } from "./support/pixi";
 
 test.describe("Tam Quoc Sat - Lobby & Game", () => {
   test("should create a room and join it", async ({ page }) => {
-    // Log console messages and errors for debugging
-    page.on("console", (msg) => console.log("PAGE LOG:", msg.text()));
-    page.on("pageerror", (err) => console.log("PAGE ERROR:", err.message));
-    page.on("requestfailed", (request) =>
-      console.log(
-        "REQUEST FAILED:",
-        request.url(),
-        request.failure()?.errorText,
-      ),
-    );
+    const errors = trackErrors(page);
 
     // 1. Navigate to the frontend, forcing it to use the local test backend (which proxies to 8000)
     await page.goto("/?backend=" + encodeURIComponent("http://localhost:8000"));
@@ -45,7 +37,8 @@ test.describe("Tam Quoc Sat - Lobby & Game", () => {
     const canvas = page.locator("canvas");
     await expect(canvas).toBeVisible();
 
-    // Wait for a second to ensure no immediate crash on game start
-    await page.waitForTimeout(2000);
+    await waitForStatus(page, "waiting-room");
+    await waitForText(page, /NGƯỜI CHƠI \(1\/8\)/);
+    expect(errors).toEqual([]);
   });
 });

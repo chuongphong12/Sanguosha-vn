@@ -161,8 +161,8 @@ async function driveUntil(
 async function discardIfRequired(page: Page): Promise<void> {
   const state = await localState(page);
   if (state.step !== "discard") return;
-  const required = state.hand - Math.max(0, state.hp);
-  await waitForText(page, /Cần bỏ:/);
+  const discardLabel = await waitForText(page, /Cần bỏ:/);
+  const required = Number(discardLabel.text.match(/Cần bỏ:\s*(\d+)/)![1]);
   for (let i = 0; i < required; i += 1) {
     const cards = (await visibleTexts(page)).filter(
       (t) => /^【.+】/.test(t.text) && t.y > VIEWPORT.height - 260,
@@ -179,6 +179,125 @@ async function discardIfRequired(page: Page): Promise<void> {
 }
 
 test.describe("Local play", () => {
+  test("a seeded match reaches a real winner and returns to the lobby through UI moves", async ({
+    page,
+  }) => {
+    test.setTimeout(240000);
+    await page.setViewportSize(VIEWPORT);
+    const errors = trackErrors(page);
+    await page.goto(
+      "/?mode=local&numPlayers=4&fastpick=1&bots=1&seed=card-flow-1",
+    );
+    await waitForStatus(page, "playing", 45000);
+    const deadline = Date.now() + 180000;
+    while (Date.now() < deadline) {
+      const state = await localState(page);
+      if (state.status === "ended") break;
+      const texts = await visibleTexts(page);
+      if (texts.some((t) => /^Thân phận của bạn là:/.test(t.text))) {
+        await dismissRoleIfShown(page);
+      } else if (state.promptResponder === state.viewerID) {
+        const decline = texts.find((t) =>
+          /^(Không$|Không dùng|Không đánh ra|Không cứu|Bỏ qua|Giữ nguyên|Không kích hoạt|Nhận sát thương|Gây Sát|Rút 1 lá)/.test(
+            t.text,
+          ),
+        );
+        expect(
+          decline,
+          `a legal response is visible: ${texts.map((t) => t.text).join(" | ")}`,
+        ).toBeDefined();
+        await page.mouse.click(
+          decline!.x + decline!.width / 2,
+          decline!.y + decline!.height / 2,
+        );
+      } else if (
+        state.activePlayerID === state.viewerID &&
+        state.step === "play" &&
+        state.promptID === null
+      ) {
+        await clickText(page, /^Kết thúc Xuất Bài$/);
+      } else if (
+        state.activePlayerID === state.viewerID &&
+        state.step === "discard" &&
+        state.promptID === null
+      ) {
+        await discardIfRequired(page);
+      }
+      await page.waitForTimeout(150);
+    }
+    expect((await localState(page)).status).toBe("ended");
+    const result = await evalMatch(page, (G) => ({
+      winner: G.winner,
+      turn: G.turn.number,
+      alive: Object.values(G.players).filter((p: any) => p.alive).length,
+    }));
+    expect(result.winner?.playerIDs.length).toBeGreaterThan(0);
+    expect(result.turn).toBeGreaterThan(1);
+    expect(result.alive).toBeLessThan(4);
+    await waitForText(page, result.winner!.reason);
+    await expectNoText(page, /^Kết thúc Xuất Bài$/);
+    await page.screenshot({
+      path: test.info().outputPath("real-match-result.png"),
+    });
+    await clickText(page, /^Quay lại sảnh$/);
+    await expect(page.locator("#lobby-ui")).toBeVisible();
+    expect(errors).toEqual([]);
+  });
+  for (const removeCard of [false, true]) {
+    test(`${removeCard ? "removing a hovered card" : "destroying a hovered dashboard"} stops animation without runtime errors`, async ({
+      page,
+    }) => {
+      const errors = trackErrors(page);
+      await startSeededHotSeat(page, "card-flow-1");
+      const hoverPoint = await page.evaluate(async (removeCard) => {
+        const visit = (node: any): any => {
+          if (node.constructor.name === "Dashboard") return node;
+          for (const child of node.children ?? []) {
+            const dashboard = visit(child);
+            if (dashboard) return dashboard;
+          }
+        };
+        const dashboard = visit((window as any).__TQS_APP__.stage);
+        if (!dashboard) throw new Error("Dashboard is not on stage");
+        // Let deal animations settle before finding the card's hit box.
+        await Promise.all(
+          [...dashboard.handCardAnimations.values()].map(
+            (animation: any) => animation.finished,
+          ),
+        );
+        const card = dashboard.handCardViews.values().next().value;
+        if (!card) throw new Error("Dashboard has no hand card");
+        card.once("pointerenter", () => {
+          (window as any).__E2E_TEARDOWN__ = {
+            hovered: dashboard.constructor.hoveredCardID !== null,
+            running: [...dashboard.handCardAnimations.values()].some(
+              (animation: any) => animation.state === "running",
+            ),
+          };
+          if (removeCard) {
+            const G = structuredClone(dashboard.lastState.G);
+            G.players[dashboard.viewerID].hand =
+              G.players[dashboard.viewerID].hand.slice(1);
+            dashboard.sync(G, dashboard.lastState.options);
+          } else {
+            dashboard.destroy({ children: true });
+          }
+        });
+        const bounds = card.getBounds();
+        return { x: bounds.x + 20, y: bounds.y + bounds.height / 2 };
+      }, removeCard);
+      await page.mouse.move(hoverPoint.x, hoverPoint.y);
+      await page.waitForFunction(
+        () => (window as any).__E2E_TEARDOWN__ !== undefined,
+      );
+      expect(
+        await page.evaluate(() => (window as any).__E2E_TEARDOWN__),
+      ).toEqual({ hovered: true, running: true });
+      // Keep the browser alive so delayed writes to destroyed Pixi objects surface.
+      await page.waitForTimeout(500);
+      expect(errors).toEqual([]);
+    });
+  }
   test("hot-seat: hand-offs, general selection and the first turn hand-over", async ({
     page,
   }) => {
@@ -192,14 +311,18 @@ test.describe("Local play", () => {
 
     // The lord opens; the device must be handed to them before they may act.
     const { lordID } = await localState(page);
-    await expect
-      .poll(async () => {
-        const { viewerID } = await localState(page);
-        if (viewerID !== lordID && (await hasText(page, /^Tôi là P\d+/)))
-          await clickText(page, /^Tôi là P\d+/);
-        return (await localState(page)).viewerID;
-      })
-      .toBe(lordID);
+    await driveUntil(
+      page,
+      async () => {
+        const state = await localState(page);
+        return (
+          state.viewerID === lordID &&
+          state.step === "play" &&
+          state.promptID === null
+        );
+      },
+      /^(Không dùng|Bỏ qua|Giữ nguyên|Không$)/,
+    );
     await waitForText(page, /Giai Đoạn Xuất Bài/);
     await dismissRoleIfShown(page);
     await clickText(page, "Kết thúc Xuất Bài");
@@ -355,7 +478,7 @@ test.describe("Local play", () => {
                 ).length,
             )) >= 3,
         ),
-      /^Bỏ qua$/,
+      /^(Bỏ qua|Không đánh ra 【Sát】|Không dùng 【.+】)$/,
     );
 
     const hpLost = await evalMatch(

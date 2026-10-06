@@ -41,6 +41,7 @@ export interface TurnState {
   wangZunResolved: boolean;
   wangZunHandLimitPenalty: number;
   biYueResolved: boolean;
+  playedSlashDuringPlay?: boolean;
 }
 
 export interface TqsGameState {

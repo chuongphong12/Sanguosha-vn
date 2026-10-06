@@ -86,15 +86,15 @@ describe("core rules v2", () => {
     ).toBe(false);
   });
 
-  it("returns from Discard to Play without undoing resolved state", () => {
+  it("rejects a return from Discard to Play without changing resolved state", () => {
     const G = createStartedGame();
     const playerID = G.turn.activePlayerID;
     const hand = [...G.players[playerID].hand];
 
     expect(endCardPlayPhase(G, playerID, identityShuffle)).toBe(true);
     expect(G.turn.step).toBe("discard");
-    expect(resumeCardPlayPhase(G, playerID)).toBe(true);
-    expect(G.turn.step).toBe("play");
+    expect(resumeCardPlayPhase(G, playerID)).toBe(false);
+    expect(G.turn.step).toBe("discard");
     expect(G.players[playerID].hand).toEqual(hand);
   });
 

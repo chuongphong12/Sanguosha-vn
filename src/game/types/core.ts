@@ -51,7 +51,7 @@ export type DamageNature = "normal" | "thunder";
 export type CardColor = "red" | "black" | "colorless";
 
 export interface GameWinner {
-  side: "lord" | "rebel" | "renegade";
+  side: "lord" | "rebel" | "renegade" | "draw";
   playerIDs: PlayerID[];
   reason: string;
 }

@@ -31,24 +31,26 @@ function startAoe(cardName: "barbarian-invasion" | "arrow-barrage") {
   return { G, sourceID, targetIDs };
 }
 
-const pass = (G: TqsGameState, playerID: PlayerID) =>
-  answerCardPrompt(
+const pass = (G: TqsGameState, playerID: PlayerID) => {
+  answerNullificationChain(G, {});
+  return answerCardPrompt(
     G,
     playerID,
     G.prompt!.id,
     { kind: "pass" },
     identityShuffle,
   );
+};
 
 describe.each(["barbarian-invasion", "arrow-barrage"] as const)(
   "%s answered one player at a time",
   (cardName) => {
-    it("opens one window for all targets", () => {
+    it("opens the required response for the next target", () => {
       const { G } = startAoe(cardName);
       expect(G.prompt).toMatchObject({
         kind: "card-response",
         reason: cardName,
-        response: "aoe-response",
+        response: REASON[cardName],
       });
     });
 
@@ -101,6 +103,7 @@ describe.each(["barbarian-invasion", "arrow-barrage"] as const)(
     it("does not let a target answer twice", () => {
       const { G, targetIDs } = startAoe(cardName);
       expect(pass(G, targetIDs[0])).toBe(true);
+      answerNullificationChain(G, {});
       expect(pass(G, targetIDs[0])).toBe(false);
     });
   },

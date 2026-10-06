@@ -144,7 +144,8 @@ const zoneChoicesFor = (
       for (const slot of Object.keys(owner.equipment) as Array<
         keyof typeof owner.equipment
       >)
-        choices.push({ zone, ownerID: prompt.ownerID, slot });
+        if (!prompt.excludedEquipmentSlots?.includes(slot))
+          choices.push({ zone, ownerID: prompt.ownerID, slot });
     if (zone === "judgement")
       owner.judgement.forEach((cardID) =>
         choices.push({ zone, ownerID: prompt.ownerID, cardID }),
@@ -315,10 +316,8 @@ const selectionCandidates = (
     args: [generalID],
   }));
 
-// Nullification and rescue prompts are open to every living player who has
-// not passed yet (the table UI offers them to all seats), and the engine keeps
-// waiting until each of them has answered, whoever the named responder is.
-const OPEN_PROMPT_REASONS = new Set(["nullification", "rescue"]);
+// Nullification is an open response window; rescue and AOE follow seat order.
+const OPEN_PROMPT_REASONS = new Set(["nullification"]);
 
 const mayAnswerPrompt = (prompt: GamePrompt, playerID: PlayerID): boolean => {
   if (prompt.responderID === playerID) return true;

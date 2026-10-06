@@ -1,7 +1,7 @@
 // @ts-nocheck
 import { SkillDefinition } from "../../SkillRegistry";
 import { SkillTriggerEffect } from "../../model";
-import { playerName } from "../../../cardEngine";
+import { playerName, removeHandCard } from "../../../cardEngine";
 import { writeLog, drawCards } from "../../../rules";
 import { hasSkill } from "../../../cardEngine";
 
@@ -76,14 +76,14 @@ export const tuXiSkill: SkillDefinition = {
       }
 
       G.turn.skippedSteps.push("draw");
+      G.effectStack.splice(G.effectStack.indexOf(effect), 1);
 
       for (const targetID of chosen) {
         const targetHand = G.players[targetID].hand;
         if (targetHand.length === 0) continue;
 
-        const randomIndex = Math.floor(Math.random() * targetHand.length);
-        const cardID = targetHand[randomIndex];
-        targetHand.splice(randomIndex, 1);
+        const cardID = shuffle([...targetHand])[0];
+        removeHandCard(G, targetID, cardID);
         G.players[effect.owner].hand.push(cardID);
         writeLog(
           G,
@@ -92,7 +92,6 @@ export const tuXiSkill: SkillDefinition = {
       }
 
       G.prompt = null;
-      G.effectStack.shift();
       return true;
     }
     return false;
