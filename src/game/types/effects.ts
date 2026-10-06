@@ -16,18 +16,6 @@ export interface FinishUseEffect {
   materialCardIDs: string[];
 }
 
-export interface AoeSimultaneousEffect {
-  id: number;
-  kind: "aoe-simultaneous";
-  sourceID: PlayerID;
-  cardName: "arrow-barrage" | "barbarian-invasion";
-  sourceCardID: string | null;
-  targetIDs: PlayerID[];
-  passedPlayerIDs: PlayerID[];
-  baguaTriedPlayerIDs: PlayerID[];
-  summonTriedPlayerIDs: PlayerID[];
-}
-
 export interface NullificationEffect {
   id: number;
   kind: "nullification";
@@ -54,7 +42,9 @@ export interface SlashEffect {
     | "dodge"
     | "dodged"
     | "before-damage"
+    | "ice-sword"
     | "after-damage";
+  iceSwordDiscardsRemaining?: number;
   ignoreArmor: boolean;
   baguaTried: boolean;
   dodgesRequired: number;
@@ -270,7 +260,8 @@ export interface OptionalSkillEffect {
   id: number;
   kind: "optional-skill";
   ownerID: PlayerID;
-  skillID: "bi-yue" | "ke-ji" | "ji-zhi";
+  skillID: "bi-yue" | "ke-ji" | "ji-zhi" | "ying-zi" | "tian-du";
+  cardID?: string;
 }
 
 export interface FanJianEffect {
@@ -312,9 +303,8 @@ export interface SkillTriggerEffect {
 
 export type GameEffect =
   | SkillTriggerEffect
-  | { id: number; kind: "execute-draw"; ownerID: PlayerID }
+  | { id: number; kind: "execute-draw"; ownerID: PlayerID; amount?: number }
   | FinishUseEffect
-  | AoeSimultaneousEffect
   | NullificationEffect
   | SlashEffect
   | DuelEffect

@@ -62,6 +62,8 @@ export interface OptionPrompt extends PromptBase {
     | "luo-shen"
     | "bi-yue"
     | "ke-ji"
+    | "ying-zi"
+    | "tian-du"
     | "ji-zhi";
   sourceID: PlayerID;
   targetID: PlayerID;
@@ -82,9 +84,11 @@ export interface SelectCardsPrompt extends PromptBase {
     | "gui-cai"
     | "yi-ji"
     | "liu-li"
+    | "ji-zhi"
     | "guan-xing";
   ownerID: PlayerID;
   zones: Array<"hand" | "equipment" | "judgement" | "processing">;
+  excludedEquipmentSlots?: EquipmentSlot[];
   minimum: number;
   maximum: number;
   allowPass: boolean;

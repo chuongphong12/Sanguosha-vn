@@ -5,6 +5,7 @@ import type {
   Role,
   Shuffle,
   TqsGameState,
+  TqsPlayerViewState,
 } from "./model";
 
 export function writeLog(G: TqsGameState, message: string): void {
@@ -18,17 +19,38 @@ export function drawCards(
   amount: number,
   shuffle: Shuffle,
 ): void {
+  if (!ensureDeck(G, amount, shuffle)) return;
   const player = G.players[playerID];
   for (let index = 0; index < amount; index += 1) {
-    if (G.deck.length === 0 && G.discard.length > 0) {
-      G.deck = shuffle([...G.discard]);
-      G.discard = [];
-      writeLog(G, "Chồng Bài Bỏ được xáo lại để tạo thành Chồng Bài Rút mới.");
-    }
     const cardID = G.deck.shift();
     if (!cardID) return;
     player.hand.push(cardID);
   }
+}
+
+export function ensureDeck(
+  G: TqsGameState,
+  amount: number,
+  shuffle: Shuffle,
+): boolean {
+  if (G.status === "ended") return false;
+  if (G.deck.length + G.discard.length < amount) {
+    const reason = "Ván đấu hòa: Chồng Bài Rút và Chồng Bài Bỏ không đủ bài.";
+    G.winner = { side: "draw", playerIDs: [], reason };
+    G.status = "ended";
+    G.prompt = null;
+    G.effectStack = [];
+    G.discard.push(...G.processing);
+    G.processing = [];
+    writeLog(G, reason);
+    return false;
+  }
+  if (G.deck.length < amount) {
+    G.deck.push(...shuffle([...G.discard]));
+    G.discard = [];
+    writeLog(G, "Chồng Bài Bỏ được xáo lại và bổ sung vào Chồng Bài Rút.");
+  }
+  return true;
 }
 
 export function determineWinner(G: TqsGameState): GameWinner | null {
@@ -96,7 +118,10 @@ export function attackRange(G: TqsGameState, playerID: PlayerID): number {
   return CARD_DEFINITIONS[G.cards[weaponID].definitionID].attackRange ?? 1;
 }
 
-export function handLimit(G: TqsGameState, playerID: PlayerID): number {
+export function handLimit(
+  G: TqsGameState | TqsPlayerViewState,
+  playerID: PlayerID,
+): number {
   const wangZunPenalty =
     playerID === G.lordID && G.turn.activePlayerID === playerID
       ? G.turn.wangZunHandLimitPenalty

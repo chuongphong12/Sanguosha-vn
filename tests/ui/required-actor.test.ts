@@ -41,10 +41,8 @@ describe("requiredActorID", () => {
     expect(requiredActorID(G)).toBe(target);
   });
 
-  describe("simultaneous windows", () => {
-    // The engine fills responderID with the active player "for compatibility",
-    // so the device must go to whoever still has to answer instead.
-    it("asks each Nam Man target in turn order, skipping the caster and those who passed", () => {
+  describe("response windows", () => {
+    it("uses the engine's ordered Nam Man responder", () => {
       const G = createStartedGame(4);
       const source = G.turn.activePlayerID;
       const order = G.seatOrder;
@@ -52,14 +50,14 @@ describe("requiredActorID", () => {
       setPrompt(G, {
         kind: "card-response",
         reason: "barbarian-invasion",
-        response: "aoe-response",
-        responderID: source,
+        response: "slash",
+        responderID: others[0],
         sourceID: source,
         passedPlayerIDs: [],
       });
       expect(requiredActorID(G)).toBe(others[0]);
 
-      (G.prompt as { passedPlayerIDs: string[] }).passedPlayerIDs = [others[0]];
+      G.prompt!.responderID = others[1];
       expect(requiredActorID(G)).toBe(others[1]);
     });
 
@@ -71,8 +69,8 @@ describe("requiredActorID", () => {
       setPrompt(G, {
         kind: "card-response",
         reason: "arrow-barrage",
-        response: "aoe-response",
-        responderID: source,
+        response: "dodge",
+        responderID: others[1],
         sourceID: source,
         passedPlayerIDs: [],
       });
@@ -90,7 +88,7 @@ describe("requiredActorID", () => {
         passedPlayerIDs: [],
       });
       expect(requiredActorID(G)).toBe(active);
-      (G.prompt as { passedPlayerIDs: string[] }).passedPlayerIDs = [active];
+      G.prompt!.responderID = G.seatOrder[1];
       const next = requiredActorID(G);
       expect(next).not.toBe(active);
       expect(G.seatOrder).toContain(next);

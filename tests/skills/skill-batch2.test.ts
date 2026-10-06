@@ -180,7 +180,7 @@ describe("card conversion skills (batch 2)", () => {
     expect(G.discard).toContain(equipmentCardID);
   });
 
-  it("lets Qi Xi use a black hand card as Snatch", () => {
+  it("lets Qi Xi use a black hand card as Dismantle", () => {
     const G = createStartedGame();
     resetHands(G);
     const sourceID = G.turn.activePlayerID;
@@ -202,7 +202,7 @@ describe("card conversion skills (batch 2)", () => {
         {
           kind: "virtual",
           cardID: blackSlashID,
-          as: "snatch",
+          as: "dismantle",
           targetIDs: [targetID],
         },
         identityShuffle,
@@ -219,7 +219,7 @@ describe("card conversion skills (batch 2)", () => {
       },
       identityShuffle,
     );
-    expect(G.players[sourceID].hand).toContain(victimCardID);
+    expect(G.discard).toContain(victimCardID);
     expect(G.discard).toContain(blackSlashID);
   });
 });

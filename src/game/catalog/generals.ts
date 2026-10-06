@@ -63,7 +63,7 @@ export const SKILLS: Record<string, SkillDefinition> = {
     name: "Di Kế",
     chineseName: "遗计",
     description:
-      "Sau khi mất 1 máu, được xem 2 lá bài và chia cho bất kỳ ai (kể cả bản thân).",
+      "Sau mỗi điểm sát thương phải chịu, có thể xem 2 lá đầu chồng rút và phân chia cho các nhân vật còn sống (kể cả bản thân).",
   },
   "luo-shen": {
     id: "luo-shen",
@@ -83,7 +83,7 @@ export const SKILLS: Record<string, SkillDefinition> = {
     name: "Nhân Đức",
     chineseName: "仁德",
     description:
-      "Giai đoạn ra bài, có thể đưa bài tùy ý cho người khác. Khi đưa từ 2 lá trở lên trong lượt, hồi 1 máu.",
+      "Một lần trong giai đoạn Xuất Bài, có thể đưa tùy ý lá tay cho nhân vật khác; nếu đưa ít nhất 2 lá thì hồi 1 Thể Lực.",
   },
   "ji-jiang": {
     id: "ji-jiang",
@@ -146,13 +146,14 @@ export const SKILLS: Record<string, SkillDefinition> = {
     name: "Tập Trí",
     chineseName: "集智",
     description:
-      "Mỗi khi sử dụng thẻ Cẩm nang (trừ Diên thời), có thể rút 1 lá bài.",
+      "Khi sử dụng Cẩm Nang, có thể lật lá đầu chồng rút: nếu là bài cơ bản thì bỏ lá đó hoặc bỏ 1 lá tay để nhận nó; nếu không phải bài cơ bản thì nhận nó.",
   },
   "qi-cai": {
     id: "qi-cai",
     name: "Kỳ Tài",
     chineseName: "奇才",
-    description: "Khóa kỹ: Sử dụng thẻ Cẩm nang không bị giới hạn về tầm đánh.",
+    description:
+      "Khóa kỹ: Cẩm Nang không bị giới hạn khoảng cách. Người khác không thể bỏ Vũ Khí hoặc Phòng Cụ của bạn.",
     lockedSkill: true,
   },
   "zhi-heng": {
@@ -207,8 +208,7 @@ export const SKILLS: Record<string, SkillDefinition> = {
     id: "guo-se",
     name: "Quốc Sắc",
     chineseName: "国色",
-    description:
-      "Có thể dùng lá bài màu Đỏ (Rô/Cơ) làm [Binh Lương Thốn Đoạn].",
+    description: "Có thể dùng lá bài Rô làm [Lạc Bất Tư Thục].",
   },
   "liu-li": {
     id: "liu-li",
@@ -222,7 +222,7 @@ export const SKILLS: Record<string, SkillDefinition> = {
     name: "Khiêm Tốn",
     chineseName: "谦逊",
     description:
-      "Khóa kỹ: Không thể bị chọn làm mục tiêu của [Thuận Thủ Khiên Dương] và [Quá Hà Sách Kiều].",
+      "Khóa kỹ: Không thể bị chọn làm mục tiêu của [Thuận Thủ Khiên Dương] và [Lạc Bất Tư Thục].",
     lockedSkill: true,
   },
   "lian-ying": {
@@ -285,7 +285,7 @@ export const SKILLS: Record<string, SkillDefinition> = {
     name: "Diệu Võ",
     chineseName: "耀武",
     description:
-      "Khóa kỹ: Khi bị sát thương bằng thẻ màu Đỏ, người gây sát thương được hồi 1 máu hoặc rút 1 lá.",
+      "Khóa kỹ: Khi bị sát thương bởi [Sát] màu Đỏ, người gây sát thương có thể hồi 1 Thể Lực hoặc rút 1 lá.",
     lockedSkill: true,
   },
   "wang-zun": {
@@ -300,7 +300,7 @@ export const SKILLS: Record<string, SkillDefinition> = {
     name: "Đồng Tật",
     chineseName: "同疾",
     description:
-      "Khóa kỹ: Nếu số bài trên tay của bạn lớn hơn máu hiện tại, những người khác không thể dùng [Sát] chỉ định mục tiêu nào ngoài bạn.",
+      "Khóa kỹ: Khi số lá tay của bạn lớn hơn Thể Lực và bạn nằm trong tầm đánh của người dùng [Sát], người đó chỉ được chọn bạn làm mục tiêu.",
     lockedSkill: true,
   },
 };

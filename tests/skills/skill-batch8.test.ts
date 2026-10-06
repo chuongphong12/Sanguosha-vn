@@ -11,6 +11,7 @@ import {
   giveCard,
   identityShuffle,
   resetHands,
+  answerNullificationChain,
 } from "../helpers/game";
 
 function assignSkills(
@@ -144,8 +145,9 @@ describe("ally summons and Guan Xing", () => {
       { cardID: trickID, targetIDs: [] },
       identityShuffle,
     );
+    answerNullificationChain(G, {});
     expect(G.prompt).toMatchObject({
-      response: "aoe-response",
+      response: "slash",
       reason: "barbarian-invasion",
     });
     expect(
@@ -178,9 +180,10 @@ describe("ally summons and Guan Xing", () => {
     );
     expect(G.players[lordID].hp).toBe(hp);
     expect(G.discard).toContain(allySlash);
+    answerNullificationChain(G, {});
     expect(G.prompt).toMatchObject({
-      response: "aoe-response",
-      passedPlayerIDs: [lordID],
+      response: "slash",
+      responderID: allyID,
     });
     expect(
       answerCardPrompt(

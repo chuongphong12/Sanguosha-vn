@@ -87,7 +87,7 @@ describe("equipment-zone skill expansion", () => {
     expect(G.discard).toContain(redWeaponID);
   });
 
-  it("lets Qi Xi use an equipped black weapon as Snatch", () => {
+  it("lets Qi Xi use an equipped black weapon as Dismantle", () => {
     const G = createStartedGame();
     resetHands(G);
     const sourceID = G.turn.activePlayerID;
@@ -108,7 +108,7 @@ describe("equipment-zone skill expansion", () => {
         {
           kind: "virtual",
           cardID: blackWeaponID,
-          as: "snatch",
+          as: "dismantle",
           targetIDs: [targetID],
         },
         identityShuffle,
@@ -125,7 +125,7 @@ describe("equipment-zone skill expansion", () => {
       },
       identityShuffle,
     );
-    expect(G.players[sourceID].hand).toContain(victimCardID);
+    expect(G.discard).toContain(victimCardID);
     expect(G.players[sourceID].equipment.weapon).toBeUndefined();
     expect(G.discard).toContain(blackWeaponID);
   });

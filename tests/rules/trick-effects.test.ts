@@ -172,6 +172,7 @@ describe("trick card effects", () => {
         { cardID: trickID, targetIDs: [] },
         identityShuffle,
       );
+      passNullificationWindow(G);
       expect(
         answerCardPrompt(
           G,
@@ -182,8 +183,9 @@ describe("trick card effects", () => {
         ),
       ).toBe(false);
       for (const [index, targetID] of targetIDs.entries()) {
+        passNullificationWindow(G);
         expect(G.prompt).toMatchObject({
-          response: "aoe-response",
+          response,
           reason: cardName,
         });
         answerCardPrompt(
@@ -193,6 +195,7 @@ describe("trick card effects", () => {
           index === 0 ? { kind: "card", cardID: responseID } : { kind: "pass" },
           identityShuffle,
         );
+        passNullificationWindow(G);
         expect(
           answerCardPrompt(
             G,

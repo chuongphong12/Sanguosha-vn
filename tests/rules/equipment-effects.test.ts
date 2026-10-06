@@ -155,14 +155,21 @@ describe("equipment effects", () => {
       G.prompt!.id,
       {
         kind: "zone-cards",
-        choices: [
-          { zone: "hand", ownerID: targetID, handIndex: 0 },
-          { zone: "hand", ownerID: targetID, handIndex: 1 },
-        ],
+        choices: [{ zone: "hand", ownerID: targetID, handIndex: 0 }],
       },
       identityShuffle,
     );
 
+    answerCardPrompt(
+      G,
+      sourceID,
+      G.prompt!.id,
+      {
+        kind: "zone-cards",
+        choices: [{ zone: "hand", ownerID: targetID, handIndex: 0 }],
+      },
+      identityShuffle,
+    );
     expect(G.players[targetID].hp).toBe(hp);
     expect(G.discard).toEqual(expect.arrayContaining([first, second]));
   });

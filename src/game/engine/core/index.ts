@@ -16,7 +16,6 @@ import type {
   GamePrompt,
   HarvestEffect,
   NullificationEffect,
-  AoeSimultaneousEffect,
   PhysicalCard,
   PlayCardInput,
   PlayerID,
@@ -34,6 +33,7 @@ import {
   determineWinner,
   distanceBetween,
   drawCards,
+  ensureDeck,
   handLimit,
   nextLivingPlayer,
   writeLog,
@@ -227,10 +227,10 @@ export function getVirtualConversions(
   G: TqsGameState | TqsPlayerViewState,
   playerID: PlayerID,
   cardID: string,
-): Array<"slash" | "snatch" | "indulgence"> {
+): Array<"slash" | "dismantle" | "indulgence"> {
   const card = G.cards[cardID];
   if (!card) return [];
-  const conversions: Array<"slash" | "snatch" | "indulgence"> = [];
+  const conversions: Array<"slash" | "dismantle" | "indulgence"> = [];
   if (
     card.definitionID !== "slash" &&
     ((hasSkill(G, playerID, "wu-sheng") && cardColor(card) === "red") ||
@@ -240,9 +240,9 @@ export function getVirtualConversions(
   if (
     hasSkill(G, playerID, "qi-xi") &&
     cardColor(card) === "black" &&
-    card.definitionID !== "snatch"
+    card.definitionID !== "dismantle"
   )
-    conversions.push("snatch");
+    conversions.push("dismantle");
   if (
     hasSkill(G, playerID, "guo-se") &&
     card.suit === "diamond" &&
@@ -361,11 +361,7 @@ function processingToDiscard(G: TqsGameState, cardID: string): void {
 }
 
 export function takeTopCard(G: TqsGameState, shuffle: Shuffle): string | null {
-  if (G.deck.length === 0 && G.discard.length > 0) {
-    G.deck = shuffle([...G.discard]);
-    G.discard = [];
-    writeLog(G, "Chồng Bài Bỏ được xáo lại để tạo thành Chồng Bài Rút mới.");
-  }
+  if (!ensureDeck(G, 1, shuffle)) return null;
   return G.deck.shift() ?? null;
 }
 
@@ -376,6 +372,12 @@ function newUse(
   targetIDs: PlayerID[],
   reason: CardUse["reason"] = "play",
 ): CardUse {
+  if (
+    card.definitionID === "slash" &&
+    sourceID === G.turn.activePlayerID &&
+    G.turn.step === "play"
+  )
+    G.turn.playedSlashDuringPlay = true;
   return {
     id: resolutionID(G),
     cardName: card.definitionID,
@@ -558,6 +560,33 @@ export function hasZoneCard(
   );
 }
 
+function protectedEquipmentSlots(
+  G: TqsGameState | TqsPlayerViewState,
+  sourceID: PlayerID,
+  ownerID: PlayerID,
+): EquipmentSlot[] {
+  return sourceID !== ownerID && hasSkill(G, ownerID, "qi-cai")
+    ? ["weapon", "armor"]
+    : [];
+}
+
+function discardableCardCount(
+  G: TqsGameState | TqsPlayerViewState,
+  sourceID: PlayerID,
+  ownerID: PlayerID,
+  includeJudgement: boolean,
+): number {
+  const player = G.players[ownerID];
+  const excluded = protectedEquipmentSlots(G, sourceID, ownerID);
+  return (
+    player.hand.length +
+    Object.keys(player.equipment).filter(
+      (slot) => !excluded.includes(slot as EquipmentSlot),
+    ).length +
+    (includeJudgement ? player.judgement.length : 0)
+  );
+}
+
 function hasDelayed(
   G: TqsGameState | TqsPlayerViewState,
   playerID: PlayerID,
@@ -574,6 +603,7 @@ function validateTargets(
   card: PhysicalCard,
   targetIDs: PlayerID[],
   materialCount = 1,
+  ignoreDistance = false,
 ): boolean {
   const name = card.definitionID;
   const distinct = new Set(targetIDs);
@@ -611,7 +641,9 @@ function validateTargets(
       targetIDs.every(
         (targetID) =>
           targetID !== sourceID &&
-          distanceBetween(G, sourceID, targetID) <= attackRange(G, sourceID) &&
+          (ignoreDistance ||
+            distanceBetween(G, sourceID, targetID) <=
+              attackRange(G, sourceID)) &&
           !(
             hasSkill(G, targetID, "kong-cheng") &&
             G.players[targetID].hand.length === 0
@@ -640,7 +672,8 @@ function validateTargets(
       (distanceBetween(G, sourceID, targetID) <= 1 ||
         hasSkill(G, sourceID, "qi-cai"))
     );
-  if (name === "dismantle") return hasZoneCard(G, targetID);
+  if (name === "dismantle")
+    return discardableCardCount(G, sourceID, targetID, true) > 0;
   if (name === "indulgence")
     return (
       !hasSkill(G, targetID, "qian-xun") &&
@@ -652,6 +685,22 @@ function validateTargets(
       G.players[targetID].hand.length === 0
     );
   return false;
+}
+
+function stateAfterEquipmentCost(
+  G: TqsGameState,
+  sourceID: PlayerID,
+  materialCardIDs: string[],
+): TqsGameState {
+  const source = G.players[sourceID];
+  const equipment = { ...source.equipment };
+  for (const slot of Object.keys(equipment) as EquipmentSlot[]) {
+    if (materialCardIDs.includes(equipment[slot]!)) delete equipment[slot];
+  }
+  return {
+    ...G,
+    players: { ...G.players, [sourceID]: { ...source, equipment } },
+  };
 }
 
 function obeysTongJi(
@@ -738,7 +787,8 @@ export function canSelectCardTarget(
       (distanceBetween(authoritativeShape, sourceID, candidateID) <= 1 ||
         hasSkill(G, sourceID, "qi-cai"))
     );
-  if (cardName === "dismantle") return hasZoneCard(G, candidateID);
+  if (cardName === "dismantle")
+    return discardableCardCount(G, sourceID, candidateID, true) > 0;
   if (cardName === "indulgence")
     return !hasDelayed(G, candidateID, "indulgence");
   if (cardName === "duel")
@@ -841,18 +891,21 @@ function compileCardUse(G: TqsGameState, use: CardUse): GameEffect[] {
       const targets = aliveInActionOrder(G, use.sourceID).filter(
         (playerID) => playerID !== use.sourceID,
       );
-      const aoeEffect: AoeSimultaneousEffect = {
-        id: resolutionID(G),
-        kind: "aoe-simultaneous",
-        sourceID: use.sourceID,
-        cardName: use.cardName,
-        sourceCardID: use.materialCardIDs[0] ?? null,
-        targetIDs: targets,
-        passedPlayerIDs: [],
-        baguaTriedPlayerIDs: [],
-        summonTriedPlayerIDs: [],
-      };
-      return [aoeEffect, finishUse(G, use)];
+      const responses = targets.map((affectedID): GameEffect =>
+        nullifiable(G, use.cardName, use.sourceID, affectedID, [
+          {
+            id: resolutionID(G),
+            kind: "required-response",
+            sourceID: use.sourceID,
+            targetID: affectedID,
+            response: use.cardName === "arrow-barrage" ? "dodge" : "slash",
+            reason: use.cardName as "arrow-barrage" | "barbarian-invasion",
+            baguaTried: false,
+            sourceCardID: use.materialCardIDs[0] ?? null,
+          },
+        ]),
+      );
+      return [...responses, finishUse(G, use)];
     }
     case "peach-garden": {
       const effects = aliveInActionOrder(G, use.sourceID).map(
@@ -884,14 +937,12 @@ function compileCardUse(G: TqsGameState, use: CardUse): GameEffect[] {
       const delayedTarget =
         use.cardName === "lightning" ? use.sourceID : targetID;
       return [
-        nullifiable(G, use.cardName, use.sourceID, delayedTarget, [
-          {
-            id: resolutionID(G),
-            kind: "place-delayed",
-            targetID: delayedTarget,
-            cardID: use.materialCardIDs[0],
-          },
-        ]),
+        {
+          id: resolutionID(G),
+          kind: "place-delayed",
+          targetID: delayedTarget,
+          cardID: use.materialCardIDs[0],
+        },
         finishUse(G, use),
       ];
     }
@@ -985,6 +1036,8 @@ export function declareCardUse(
       "barbarian-invasion",
       "peach-garden",
       "harvest",
+      "indulgence",
+      "lightning",
     ].includes(card.definitionID)
   )
     afterTrickUse(G, playerID, shuffle);
@@ -1007,6 +1060,8 @@ function createVirtualSlashUse(
   targetIDs: PlayerID[],
   reason: CardUse["reason"] = "play",
 ): CardUse {
+  if (sourceID === G.turn.activePlayerID && G.turn.step === "play")
+    G.turn.playedSlashDuringPlay = true;
   return {
     id: resolutionID(G),
     cardName: "slash",
@@ -1091,13 +1146,12 @@ function declareVirtualUse(
       G.players[playerID].slashUses >= 1
     )
       return false;
-    G.players[playerID].slashUses += 1;
     representative = { ...card, definitionID: "slash" };
   } else if (as === "indulgence") {
     if (!(hasSkill(G, playerID, "guo-se") && card.suit === "diamond"))
       return false;
     representative = { ...card, definitionID: "indulgence" };
-  } else if (as === "dismantle" || as === "snatch") {
+  } else if (as === "dismantle") {
     if (!(hasSkill(G, playerID, "qi-xi") && cardColor(card) === "black"))
       return false;
     representative = { ...card, definitionID: as };
@@ -1105,7 +1159,19 @@ function declareVirtualUse(
     return false;
   }
 
-  if (!validateTargets(G, playerID, representative, targetIDs)) return false;
+  if (
+    !validateTargets(
+      stateAfterEquipmentCost(G, playerID, [cardID]),
+      playerID,
+      representative,
+      targetIDs,
+    )
+  )
+    return false;
+  if (as === "slash") {
+    G.players[playerID].slashUses += 1;
+    G.turn.playedSlashDuringPlay = true;
+  }
   const orderedTargets =
     as === "slash"
       ? aliveInActionOrder(G, playerID).filter((targetID) =>
@@ -1127,7 +1193,8 @@ function declareVirtualUse(
     G,
     `${playerName(G, playerID)} dùng 【${CARD_DEFINITIONS[card.definitionID].name}】 làm 【${CARD_DEFINITIONS[as].name}】.`,
   );
-  if (as === "snatch") afterTrickUse(G, playerID, shuffle);
+  if (as === "dismantle" || as === "indulgence")
+    afterTrickUse(G, playerID, shuffle);
   resolveCardGame(G, shuffle);
   return true;
 }
@@ -1263,9 +1330,9 @@ export function killPlayer(
     source.role === "lord" &&
     player.role === "loyalist"
   ) {
-    G.discard.push(...source.hand, ...Object.values(source.equipment));
-    source.hand = [];
-    source.equipment = {};
+    for (const cardID of [...source.hand]) handToDiscard(G, source.id, cardID);
+    for (const cardID of Object.values(source.equipment))
+      zoneToDiscard(G, source.id, cardID);
     writeLog(G, "Chủ Công bỏ toàn bộ bài vì tiêu diệt Trung Thần.");
   }
 }
@@ -1292,6 +1359,7 @@ export function moveSelectedCard(
     if (choice.zone === "hand")
       return G.players[choice.ownerID].hand[choice.handIndex] ?? null;
     if (choice.zone === "equipment") {
+      if (prompt.excludedEquipmentSlots?.includes(choice.slot)) return null;
       if (
         prompt.reason === "qilin-bow" &&
         choice.slot !== "offensive-mount" &&
@@ -1326,7 +1394,7 @@ export function removeZoneCard(
   const player = G.players[ownerID];
   const handIndex = player.hand.indexOf(cardID);
   if (handIndex >= 0) {
-    player.hand.splice(handIndex, 1);
+    removeHandCard(G, ownerID, cardID);
     return;
   }
   for (const slot of [
@@ -1380,6 +1448,7 @@ function transferLightning(
 
   let candidate = nextLivingPlayer(G, fromID);
   for (let count = 0; count < G.seatOrder.length - 1; count += 1) {
+    if (candidate === fromID) break;
     if (!hasDelayed(G, candidate, "lightning")) {
       G.players[candidate].judgement.push(cardID);
       writeLog(G, `【Thiểm Điện】 chuyển sang ${playerName(G, candidate)}.`);
@@ -1480,11 +1549,13 @@ function advanceSlashTarget(effect: SlashEffect): void {
 
 function resetSlashTargetStage(effect: SlashEffect): void {
   effect.stage = "start";
+  effect.dodgesUsed = 0;
   effect.ignoreArmor = false;
   effect.baguaTried = false;
   effect.tieJiTried = false;
   effect.ignoreDodge = false;
   effect.liuLiDiscardID = null;
+  effect.iceSwordDiscardsRemaining = undefined;
 }
 
 function resolveSlash(G: TqsGameState, effect: SlashEffect): void {
@@ -1614,8 +1685,7 @@ function resolveSlash(G: TqsGameState, effect: SlashEffect): void {
   if (effect.stage === "before-damage") {
     if (
       equipmentName(G, sourceID, "weapon") === "ice-sword" &&
-      (G.players[targetID].hand.length > 0 ||
-        Object.values(G.players[targetID].equipment).length > 0)
+      discardableCardCount(G, sourceID, targetID, false) > 0
     ) {
       setPrompt(G, {
         id: resolutionID(G),
@@ -1640,6 +1710,30 @@ function resolveSlash(G: TqsGameState, effect: SlashEffect): void {
         effect.use.color,
       ),
     );
+    return;
+  }
+
+  if (effect.stage === "ice-sword") {
+    if (
+      !effect.iceSwordDiscardsRemaining ||
+      discardableCardCount(G, sourceID, targetID, false) === 0
+    ) {
+      advanceSlashTarget(effect);
+      return;
+    }
+    setPrompt(G, {
+      id: resolutionID(G),
+      effectID: effect.id,
+      kind: "select-cards",
+      responderID: sourceID,
+      reason: "ice-sword",
+      ownerID: targetID,
+      zones: ["hand", "equipment"],
+      excludedEquipmentSlots: protectedEquipmentSlots(G, sourceID, targetID),
+      minimum: 1,
+      maximum: 1,
+      allowPass: effect.iceSwordDiscardsRemaining === 2,
+    });
     return;
   }
 
@@ -1725,7 +1819,11 @@ function resolveTargetCard(
   G: TqsGameState,
   effect: Extract<GameEffect, { kind: "target-card" }>,
 ): void {
-  if (!hasZoneCard(G, effect.targetID)) {
+  if (
+    !hasZoneCard(G, effect.targetID) ||
+    (effect.result === "discard" &&
+      discardableCardCount(G, effect.sourceID, effect.targetID, true) === 0)
+  ) {
     G.effectStack.shift();
     return;
   }
@@ -1737,6 +1835,10 @@ function resolveTargetCard(
     reason: effect.result === "gain" ? "snatch" : "dismantle",
     ownerID: effect.targetID,
     zones: ["hand", "equipment", "judgement"],
+    excludedEquipmentSlots:
+      effect.result === "discard"
+        ? protectedEquipmentSlots(G, effect.sourceID, effect.targetID)
+        : [],
     minimum: 1,
     maximum: 1,
     allowPass: false,
@@ -1771,6 +1873,7 @@ function resolveHarvest(
   effect: HarvestEffect,
   shuffle: Shuffle,
 ): void {
+  if (!ensureDeck(G, effect.targetIDs.length, shuffle)) return;
   for (let index = 0; index < effect.targetIDs.length; index += 1) {
     const cardID = takeTopCard(G, shuffle);
     if (cardID) {
@@ -1859,21 +1962,10 @@ function applyJudgementResult(
   const owner = G.players[effect.ownerID];
   const judgeCard = G.cards[effect.judgeCardID];
 
-  if (hasSkill(G, effect.ownerID, "tian-du")) {
-    const discardIndex = G.discard.indexOf(effect.judgeCardID);
-    if (discardIndex >= 0) {
-      G.discard.splice(discardIndex, 1);
-      owner.hand.push(effect.judgeCardID);
-      writeLog(
-        G,
-        `${playerName(G, effect.ownerID)} dùng 【Thiên Đố】 nhận lá phán xét.`,
-      );
-    }
-  }
-
   if (card.definitionID === "indulgence") {
     G.discard.push(effect.cardID);
     if (judgeCard.suit !== "heart") G.turn.skippedSteps.push("play");
+    offerTianDu(G, effect.ownerID, effect.judgeCardID);
     return;
   }
   const rank = Number.parseInt(judgeCard.rank, 10);
@@ -1883,6 +1975,26 @@ function applyJudgementResult(
   } else {
     transferLightning(G, effect.ownerID, effect.cardID);
   }
+  offerTianDu(G, effect.ownerID, effect.judgeCardID);
+}
+
+export function offerTianDu(
+  G: TqsGameState,
+  ownerID: PlayerID,
+  cardID: string,
+): void {
+  if (!G.players[ownerID].alive || !hasSkill(G, ownerID, "tian-du")) return;
+  const index = G.discard.indexOf(cardID);
+  if (index < 0) return;
+  G.discard.splice(index, 1);
+  G.processing.push(cardID);
+  G.effectStack.unshift({
+    id: resolutionID(G),
+    kind: "optional-skill",
+    ownerID,
+    skillID: "tian-du",
+    cardID,
+  });
 }
 
 function resolveDamage(G: TqsGameState, effect: DamageEffect): void {
@@ -1968,6 +2080,9 @@ export function resolveDying(
     return;
   }
 
+  effect.responderID = living.find(
+    (id) => !effect.passedPlayerIDs.includes(id),
+  )!;
   G.prompt = responsePrompt(
     G,
     effect.id,
@@ -1984,14 +2099,14 @@ function performRegularDraw(
   G: TqsGameState,
   playerID: PlayerID,
   shuffle: Shuffle,
+  amount = 2,
 ): void {
-  const amount = hasSkill(G, playerID, "ying-zi") ? 3 : 2;
   drawCards(G, playerID, amount, shuffle);
+  if (G.status === "ended") return;
   writeLog(
     G,
     `${playerName(G, playerID)} rút ${amount} lá${amount === 3 ? " (【Anh Tư】)" : ""}.`,
   );
-  advanceAfterDraw(G, playerID);
 }
 
 function advanceAfterDraw(G: TqsGameState, playerID: PlayerID): void {
@@ -2005,7 +2120,11 @@ function enterDiscardPhase(G: TqsGameState, playerID: PlayerID): void {
     G.turn.step = "end";
     return;
   }
-  if (hasSkill(G, playerID, "ke-ji") && G.players[playerID].slashUses === 0)
+  if (
+    hasSkill(G, playerID, "ke-ji") &&
+    G.players[playerID].slashUses === 0 &&
+    !G.turn.playedSlashDuringPlay
+  )
     G.effectStack.unshift({
       id: resolutionID(G),
       kind: "optional-skill",
@@ -2109,14 +2228,6 @@ function completeAllyResponse(
     writeLog(
       G,
       `【Kích Tướng】: ${allyName} đánh 【Sát】 thay ${playerName(G, summon.lordID)}.`,
-    );
-    return;
-  }
-  if (underlying.kind === "aoe-simultaneous") {
-    underlying.passedPlayerIDs.push(summon.lordID);
-    writeLog(
-      G,
-      `【${summon.skillID === "hu-jia" ? "Hộ Giá" : "Kích Tướng"}】: ${allyName} đánh 【${summon.response === "dodge" ? "Thiểm" : "Sát"}】 thay ${playerName(G, summon.lordID)}.`,
     );
     return;
   }
@@ -2300,6 +2411,21 @@ function resolveOptionalSkill(
     G.effectStack.shift();
     return;
   }
+  if (effect.skillID === "ji-zhi" && effect.cardID) {
+    setPrompt(G, {
+      id: resolutionID(G),
+      effectID: effect.id,
+      kind: "select-cards",
+      responderID: effect.ownerID,
+      reason: "ji-zhi",
+      ownerID: effect.ownerID,
+      zones: ["hand"],
+      minimum: 1,
+      maximum: 1,
+      allowPass: true,
+    });
+    return;
+  }
   setPrompt(G, {
     id: resolutionID(G),
     effectID: effect.id,
@@ -2414,6 +2540,13 @@ function resolveTurnFlow(G: TqsGameState, shuffle: Shuffle): boolean {
       kind: "execute-draw",
       ownerID: playerID,
     });
+    if (hasSkill(G, playerID, "ying-zi"))
+      G.effectStack.unshift({
+        id: resolutionID(G),
+        kind: "optional-skill",
+        ownerID: playerID,
+        skillID: "ying-zi",
+      });
     emitEvent(G, "DrawPhase", { playerID });
     return true;
   }
@@ -2436,18 +2569,16 @@ export function resolveCardGame(G: TqsGameState, shuffle: Shuffle): void {
       }
       case "execute-draw":
         if (!G.turn.skippedSteps.includes("draw")) {
-          performRegularDraw(G, effect.ownerID, shuffle);
+          performRegularDraw(G, effect.ownerID, shuffle, effect.amount);
         }
-        advanceAfterDraw(G, effect.ownerID);
+        if (G.winner) break;
         G.effectStack.shift();
+        advanceAfterDraw(G, effect.ownerID);
         break;
       case "finish-use":
         for (const cardID of effect.materialCardIDs)
           processingToDiscard(G, cardID);
         G.effectStack.shift();
-        break;
-      case "aoe-simultaneous":
-        resolveAoeSimultaneous(G, effect);
         break;
       case "nullification":
         resolveNullification(G, effect);
@@ -2552,11 +2683,19 @@ function discardResponseMaterials(
 ): string[] | null {
   if (answer.kind === "card") {
     if (!matchesResponse(G, playerID, answer.cardID, expected)) return null;
+    if (
+      expected === "slash" &&
+      G.turn.activePlayerID === playerID &&
+      G.turn.step === "play"
+    )
+      G.turn.playedSlashDuringPlay = true;
     zoneToDiscard(G, playerID, answer.cardID);
     return [answer.cardID];
   }
   if (answer.kind === "serpent-spear" && expected === "slash") {
     if (!canUseSerpentSpear(G, playerID, answer.cardIDs)) return null;
+    if (G.turn.activePlayerID === playerID && G.turn.step === "play")
+      G.turn.playedSlashDuringPlay = true;
     for (const cardID of answer.cardIDs) handToDiscard(G, playerID, cardID);
     return [...answer.cardIDs];
   }
@@ -2684,12 +2823,27 @@ function answerGreenDragonPrompt(
 
   let childUse: CardUse;
   if (answer.kind === "card") {
-    if (!hasCardInHand(G, prompt.responderID, answer.cardID, "slash"))
+    if (!matchesResponse(G, prompt.responderID, answer.cardID, "slash"))
       return false;
-    handToProcessing(G, prompt.responderID, answer.cardID);
+    const representative = {
+      ...G.cards[answer.cardID],
+      definitionID: "slash" as const,
+    };
+    if (
+      !validateTargets(
+        stateAfterEquipmentCost(G, prompt.responderID, [answer.cardID]),
+        prompt.responderID,
+        representative,
+        [targetID],
+        1,
+        true,
+      )
+    )
+      return false;
+    zoneToProcessing(G, prompt.responderID, answer.cardID);
     childUse = newUse(
       G,
-      G.cards[answer.cardID],
+      { ...G.cards[answer.cardID], definitionID: "slash" },
       prompt.responderID,
       [targetID],
       "green-dragon-blade",
@@ -2709,7 +2863,11 @@ function answerGreenDragonPrompt(
   } else return false;
 
   advanceSlashTarget(effect);
-  G.effectStack.unshift(...compileCardUse(G, childUse));
+  G.effectStack.splice(
+    G.effectStack.indexOf(effect),
+    0,
+    ...compileCardUse(G, childUse),
+  );
   return true;
 }
 
@@ -2785,11 +2943,14 @@ function answerRequiredResponse(
   if (answer.kind === "pass") {
     G.effectStack.shift();
     G.effectStack.unshift(
-      meleeDamage(
+      damageEffect(
         G,
         effect.sourceID,
         effect.targetID,
+        1,
+        "normal",
         effect.sourceCardID ? [effect.sourceCardID] : [],
+        effect.reason,
       ),
     );
     return true;
@@ -2801,7 +2962,7 @@ function answerRequiredResponse(
     effect.response,
   );
   if (!materials) return false;
-  G.effectStack.shift();
+  G.effectStack.splice(G.effectStack.indexOf(effect), 1);
   return true;
 }
 
@@ -2814,27 +2975,53 @@ function answerBorrowedSword(
   if (answer.kind === "pass") {
     const weaponID = G.players[effect.weaponHolderID].equipment.weapon;
     if (!weaponID) return false;
-    loseEquipmentCard(G, effect.weaponHolderID);
-    delete G.players[effect.weaponHolderID].equipment.weapon;
+    G.effectStack.splice(G.effectStack.indexOf(effect), 1);
+    removeZoneCard(G, effect.weaponHolderID, weaponID);
     G.players[effect.sourceID].hand.push(weaponID);
-    G.effectStack.shift();
     return true;
   }
 
   let use: CardUse;
   if (answer.kind === "card") {
-    if (!hasCardInHand(G, prompt.responderID, answer.cardID, "slash"))
+    if (!matchesResponse(G, prompt.responderID, answer.cardID, "slash"))
       return false;
-    handToProcessing(G, prompt.responderID, answer.cardID);
+    const representative = {
+      ...G.cards[answer.cardID],
+      definitionID: "slash" as const,
+    };
+    if (
+      !validateTargets(
+        stateAfterEquipmentCost(G, prompt.responderID, [answer.cardID]),
+        prompt.responderID,
+        representative,
+        [effect.slashTargetID],
+      )
+    )
+      return false;
+    zoneToProcessing(G, prompt.responderID, answer.cardID);
     use = newUse(
       G,
-      G.cards[answer.cardID],
+      { ...G.cards[answer.cardID], definitionID: "slash" },
       prompt.responderID,
       [effect.slashTargetID],
       "borrowed-sword",
     );
   } else if (answer.kind === "serpent-spear") {
     if (!canUseSerpentSpear(G, prompt.responderID, answer.cardIDs))
+      return false;
+    const representative = {
+      ...G.cards[answer.cardIDs[0]],
+      definitionID: "slash" as const,
+    };
+    if (
+      !validateTargets(
+        G,
+        prompt.responderID,
+        representative,
+        [effect.slashTargetID],
+        2,
+      )
+    )
       return false;
     for (const cardID of answer.cardIDs)
       handToProcessing(G, prompt.responderID, cardID);
@@ -2847,14 +3034,17 @@ function answerBorrowedSword(
     );
   } else return false;
 
-  G.effectStack.shift();
   emitPresentationEvent(G, {
     kind: "card-committed",
     actorID: use.sourceID,
     card: { id: use.cardName }, // This is virtual ref or cardName
     targetIDs: [...use.targetIDs],
   });
-  G.effectStack.unshift(...compileCardUse(G, use));
+  G.effectStack.splice(
+    G.effectStack.indexOf(effect),
+    1,
+    ...compileCardUse(G, use),
+  );
   return true;
 }
 
@@ -2883,9 +3073,8 @@ function answerRescue(
         G,
         `【Cứu Viện】 tăng hiệu quả hồi phục cho ${playerName(G, dying.id)}.`,
       );
-    effect.passedPlayerIDs = [];
     if (G.players[effect.dyingPlayerID].hp >= 1) {
-      G.effectStack.shift();
+      G.effectStack.splice(G.effectStack.indexOf(effect), 1);
       if (G.prompt?.reason === "rescue") G.prompt = null;
     }
     return true;
@@ -2921,6 +3110,23 @@ function answerSelectCards(
   shuffle: Shuffle,
 ): boolean {
   if (
+    effect.kind === "optional-skill" &&
+    effect.skillID === "ji-zhi" &&
+    effect.cardID
+  ) {
+    const cardIDs =
+      answer.kind === "pass" ? [] : moveSelectedCard(G, prompt, answer);
+    if (!cardIDs || !G.processing.includes(effect.cardID)) return false;
+    G.effectStack.splice(G.effectStack.indexOf(effect), 1);
+    if (cardIDs.length === 0) processingToDiscard(G, effect.cardID);
+    else {
+      handToDiscard(G, effect.ownerID, cardIDs[0]);
+      G.processing.splice(G.processing.indexOf(effect.cardID), 1);
+      G.players[effect.ownerID].hand.push(effect.cardID);
+    }
+    return true;
+  }
+  if (
     answer.kind === "pass" &&
     prompt.allowPass &&
     effect.kind === "slash" &&
@@ -2940,12 +3146,10 @@ function answerSelectCards(
       if (prompt.reason === "ice-sword") {
         effect.stage = "after-damage";
         G.effectStack.unshift(
-          damageEffect(
+          meleeDamage(
             G,
             effect.use.sourceID,
             effect.use.targetIDs[effect.targetIndex],
-            1,
-            "normal",
             effect.use.materialCardIDs,
             "slash",
             effect.use.color,
@@ -2971,6 +3175,7 @@ function answerSelectCards(
   if (!cardIDs) return false;
 
   if (effect.kind === "target-card") {
+    G.effectStack.splice(G.effectStack.indexOf(effect), 1);
     for (const cardID of cardIDs) {
       removeZoneCard(G, prompt.ownerID, cardID);
       if (effect.result === "gain")
@@ -2981,7 +3186,6 @@ function answerSelectCards(
         `${playerName(G, effect.sourceID)} ${effect.result === "gain" ? "thu lấy" : "bỏ"} một lá của ${playerName(G, prompt.ownerID)}.`,
       );
     }
-    G.effectStack.shift();
     return true;
   }
   if (effect.kind === "slash") {
@@ -3011,7 +3215,8 @@ function answerSelectCards(
       G.discard.push(cardID);
     }
     if (prompt.reason === "gender-swords") effect.stage = "dodge";
-    else if (prompt.reason === "ice-sword") advanceSlashTarget(effect);
+    else if (prompt.reason === "ice-sword")
+      effect.iceSwordDiscardsRemaining! -= 1;
     else if (prompt.reason === "rock-cleaving-axe")
       effect.stage = "before-damage";
     else if (prompt.reason === "qilin-bow") advanceSlashTarget(effect);
@@ -3097,18 +3302,20 @@ function answerOption(
       return true;
     }
     if (answer.choice === "decline") {
-      if (effect.stage === "gender-swords" || prompt.reason === "liu-li")
+      if (
+        effect.stage === "gender-swords" ||
+        prompt.reason === "liu-li" ||
+        prompt.reason === "tie-ji"
+      )
         effect.stage = "dodge";
       else if (effect.stage === "dodged") advanceSlashTarget(effect);
       else if (effect.stage === "before-damage") {
         effect.stage = "after-damage";
         G.effectStack.unshift(
-          damageEffect(
+          meleeDamage(
             G,
             effect.use.sourceID,
             targetID,
-            1,
-            "normal",
             effect.use.materialCardIDs,
             "slash",
             effect.use.color,
@@ -3138,21 +3345,8 @@ function answerOption(
     }
 
     if (prompt.reason === "ice-sword") {
-      const available =
-        G.players[targetID].hand.length +
-        Object.values(G.players[targetID].equipment).length;
-      setPrompt(G, {
-        id: resolutionID(G),
-        effectID: effect.id,
-        kind: "select-cards",
-        responderID: effect.use.sourceID,
-        reason: "ice-sword",
-        ownerID: targetID,
-        zones: ["hand", "equipment"],
-        minimum: Math.min(2, available),
-        maximum: Math.min(2, available),
-        allowPass: true,
-      });
+      effect.stage = "ice-sword";
+      effect.iceSwordDiscardsRemaining = 2;
       return true;
     }
     if (prompt.reason === "rock-cleaving-axe") {
@@ -3253,6 +3447,7 @@ function answerOption(
       5,
       G.seatOrder.filter((playerID) => G.players[playerID].alive).length,
     );
+    if (!ensureDeck(G, count, shuffle)) return true;
     for (let index = 0; index < count; index += 1) {
       const cardID = takeTopCard(G, shuffle);
       if (!cardID) break;
@@ -3279,6 +3474,36 @@ function answerOption(
     return true;
   }
   if (effect.kind === "optional-skill") {
+    if (effect.skillID === "tian-du") {
+      if (!effect.cardID || !G.processing.includes(effect.cardID)) return false;
+      G.effectStack.splice(G.effectStack.indexOf(effect), 1);
+      if (answer.choice === "activate") {
+        G.processing.splice(G.processing.indexOf(effect.cardID), 1);
+        G.players[effect.ownerID].hand.push(effect.cardID);
+        writeLog(
+          G,
+          `${playerName(G, effect.ownerID)} dùng 【Thiên Đố】 nhận lá phán xét.`,
+        );
+      } else processingToDiscard(G, effect.cardID);
+      return true;
+    }
+    if (effect.skillID === "ji-zhi" && answer.choice === "activate") {
+      const cardID = takeTopCard(G, shuffle);
+      if (!cardID) return true;
+      const card = G.cards[cardID];
+      writeLog(
+        G,
+        `${playerName(G, effect.ownerID)} dùng 【Tập Trí】 lật 【${CARD_DEFINITIONS[card.definitionID].name}】.`,
+      );
+      if (CARD_DEFINITIONS[card.definitionID].kind === "basic") {
+        effect.cardID = cardID;
+        G.processing.push(cardID);
+      } else {
+        G.effectStack.splice(G.effectStack.indexOf(effect), 1);
+        G.players[effect.ownerID].hand.push(cardID);
+      }
+      return true;
+    }
     if (answer.choice === "decline") {
       G.effectStack.shift();
       return true;
@@ -3290,6 +3515,13 @@ function answerOption(
         G,
         `${playerName(G, effect.ownerID)} dùng 【Khắc Kỷ】 bỏ qua Giai Đoạn Bỏ Bài.`,
       );
+    } else if (effect.skillID === "ying-zi") {
+      const pendingDraw = G.effectStack.find(
+        (candidate) =>
+          candidate.kind === "execute-draw" &&
+          candidate.ownerID === effect.ownerID,
+      );
+      if (pendingDraw?.kind === "execute-draw") pendingDraw.amount = 3;
     } else {
       drawCards(G, effect.ownerID, 1, shuffle);
       writeLog(
@@ -3535,6 +3767,8 @@ export function useSkill(
         `${playerName(G, playerID)} hồi phục 1 Thể Lực nhờ 【Nhân Đức】.`,
       );
     }
+    markSkillUsed(G, playerID, skillID);
+    resolveCardGame(G, shuffle);
     return true;
   }
 
@@ -3627,15 +3861,14 @@ export function answerCardPrompt(
   const effect = G.effectStack[0];
   if (
     !prompt ||
+    !G.players[playerID]?.alive ||
     !effect ||
     prompt.id !== promptID ||
     (prompt.responderID !== playerID &&
       !(
         prompt.kind === "card-response" &&
-        (prompt.reason === "rescue" ||
-          prompt.reason === "nullification" ||
-          prompt.reason === "arrow-barrage" ||
-          prompt.reason === "barbarian-invasion")
+        prompt.reason === "nullification" &&
+        !prompt.passedPlayerIDs?.includes(playerID)
       )) ||
     !("effectID" in prompt) ||
     prompt.effectID !== effect.id
@@ -3686,15 +3919,6 @@ export function answerCardPrompt(
       prompt.reason === "ally-summon"
     ) {
       accepted = answerAllySummon(G, effect, prompt, answer);
-    } else if (effect.kind === "aoe-simultaneous") {
-      accepted = answerAoeSimultaneous(
-        G,
-        effect,
-        prompt,
-        playerID,
-        answer,
-        shuffle,
-      );
     } else if (effect.kind === "nullification")
       accepted = answerNullification(G, effect, prompt, playerID, answer);
     else if (effect.kind === "slash")
@@ -3729,11 +3953,7 @@ export function answerCardPrompt(
   }
 
   if (!accepted) return false;
-  if (
-    G.prompt?.id === promptID &&
-    G.prompt.reason !== "arrow-barrage" &&
-    G.prompt.reason !== "barbarian-invasion"
-  ) {
+  if (G.prompt?.id === promptID) {
     G.prompt = null;
   }
   resolveCardGame(G, shuffle);
@@ -3752,20 +3972,11 @@ export function endCardPlayPhase(
 }
 
 export function resumeCardPlayPhase(
-  G: TqsGameState,
-  playerID: PlayerID,
+  _G: TqsGameState,
+  _playerID: PlayerID,
 ): boolean {
-  if (
-    G.status !== "playing" ||
-    G.turn.activePlayerID !== playerID ||
-    G.turn.step !== "discard" ||
-    G.turn.skippedSteps.includes("play") ||
-    G.effectStack.length > 0 ||
-    G.prompt
-  )
-    return false;
-  G.turn.step = "play";
-  return true;
+  // Older clients may still send this move; Standard phases only advance.
+  return false;
 }
 
 export function discardCardHand(
@@ -3845,34 +4056,22 @@ export function resolveBaguaJudgement(
     `【Bát Quái Trận】 phán xét ${success ? "đỏ, thành công" : "đen, thất bại"}.`,
   );
 
-  if (hasSkill(G, effect.ownerID, "tian-du")) {
-    const discardIndex = G.discard.indexOf(cardID);
-    if (discardIndex >= 0) {
-      G.discard.splice(discardIndex, 1);
-      G.players[effect.ownerID].hand.push(cardID);
-      writeLog(
-        G,
-        `${playerName(G, effect.ownerID)} dùng 【Thiên Đố】 nhận lá phán xét.`,
-      );
-    }
-  }
-
   G.effectStack.shift();
   // On a failed judgement the Slash / required response resolves again and
   // re-asks for a real Dodge, now without the Bagua option (baguaTried).
   const slashEffect = G.effectStack[0];
   if (slashEffect?.kind === "slash") {
     slashEffect.baguaTried = true;
-    if (success) slashEffect.dodgesUsed += 1;
+    if (success) {
+      slashEffect.dodgesUsed += 1;
+      if (slashEffect.dodgesUsed >= slashEffect.dodgesRequired)
+        slashEffect.stage = "dodged";
+    }
   } else if (slashEffect?.kind === "required-response") {
     slashEffect.baguaTried = true;
     if (success) G.effectStack.shift(); // remove required-response
-  } else if (slashEffect?.kind === "aoe-simultaneous") {
-    slashEffect.baguaTriedPlayerIDs.push(effect.ownerID);
-    if (success) {
-      slashEffect.passedPlayerIDs.push(effect.ownerID);
-    }
   }
+  offerTianDu(G, effect.ownerID, cardID);
 }
 
 export function resolveTieJiJudgement(
@@ -3915,24 +4114,13 @@ export function resolveTieJiJudgement(
   const cardID = effect.judgeCardID;
   const card = G.cards[cardID];
 
-  if (hasSkill(G, effect.ownerID, "tian-du")) {
-    const discardIndex = G.discard.indexOf(cardID);
-    if (discardIndex >= 0) {
-      G.discard.splice(discardIndex, 1);
-      G.players[effect.ownerID].hand.push(cardID);
-      writeLog(
-        G,
-        `${playerName(G, effect.ownerID)} dùng 【Thiên Đố】 nhận lá phán xét.`,
-      );
-    }
-  }
-
   G.effectStack.shift();
   const slashEffect = G.effectStack[0];
   if (slashEffect?.kind === "slash" && cardColor(card) === "red") {
     slashEffect.ignoreDodge = true;
     writeLog(G, `【Thiết Kỵ】 khóa 【Thiểm】 của mục tiêu.`);
   }
+  offerTianDu(G, effect.ownerID, cardID);
 }
 
 export function answerAllySummon(
@@ -3950,7 +4138,7 @@ export function answerAllySummon(
     matchesResponse(G, prompt.responderID, answer.cardID, effect.response)
   ) {
     zoneToDiscard(G, prompt.responderID, answer.cardID);
-    G.effectStack.shift();
+    G.effectStack.splice(G.effectStack.indexOf(effect), 1);
     completeAllyResponse(G, effect);
     return true;
   }
@@ -3961,190 +4149,11 @@ export function answerAllySummon(
   ) {
     for (const cardID of answer.cardIDs)
       handToDiscard(G, prompt.responderID, cardID);
-    G.effectStack.shift();
+    G.effectStack.splice(G.effectStack.indexOf(effect), 1);
     completeAllyResponse(G, effect);
     return true;
   }
   return false;
-}
-
-function resolveAoeSimultaneous(
-  G: TqsGameState,
-  effect: AoeSimultaneousEffect,
-): void {
-  const targetsLeft = effect.targetIDs.filter(
-    (id) => !effect.passedPlayerIDs.includes(id) && G.players[id]?.alive,
-  );
-  if (targetsLeft.length === 0) {
-    G.effectStack.shift();
-    return;
-  }
-
-  const isBarbarian = effect.cardName === "barbarian-invasion";
-  const isArrow = effect.cardName === "arrow-barrage";
-  const summonFaction = isBarbarian
-    ? hasSkill(G, G.turn.activePlayerID, "ji-jiang")
-      ? "shu"
-      : null
-    : isArrow
-      ? hasSkill(G, G.turn.activePlayerID, "hu-jia")
-        ? "wei"
-        : null
-      : null;
-
-  setPrompt(G, {
-    id: resolutionID(G),
-    kind: "card-response",
-    responderID: G.turn.activePlayerID, // Used just for compatibility, but the UI checks reason
-    response: "aoe-response",
-    reason: effect.cardName,
-    sourceID: effect.sourceID,
-    targetID: G.turn.activePlayerID,
-    allowBagua: isArrow,
-    allowSerpentSpear: isBarbarian,
-    allowPass: true,
-    subjectCardName: effect.cardName,
-    forbidCard: false,
-    summonFaction,
-    passedPlayerIDs: effect.passedPlayerIDs,
-    effectID: effect.id,
-    chainDepth: 0,
-    currentlyNegated: false,
-  });
-}
-
-function answerAoeSimultaneous(
-  G: TqsGameState,
-  effect: AoeSimultaneousEffect,
-  prompt: CardResponsePrompt,
-  playerID: PlayerID,
-  answer: PromptAnswer,
-  shuffle: Shuffle,
-): boolean {
-  if (effect.passedPlayerIDs.includes(playerID)) return false;
-  if (!effect.targetIDs.includes(playerID)) return false;
-  if (!G.players[playerID]?.alive) return false;
-
-  const isArrow = effect.cardName === "arrow-barrage";
-
-  if (answer.kind === "bagua") {
-    if (!prompt.allowBagua) return false;
-    if (effect.baguaTriedPlayerIDs.includes(playerID)) return false; // Can only try once
-    G.effectStack.unshift({
-      id: resolutionID(G),
-      kind: "bagua-judgement",
-      ownerID: playerID,
-      judgeCardID: null,
-    });
-    if (G.prompt?.id === prompt.id) G.prompt = null;
-    return true;
-  } else if (answer.kind === "summon") {
-    return startAoeAllySummon(G, effect, prompt, playerID);
-  } else if (answer.kind === "card") {
-    const isWuxie = canRespondWithCard(
-      G,
-      playerID,
-      answer.cardID,
-      "nullification",
-    );
-    const isDodgeOrSlash = canRespondWithCard(
-      G,
-      playerID,
-      answer.cardID,
-      isArrow ? "dodge" : "slash",
-    );
-
-    if (isWuxie) {
-      zoneToProcessing(G, playerID, answer.cardID);
-      processingToDiscard(G, answer.cardID);
-      writeLog(
-        G,
-        `${playerName(G, playerID)} dùng 【Vô Giải Khả Kích】 để vô hiệu hóa 【${CARD_DEFINITIONS[effect.cardName].name}】 lên bản thân.`,
-      );
-    } else if (isDodgeOrSlash) {
-      zoneToProcessing(G, playerID, answer.cardID);
-      processingToDiscard(G, answer.cardID);
-      writeLog(
-        G,
-        `${playerName(G, playerID)} đánh ra 【${isArrow ? "Thiểm" : "Sát"}】.`,
-      );
-    } else {
-      return false; // Invalid card
-    }
-  } else if (answer.kind === "pass") {
-    // Take damage
-    G.effectStack.unshift(
-      damageEffect(
-        G,
-        effect.sourceID,
-        playerID,
-        1,
-        "normal",
-        effect.sourceCardID ? [effect.sourceCardID] : [],
-        effect.cardName,
-      ),
-    );
-  } else {
-    return false;
-  }
-
-  effect.passedPlayerIDs.push(playerID);
-
-  const targetsLeft = effect.targetIDs.filter(
-    (id) => !effect.passedPlayerIDs.includes(id) && G.players[id]?.alive,
-  );
-  if (targetsLeft.length === 0) {
-    // A damage effect may sit above this one, so remove it by identity.
-    G.effectStack.splice(G.effectStack.indexOf(effect), 1);
-    if (G.prompt?.reason === effect.cardName) {
-      G.prompt = null;
-    }
-  } else if (answer.kind === "pass") {
-    // Close the shared window so the queued damage resolves; the remaining
-    // targets get a fresh prompt once it has.
-    if (G.prompt?.id === prompt.id) G.prompt = null;
-  } else {
-    prompt.passedPlayerIDs = [...effect.passedPlayerIDs];
-  }
-  return true;
-}
-
-function startAoeAllySummon(
-  G: TqsGameState,
-  effect: AoeSimultaneousEffect,
-  prompt: CardResponsePrompt,
-  lordID: PlayerID,
-): boolean {
-  const isArrow = effect.cardName === "arrow-barrage";
-  const skillID = isArrow ? "hu-jia" : "ji-jiang";
-  const faction = isArrow ? "wei" : "shu";
-  if (!hasSkill(G, lordID, skillID)) return false;
-  if (effect.summonTriedPlayerIDs.includes(lordID)) return false;
-
-  effect.summonTriedPlayerIDs.push(lordID);
-  const queueIDs = G.seatOrder.filter(
-    (id) =>
-      id !== lordID &&
-      G.players[id].alive &&
-      GENERALS_BY_ID[G.players[id].generalID!]?.faction === faction,
-  );
-  G.effectStack.unshift({
-    id: resolutionID(G),
-    kind: "ally-summon",
-    skillID,
-    lordID,
-    faction,
-    response: isArrow ? "dodge" : "slash",
-    requesterEffectID: effect.id,
-    queueIDs,
-    passedIDs: [],
-  });
-  writeLog(
-    G,
-    `${playerName(G, lordID)} phát động 【${isArrow ? "Hộ Giá" : "Kích Tướng"}】.`,
-  );
-  if (G.prompt?.id === prompt.id) G.prompt = null;
-  return true;
 }
 
 function setPrompt(G: TqsGameState, p: GamePrompt | null) {
