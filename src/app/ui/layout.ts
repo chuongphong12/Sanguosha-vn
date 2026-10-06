@@ -18,7 +18,7 @@ export function layoutActionRow(
     buttonHeight?: number;
   } = {},
 ): ActionRowLayout {
-  const rightInset = options.rightInset ?? 314;
+  const rightInset = options.rightInset ?? 34;
   const bottomInset = options.bottomInset ?? 280;
   const gap = options.gap ?? 8;
   const buttonHeight = options.buttonHeight ?? 48;

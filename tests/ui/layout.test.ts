@@ -6,7 +6,7 @@ describe("action row layout", () => {
   it("aligns a two-button row to the content frame", () => {
     const layout = layoutActionRow(1840, 820, [180, 190]);
 
-    expect(layout.centers).toEqual([1238, 1431]);
+    expect(layout.centers).toEqual([1518, 1711]);
     expect(layout.widths).toEqual([180, 190]);
     expect(layout.centerY + 48 / 2).toBe(540);
   });
@@ -14,8 +14,8 @@ describe("action row layout", () => {
   it("aligns a single button using the same right and bottom insets", () => {
     const layout = layoutActionRow(768, 820, [240]);
 
-    expect(layout.centers).toEqual([384]);
-    expect(layout.widths).toEqual([140]);
+    expect(layout.centers).toEqual([614]);
+    expect(layout.widths).toEqual([240]);
     expect(layout.centerY).toBe(516);
   });
 
