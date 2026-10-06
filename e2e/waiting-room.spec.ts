@@ -27,6 +27,24 @@ async function seatCount(page: Page): Promise<number | null> {
 }
 
 test.describe("Waiting room", () => {
+  test("reload reconnects to the same seat without duplicating the player", async ({
+    page,
+  }) => {
+    const errors = trackErrors(page);
+    const matchID = await createRoom(page, "Reconnect");
+    await waitForText(page, /NGƯỜI CHƠI \(1\/8\)/);
+    const before = await page.evaluate(
+      () => (window as any).__TQS_MATCH__.currentViewerID,
+    );
+    await page.reload();
+    await waitForStatus(page, "waiting-room", 45000);
+    await waitForText(page, /NGƯỜI CHƠI \(1\/8\)/);
+    expect(new URL(page.url()).searchParams.get("matchID")).toBe(matchID);
+    expect(
+      await page.evaluate(() => (window as any).__TQS_MATCH__.currentViewerID),
+    ).toBe(before);
+    expect(errors).toEqual([]);
+  });
   test("shows the waiting room after creating a room (regression: black screen)", async ({
     browser,
   }) => {
@@ -99,6 +117,7 @@ test.describe("Waiting room", () => {
   test("host starts a game from the waiting room with exactly the joined players", async ({
     browser,
   }) => {
+    test.setTimeout(120000);
     const hostContext = await browser.newContext({ viewport: VIEWPORT });
     const host = await hostContext.newPage();
     const errors = trackErrors(host);
@@ -106,9 +125,11 @@ test.describe("Waiting room", () => {
     await waitForText(host, "Bắt Đầu Ngay");
 
     const guests: Page[] = [];
+    const guestErrors: string[][] = [];
     for (let i = 1; i <= 4; i += 1) {
       const context = await browser.newContext({ viewport: VIEWPORT });
       const page = await context.newPage();
+      guestErrors.push(trackErrors(page));
       await joinRoom(page, matchID);
       guests.push(page);
       // Sequential joins avoid two clients racing for the same empty seat.
@@ -125,6 +146,13 @@ test.describe("Waiting room", () => {
     await clickText(host, "Bắt Đầu Ngay");
     await waitForStatus(host, "lord-selection");
     expect(await seatCount(host)).toBe(4);
+    const excluded = guests[guests.length - 1];
+    await waitForText(
+      excluded,
+      "Bạn không nằm trong danh sách người chơi của trận này.",
+    );
+    await expectNoText(excluded, "CHỌN TƯỚNG NÀY");
+    expect(guestErrors.flat()).toEqual([]);
     expect(errors).toEqual([]);
 
     await hostContext.close();

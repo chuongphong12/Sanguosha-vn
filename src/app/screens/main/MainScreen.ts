@@ -313,6 +313,16 @@ export class MainScreen extends Container {
     this.state = state;
     if (!state) return;
 
+    if (
+      state.G.status !== "waiting-room" &&
+      !state.G.players[this.match!.currentViewerID]
+    ) {
+      if (this.nullificationTimeout) clearTimeout(this.nullificationTimeout);
+      this.nullificationTimeout = null;
+      this.render();
+      return;
+    }
+
     const promptID = state?.G.prompt?.id ?? null;
     if (promptID !== this.lastPromptID) {
       if (this.nullificationTimeout) {
@@ -392,6 +402,21 @@ export class MainScreen extends Container {
 
     const G = this.state.G;
     const viewerID = this.match.currentViewerID;
+    if (G.status !== "waiting-room" && !G.players[viewerID]) {
+      this.waitingRoomScene.visible = false;
+      this.formationScene.visible = false;
+      this.battleScene.visible = false;
+      this.resultScene.visible = false;
+      this.drawExitButton();
+      this.addText(
+        "Bạn không nằm trong danh sách người chơi của trận này.",
+        this.viewportWidth / 2,
+        this.viewportHeight / 2,
+        20,
+        THEME.colors.paper,
+      );
+      return;
+    }
     const isSelecting =
       G.status === "lord-selection" || G.status === "general-selection";
     this.waitingRoomScene.visible = G.status === "waiting-room";

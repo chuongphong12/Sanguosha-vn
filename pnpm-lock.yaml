@@ -41,6 +41,9 @@ importers:
       "@playwright/test":
         specifier: ^1.63.0
         version: 1.63.0
+      "@types/node":
+        specifier: 22.20.3
+        version: 22.20.3
       eslint:
         specifier: ^9.39.5
         version: 9.39.5(supports-color@7.2.0)

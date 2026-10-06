@@ -5,11 +5,13 @@ export default defineConfig({
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
-  workers: process.env.CI ? 1 : undefined,
+  // Each remote scenario renders up to five WebGL clients simultaneously.
+  workers: 1,
   reporter: "html",
   use: {
     baseURL: "http://localhost:8080",
     trace: "on-first-retry",
+    screenshot: "only-on-failure",
   },
   timeout: 60000,
   projects: [
@@ -27,6 +29,7 @@ export default defineConfig({
     },
     {
       command: "npm run dev",
+      env: { BROWSER: "none" },
       url: "http://localhost:8080",
       reuseExistingServer: !process.env.CI,
       timeout: 120 * 1000,

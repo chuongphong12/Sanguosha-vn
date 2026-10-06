@@ -358,6 +358,8 @@ export class Dashboard extends Container {
     // Remove missing
     for (const [id, view] of this.handCardViews) {
       if (!newHandSet.has(id)) {
+        this.handCardAnimations.get(view)?.stop();
+        this.handCardAnimations.delete(view);
         view.destroy();
         this.handCardViews.delete(id);
         this.handCardLayouts.delete(id);
@@ -491,6 +493,7 @@ export class Dashboard extends Container {
     target: Record<string, number>,
     transition: { duration: number; ease: "easeOut" | "backOut" },
   ): void {
+    if (this.destroying || cardView.isDestroying) return;
     this.handCardAnimations.get(cardView)?.stop();
     if (Dashboard.prefersReducedMotion()) {
       const { scale, ...rest } = target;
@@ -630,6 +633,8 @@ export class Dashboard extends Container {
     this.destroying = true;
     clearTimeout(this.hoverTimeout);
     this.popoverAnimation?.stop();
+    for (const animation of this.handCardAnimations.values()) animation.stop();
+    this.handCardAnimations.clear();
     this.removeFromParent();
     this.visible = false;
     requestAnimationFrame(() =>

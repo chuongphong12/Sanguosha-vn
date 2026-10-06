@@ -59,20 +59,11 @@ async function snapshot(page: Page): Promise<Snapshot> {
  * (e.g. Wang Zun). Decline it so the scenario does not depend on the deal.
  */
 async function declineStartOfTurnPrompt(page: Page): Promise<void> {
-  await page.evaluate(() => {
+  const needsResponse = await page.evaluate(() => {
     const match = (window as any).__TQS_MATCH__;
-    const G = match.state.G;
-    const prompt = G.prompt;
-    if (!prompt || prompt.responderID !== match.currentViewerID) return;
-    if (prompt.kind === "option")
-      match.move("answerPrompt", prompt.id, {
-        kind: "option",
-        choice: prompt.choices.includes("decline")
-          ? "decline"
-          : prompt.choices[0],
-      });
-    else match.move("answerPrompt", prompt.id, { kind: "pass" });
+    return match.state.G.prompt?.responderID === match.currentViewerID;
   });
+  if (needsResponse) await clickText(page, /^(Không dùng|Bỏ qua)/);
 }
 
 async function pickFirstGeneral(page: Page): Promise<void> {
@@ -92,7 +83,7 @@ test.describe("Full remote game flow", () => {
     test.setTimeout(180000);
     const hostContext = await browser.newContext({ viewport: VIEWPORT });
     const host = await hostContext.newPage();
-    const errors = trackErrors(host);
+    const errors = [trackErrors(host)];
 
     // Waiting room -> start
     const matchID = await createRoom(host, "Host");
@@ -100,7 +91,7 @@ test.describe("Full remote game flow", () => {
     for (let i = 1; i <= 3; i += 1) {
       const context = await browser.newContext({ viewport: VIEWPORT });
       const page = await context.newPage();
-      trackErrors(page);
+      errors.push(trackErrors(page));
       await joinRoom(page, matchID);
       pages.push(page);
       await host.waitForTimeout(800);
@@ -128,16 +119,60 @@ test.describe("Full remote game flow", () => {
 
     // Battle
     for (const page of pages) await waitForStatus(page, "playing");
+    for (const page of pages) {
+      const privacy = await page.evaluate(() => {
+        const match = (window as any).__TQS_MATCH__;
+        const G = match.state.G;
+        const opponents = Object.values(G.players).filter(
+          (player: any) => player.id !== match.currentViewerID,
+        ) as any[];
+        return {
+          hiddenHands: opponents.every((player) =>
+            player.hand.every((card: string) => card === "hidden"),
+          ),
+          hiddenRoles: opponents.every(
+            (player) => player.roleRevealed || player.role === null,
+          ),
+          hasDeck: Object.hasOwn(G, "deck"),
+          effectStack: G.effectStack,
+        };
+      });
+      expect(privacy).toEqual({
+        hiddenHands: true,
+        hiddenRoles: true,
+        hasDeck: false,
+        effectStack: [],
+      });
+    }
     await expect
       .poll(
         async () => {
-          await declineStartOfTurnPrompt(lordPage);
+          for (const page of pages) await declineStartOfTurnPrompt(page);
           const s = await snapshot(lordPage);
           return s.activePlayerID === lordID && s.step === "play" && !s.prompt;
         },
         { timeout: 30000 },
       )
       .toBe(true);
+
+    const beforeReload = await snapshot(lordPage);
+    const handBeforeReload = await lordPage.evaluate(() => {
+      const match = (window as any).__TQS_MATCH__;
+      return match.state.G.players[match.currentViewerID].hand;
+    });
+    await lordPage.reload();
+    // Reload rebuilds the Pixi renderer and reloads assets for this client.
+    await waitForStatus(lordPage, "playing", 45000);
+    const afterReload = await snapshot(lordPage);
+    expect(afterReload.viewerID).toBe(beforeReload.viewerID);
+    expect(afterReload.hand).toBe(beforeReload.hand);
+    expect(
+      await lordPage.evaluate(() => {
+        const match = (window as any).__TQS_MATCH__;
+        return match.state.G.players[match.currentViewerID].hand;
+      }),
+    ).toEqual(handBeforeReload);
+    expect(afterReload.seatOrder).toEqual(beforeReload.seatOrder);
 
     // HUD, hand and log drawer are drawn
     await waitForText(lordPage, /Lượt 1 · Giai Đoạn Xuất Bài/);
@@ -173,8 +208,8 @@ test.describe("Full remote game flow", () => {
 
     const state = await snapshot(lordPage);
     if (state.activePlayerID === lordID && state.step === "discard") {
-      const required = state.hand - Math.max(0, state.hp);
-      await waitForText(lordPage, /Cần bỏ:/);
+      const discardLabel = await waitForText(lordPage, /Cần bỏ:/);
+      const required = Number(discardLabel.text.match(/Cần bỏ:\s*(\d+)/)![1]);
       for (let i = 0; i < required; i += 1) {
         const hand = (await visibleTexts(lordPage)).filter(
           (t) => /^【.+】/.test(t.text) && t.y > VIEWPORT.height - 260,
@@ -202,8 +237,8 @@ test.describe("Full remote game flow", () => {
       .not.toBe(lordID);
     // The status line may show a skill prompt instead; the deck line is always there.
     await waitForText(lordPage, /Chồng Bài Rút: \d+/);
-    expect(errors).toEqual([]);
+    expect(errors.flat()).toEqual([]);
 
-    for (const page of pages) await page.context().close();
+    await Promise.all(pages.map((page) => page.context().close()));
   });
 });
