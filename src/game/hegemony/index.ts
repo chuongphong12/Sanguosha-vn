@@ -6,6 +6,12 @@ import type {
 } from "./types";
 
 export type * from "./types";
+export {
+  revealHegemonyGeneral,
+  concealHegemonyGeneral,
+  areHegemonyFriends,
+  willBeHegemonyFriend,
+} from "./identity";
 
 /** Paired setup only: ready does not yet mean a playable match. */
 export function createHegemonySetup(
@@ -52,6 +58,7 @@ export function createHegemonySetup(
           candidates: options.offers[id],
           initialKingdom: null,
           kingdom: null,
+          alliance: null,
           hp: 0,
           maxHp: 0,
           alive: true,
@@ -135,6 +142,7 @@ export function projectHegemonyState(
       state.seatOrder.map((id) => {
         const p = state.players[id];
         const own = id === viewer;
+        const shown = p.head.shown || p.deputy.shown;
         return [
           id,
           {
@@ -149,7 +157,9 @@ export function projectHegemonyState(
             },
             selected: p.head.id !== null && p.deputy.id !== null,
             candidates: own ? [...p.candidates] : [],
-            kingdom: p.kingdom,
+            kingdom: shown ? p.kingdom : null,
+            alliance: shown && p.alliance ? { ...p.alliance } : null,
+            ...(own ? { initialKingdom: p.initialKingdom } : {}),
             hp: p.hp,
             maxHp: p.maxHp,
             alive: p.alive,

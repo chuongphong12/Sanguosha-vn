@@ -10,6 +10,10 @@ export interface HegemonyGeneral {
 
 export type GeneralSlot = "head" | "deputy";
 
+export type HegemonyAlliance =
+  | { kind: "faction"; kingdom: string }
+  | { kind: "careerist"; group: string | null };
+
 export interface HegemonyPlayer {
   id: string;
   head: { id: string | null; shown: boolean };
@@ -17,6 +21,7 @@ export interface HegemonyPlayer {
   candidates: string[];
   initialKingdom: string | null;
   kingdom: string | null;
+  alliance: HegemonyAlliance | null;
   hp: number;
   maxHp: number;
   alive: boolean;
@@ -51,6 +56,8 @@ export interface HegemonyPlayerView {
     string,
     Omit<HegemonyPlayer, "initialKingdom"> & {
       selected: boolean;
+      /** Only present for the owner, including after reconnect. */
+      initialKingdom?: string | null;
     }
   >;
 }

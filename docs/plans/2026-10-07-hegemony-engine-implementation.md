@@ -22,7 +22,7 @@ Status: complete. 24 focused tests; full check 41 files / 311 tests, typecheck/l
 
 Implement source-normalized reveal/hide transitions and relation predicates through the same domain boundary. Include majority/lord-general/deceased faction membership and careerist group semantics. Keep these domain transitions separate from the later GeneralShown/GeneralHidden scheduler integration; do not expose raw low-level hide as an unrestricted player command.
 
-Status: Part 1 gate passed; native reveal/hide edge contracts under source verification before implementation.
+Status: complete. Full check: 42 files / 323 tests, typecheck/lint and production build pass. GitNexus rebuilt: 2,799 nodes / 9,775 edges / 239 flows; CodeGraph: 185 files / 1,697 nodes / 7,204 edges. Standards/spec reviews have zero outstanding findings. Twelve identity-domain tests cover reveal/conceal, majority/careerist/lord cases, deceased members, persisted recruitment groups, forecast semantics, malformed/no-op transitions, privacy and re-reveal. GeneralShown/GeneralHidden dispatch, skills/preshow/marks, death burial conversion and recruitment operations remain later pipeline work.
 
 ## Subsequent parts
 
