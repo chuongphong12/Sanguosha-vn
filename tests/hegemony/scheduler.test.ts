@@ -234,7 +234,9 @@ describe("Hegemony trigger dispatch and resume", () => {
         ),
       ).toThrow("Invalid trigger data");
       expect(scheduler.prompt).toBeNull();
-      expect(scheduler.frames[0].event.data).toBe(1);
+      const failedFrame = scheduler.frames[0];
+      if (failedFrame.kind !== "event") throw new Error("Expected event frame");
+      expect(failedFrame.event.data).toBe(1);
     },
   );
   it("does not offer a compulsory occurrence invalidated by a later record hook", () => {

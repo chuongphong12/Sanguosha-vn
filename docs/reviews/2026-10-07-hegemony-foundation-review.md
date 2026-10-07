@@ -43,3 +43,17 @@ No outstanding actionable findings. Shared advanceActor removes duplicated progr
 No outstanding actionable findings. Initial reconciliation and order resume preserve offered identities, remove invalidated occurrences and allow cancellation according to the valid offered list; full post-attempt refresh discovers newly eligible occurrences without re-recording. Native record ordering, nested continuation, priority, occurrence identity and event consumption are exercised at the approved public seam. Both reviewers' reload/order findings were fixed with regressions. The spec reviewer independently passed all 36 focused tests. Operation-specific unwind, package adapters and gameplay integration remain deferred.
 
 Summary: Standards 0 outstanding findings; Spec 0 outstanding findings. This is approval of the scoped scheduler checkpoint, not complete native/gameplay parity.
+
+## Part 4a — operation frames and physical movement kernel
+
+Fixed baseline: 2f94f2a. Review covers the separate operation frame/handler path, hand/draw/discard/table movement kernel, public dispatch/resume tests and scoped documentation. Both independent reviewers rechecked the fixes.
+
+### Standards
+
+Two findings resolved: the nested movement fixture initially defined a callback that it then overwrote; it now constructs the real guarded callback directly. Shared canDispatch and invokeWithValidData centralize dispatch admission and payload snapshot/validation/restoration while preserving distinct typed contexts. Source hints are checked against each original card index before no-op filtering. No remaining actionable Standards findings.
+
+### Spec
+
+One P2 finding resolved: a nested Before movement could make the outer packet silently derive a new source, unlike the documented stale-source invariant. Canonical from hints are now validated after both Before and Confirm children. Regressions preserve the committed child transfer and prevent another outer debit, including mixed-source no-op filtering. Explicit Before replacement packets without hints can deliberately derive current sources. The reviewer independently passed 66 focused movement/operation/scheduler cases. No remaining actionable Spec findings or misleading full-engine parity claim.
+
+Summary: Standards 2 findings resolved, 0 outstanding; Spec 1 finding resolved, 0 outstanding. Native packet classification/metadata, additional zones, package modifiers, wrapped-card filters, transport visibility, cleanup/error recovery and production integration remain deferred.

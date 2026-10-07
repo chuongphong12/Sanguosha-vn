@@ -30,6 +30,16 @@ Status: complete. 36 focused cases and 43 files / 359 full-suite tests pass; typ
 
 The registry is normalized package metadata, not a ported or selectable skill catalog. Its triggerable hooks are pure and stable occurrence IDs/order indices survive refresh. Native encoded-string edge cases must be audited when translating actual packages. CardFinished/material/phase cleanup, GeneralShown identity/skill integration and transport command policies remain Part 4 or later.
 
+## Part 4a — operation frames and physical movement kernel
+
+Scope: implement a typed operation frame, dispatch/resume/nested return through the approved authoritative seam, then the normalized hand/draw/discard/table kernel of native `moveCardsSub`. Operations are separate from trigger events; package skills cannot subscribe to an internal operation as though it were a native event. The version-pinned registry owns pure preflight validation and external continuation handlers.
+
+Source: `room.cpp:5163–5315`. Before events can consume/cancel the whole movement. Confirm events share their mutable notification data but its rewrites/consumption do not alter the committed batch. Remove all sources, then add destinations once; draw-top/discard prepend per card, draw-bottom appends. Post events share their rewrites and return that data without retroactive movement. Each foreach snapshots living action order anew; the trigger scheduler within each event still includes deceased seats.
+
+This is a physical kernel over normalized packets, not the full native move API: native merge/source classifiers and last-hand/origin/open metadata, equip/judge/private/WuGu piles, `cheakMoveData` special-card rewrites, wrapped-card lose/get filters, transport notifications/visibility and operation-specific unwind remain subsequent slices. No catalog or production adapter is enabled. The adapter must not expose raw card zones, frames or operation completions to clients. A stale precommit physical mapping is a rejected kernel invariant; any already-completed child movement remains committed. Cleanup/recovery of programming/invariant errors is still deferred, rather than claiming that a whole nested transaction rolls back.
+
+Status: complete for this scoped kernel. 27 movement + 3 operation cases, together with all 36 prior scheduler cases, pass. Full check: 45 files / 389 tests, typecheck/lint and production build pass; 42 inherited warnings, no added warnings/errors. Tracer tests began red, including fresh living-stage snapshots, atomic invalid input, duplicate physical storage, stale nested Before/Confirm mapping, aligned no-op filtering and draw-bottom ordering. Separate reviews resolved two Standards findings and one Spec finding; both final axes report zero outstanding findings. GitNexus and CodeGraph rebuilt; structured staged analysis reports 13 affected flows and HIGH risk, retained with scoped inspection and explicit global index omissions in the knowledge note. Additional movement metadata/zones and all other gameplay pipelines remain outstanding.
+
 ## Subsequent parts
 
 Pipelines, enabled content, adapters/UI/AI and final Standard retirement follow the approved spec, each gated independently. Production cutover has not happened merely because foundational library tests pass.

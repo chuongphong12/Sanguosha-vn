@@ -69,8 +69,33 @@ Event consumption returns a child result to its parent; stage-change, turn-broke
 - Structured staged detect_changes: 402 changed symbols across five files, seven affected flows, HIGH risk, no reported partial/truncated response flags. All seven listed flows were inspected and remain inside the new scheduler. The HIGH assessment is retained, not waived because the library is unregistered.
 - dispatchTriggerEvent impact reports UNKNOWN due to missing test caller edges. CodeGraph identifies scheduler.test.ts; a supplementary source/import search confirms no production consumers. This resolves the specific caller uncertainty, not all graph omissions. Global process extraction remains truncated (97 dropped entry points, 69 unexplored, 73 dropped flows, 765 omitted callees); source and public-seam tests supplement the scoped assessment.
 
+## Operation and movement boundary (Part 4a)
+
+`dispatchTriggerOperation` and a separate operation handler registry extend the existing dispatch/resume seam. Event and operation frames have distinct discriminants. Operations yield events, other operations or responder-only prompts; event consumption returns through `child`, while operation values return through `operationChild`. A root operation uses `operationCompletion`, without fabricating a native trigger event. Continuations remain JSON data and handlers remain outside state. Pure preflight rejects invalid root input before allocating a frame. An operation's rewritten payload receives the same JSON validation/restoration policy as an event payload; arbitrary handler game mutations are not rollback transactions.
+
+`createCardMovementOperation` supplies `move-cards` for an authoritative store of hand, draw, discard and table zones. A request has `{ moves: [{ ids, to, from?, bottom?, reason? }] }`; source zones are resolved from unique physical storage. Canonical packets include per-card `from[]`; supplied hints must match physical storage, including after nested Before/Confirm movement. Packages may deliberately replace Before packets without hints to derive current sources, but untouched packets cannot silently rebase. Same-zone moves are omitted except moving a draw card to the bottom; parallel source indices stay aligned during omission. All source removals precede destination additions on a copied store; only a validated batch replaces the authoritative zones. Actor order is current-first among living players, freshly snapshotted for each movement stage; the trigger frame itself still visits all seats.
+
+Pinned `room.cpp:5163–5315` ordering:
+
+1. BeforeCardsMove for each living player; consumption cancels the whole operation.
+2. Normalize the rewritten batch, then ConfirmMoveCards for each living player. Confirm rewrites are passed among confirmations but ignored by the physical commit.
+3. Commit once. Draw-top and discard prepend per card (reversing the input group); draw-bottom appends in input order. Hands/table append.
+4. PreCardsMoveOneTime then CardsMoveOneTime for each living player, sharing rewritten data. Post rewrites and consumption cannot undo the physical commit.
+
+Nested cost movement can suspend before or after commit, survive JSON reload and return to the suspended skill without paying again. Interruptions retain the stack and the corresponding committed/uncommitted storage. No CardFinished/material/phase cleanup is inferred from freezing that stack.
+
+Only the physical kernel is implemented: native merge classifiers, source action sorting, origin/last-hand/open metadata, equip/judge/private/WuGu piles, special ImperialOrder/SixDragons/ImperialEdict and scenario-card rewrites in `cheakMoveData`, wrapped-card reset/filter hooks and network notification visibility remain later work. The input batch order is normalized by a future package adapter; current test fixtures exercise this kernel rather than claiming native packet normalization. A stale mapping during Confirm is rejected before any outer debit; committed nested children are preserved and error recovery is deferred. Raw zone IDs, frame payloads and operation completions are authoritative-only; the current paired-general projection never includes them. No selectable content, UI, AI or transport integration has changed.
+
+## Part 4a checkpoint — 2026-10-07
+
+- Red/green regressions and focused suites: 27 movement cases, 3 operation cases and the 36 existing scheduler cases pass. Full check: 45 files / 389 tests; typecheck/lint and build pass, with 42 inherited lint warnings and zero errors.
+- Independent Standards review resolved duplicate admission/payload policies and an overwritten fixture callback. Spec review resolved silent source rebasing during a nested Before movement; canonical hints now reject stale Before and Confirm packets. Both final axes report zero actionable findings; Spec independently reran all 66 focused cases.
+- GitNexus rebuilt: 3,460 nodes / 11,137 edges / 113 clusters / 298 flows. CodeGraph: 190 files / 1,777 nodes / 7,690 edges. GitNexus resolves the movement factory's test caller and handler reference; CodeGraph identifies the three affected test files. Source/import inspection confirms only scoped Hegemony/test consumers, with no production registration.
+- Structured staged assessment before final ledger bookkeeping: 218 changed symbols across eight files, 13 affected flows, HIGH risk, with no reported partial/truncated response flags. The flows cover event/operation dispatch to movement normalization, living order, JSON validation, handler execution and completion, plus resume ordering/forced choice. They were inspected and stay in the Hegemony scheduler/movement boundary. HIGH is retained, not downgraded because the module is unregistered.
+- Global process extraction remains incomplete: 105 dropped entry points, 55 unexplored, 16 budget-cut walks, 783 omitted callees and 64 dropped flows. Interface/callable-handler boundaries and omitted test-caller edges require CodeGraph, source inspection and the public dispatch/resume traces as supplements. This checkpoint does not claim a complete repository graph, native runtime differential validation, complete movement parity or playable production Hegemony.
+
 ## Next seam
 
-Implement serializable card/movement/phase/damage/dying/death/reveal/winner operations over the scheduler. Validate operation cleanup and authoritative command routing before registering a playable catalog or migrating consumers.
+Finish native movement metadata and additional zones/package modifiers, then card/phase/damage/dying/death/reveal/winner operations over the scheduler. Validate operation cleanup and authoritative command routing before registering a playable catalog or migrating consumers.
 
 All later pipelines, skills/content manifests, UI/AI/transport migration and Standard 2013 retirement remain outstanding.

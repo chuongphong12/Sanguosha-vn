@@ -44,6 +44,11 @@ export type TriggerStep =
   | { kind: "done"; value: boolean }
   | { kind: "event"; event: TriggerEvent; continuation: TriggerData }
   | {
+      kind: "operation";
+      operation: TriggerOperation;
+      continuation: TriggerData;
+    }
+  | {
       kind: "prompt";
       actor: string;
       choices: string[];
@@ -56,6 +61,53 @@ interface ChildResult {
   consumed: boolean;
 }
 
+export interface TriggerOperation {
+  name: string;
+  data: TriggerData;
+}
+
+export interface OperationResult {
+  operation: TriggerOperation;
+  value: TriggerData;
+}
+
+export type OperationStep =
+  | Exclude<TriggerStep, { kind: "done" }>
+  | {
+      kind: "return";
+      value: TriggerData;
+    };
+
+interface FrameContinuation {
+  id: string;
+  actors: (string | null)[];
+  continuation: TriggerData;
+  answer: { choice: string | null } | null;
+  child: ChildResult | null;
+  operationChild: OperationResult | null;
+}
+
+export interface OperationContext<G> {
+  game: G;
+  operation: TriggerOperation;
+  currentActor: string | null;
+  continuation: TriggerData;
+  answer: { choice: string | null } | null;
+  child: ChildResult | null;
+  operationChild: OperationResult | null;
+}
+
+export interface OperationHandler<G> {
+  name: string;
+  /** Pure preflight: reject malformed operations before allocating a frame. */
+  validate?: (
+    game: G,
+    operation: TriggerOperation,
+    currentActor: string | null,
+  ) => void;
+  run: (context: OperationContext<G>) => OperationStep;
+}
+
 export interface TriggerContext<G> {
   game: G;
   event: TriggerEvent;
@@ -63,6 +115,7 @@ export interface TriggerContext<G> {
   continuation: TriggerData;
   answer: { choice: string | null } | null;
   child: ChildResult | null;
+  operationChild: OperationResult | null;
 }
 
 export interface TriggerSkill<G> {
@@ -81,12 +134,12 @@ export interface TriggerSkill<G> {
 export interface TriggerRegistry<G> {
   version: string;
   skills: TriggerSkill<G>[];
+  operations?: OperationHandler<G>[];
 }
 
-interface TriggerFrame {
-  id: string;
+interface TriggerFrame extends FrameContinuation {
+  kind: "event";
   event: TriggerEvent;
-  actors: (string | null)[];
   bands: { priority: number; skills: string[] }[];
   band: number;
   actor: number;
@@ -97,16 +150,20 @@ interface TriggerFrame {
   consumedPrefixes: Record<string, number>;
   selected: Candidate | null;
   stage: TriggerStage;
-  continuation: TriggerData;
-  answer: { choice: string | null } | null;
-  child: ChildResult | null;
 }
+
+interface OperationFrame extends FrameContinuation {
+  kind: "operation";
+  operation: TriggerOperation;
+}
+
+type SchedulerFrame = TriggerFrame | OperationFrame;
 
 export interface TriggerScheduler {
   registryVersion: string;
   seatOrder: string[];
   nextId: number;
-  frames: TriggerFrame[];
+  frames: SchedulerFrame[];
   prompt: TriggerPrompt | null;
   /** Frames remain available to the later operation-specific unwind pipeline. */
   interruption: {
@@ -118,6 +175,7 @@ export interface TriggerScheduler {
     event: TriggerEvent;
     consumed: boolean;
   } | null;
+  operationCompletion: OperationResult | null;
 }
 
 export interface TriggerPrompt {
@@ -154,6 +212,7 @@ export function createTriggerScheduler(
     prompt: null,
     interruption: null,
     completion: null,
+    operationCompletion: null,
   };
 }
 
@@ -203,6 +262,7 @@ function collectCandidates<G>(
       continuation: null,
       answer: null,
       child: null,
+      operationChild: null,
     };
     const occurrences = skill.rule
       ? [
@@ -232,10 +292,11 @@ function collectCandidates<G>(
   return candidates;
 }
 
-function clearStep(frame: TriggerFrame): void {
+function clearStep(frame: FrameContinuation): void {
   frame.continuation = null;
   frame.answer = null;
   frame.child = null;
+  frame.operationChild = null;
 }
 
 function reconcileCandidates<G>(
@@ -285,32 +346,43 @@ function advanceActor(frame: TriggerFrame): void {
   }
 }
 
+function invokeWithValidData<T>(
+  payload: { data: TriggerData },
+  invoke: () => T,
+): T {
+  const previousData = structuredClone(payload.data);
+  try {
+    const result = invoke();
+    assertTriggerData(payload.data);
+    return result;
+  } catch (error) {
+    payload.data = previousData;
+    throw error;
+  }
+}
+
 function invokeTriggerHandler<G>(
   frame: TriggerFrame,
   game: G,
   handler: ((context: TriggerContext<G>) => void | TriggerStep) | undefined,
 ): void | TriggerStep {
-  const previousData = structuredClone(frame.event.data);
-  try {
-    const result = handler?.({
+  return invokeWithValidData(frame.event, () =>
+    handler?.({
       game,
       event: frame.event,
       selected: frame.selected,
       continuation: frame.continuation,
       answer: frame.answer,
       child: frame.child,
-    });
-    assertTriggerData(frame.event.data);
-    return result;
-  } catch (error) {
-    frame.event.data = previousData;
-    throw error;
-  }
+      operationChild: frame.operationChild,
+    }),
+  );
 }
 
 function yieldTriggerStep<G>(
   scheduler: TriggerScheduler,
-  frame: TriggerFrame,
+  frame: SchedulerFrame,
+  game: G,
   registry: TriggerRegistry<G>,
   skill: string,
   result: TriggerStep,
@@ -331,9 +403,20 @@ function yieldTriggerStep<G>(
   frame.continuation = structuredClone(result.continuation);
   frame.answer = null;
   frame.child = null;
+  frame.operationChild = null;
   if (result.kind === "event") {
     scheduler.frames.push(
       createEventFrame(scheduler, registry, result.event, frame.actors[0]),
+    );
+  } else if (result.kind === "operation") {
+    scheduler.frames.push(
+      createOperationFrame(
+        scheduler,
+        game,
+        registry,
+        result.operation,
+        frame.actors[0],
+      ),
     );
   } else {
     scheduler.prompt = {
@@ -345,9 +428,12 @@ function yieldTriggerStep<G>(
       choices: result.choices.map((id) => ({
         id,
         skill,
-        owner: frame.selected?.owner ?? null,
-        slot: frame.selected?.slot ?? null,
-        target: frame.selected?.target ?? frame.event.target,
+        owner: frame.kind === "event" ? (frame.selected?.owner ?? null) : null,
+        slot: frame.kind === "event" ? (frame.selected?.slot ?? null) : null,
+        target:
+          frame.kind === "event"
+            ? (frame.selected?.target ?? frame.event.target)
+            : null,
       })),
     };
   }
@@ -356,6 +442,7 @@ function yieldTriggerStep<G>(
 
 function completeFrame(scheduler: TriggerScheduler, consumed: boolean): void {
   const frame = scheduler.frames.pop()!;
+  if (frame.kind !== "event") throw new Error("Expected event frame");
   const parent = scheduler.frames[scheduler.frames.length - 1];
   if (parent) parent.child = { event: frame.event, consumed };
   else
@@ -392,6 +479,24 @@ function actorChoices(frame: TriggerFrame): {
   return { choices, canCancel: !all.some(isForced) };
 }
 
+function invokeOperationHandler<G>(
+  frame: OperationFrame,
+  game: G,
+  handler: OperationHandler<G>,
+): OperationStep {
+  return invokeWithValidData(frame.operation, () =>
+    handler.run({
+      game,
+      operation: frame.operation,
+      currentActor: frame.actors[0],
+      continuation: frame.continuation,
+      answer: frame.answer,
+      child: frame.child,
+      operationChild: frame.operationChild,
+    }),
+  );
+}
+
 function runTriggers<G>(
   scheduler: TriggerScheduler,
   game: G,
@@ -403,6 +508,34 @@ function runTriggers<G>(
     !scheduler.interruption
   ) {
     const frame = scheduler.frames[scheduler.frames.length - 1];
+    if (frame.kind === "operation") {
+      const handler = registry.operations?.find(
+        (handler) => handler.name === frame.operation.name,
+      );
+      if (!handler) throw new Error("Unknown scheduler operation");
+      const result = invokeOperationHandler(frame, game, handler);
+      if (result.kind === "return") {
+        assertTriggerData(result.value);
+        const completion = {
+          operation: frame.operation,
+          value: structuredClone(result.value),
+        };
+        scheduler.frames.pop();
+        const parent = scheduler.frames[scheduler.frames.length - 1];
+        if (parent) parent.operationChild = completion;
+        else scheduler.operationCompletion = completion;
+      } else {
+        yieldTriggerStep(
+          scheduler,
+          frame,
+          game,
+          registry,
+          handler.name,
+          result,
+        );
+      }
+      continue;
+    }
     if (frame.band >= frame.bands.length) {
       completeFrame(scheduler, false);
       continue;
@@ -423,7 +556,8 @@ function runTriggers<G>(
         game,
         !skill.rule ? skill.record : undefined,
       ) ?? { kind: "done", value: false };
-      if (yieldTriggerStep(scheduler, frame, registry, id, result)) continue;
+      if (yieldTriggerStep(scheduler, frame, game, registry, id, result))
+        continue;
       clearStep(frame);
       frame.candidates.push(...collectCandidates(frame, game, registry, [id]));
       frame.recordCursor++;
@@ -463,7 +597,7 @@ function runTriggers<G>(
       kind: "done",
       value: true,
     };
-    if (yieldTriggerStep(scheduler, frame, registry, skill.id, result))
+    if (yieldTriggerStep(scheduler, frame, game, registry, skill.id, result))
       continue;
     if (result.kind !== "done") continue;
     clearStep(frame);
@@ -507,6 +641,7 @@ function createEventFrame<G>(
   const start =
     currentActor === null ? 0 : scheduler.seatOrder.indexOf(currentActor);
   return {
+    kind: "event",
     id: `event-${scheduler.nextId++}`,
     event: structuredClone(event),
     actors: [
@@ -527,14 +662,41 @@ function createEventFrame<G>(
     continuation: null,
     answer: null,
     child: null,
+    operationChild: null,
   };
 }
 
-export function dispatchTriggerEvent<G>(
+function createOperationFrame<G>(
   scheduler: TriggerScheduler,
   game: G,
   registry: TriggerRegistry<G>,
-  event: TriggerEvent,
+  operation: TriggerOperation,
+  currentActor: string | null,
+): OperationFrame {
+  assertTriggerData(operation.data);
+  const handler = registry.operations?.find(
+    (handler) => handler.name === operation.name,
+  );
+  if (!handler) throw new Error("Unknown scheduler operation");
+  const names = registry.operations!.map((handler) => handler.name);
+  if (new Set(names).size !== names.length)
+    throw new Error("Duplicate scheduler operation");
+  handler.validate?.(game, operation, currentActor);
+  return {
+    kind: "operation",
+    id: `operation-${scheduler.nextId++}`,
+    operation: structuredClone(operation),
+    actors: [currentActor],
+    continuation: null,
+    answer: null,
+    child: null,
+    operationChild: null,
+  };
+}
+
+function canDispatch<G>(
+  scheduler: TriggerScheduler,
+  registry: TriggerRegistry<G>,
   currentActor: string | null,
 ): boolean {
   if (
@@ -549,10 +711,39 @@ export function dispatchTriggerEvent<G>(
     registry.skills.length
   )
     throw new Error("Duplicate trigger skill");
+  return true;
+}
+
+export function dispatchTriggerOperation<G>(
+  scheduler: TriggerScheduler,
+  game: G,
+  registry: TriggerRegistry<G>,
+  operation: TriggerOperation,
+  currentActor: string | null,
+): boolean {
+  if (!canDispatch(scheduler, registry, currentActor)) return false;
+  scheduler.frames.push(
+    createOperationFrame(scheduler, game, registry, operation, currentActor),
+  );
+  scheduler.completion = null;
+  scheduler.operationCompletion = null;
+  runTriggers(scheduler, game, registry);
+  return true;
+}
+
+export function dispatchTriggerEvent<G>(
+  scheduler: TriggerScheduler,
+  game: G,
+  registry: TriggerRegistry<G>,
+  event: TriggerEvent,
+  currentActor: string | null,
+): boolean {
+  if (!canDispatch(scheduler, registry, currentActor)) return false;
   scheduler.frames.push(
     createEventFrame(scheduler, registry, event, currentActor),
   );
   scheduler.completion = null;
+  scheduler.operationCompletion = null;
   runTriggers(scheduler, game, registry);
   return true;
 }
@@ -590,6 +781,7 @@ export function resumeTriggerPrompt<G>(
     return false;
   const frame = scheduler.frames[scheduler.frames.length - 1];
   if (!frame || frame.id !== prompt.frameId) return false;
+  if (frame.kind === "operation" && prompt.kind !== "step") return false;
   if (answer.choice === null && !prompt.canCancel) return false;
   if (
     answer.choice !== null &&
@@ -597,7 +789,7 @@ export function resumeTriggerPrompt<G>(
   )
     return false;
   const current =
-    prompt.kind === "order"
+    prompt.kind === "order" && frame.kind === "event"
       ? actorChoices({
           ...frame,
           candidates: reconcileCandidates(frame, game, registry),
@@ -611,9 +803,9 @@ export function resumeTriggerPrompt<G>(
     return false;
   if (prompt.kind === "step") {
     frame.answer = { choice: answer.choice };
-  } else if (answer.choice === null) {
+  } else if (frame.kind === "event" && answer.choice === null) {
     advanceActor(frame);
-  } else {
+  } else if (frame.kind === "event") {
     selectOccurrence(frame, selected!);
   }
   scheduler.prompt = null;
