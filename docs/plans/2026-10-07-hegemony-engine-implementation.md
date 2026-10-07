@@ -24,6 +24,12 @@ Implement source-normalized reveal/hide transitions and relation predicates thro
 
 Status: complete. Full check: 42 files / 323 tests, typecheck/lint and production build pass. GitNexus rebuilt: 2,799 nodes / 9,775 edges / 239 flows; CodeGraph: 185 files / 1,697 nodes / 7,204 edges. Standards/spec reviews have zero outstanding findings. Twelve identity-domain tests cover reveal/conceal, majority/careerist/lord cases, deceased members, persisted recruitment groups, forecast semantics, malformed/no-op transitions, privacy and re-reveal. GeneralShown/GeneralHidden dispatch, skills/preshow/marks, death burial conversion and recruitment operations remain later pipeline work.
 
+## Part 3 — resumable trigger scheduler
+
+Status: complete. 36 focused cases and 43 files / 359 full-suite tests pass; typecheck/lint and build pass. Both final review axes have zero outstanding findings. GitNexus/CodeGraph rebuilt with search recovery; all seven reported affected scheduler flows inspected. Staged graph assessment remains HIGH and has no partial/truncated response flags; global index limits and the resolved test-caller UNKNOWN are recorded in the knowledge note. The separate scheduler uses data-only event frames and a version-pinned external handler registry. Test the approved dispatch/resume seam for dynamic priority bands, current-first order including deceased seats, record-before-triggerable interleaving, player trigger ordering, compulsory visibility, non-card precedence, occurrence multiplicity and ordered target prefixes, refreshed eligibility, nested record/cost/reveal/effect, JSON reload and invalid replies. Event consumption returns only from that event; stage/turn/game interruption freezes parents for later operation-specific cleanup.
+
+The registry is normalized package metadata, not a ported or selectable skill catalog. Its triggerable hooks are pure and stable occurrence IDs/order indices survive refresh. Native encoded-string edge cases must be audited when translating actual packages. CardFinished/material/phase cleanup, GeneralShown identity/skill integration and transport command policies remain Part 4 or later.
+
 ## Subsequent parts
 
-Scheduler, pipelines, enabled content, adapters/UI/AI and final Standard retirement follow the approved spec, each gated independently. Production cutover has not happened merely because foundational library tests pass.
+Pipelines, enabled content, adapters/UI/AI and final Standard retirement follow the approved spec, each gated independently. Production cutover has not happened merely because foundational library tests pass.
