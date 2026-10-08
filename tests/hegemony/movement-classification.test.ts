@@ -29,8 +29,8 @@ function fixture(): CardMovementGame & { seen: Record<string, TriggerData> } {
   };
 }
 
-function observer(game: ReturnType<typeof fixture>) {
-  const registry: TriggerRegistry<typeof game> = {
+function observer() {
+  const registry: TriggerRegistry<ReturnType<typeof fixture>> = {
     version: "classification-ce4e62b",
     operations: [createCardMovementOperation()],
     skills: [
@@ -53,7 +53,7 @@ function observer(game: ReturnType<typeof fixture>) {
 describe("Hegemony movement packet classification", () => {
   it("merges same-owner sources and orders packets current-first before and after BeforeCardsMove", () => {
     const game = fixture();
-    const registry = observer(game);
+    const registry = observer();
     dispatchTriggerOperation(
       createTriggerScheduler(game.seatOrder, registry.version),
       game,
@@ -148,7 +148,7 @@ describe("Hegemony movement packet classification", () => {
   it("uses the destination actor for ownerless sources and places ownerless moves last", () => {
     const game = fixture();
     game.cardZones.table.cards = [6];
-    const registry = observer(game);
+    const registry = observer();
     dispatchTriggerOperation(
       createTriggerScheduler(game.seatOrder, registry.version),
       game,
@@ -183,7 +183,7 @@ describe("Hegemony movement packet classification", () => {
   it("keeps draw-top and draw-bottom packets separate for the same source owner", () => {
     const game = fixture();
     game.cardZones.a.cards = [1, 6];
-    const registry = observer(game);
+    const registry = observer();
     dispatchTriggerOperation(
       createTriggerScheduler(game.seatOrder, registry.version),
       game,
@@ -211,7 +211,7 @@ describe("Hegemony movement packet classification", () => {
   it("marks the last hand card across all hand storage for one owner", () => {
     const game = fixture();
     game.cardZones.aReserve = { place: "hand", owner: "a", cards: [6] };
-    const registry = observer(game);
+    const registry = observer();
     const scheduler = createTriggerScheduler(game.seatOrder, registry.version);
     dispatchTriggerOperation(
       scheduler,
@@ -322,7 +322,7 @@ describe("Hegemony movement packet classification", () => {
       pileName: "p2",
       cards: [7],
     };
-    const registry = observer(game);
+    const registry = observer();
     dispatchTriggerOperation(
       createTriggerScheduler(game.seatOrder, registry.version),
       game,

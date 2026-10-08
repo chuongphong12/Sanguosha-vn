@@ -77,17 +77,21 @@ function validZone(game: CardMovementGame, zone: CardZone): boolean {
   );
 }
 
-function livingActors(
+function actionOrder(
   game: CardMovementGame,
   currentActor: string | null,
 ): string[] {
   const start =
     currentActor === null ? 0 : game.seatOrder.indexOf(currentActor);
   if (start < 0) throw new Error("Unknown movement actor");
-  return [
-    ...game.seatOrder.slice(start),
-    ...game.seatOrder.slice(0, start),
-  ].filter((id) => game.alive[id]);
+  return [...game.seatOrder.slice(start), ...game.seatOrder.slice(0, start)];
+}
+
+function livingActors(
+  game: CardMovementGame,
+  currentActor: string | null,
+): string[] {
+  return actionOrder(game, currentActor).filter((id) => game.alive[id]);
 }
 
 function normalizeMoves(game: CardMovementGame, data: TriggerData): Move[] {
@@ -235,21 +239,14 @@ function reasonKey(value: TriggerData): string {
   return JSON.stringify(value);
 }
 
-function separateMoves(game: CardMovementGame, moves: Move[]): Move[] {
+function groupCards(
+  moves: Move[],
+  classify: (move: Move, index: number) => string,
+): Move[] {
   const groups = new Map<string, Move>();
   for (const move of moves) {
     move.ids.forEach((_, index) => {
-      const source = game.cardZones[move.from[index]];
-      const key = JSON.stringify([
-        source.owner,
-        source.place,
-        source.pileName ?? "",
-        move.to,
-        move.bottom,
-        move.open[index],
-        reasonKey(move.reason),
-        move.lastHandcard,
-      ]);
+      const key = classify(move, index);
       const group = groups.get(key);
       if (group) appendCard(group, move, index);
       else groups.set(key, oneCardMove(move, index));
@@ -258,30 +255,33 @@ function separateMoves(game: CardMovementGame, moves: Move[]): Move[] {
   return [...groups.values()];
 }
 
+function separateMoves(game: CardMovementGame, moves: Move[]): Move[] {
+  return groupCards(moves, (move, index) => {
+    const source = game.cardZones[move.from[index]];
+    return JSON.stringify([
+      source.owner,
+      source.place,
+      source.pileName ?? "",
+      move.to,
+      move.bottom,
+      move.open[index],
+      reasonKey(move.reason),
+      move.lastHandcard,
+    ]);
+  });
+}
+
 function mergeMoves(
   game: CardMovementGame,
   moves: Move[],
   currentActor: string | null,
 ): Move[] {
-  const groups = new Map<string, Move>();
-  for (const move of moves) {
-    move.ids.forEach((_, index) => {
-      const owner = game.cardZones[move.from[index]].owner;
-      const key = JSON.stringify([owner, move.to, move.bottom]);
-      let group = groups.get(key);
-      if (!group) {
-        group = oneCardMove(move, index);
-        groups.set(key, group);
-      } else appendCard(group, move, index);
-    });
-  }
-  const start =
-    currentActor === null ? 0 : game.seatOrder.indexOf(currentActor);
-  const order = [
-    ...game.seatOrder.slice(start),
-    ...game.seatOrder.slice(0, start),
-  ];
-  return [...groups.values()].sort((a, b) => {
+  const groups = groupCards(moves, (move, index) => {
+    const owner = game.cardZones[move.from[index]].owner;
+    return JSON.stringify([owner, move.to, move.bottom]);
+  });
+  const order = actionOrder(game, currentActor);
+  return groups.sort((a, b) => {
     const actor = (move: Move) =>
       game.cardZones[move.from[0]].owner ?? game.cardZones[move.to].owner;
     const index = (move: Move) => {

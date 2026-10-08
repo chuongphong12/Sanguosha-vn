@@ -74,14 +74,14 @@ Summary: Standards 1 judgment finding resolved, 0 outstanding; Spec 1 P2 finding
 
 ## Part 4c — movement packet classification
 
-Fixed baseline: 35915de. The two independent review attempts could not run because the agent service returned a usage-limit error. This checkpoint therefore has a manual two-axis review only; independent review remains a gate before proceeding to Part 4d.
+Fixed baseline: 35915de. The first two reviewer attempts hit a service usage limit; both independent reviews later completed against commit d7263b4 and rechecked the final refactor. Validation uses the public dispatch/resume seam.
 
-### Standards — manual review
+### Standards
 
-The staged diff stays inside the unregistered movement module, its public-dispatch tests and checkpoint notes. It preserves data-only continuations and tests externally observable event packets, physical storage and JSON reload. `oneCardMove`/`appendCard` share per-card array handling rather than duplicating it across classifiers. `reasonKey` structurally compares JSON objects independent of field insertion order. No actionable standards issue was found in manual review; this does not substitute for the required independent review.
+The independent reviewer found no hard violations and two low-priority possible Duplicated Code findings: the per-card `Map` grouping loop in `separateMoves`/`mergeMoves`, and current-first seat rotation in `livingActors`/`mergeMoves`. Shared `groupCards` and `actionOrder` remove the repeated mechanisms while leaving classifier keys and alive filtering explicit. The reviewer rechecked both fixes and found no remaining actionable Standards issue. A new type-only fixture parameter also caused one lint warning; it was removed without changing test behavior.
 
-### Spec — manual review
+### Spec
 
-The initial owner/destination merge, Before rewrite separation, owner-wide hand depletion, second merge and current-first sort were checked against pinned `room.h:514–617` and `room.cpp:192–216, 4597, 5000–5142, 5163–5205, 5492–5524`. A red/green regression caught reordered but structurally equal reason objects changing the last-hand packet; canonical JSON comparison fixes it. Tests also cover source place/pile and visibility alignment, draw-top/bottom distinction, ownerless order and reload. The documented deterministic zone-key adapter intentionally does not emulate native pointer/QMap tie ordering or package card rewrites.
+The independent reviewer found zero actionable native/spec findings against pinned `room.h:514–617` and `room.cpp:192–216, 4597, 5000–5142, 5163–5205, 5492–5524`; 79 focused tests passed independently. A manual red/green regression had already caught reordered but structurally equal reason objects changing the last-hand packet; canonical JSON comparison fixed it. The reviewer confirmed the Standards refactor preserves classifier keys, card traversal, action order and alive filtering. Deterministic zone-key tie behavior and deferred package rewrites remain documented scope limits.
 
-Summary: manual Standards 0 outstanding findings; manual Spec 1 issue resolved, 0 outstanding. Independent Standards/Spec review is pending because both reviewer attempts hit the service usage limit.
+Summary: Standards 2 judgment findings resolved, 0 outstanding; Spec 0 independent findings, 0 outstanding. The manual reason-comparison issue was resolved before independent review.
