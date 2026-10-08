@@ -71,3 +71,17 @@ One low-priority possible Duplicated Code finding was resolved. `CardZone.place`
 One P2 native-conformance finding was resolved. The first version preserved the initial `originTo` when a BeforeCardsMove hook redirected `to`. Native `_separateMoves` derives origin fields again from the rewritten packet before Confirm; the code and public regression now do the same. The reviewer independently passed all 71 focused tests and found no other actionable scoped issues.
 
 Summary: Standards 1 judgment finding resolved, 0 outstanding; Spec 1 P2 finding resolved, 0 outstanding. This review covers physical metadata/zones, not equipment effects, package move rewrites, card visibility projection or a playable Hegemony runtime.
+
+## Part 4c — movement packet classification
+
+Fixed baseline: 35915de. The two independent review attempts could not run because the agent service returned a usage-limit error. This checkpoint therefore has a manual two-axis review only; independent review remains a gate before proceeding to Part 4d.
+
+### Standards — manual review
+
+The staged diff stays inside the unregistered movement module, its public-dispatch tests and checkpoint notes. It preserves data-only continuations and tests externally observable event packets, physical storage and JSON reload. `oneCardMove`/`appendCard` share per-card array handling rather than duplicating it across classifiers. `reasonKey` structurally compares JSON objects independent of field insertion order. No actionable standards issue was found in manual review; this does not substitute for the required independent review.
+
+### Spec — manual review
+
+The initial owner/destination merge, Before rewrite separation, owner-wide hand depletion, second merge and current-first sort were checked against pinned `room.h:514–617` and `room.cpp:192–216, 4597, 5000–5142, 5163–5205, 5492–5524`. A red/green regression caught reordered but structurally equal reason objects changing the last-hand packet; canonical JSON comparison fixes it. Tests also cover source place/pile and visibility alignment, draw-top/bottom distinction, ownerless order and reload. The documented deterministic zone-key adapter intentionally does not emulate native pointer/QMap tie ordering or package card rewrites.
+
+Summary: manual Standards 0 outstanding findings; manual Spec 1 issue resolved, 0 outstanding. Independent Standards/Spec review is pending because both reviewer attempts hit the service usage limit.

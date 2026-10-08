@@ -201,19 +201,115 @@ function normalizeMoves(game: CardMovementGame, data: TriggerData): Move[] {
     .filter((move) => move.ids.length);
 }
 
+const CARD_FIELDS = [
+  "ids",
+  "from",
+  "fromPlaces",
+  "fromPileNames",
+  "originFrom",
+  "originFromPlaces",
+  "originFromPileNames",
+  "open",
+] as const;
+
+function oneCardMove(move: Move, index: number): Move {
+  const result = structuredClone(move);
+  for (const field of CARD_FIELDS)
+    (result[field] as (number | string | boolean)[]) = [move[field][index]];
+  return result;
+}
+
+function appendCard(group: Move, move: Move, index: number): void {
+  for (const field of CARD_FIELDS)
+    (group[field] as (number | string | boolean)[]).push(move[field][index]);
+  group.lastHandcard ||= move.lastHandcard;
+}
+
+function reasonKey(value: TriggerData): string {
+  if (Array.isArray(value)) return `[${value.map(reasonKey).join(",")}]`;
+  if (value !== null && typeof value === "object")
+    return `{${Object.keys(value)
+      .sort()
+      .map((key) => `${JSON.stringify(key)}:${reasonKey(value[key])}`)
+      .join(",")}}`;
+  return JSON.stringify(value);
+}
+
+function separateMoves(game: CardMovementGame, moves: Move[]): Move[] {
+  const groups = new Map<string, Move>();
+  for (const move of moves) {
+    move.ids.forEach((_, index) => {
+      const source = game.cardZones[move.from[index]];
+      const key = JSON.stringify([
+        source.owner,
+        source.place,
+        source.pileName ?? "",
+        move.to,
+        move.bottom,
+        move.open[index],
+        reasonKey(move.reason),
+        move.lastHandcard,
+      ]);
+      const group = groups.get(key);
+      if (group) appendCard(group, move, index);
+      else groups.set(key, oneCardMove(move, index));
+    });
+  }
+  return [...groups.values()];
+}
+
+function mergeMoves(
+  game: CardMovementGame,
+  moves: Move[],
+  currentActor: string | null,
+): Move[] {
+  const groups = new Map<string, Move>();
+  for (const move of moves) {
+    move.ids.forEach((_, index) => {
+      const owner = game.cardZones[move.from[index]].owner;
+      const key = JSON.stringify([owner, move.to, move.bottom]);
+      let group = groups.get(key);
+      if (!group) {
+        group = oneCardMove(move, index);
+        groups.set(key, group);
+      } else appendCard(group, move, index);
+    });
+  }
+  const start =
+    currentActor === null ? 0 : game.seatOrder.indexOf(currentActor);
+  const order = [
+    ...game.seatOrder.slice(start),
+    ...game.seatOrder.slice(0, start),
+  ];
+  return [...groups.values()].sort((a, b) => {
+    const actor = (move: Move) =>
+      game.cardZones[move.from[0]].owner ?? game.cardZones[move.to].owner;
+    const index = (move: Move) => {
+      const owner = actor(move);
+      return owner === null ? Infinity : order.indexOf(owner);
+    };
+    return index(a) - index(b);
+  });
+}
+
 function markLastHandcards(game: CardMovementGame, moves: Move[]): void {
   const remaining = new Map<string, Set<number>>();
-  for (const [key, zone] of Object.entries(game.cardZones))
-    if (zone.place === "hand") remaining.set(key, new Set(zone.cards));
+  for (const zone of Object.values(game.cardZones)) {
+    if (zone.place !== "hand" || zone.owner === null) continue;
+    const cards = remaining.get(zone.owner) ?? new Set<number>();
+    zone.cards.forEach((id) => cards.add(id));
+    remaining.set(zone.owner, cards);
+  }
   for (const move of moves) {
+    let lastHandcard = false;
     move.from.forEach((source, index) => {
-      if (move.fromPlaces[index] === "hand")
-        remaining.get(source)?.delete(move.ids[index]);
+      const owner = game.cardZones[source].owner;
+      const cards = owner === null ? undefined : remaining.get(owner);
+      if (!cards?.size) return;
+      cards.delete(move.ids[index]);
+      if (cards.size === 0) lastHandcard = true;
     });
-    move.lastHandcard = move.from.some(
-      (source, index) =>
-        move.fromPlaces[index] === "hand" && remaining.get(source)?.size === 0,
-    );
+    move.lastHandcard = lastHandcard;
   }
 }
 
@@ -248,7 +344,11 @@ function runCardMovement<G extends CardMovementGame>(
   const { game, operation, continuation, child, currentActor } = context;
   let cursor: Cursor;
   if (continuation === null) {
-    const moves = normalizeMoves(game, operation.data);
+    const moves = mergeMoves(
+      game,
+      normalizeMoves(game, operation.data),
+      currentActor,
+    );
     cursor = {
       stage: 0,
       actor: 0,
@@ -276,8 +376,9 @@ function runCardMovement<G extends CardMovementGame>(
       };
     }
     if (cursor.stage === 0) {
-      cursor.moves = normalizeMoves(game, cursor.data);
-      markLastHandcards(game, cursor.moves);
+      const separated = separateMoves(game, normalizeMoves(game, cursor.data));
+      markLastHandcards(game, separated);
+      cursor.moves = mergeMoves(game, separated, currentActor);
       cursor.data = { moves: cursor.moves };
     } else if (cursor.stage === 1) {
       commitMoves(game, cursor.moves);
