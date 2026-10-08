@@ -57,3 +57,17 @@ Two findings resolved: the nested movement fixture initially defined a callback 
 One P2 finding resolved: a nested Before movement could make the outer packet silently derive a new source, unlike the documented stale-source invariant. Canonical from hints are now validated after both Before and Confirm children. Regressions preserve the committed child transfer and prevent another outer debit, including mixed-source no-op filtering. Explicit Before replacement packets without hints can deliberately derive current sources. The reviewer independently passed 66 focused movement/operation/scheduler cases. No remaining actionable Spec findings or misleading full-engine parity claim.
 
 Summary: Standards 2 findings resolved, 0 outstanding; Spec 1 finding resolved, 0 outstanding. Native packet classification/metadata, additional zones, package modifiers, wrapped-card filters, transport visibility, cleanup/error recovery and production integration remain deferred.
+
+## Part 4b — movement metadata and additional physical zones
+
+Fixed baseline: 212bd83. Two independent reviewers checked the staged metadata/zone diff against repository standards and pinned ce4e62b native movement code, then rechecked the fixes.
+
+### Standards
+
+One low-priority possible Duplicated Code finding was resolved. `CardZone.place` and the runtime allowed-place list initially repeated the same literals; the allowed-place tuple now defines the type. The reviewer found no hard standards violations or further actionable smells after the fix.
+
+### Spec
+
+One P2 native-conformance finding was resolved. The first version preserved the initial `originTo` when a BeforeCardsMove hook redirected `to`. Native `_separateMoves` derives origin fields again from the rewritten packet before Confirm; the code and public regression now do the same. The reviewer independently passed all 71 focused tests and found no other actionable scoped issues.
+
+Summary: Standards 1 judgment finding resolved, 0 outstanding; Spec 1 P2 finding resolved, 0 outstanding. This review covers physical metadata/zones, not equipment effects, package move rewrites, card visibility projection or a playable Hegemony runtime.

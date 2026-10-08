@@ -43,3 +43,9 @@ Status: complete for this scoped kernel. 27 movement + 3 operation cases, togeth
 ## Subsequent parts
 
 Pipelines, enabled content, adapters/UI/AI and final Standard retirement follow the approved spec, each gated independently. Production cutover has not happened merely because foundational library tests pass.
+
+## Part 4b — movement metadata and extra physical zones
+
+Scope: extend the normalized physical packet with source/destination place and named-pile data, preserved origin, per-card visibility and final-hand-loss metadata. Accept equip, delayed-trick, judge, named private pile and WuGu storage without claiming card-specific install/lose/get hooks. Keep this authoritative packet behind the existing dispatch/resume seam; client projection and native merge/separate adapters remain separate gates.
+
+Status: complete for the scoped physical metadata/zones. Five new red/green metadata/zone cases plus the existing movement/operation/scheduler tests pass; full check is 46 files / 394 tests, typecheck/lint and production build pass with the same 42 inherited warnings and zero errors. GitNexus and CodeGraph rebuilt after review fixes. Structured staged assessment finds six affected flows, HIGH risk, retained and scoped in the knowledge note; global graph omissions remain. Independent Standards/Spec reviews each resolved one finding and report zero outstanding issues. Native packet classification, card-specific hooks, visibility projection and production integration remain later gates.

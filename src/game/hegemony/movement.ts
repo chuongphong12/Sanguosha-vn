@@ -5,10 +5,24 @@ import type {
   TriggerData,
 } from "./scheduler";
 
+const PLACES = [
+  "hand",
+  "equip",
+  "delayed",
+  "judge",
+  "special",
+  "draw",
+  "discard",
+  "table",
+  "wugu",
+] as const;
+type CardPlace = (typeof PLACES)[number];
+
 export interface CardZone {
-  place: "hand" | "draw" | "discard" | "table";
+  place: CardPlace;
   owner: string | null;
   cards: number[];
+  pileName?: string;
 }
 
 /** Authoritative physical storage; never return this object to a player. */
@@ -21,7 +35,19 @@ export interface CardMovementGame {
 type Move = {
   ids: number[];
   from: string[];
+  fromPlaces: CardZone["place"][];
+  fromPileNames: string[];
   to: string;
+  toPlace: CardZone["place"];
+  toPileName: string;
+  originFrom: string[];
+  originTo: string;
+  originFromPlaces: CardZone["place"][];
+  originToPlace: CardZone["place"];
+  originFromPileNames: string[];
+  originToPileName: string;
+  open: boolean[];
+  lastHandcard: boolean;
   bottom: boolean;
   reason: TriggerData;
 };
@@ -39,6 +65,17 @@ const EVENTS = [
   "PreCardsMoveOneTime",
   "CardsMoveOneTime",
 ];
+function validZone(game: CardMovementGame, zone: CardZone): boolean {
+  return (
+    PLACES.includes(zone.place) &&
+    Array.isArray(zone.cards) &&
+    (zone.pileName === undefined || typeof zone.pileName === "string") &&
+    (zone.place !== "special" || Boolean(zone.pileName)) &&
+    (["hand", "equip", "delayed", "judge", "special"].includes(zone.place)
+      ? typeof zone.owner === "string" && game.seatOrder.includes(zone.owner)
+      : zone.owner === null)
+  );
+}
 
 function livingActors(
   game: CardMovementGame,
@@ -71,6 +108,7 @@ function normalizeMoves(game: CardMovementGame, data: TriggerData): Move[] {
         !Array.isArray(entry.ids) ||
         typeof entry.to !== "string" ||
         !Object.prototype.hasOwnProperty.call(game.cardZones, entry.to) ||
+        !validZone(game, game.cardZones[entry.to]) ||
         (entry.bottom !== undefined && typeof entry.bottom !== "boolean") ||
         (entry.bottom === true && game.cardZones[entry.to].place !== "draw")
       )
@@ -82,8 +120,27 @@ function normalizeMoves(game: CardMovementGame, data: TriggerData): Move[] {
           entry.from.some((source) => typeof source !== "string"))
       )
         throw new Error("Invalid movement source");
+      if (
+        entry.open !== undefined &&
+        typeof entry.open !== "boolean" &&
+        (!Array.isArray(entry.open) ||
+          entry.open.length !== entry.ids.length ||
+          entry.open.some((value) => typeof value !== "boolean"))
+      )
+        throw new Error("Invalid movement visibility");
+      if (
+        entry.lastHandcard !== undefined &&
+        typeof entry.lastHandcard !== "boolean"
+      )
+        throw new Error("Invalid movement metadata");
       const ids: number[] = [];
       const from: string[] = [];
+      const fromPlaces: CardZone["place"][] = [];
+      const fromPileNames: string[] = [];
+      const originFrom: string[] = [];
+      const originFromPlaces: CardZone["place"][] = [];
+      const originFromPileNames: string[] = [];
+      const open: boolean[] = [];
       for (const [index, id] of entry.ids.entries()) {
         if (
           typeof id !== "number" ||
@@ -102,22 +159,62 @@ function normalizeMoves(game: CardMovementGame, data: TriggerData): Move[] {
           0,
         );
         if (count !== 1) throw new Error("Invalid physical card location");
+        if (!validZone(game, sources[0][1]))
+          throw new Error("Invalid movement source zone");
         if (Array.isArray(entry.from) && entry.from[index] !== sources[0][0])
           throw new Error("Stale card movement");
         if (sources[0][0] !== entry.to || entry.bottom === true) {
           ids.push(id);
           from.push(sources[0][0]);
+          fromPlaces.push(sources[0][1].place);
+          fromPileNames.push(sources[0][1].pileName ?? "");
+          originFrom.push(sources[0][0]);
+          originFromPlaces.push(sources[0][1].place);
+          originFromPileNames.push(sources[0][1].pileName ?? "");
+          open.push(
+            Array.isArray(entry.open)
+              ? (entry.open[index] as boolean)
+              : entry.open === true,
+          );
         }
       }
       return {
         ids,
         from,
+        fromPlaces,
+        fromPileNames,
         to: entry.to,
+        toPlace: game.cardZones[entry.to].place,
+        toPileName: game.cardZones[entry.to].pileName ?? "",
+        originFrom,
+        originTo: entry.to,
+        originFromPlaces,
+        originToPlace: game.cardZones[entry.to].place,
+        originFromPileNames,
+        originToPileName: game.cardZones[entry.to].pileName ?? "",
+        open,
+        lastHandcard: entry.lastHandcard === true,
         bottom: entry.bottom === true,
         reason: entry.reason ?? null,
       };
     })
     .filter((move) => move.ids.length);
+}
+
+function markLastHandcards(game: CardMovementGame, moves: Move[]): void {
+  const remaining = new Map<string, Set<number>>();
+  for (const [key, zone] of Object.entries(game.cardZones))
+    if (zone.place === "hand") remaining.set(key, new Set(zone.cards));
+  for (const move of moves) {
+    move.from.forEach((source, index) => {
+      if (move.fromPlaces[index] === "hand")
+        remaining.get(source)?.delete(move.ids[index]);
+    });
+    move.lastHandcard = move.from.some(
+      (source, index) =>
+        move.fromPlaces[index] === "hand" && remaining.get(source)?.size === 0,
+    );
+  }
 }
 
 function commitMoves(game: CardMovementGame, moves: Move[]): void {
@@ -180,6 +277,7 @@ function runCardMovement<G extends CardMovementGame>(
     }
     if (cursor.stage === 0) {
       cursor.moves = normalizeMoves(game, cursor.data);
+      markLastHandcards(game, cursor.moves);
       cursor.data = { moves: cursor.moves };
     } else if (cursor.stage === 1) {
       commitMoves(game, cursor.moves);
@@ -192,7 +290,7 @@ function runCardMovement<G extends CardMovementGame>(
   return { kind: "return", value: { cancelled: false, data: cursor.data } };
 }
 
-/** Only the normalized core zones are enabled; package rewrite rules come later. */
+/** Physical zones and metadata only; package card effects come later. */
 export function createCardMovementOperation<
   G extends CardMovementGame,
 >(): OperationHandler<G> {
