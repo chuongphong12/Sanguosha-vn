@@ -85,3 +85,17 @@ The independent reviewer found no hard violations and two low-priority possible 
 The independent reviewer found zero actionable native/spec findings against pinned `room.h:514–617` and `room.cpp:192–216, 4597, 5000–5142, 5163–5205, 5492–5524`; 79 focused tests passed independently. A manual red/green regression had already caught reordered but structurally equal reason objects changing the last-hand packet; canonical JSON comparison fixed it. The reviewer confirmed the Standards refactor preserves classifier keys, card traversal, action order and alive filtering. Deterministic zone-key tie behavior and deferred package rewrites remain documented scope limits.
 
 Summary: Standards 2 judgment findings resolved, 0 outstanding; Spec 0 independent findings, 0 outstanding. The manual reason-comparison issue was resolved before independent review.
+
+## Part 4d — scenario-card discard rewrite
+
+Fixed baseline: 08fa34a. Independent Standards and Spec reviewers inspected the uncommitted four-class rewrite through the public movement dispatch seam against pinned `room.cpp:5163–5205, 5317–5489, 5492–5515`.
+
+### Standards
+
+No actionable finding. Injected card-class metadata is confined to the external operation configuration; the movement helper is local and single-purpose. Existing callers without scenario metadata retain their operation registration.
+
+### Spec
+
+One native-conformance defect resolved: rerouting a card already in WuGu back to WuGu left a same-place packet. The first public-dispatch regression failed with `Stale card movement`; the reviewer's adjacent distinct-key WuGu case also failed by committing a move that native breakdown omits. The final guard compares physical place, and both regressions confirm an empty Confirm packet and unchanged physical storage. The reviewer found no other issue in the scoped four-class branch. A scenario-specific prompt/reload case would add coverage, although the generic classified movement path already tests JSON resume.
+
+Summary: Standards 0 findings; Spec 1 finding resolved, 0 outstanding. Other `cheakMoveData` branches, wrapped-card hooks and production/catalog integration were outside this review.

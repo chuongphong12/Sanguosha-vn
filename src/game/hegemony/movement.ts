@@ -32,6 +32,11 @@ export interface CardMovementGame {
   cardZones: Record<string, CardZone>;
 }
 
+export interface ScenarioMovementRules {
+  cardClasses: Readonly<Record<number, string>>;
+  wuguZone: string;
+}
+
 type Move = {
   ids: number[];
   from: string[];
@@ -65,6 +70,12 @@ const EVENTS = [
   "PreCardsMoveOneTime",
   "CardsMoveOneTime",
 ];
+const SCENARIO_CLASSES = new Set([
+  "RuleTheWorld",
+  "Conquering",
+  "ConsolidateCountry",
+  "Chaos",
+]);
 function validZone(game: CardMovementGame, zone: CardZone): boolean {
   return (
     PLACES.includes(zone.place) &&
@@ -292,6 +303,40 @@ function mergeMoves(
   });
 }
 
+function redirectScenarioCards(
+  game: CardMovementGame,
+  moves: Move[],
+  rules: ScenarioMovementRules | undefined,
+): Move[] {
+  if (!rules) return moves;
+  const diverted: Move[] = [];
+  const remaining: Move[] = [];
+  for (const move of moves) {
+    if (move.toPlace !== "discard") {
+      remaining.push(move);
+      continue;
+    }
+    move.ids.forEach((id, index) => {
+      const card = oneCardMove(move, index);
+      if (!SCENARIO_CLASSES.has(rules.cardClasses[id])) {
+        remaining.push(card);
+        return;
+      }
+      const zone = game.cardZones[rules.wuguZone];
+      if (!zone || !validZone(game, zone) || zone.place !== "wugu")
+        throw new Error("Invalid WuGu destination");
+      card.to = rules.wuguZone;
+      card.toPlace = "wugu";
+      card.toPileName = "";
+      card.originTo = rules.wuguZone;
+      card.originToPlace = "wugu";
+      card.originToPileName = "";
+      if (card.fromPlaces[0] !== "wugu") diverted.push(card);
+    });
+  }
+  return [...diverted, ...remaining];
+}
+
 function markLastHandcards(game: CardMovementGame, moves: Move[]): void {
   const remaining = new Map<string, Set<number>>();
   for (const zone of Object.values(game.cardZones)) {
@@ -340,6 +385,7 @@ function commitMoves(game: CardMovementGame, moves: Move[]): void {
 
 function runCardMovement<G extends CardMovementGame>(
   context: OperationContext<G>,
+  scenarioRules?: ScenarioMovementRules,
 ): OperationStep {
   const { game, operation, continuation, child, currentActor } = context;
   let cursor: Cursor;
@@ -376,7 +422,14 @@ function runCardMovement<G extends CardMovementGame>(
       };
     }
     if (cursor.stage === 0) {
-      const separated = separateMoves(game, normalizeMoves(game, cursor.data));
+      const separated = separateMoves(
+        game,
+        redirectScenarioCards(
+          game,
+          normalizeMoves(game, cursor.data),
+          scenarioRules,
+        ),
+      );
       markLastHandcards(game, separated);
       cursor.moves = mergeMoves(game, separated, currentActor);
       cursor.data = { moves: cursor.moves };
@@ -392,15 +445,15 @@ function runCardMovement<G extends CardMovementGame>(
 }
 
 /** Physical zones and metadata only; package card effects come later. */
-export function createCardMovementOperation<
-  G extends CardMovementGame,
->(): OperationHandler<G> {
+export function createCardMovementOperation<G extends CardMovementGame>(
+  scenarioRules?: ScenarioMovementRules,
+): OperationHandler<G> {
   return {
     name: "move-cards",
     validate: (game, operation, currentActor) => {
       livingActors(game, currentActor);
       normalizeMoves(game, operation.data);
     },
-    run: runCardMovement,
+    run: (context) => runCardMovement(context, scenarioRules),
   };
 }
