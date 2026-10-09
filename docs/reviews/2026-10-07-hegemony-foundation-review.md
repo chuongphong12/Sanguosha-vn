@@ -173,3 +173,17 @@ Zero findings. Native `card.cpp:746–895`, the void `moveCardsAtomic` wrapper (
 The reviewer also confirmed the supplemental 43rd case distinguishes sorting from the room's current player rather than the card source: `sortByActionOrder`/`CompareByActionOrder`/`getFront`/`getAllPlayers(true)` rotate seats from current (`room.cpp:192–215, 4597–4604, 8260–8264`; `serverplayer.cpp:1684–1688`). No implementation changed and no new finding was raised.
 
 Summary: Standards 0 findings; Spec 0 findings. Full checkpoint validation and graph limits are recorded in knowledge; this is the common normalized event/material lifecycle, not complete card-use or native runtime differential parity.
+
+## Part 4j — GameRule target dispatch review (2026-10-09)
+
+Fixed baseline: `c69a191ccf497703b676606e62c3667d4e5749c2`. Spec: implementation ledger Part 4j and pinned `gamerule.cpp:154–157, 537–614`. Reviewed new untracked source/tests explicitly alongside the tracked diff. The approved dispatch/resume seam and local source-derived ledger supply the specification; no external issue-tracker lookup was required.
+
+### Standards
+
+Independent review: zero documented violations and zero actionable smell findings. The operation follows the existing serializable scheduler convention, keeps callbacks outside saved state and reuses the card-use validator. Public tests observe source-derived behavior at the approved seam. Pre-action/use descriptor callbacks are required by the scope, rather than speculative hooks. Seeded CI assertions match declining optional draw skills. The reviewer independently passed two files / 40 tests. Final formatting preserves the integration test's original body indentation through a seeded describe, keeping its diff surgical.
+
+### Spec
+
+Independent review: zero findings. Confirmation uses current membership in a fixed post-Choosing candidate list; indexed loops retain post-confirmation source/recipients; shared payload reaches the child and outer lifecycle; void child returns are ignored. Resource preparation, concrete effects, content registration and unwind remain explicitly deferred. The CI correction matches the legacy optional Ying Zi branch. The reviewer independently passed three files / 83 tests.
+
+Summary: Standards 0 findings; Spec 0 findings. Full validation passed: 54 files / 586 tests, lint/typecheck and production build; 42 inherited warnings, zero errors. Final graph checkpoint is recorded in knowledge. This target dispatcher is not complete native card-use or production gameplay parity.

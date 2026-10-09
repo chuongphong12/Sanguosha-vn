@@ -30,7 +30,10 @@ type Cursor = {
   use: CardUse;
 };
 
-function readUse(game: CardMovementGame, data: TriggerData): CardUse {
+export function readCardUse(
+  game: CardMovementGame,
+  data: TriggerData,
+): CardUse {
   if (
     !data ||
     typeof data !== "object" ||
@@ -74,7 +77,7 @@ function validateOnUse(
   currentActor: string | null,
   rules: CardOnUseRules,
 ): void {
-  const use = readUse(game, data);
+  const use = readCardUse(game, data);
   if (currentActor !== null && !game.seatOrder.includes(currentActor))
     throw new Error("Unknown card use actor");
   for (const [key, place] of [
@@ -120,7 +123,7 @@ function runCardOnUse<G extends CardMovementGame>(
 ): OperationStep {
   let cursor: Cursor;
   if (continuation === null) {
-    const use = readUse(game, operation.data);
+    const use = readCardUse(game, operation.data);
     const start =
       currentActor === null ? 0 : game.seatOrder.indexOf(currentActor);
     const order = [
@@ -131,7 +134,7 @@ function runCardOnUse<G extends CardMovementGame>(
     cursor = { stage: 0, original: structuredClone(use), afterPre: null, use };
   } else {
     cursor = structuredClone(continuation) as Cursor;
-    if (child) cursor.use = readUse(game, child.event.data);
+    if (child) cursor.use = readCardUse(game, child.event.data);
   }
   while (cursor.stage < 6) {
     const stage = cursor.stage++;
