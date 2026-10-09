@@ -115,3 +115,17 @@ Zero actionable findings on the initial diff and final recheck. Replacement owne
 One finding resolved across two branches: generated discard-to-discard and WuGu-to-WuGu no-ops had removed the original movement despite native `changeMoveData` retaining it. Four red/green regressions cover identical and distinct shared-zone keys. The reviewer rechecked both fixes and independently passed 57 movement tests across five files, with zero remaining scoped findings. Combined scenario/SixDragons configuration coverage was suggested as an optional addition, without a demonstrated composition defect.
 
 Summary: Standards 0 findings; Spec 1 finding resolved, 0 outstanding. The review covers physical movement rewrites; Horse card-use availability, equipment lifecycle, other package branches and production integration remain deferred.
+
+## Part 4f — ImperialEdict physical pile routing
+
+Fixed baseline: 1e1261316726914af6914b3ddc1316a631b2e50b. Independent Standards and Spec reviewers checked the uncommitted diff and public dispatch/resume regressions against the approved design, Part 4f ledger scope and pinned ce4e62b native movement/pile code. Nineteen new cases now include the subsequent deceased-recipient correction. There are no issue references or new commits in this checkpoint; the approved repository spec is the review authority. The optional issue-tracker configuration document is absent (`/setup-matt-pocock-skills` configures that workflow); it is not needed to fetch the already-local spec.
+
+### Standards
+
+Zero hard violations and zero actionable smell findings, including the final deceased-recipient recheck. The helper reuses replacement admission, normalization and commit safeguards. Three independently optional external package configurations extend the existing factory without speculative API restructuring. The optional Horse filter and normalized equip-owner invariant justify the narrowed non-null assertions. Tests stay at the approved dispatch/resume seam and no production adapter/content is enabled.
+
+### Spec
+
+One P2 finding resolved after the initial zero-finding review: supplemental source inspection traced `findPlayerbyobjectName` and discovered its default exclusion of deceased recipients (`room.h:336`, `room.cpp:2604–2612, 5451–5452`). The Spec reviewer independently confirmed the issue and acknowledged the missed lookup indirection. Two red/green cases cover already-dead and Before-deceased recipients; a third mixed case preserves SixDragons behavior. The reviewer rechecked the branch-specific guard and independently passed all 36 package rewrite cases, with zero outstanding findings. Native generated same-owner/same-special-place no-ops and UNKNOWN reason were also checked; normalized `null` and documented deterministic `open: false` remain valid for this scoped adapter. Eager logical pile bookkeeping, direct card use, attach/trick skills and client visibility are deferred; these tests do not establish full ImperialEdict gameplay parity.
+
+Summary: Standards 0 findings; Spec 1 P2 finding resolved, 0 outstanding. Full checkpoint validation and graph limits are recorded separately in the knowledge note.

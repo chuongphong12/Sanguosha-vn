@@ -43,6 +43,11 @@ export interface SixDragonsMovementRules {
   discardZone: string;
 }
 
+export interface ImperialEdictMovementRules {
+  cardIDs: readonly number[];
+  pileZones: Readonly<Record<string, string>>;
+}
+
 type Move = {
   ids: number[];
   from: string[];
@@ -352,12 +357,22 @@ function rewriteCardMoves(
   moves: Move[],
   scenarioRules: ScenarioMovementRules | undefined,
   sixDragonsRules: SixDragonsMovementRules | undefined,
+  imperialEdictRules: ImperialEdictMovementRules | undefined,
 ): Move[] {
-  if (!sixDragonsRules)
+  if (!sixDragonsRules && !imperialEdictRules)
     return redirectScenarioCards(game, moves, scenarioRules);
   const replacements: Move[] = [];
   const remaining: Move[] = [];
-  const discarded = new Set<number>();
+  const replaced = new Set<number>();
+  const appendReplacements = (packets: Move[]) => {
+    for (const packet of packets) {
+      for (const id of packet.ids) {
+        if (replaced.has(id)) throw new Error("Duplicate special-card rewrite");
+        replaced.add(id);
+      }
+      replacements.push(packet);
+    }
+  };
   for (const move of moves) {
     for (const packet of redirectScenarioCards(game, [move], scenarioRules))
       (packet.to === move.to ? remaining : replacements).push(packet);
@@ -368,16 +383,16 @@ function rewriteCardMoves(
         (zone) => zone.place === "equip" && zone.owner === destination.owner,
       )
       .flatMap((zone) => zone.cards)
-      .filter((id) => sixDragonsRules.horses[id] !== undefined)
+      .filter((id) => sixDragonsRules?.horses[id] !== undefined)
       .sort((a, b) => {
         const slots = ["defensive", "offensive", "six-dragons"];
         return (
-          slots.indexOf(sixDragonsRules.horses[a]) -
-          slots.indexOf(sixDragonsRules.horses[b])
+          slots.indexOf(sixDragonsRules!.horses[a]) -
+          slots.indexOf(sixDragonsRules!.horses[b])
         );
       });
     const discardHorses = (ids: number[]) => {
-      if (!ids.length) return;
+      if (!sixDragonsRules || !ids.length) return;
       const discard = game.cardZones[sixDragonsRules.discardZone];
       if (!discard || !validZone(game, discard) || discard.place !== "discard")
         throw new Error("Invalid SixDragons discard destination");
@@ -400,28 +415,44 @@ function rewriteCardMoves(
             : [oneCardMove(packet, index)],
         ),
       );
-      for (const packet of generated) {
-        for (const horse of packet.ids) {
-          if (discarded.has(horse))
-            throw new Error("Duplicate special-card rewrite");
-          discarded.add(horse);
-        }
-        replacements.push(packet);
-      }
+      appendReplacements(generated);
     };
     for (const id of move.ids) {
-      if (sixDragonsRules.horses[id] === "six-dragons") discardHorses(horses);
+      if (sixDragonsRules?.horses[id] === "six-dragons") discardHorses(horses);
+      if (
+        imperialEdictRules?.cardIDs.includes(id) &&
+        game.alive[destination.owner!]
+      ) {
+        const pileKey = imperialEdictRules.pileZones[destination.owner!];
+        const pile = game.cardZones[pileKey];
+        if (
+          !pile ||
+          !validZone(game, pile) ||
+          pile.place !== "special" ||
+          pile.owner !== destination.owner ||
+          pile.pileName !== "ImperialEdict"
+        )
+          throw new Error("Invalid ImperialEdict pile destination");
+        appendReplacements(
+          normalizeMoves(game, { moves: [{ ids: [id], to: pileKey }] }).filter(
+            (packet) => {
+              const source = game.cardZones[packet.from[0]];
+              return source.place !== "special" || source.owner !== pile.owner;
+            },
+          ),
+        );
+      }
     }
-    if (horses.some((id) => sixDragonsRules.horses[id] === "six-dragons"))
+    if (horses.some((id) => sixDragonsRules?.horses[id] === "six-dragons"))
       discardHorses(
-        move.ids.filter((id) => sixDragonsRules.horses[id] !== undefined),
+        move.ids.filter((id) => sixDragonsRules?.horses[id] !== undefined),
       );
   }
   return [
     ...replacements,
     ...remaining.flatMap((move) =>
       move.ids.flatMap((id, index) =>
-        discarded.has(id) ? [] : [oneCardMove(move, index)],
+        replaced.has(id) ? [] : [oneCardMove(move, index)],
       ),
     ),
   ];
@@ -477,6 +508,7 @@ function runCardMovement<G extends CardMovementGame>(
   context: OperationContext<G>,
   scenarioRules?: ScenarioMovementRules,
   sixDragonsRules?: SixDragonsMovementRules,
+  imperialEdictRules?: ImperialEdictMovementRules,
 ): OperationStep {
   const { game, operation, continuation, child, currentActor } = context;
   let cursor: Cursor;
@@ -520,6 +552,7 @@ function runCardMovement<G extends CardMovementGame>(
           normalizeMoves(game, cursor.data),
           scenarioRules,
           sixDragonsRules,
+          imperialEdictRules,
         ),
       );
       markLastHandcards(game, separated);
@@ -540,6 +573,7 @@ function runCardMovement<G extends CardMovementGame>(
 export function createCardMovementOperation<G extends CardMovementGame>(
   scenarioRules?: ScenarioMovementRules,
   sixDragonsRules?: SixDragonsMovementRules,
+  imperialEdictRules?: ImperialEdictMovementRules,
 ): OperationHandler<G> {
   return {
     name: "move-cards",
@@ -547,6 +581,12 @@ export function createCardMovementOperation<G extends CardMovementGame>(
       livingActors(game, currentActor);
       normalizeMoves(game, operation.data);
     },
-    run: (context) => runCardMovement(context, scenarioRules, sixDragonsRules),
+    run: (context) =>
+      runCardMovement(
+        context,
+        scenarioRules,
+        sixDragonsRules,
+        imperialEdictRules,
+      ),
   };
 }
