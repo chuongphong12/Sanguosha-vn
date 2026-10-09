@@ -4,6 +4,12 @@ import type {
   OperationStep,
   TriggerData,
 } from "./scheduler";
+import {
+  prepareWrappedCards,
+  validateWrappedCards,
+  type WrappedCard,
+  type WrappedCardRules,
+} from "./wrapped-cards";
 
 const PLACES = [
   "hand",
@@ -32,6 +38,7 @@ export interface CardMovementGame {
   cardZones: Record<string, CardZone>;
   /** Native room tags: written during rewrite, before physical commit. */
   imperialOrder?: { invoke: boolean; cardID: number };
+  wrappedCards?: Record<number, WrappedCard>;
 }
 
 export interface ScenarioMovementRules {
@@ -78,6 +85,7 @@ type Cursor = {
   stage: number;
   actor: number;
   moves: Move[];
+  cardPackets: Move[];
   data: TriggerData;
   actors: string[];
 };
@@ -309,8 +317,16 @@ function mergeMoves(
     const owner = game.cardZones[move.from[index]].owner;
     return JSON.stringify([owner, move.to, move.bottom]);
   });
+  return sortMoves(game, groups, currentActor);
+}
+
+function sortMoves(
+  game: CardMovementGame,
+  moves: Move[],
+  currentActor: string | null,
+): Move[] {
   const order = actionOrder(game, currentActor);
-  return groups.sort((a, b) => {
+  return moves.sort((a, b) => {
     const actor = (move: Move) =>
       game.cardZones[move.from[0]].owner ?? game.cardZones[move.to].owner;
     const index = (move: Move) => {
@@ -517,7 +533,13 @@ function markLastHandcards(game: CardMovementGame, moves: Move[]): void {
   }
 }
 
-function commitMoves(game: CardMovementGame, moves: Move[]): void {
+function commitMoves<G extends CardMovementGame>(
+  game: G,
+  moves: Move[],
+  cardPackets: Move[],
+  wrappedRules: WrappedCardRules<G> | undefined,
+  forceVisible: boolean,
+): void {
   const current = normalizeMoves(game, { moves });
   if (JSON.stringify(current) !== JSON.stringify(moves))
     throw new Error("Stale card movement");
@@ -528,6 +550,16 @@ function commitMoves(game: CardMovementGame, moves: Move[]): void {
       cards.splice(cards.indexOf(id), 1);
     });
   }
+  const wrappedCards =
+    wrappedRules && moves.length
+      ? prepareWrappedCards(
+          game,
+          cardPackets,
+          zones,
+          wrappedRules,
+          forceVisible,
+        )
+      : undefined;
   for (const move of moves) {
     const destination = zones[move.to];
     for (const id of move.ids) {
@@ -540,6 +572,17 @@ function commitMoves(game: CardMovementGame, moves: Move[]): void {
     }
   }
   game.cardZones = zones;
+  if (wrappedCards) game.wrappedCards = wrappedCards;
+}
+
+function movementForceVisible(data: TriggerData): boolean {
+  const value =
+    data !== null && typeof data === "object" && !Array.isArray(data)
+      ? data.forceVisible
+      : undefined;
+  if (value !== undefined && typeof value !== "boolean")
+    throw new Error("Invalid forced movement visibility");
+  return value === true;
 }
 
 function runCardMovement<G extends CardMovementGame>(
@@ -548,6 +591,7 @@ function runCardMovement<G extends CardMovementGame>(
   sixDragonsRules?: SixDragonsMovementRules,
   imperialEdictRules?: ImperialEdictMovementRules,
   imperialOrderRules?: ImperialOrderMovementRules,
+  wrappedRules?: WrappedCardRules<G>,
 ): OperationStep {
   const { game, operation, continuation, child, currentActor } = context;
   let cursor: Cursor;
@@ -561,6 +605,7 @@ function runCardMovement<G extends CardMovementGame>(
       stage: 0,
       actor: 0,
       moves,
+      cardPackets: [],
       data: { moves },
       actors: livingActors(game, currentActor),
     };
@@ -596,10 +641,19 @@ function runCardMovement<G extends CardMovementGame>(
         ),
       );
       markLastHandcards(game, separated);
+      // Native retains separated packets for lose/get updates; OneTime
+      // notification merging discards reason and last-handcard boundaries.
+      cursor.cardPackets = sortMoves(game, separated, currentActor);
       cursor.moves = mergeMoves(game, separated, currentActor);
       cursor.data = { moves: cursor.moves };
     } else if (cursor.stage === 1) {
-      commitMoves(game, cursor.moves);
+      commitMoves(
+        game,
+        cursor.moves,
+        cursor.cardPackets,
+        wrappedRules,
+        movementForceVisible(operation.data),
+      );
       cursor.data = { moves: cursor.moves };
     }
     cursor.stage++;
@@ -615,12 +669,20 @@ export function createCardMovementOperation<G extends CardMovementGame>(
   sixDragonsRules?: SixDragonsMovementRules,
   imperialEdictRules?: ImperialEdictMovementRules,
   imperialOrderRules?: ImperialOrderMovementRules,
+  wrappedRules?: WrappedCardRules<G>,
 ): OperationHandler<G> {
   return {
     name: "move-cards",
     validate: (game, operation, currentActor) => {
       livingActors(game, currentActor);
-      normalizeMoves(game, operation.data);
+      const moves = normalizeMoves(game, operation.data);
+      movementForceVisible(operation.data);
+      if (wrappedRules)
+        validateWrappedCards(
+          game,
+          moves.flatMap((move) => move.ids),
+          wrappedRules,
+        );
     },
     run: (context) =>
       runCardMovement(
@@ -629,6 +691,7 @@ export function createCardMovementOperation<G extends CardMovementGame>(
         sixDragonsRules,
         imperialEdictRules,
         imperialOrderRules,
+        wrappedRules,
       ),
   };
 }

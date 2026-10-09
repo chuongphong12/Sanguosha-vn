@@ -143,3 +143,17 @@ Zero hard violations and zero actionable heuristic smells. The existing discard 
 Zero findings. Native `room.cpp:5400–5405` requires both exact USE reason and ancestry of the used card, permitting virtual cards. Eager tag writes (`:5409–5410`) precede generated breakdown and Confirm; the last eligible scanned ID overwrites earlier IDs. WuGu generated no-ops retain original discards and pending tags (`:5326–5346, 5509–5512`). Public tests cover final Before payloads/consumption, preserved tags, mixed package ordering, normalized metadata, JSON resume and stale nested parents. The reviewer independently passed 3 suites / 54 tests (30 ImperialOrder, 19 ImperialEdict, 5 scenario). NotActive invocation/reset, ImperialEdict introduction and direct use/choice effects are correctly deferred. Visibility remains normalized, without a native wire-parity claim for uninitialized `open`.
 
 Summary: Standards 0 findings; Spec 0 findings. Full validation and remaining graph limits are recorded in the knowledge note; this review establishes scoped routing/tag conformance rather than complete ImperialOrder gameplay.
+
+## Part 4h — normalized wrapped-card lifecycle
+
+Fixed baseline: 535cd19df0085481b33f6d6a71290ce7e61af94f. Independent Standards and Spec reviewers inspected the uncommitted diff and new wrapped-card tests against the approved scoped plan and pinned ce4e62b source. The existing local spec supplies review authority. Pure eligible package filters and authoritative metadata remain external/unregistered foundation contracts.
+
+### Standards
+
+Zero documented hard violations and zero actionable Fowler smell findings, including the final packet-boundary recheck. Synchronous metadata preparation uses an isolated inventory snapshot and stages storage until successful physical/wrapped commit. The fifth optional registry configuration extends the existing factory without speculative restructuring. Retained data-only lifecycle packets address a concrete correctness requirement; extracting the existing comparator into `sortMoves` avoids duplication. Delayed restoration at get and add represents distinct native lifecycle moments. Public dispatch/resume tests contain no private-helper tests or internal mocks.
+
+### Spec
+
+One finding resolved after the initial zero-finding review: the root's supplemental source audit found that reconstructing physical packets from merged OneTime notifications lost distinct reason/last-handcard boundaries and reset cards together that native refilters separately. Two direct/JSON Confirm resume regressions failed red, then passed when the continuation retained native-ordered separated `cardPackets`. A source-order rewrite guard also passes. The Spec reviewer independently confirmed the native distinction (`room.cpp:5078–5143, 5242–5251`), acknowledged the initially missed grouping detail and reran all 36 wrapped tests, with zero remaining scoped findings. Full ViewHas/TriggerSkill eligibility, wrapped pointers/subcards, client reset/update visibility, equipment hooks, dynamic ancestry adapters and enabled gameplay remain deferred.
+
+Summary: Standards 0 findings; Spec 1 finding resolved, 0 outstanding. Full checkpoint validation and graph limits are recorded in the knowledge note; this is source-derived normalized lifecycle conformance, not native differential or production E2E parity.
