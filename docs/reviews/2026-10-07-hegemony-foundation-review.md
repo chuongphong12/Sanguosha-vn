@@ -99,3 +99,19 @@ No actionable finding. Injected card-class metadata is confined to the external 
 One native-conformance defect resolved: rerouting a card already in WuGu back to WuGu left a same-place packet. The first public-dispatch regression failed with `Stale card movement`; the reviewer's adjacent distinct-key WuGu case also failed by committing a move that native breakdown omits. The final guard compares physical place, and both regressions confirm an empty Confirm packet and unchanged physical storage. The reviewer found no other issue in the scoped four-class branch. A scenario-specific prompt/reload case would add coverage, although the generic classified movement path already tests JSON resume.
 
 Summary: Standards 0 findings; Spec 1 finding resolved, 0 outstanding. Other `cheakMoveData` branches, wrapped-card hooks and production/catalog integration were outside this review.
+
+Correction from Part 4e: the Part 4d review above omitted native `changeMoveData`'s replacement-admission order. Empty generated WuGu packets do not remove original IDs. The earlier assertion of an empty Confirm packet and unchanged storage was incorrect; both regressions now expect the original discard movement to complete.
+
+## Part 4e — SixDragons movement rewrites
+
+Fixed baseline: fb27896651cfb510570a1e8b890e5195f48e9ea5. Independent reviewers inspected the external Horse/slot configuration, post-Before snapshot rewrites, normalized replacement reasons and public dispatch/resume regressions against the approved scoped plan and pinned ce4e62b native source.
+
+### Standards
+
+Zero actionable findings on the initial diff and final recheck. Replacement ownership is recorded only after generated packets survive normalization, preserving residual originals when generated replacements are no-ops. Configuration stays outside serializable game/continuation state; no unrelated production registration or equipment lifecycle changes were introduced.
+
+### Spec
+
+One finding resolved across two branches: generated discard-to-discard and WuGu-to-WuGu no-ops had removed the original movement despite native `changeMoveData` retaining it. Four red/green regressions cover identical and distinct shared-zone keys. The reviewer rechecked both fixes and independently passed 57 movement tests across five files, with zero remaining scoped findings. Combined scenario/SixDragons configuration coverage was suggested as an optional addition, without a demonstrated composition defect.
+
+Summary: Standards 0 findings; Spec 1 finding resolved, 0 outstanding. The review covers physical movement rewrites; Horse card-use availability, equipment lifecycle, other package branches and production integration remain deferred.

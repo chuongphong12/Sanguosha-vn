@@ -37,6 +37,12 @@ export interface ScenarioMovementRules {
   wuguZone: string;
 }
 
+/** Package-normalized Horse ancestry and equipment slot, including SixDragons. */
+export interface SixDragonsMovementRules {
+  horses: Readonly<Record<number, "defensive" | "offensive" | "six-dragons">>;
+  discardZone: string;
+}
+
 type Move = {
   ids: number[];
   from: string[];
@@ -325,16 +331,100 @@ function redirectScenarioCards(
       const zone = game.cardZones[rules.wuguZone];
       if (!zone || !validZone(game, zone) || zone.place !== "wugu")
         throw new Error("Invalid WuGu destination");
+      if (card.fromPlaces[0] === "wugu") {
+        remaining.push(card);
+        return;
+      }
       card.to = rules.wuguZone;
       card.toPlace = "wugu";
       card.toPileName = "";
       card.originTo = rules.wuguZone;
       card.originToPlace = "wugu";
       card.originToPileName = "";
-      if (card.fromPlaces[0] !== "wugu") diverted.push(card);
+      diverted.push(card);
     });
   }
   return [...diverted, ...remaining];
+}
+
+function rewriteCardMoves(
+  game: CardMovementGame,
+  moves: Move[],
+  scenarioRules: ScenarioMovementRules | undefined,
+  sixDragonsRules: SixDragonsMovementRules | undefined,
+): Move[] {
+  if (!sixDragonsRules)
+    return redirectScenarioCards(game, moves, scenarioRules);
+  const replacements: Move[] = [];
+  const remaining: Move[] = [];
+  const discarded = new Set<number>();
+  for (const move of moves) {
+    for (const packet of redirectScenarioCards(game, [move], scenarioRules))
+      (packet.to === move.to ? remaining : replacements).push(packet);
+    const destination = game.cardZones[move.to];
+    if (destination.place !== "equip") continue;
+    const horses = Object.values(game.cardZones)
+      .filter(
+        (zone) => zone.place === "equip" && zone.owner === destination.owner,
+      )
+      .flatMap((zone) => zone.cards)
+      .filter((id) => sixDragonsRules.horses[id] !== undefined)
+      .sort((a, b) => {
+        const slots = ["defensive", "offensive", "six-dragons"];
+        return (
+          slots.indexOf(sixDragonsRules.horses[a]) -
+          slots.indexOf(sixDragonsRules.horses[b])
+        );
+      });
+    const discardHorses = (ids: number[]) => {
+      if (!ids.length) return;
+      const discard = game.cardZones[sixDragonsRules.discardZone];
+      if (!discard || !validZone(game, discard) || discard.place !== "discard")
+        throw new Error("Invalid SixDragons discard destination");
+      const generated = normalizeMoves(game, {
+        moves: [
+          {
+            ids,
+            to: sixDragonsRules.discardZone,
+            reason: {
+              kind: "put",
+              actor: destination.owner,
+              skill: "SixDragons",
+            },
+          },
+        ],
+      }).flatMap((packet) =>
+        packet.ids.flatMap((_, index) =>
+          packet.fromPlaces[index] === "discard"
+            ? []
+            : [oneCardMove(packet, index)],
+        ),
+      );
+      for (const packet of generated) {
+        for (const horse of packet.ids) {
+          if (discarded.has(horse))
+            throw new Error("Duplicate special-card rewrite");
+          discarded.add(horse);
+        }
+        replacements.push(packet);
+      }
+    };
+    for (const id of move.ids) {
+      if (sixDragonsRules.horses[id] === "six-dragons") discardHorses(horses);
+    }
+    if (horses.some((id) => sixDragonsRules.horses[id] === "six-dragons"))
+      discardHorses(
+        move.ids.filter((id) => sixDragonsRules.horses[id] !== undefined),
+      );
+  }
+  return [
+    ...replacements,
+    ...remaining.flatMap((move) =>
+      move.ids.flatMap((id, index) =>
+        discarded.has(id) ? [] : [oneCardMove(move, index)],
+      ),
+    ),
+  ];
 }
 
 function markLastHandcards(game: CardMovementGame, moves: Move[]): void {
@@ -386,6 +476,7 @@ function commitMoves(game: CardMovementGame, moves: Move[]): void {
 function runCardMovement<G extends CardMovementGame>(
   context: OperationContext<G>,
   scenarioRules?: ScenarioMovementRules,
+  sixDragonsRules?: SixDragonsMovementRules,
 ): OperationStep {
   const { game, operation, continuation, child, currentActor } = context;
   let cursor: Cursor;
@@ -424,10 +515,11 @@ function runCardMovement<G extends CardMovementGame>(
     if (cursor.stage === 0) {
       const separated = separateMoves(
         game,
-        redirectScenarioCards(
+        rewriteCardMoves(
           game,
           normalizeMoves(game, cursor.data),
           scenarioRules,
+          sixDragonsRules,
         ),
       );
       markLastHandcards(game, separated);
@@ -447,6 +539,7 @@ function runCardMovement<G extends CardMovementGame>(
 /** Physical zones and metadata only; package card effects come later. */
 export function createCardMovementOperation<G extends CardMovementGame>(
   scenarioRules?: ScenarioMovementRules,
+  sixDragonsRules?: SixDragonsMovementRules,
 ): OperationHandler<G> {
   return {
     name: "move-cards",
@@ -454,6 +547,6 @@ export function createCardMovementOperation<G extends CardMovementGame>(
       livingActors(game, currentActor);
       normalizeMoves(game, operation.data);
     },
-    run: (context) => runCardMovement(context, scenarioRules),
+    run: (context) => runCardMovement(context, scenarioRules, sixDragonsRules),
   };
 }

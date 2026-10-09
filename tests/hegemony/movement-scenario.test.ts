@@ -131,7 +131,7 @@ describe("Hegemony scenario card movement", () => {
     expect(game.cardZones.discard.cards).toEqual([]);
   });
 
-  it("drops a redirected move whose scenario card is already in WuGu", () => {
+  it("keeps the original discard when the generated WuGu replacement is a no-op", () => {
     const game = fixture();
     game.cardZones.hand.cards = [2, 3, 4, 5];
     game.cardZones.wugu.cards = [1];
@@ -143,9 +143,11 @@ describe("Hegemony scenario card movement", () => {
       { name: "move-cards", data: { moves: [{ ids: [1], to: "discard" }] } },
       "a",
     );
-    expect(game.seen.ConfirmMoveCards).toMatchObject({ moves: [] });
-    expect(game.cardZones.wugu.cards).toEqual([1]);
-    expect(game.cardZones.discard.cards).toEqual([]);
+    expect(game.seen.ConfirmMoveCards).toMatchObject({
+      moves: [{ ids: [1], to: "discard" }],
+    });
+    expect(game.cardZones.wugu.cards).toEqual([]);
+    expect(game.cardZones.discard.cards).toEqual([1]);
   });
 
   it("treats distinct WuGu keys as the same native shared place", () => {
@@ -160,8 +162,11 @@ describe("Hegemony scenario card movement", () => {
       { name: "move-cards", data: { moves: [{ ids: [1], to: "discard" }] } },
       "a",
     );
-    expect(game.seen.ConfirmMoveCards).toMatchObject({ moves: [] });
-    expect(game.cardZones.otherWugu.cards).toEqual([1]);
+    expect(game.seen.ConfirmMoveCards).toMatchObject({
+      moves: [{ ids: [1], to: "discard" }],
+    });
+    expect(game.cardZones.otherWugu.cards).toEqual([]);
     expect(game.cardZones.wugu.cards).toEqual([]);
+    expect(game.cardZones.discard.cards).toEqual([1]);
   });
 });
