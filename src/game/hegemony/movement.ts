@@ -30,6 +30,8 @@ export interface CardMovementGame {
   seatOrder: string[];
   alive: Record<string, boolean>;
   cardZones: Record<string, CardZone>;
+  /** Native room tags: written during rewrite, before physical commit. */
+  imperialOrder?: { invoke: boolean; cardID: number };
 }
 
 export interface ScenarioMovementRules {
@@ -46,6 +48,11 @@ export interface SixDragonsMovementRules {
 export interface ImperialEdictMovementRules {
   cardIDs: readonly number[];
   pileZones: Readonly<Record<string, string>>;
+}
+
+export interface ImperialOrderMovementRules {
+  cardIDs: readonly number[];
+  wuguZone: string;
 }
 
 type Move = {
@@ -314,12 +321,13 @@ function mergeMoves(
   });
 }
 
-function redirectScenarioCards(
+function redirectDiscardCards(
   game: CardMovementGame,
   moves: Move[],
   rules: ScenarioMovementRules | undefined,
+  imperialOrderRules: ImperialOrderMovementRules | undefined,
 ): Move[] {
-  if (!rules) return moves;
+  if (!rules && !imperialOrderRules) return moves;
   const diverted: Move[] = [];
   const remaining: Move[] = [];
   for (const move of moves) {
@@ -329,21 +337,45 @@ function redirectScenarioCards(
     }
     move.ids.forEach((id, index) => {
       const card = oneCardMove(move, index);
-      if (!SCENARIO_CLASSES.has(rules.cardClasses[id])) {
+      const reason = move.reason;
+      const use =
+        reason !== null && typeof reason === "object" && !Array.isArray(reason)
+          ? reason.use
+          : null;
+      // The package adapter normalizes isKindOf("ImperialOrder") on the used
+      // card (including virtual cards) to this ancestry marker, not its ID.
+      const usedImperialOrder =
+        reason !== null &&
+        typeof reason === "object" &&
+        !Array.isArray(reason) &&
+        reason.kind === "use" &&
+        use !== null &&
+        typeof use === "object" &&
+        !Array.isArray(use) &&
+        use.cardClass === "ImperialOrder";
+      const invoke =
+        imperialOrderRules?.cardIDs.includes(id) && !usedImperialOrder;
+      if (invoke) game.imperialOrder = { invoke: true, cardID: id };
+      const wuguKey = invoke
+        ? imperialOrderRules!.wuguZone
+        : rules && SCENARIO_CLASSES.has(rules.cardClasses[id])
+          ? rules.wuguZone
+          : null;
+      if (wuguKey === null) {
         remaining.push(card);
         return;
       }
-      const zone = game.cardZones[rules.wuguZone];
+      const zone = game.cardZones[wuguKey];
       if (!zone || !validZone(game, zone) || zone.place !== "wugu")
         throw new Error("Invalid WuGu destination");
       if (card.fromPlaces[0] === "wugu") {
         remaining.push(card);
         return;
       }
-      card.to = rules.wuguZone;
+      card.to = wuguKey;
       card.toPlace = "wugu";
       card.toPileName = "";
-      card.originTo = rules.wuguZone;
+      card.originTo = wuguKey;
       card.originToPlace = "wugu";
       card.originToPileName = "";
       diverted.push(card);
@@ -358,9 +390,10 @@ function rewriteCardMoves(
   scenarioRules: ScenarioMovementRules | undefined,
   sixDragonsRules: SixDragonsMovementRules | undefined,
   imperialEdictRules: ImperialEdictMovementRules | undefined,
+  imperialOrderRules: ImperialOrderMovementRules | undefined,
 ): Move[] {
   if (!sixDragonsRules && !imperialEdictRules)
-    return redirectScenarioCards(game, moves, scenarioRules);
+    return redirectDiscardCards(game, moves, scenarioRules, imperialOrderRules);
   const replacements: Move[] = [];
   const remaining: Move[] = [];
   const replaced = new Set<number>();
@@ -374,7 +407,12 @@ function rewriteCardMoves(
     }
   };
   for (const move of moves) {
-    for (const packet of redirectScenarioCards(game, [move], scenarioRules))
+    for (const packet of redirectDiscardCards(
+      game,
+      [move],
+      scenarioRules,
+      imperialOrderRules,
+    ))
       (packet.to === move.to ? remaining : replacements).push(packet);
     const destination = game.cardZones[move.to];
     if (destination.place !== "equip") continue;
@@ -509,6 +547,7 @@ function runCardMovement<G extends CardMovementGame>(
   scenarioRules?: ScenarioMovementRules,
   sixDragonsRules?: SixDragonsMovementRules,
   imperialEdictRules?: ImperialEdictMovementRules,
+  imperialOrderRules?: ImperialOrderMovementRules,
 ): OperationStep {
   const { game, operation, continuation, child, currentActor } = context;
   let cursor: Cursor;
@@ -553,6 +592,7 @@ function runCardMovement<G extends CardMovementGame>(
           scenarioRules,
           sixDragonsRules,
           imperialEdictRules,
+          imperialOrderRules,
         ),
       );
       markLastHandcards(game, separated);
@@ -574,6 +614,7 @@ export function createCardMovementOperation<G extends CardMovementGame>(
   scenarioRules?: ScenarioMovementRules,
   sixDragonsRules?: SixDragonsMovementRules,
   imperialEdictRules?: ImperialEdictMovementRules,
+  imperialOrderRules?: ImperialOrderMovementRules,
 ): OperationHandler<G> {
   return {
     name: "move-cards",
@@ -587,6 +628,7 @@ export function createCardMovementOperation<G extends CardMovementGame>(
         scenarioRules,
         sixDragonsRules,
         imperialEdictRules,
+        imperialOrderRules,
       ),
   };
 }

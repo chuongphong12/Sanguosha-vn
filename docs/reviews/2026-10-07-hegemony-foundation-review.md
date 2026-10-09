@@ -129,3 +129,17 @@ Zero hard violations and zero actionable smell findings, including the final dec
 One P2 finding resolved after the initial zero-finding review: supplemental source inspection traced `findPlayerbyobjectName` and discovered its default exclusion of deceased recipients (`room.h:336`, `room.cpp:2604–2612, 5451–5452`). The Spec reviewer independently confirmed the issue and acknowledged the missed lookup indirection. Two red/green cases cover already-dead and Before-deceased recipients; a third mixed case preserves SixDragons behavior. The reviewer rechecked the branch-specific guard and independently passed all 36 package rewrite cases, with zero outstanding findings. Native generated same-owner/same-special-place no-ops and UNKNOWN reason were also checked; normalized `null` and documented deterministic `open: false` remain valid for this scoped adapter. Eager logical pile bookkeeping, direct card use, attach/trick skills and client visibility are deferred; these tests do not establish full ImperialEdict gameplay parity.
 
 Summary: Standards 0 findings; Spec 1 P2 finding resolved, 0 outstanding. Full checkpoint validation and graph limits are recorded separately in the knowledge note.
+
+## Part 4g — ImperialOrder discard diversion and pending room tags
+
+Fixed baseline: 333782e2a5a12d81223808ea19eb853d4fe1fee9. Independent reviewers inspected the uncommitted movement/docs diff and the explicitly read new ImperialOrder test file against the approved design, Part 4g ledger and pinned ce4e62b source. The existing local spec supplies review authority; optional issue-tracker setup remains unnecessary for this checkpoint.
+
+### Standards
+
+Zero hard violations and zero actionable heuristic smells. The existing discard rewrite is extended surgically, JSON object guards fit the trigger-data contract, and the narrowed configuration assertion follows the matching-card guard. A fourth optional external package configuration follows the existing movement factory without speculative API restructuring. Tests use the approved dispatch/resume seam with real scheduler handlers and literal source-derived expectations. No private-helper tests, internal mocks or unrelated production registration. GitNexus's initial inability to resolve the renamed helper is explicitly a refresh limitation, not evidence that it is unused; final graph checks are recorded in the knowledge note.
+
+### Spec
+
+Zero findings. Native `room.cpp:5400–5405` requires both exact USE reason and ancestry of the used card, permitting virtual cards. Eager tag writes (`:5409–5410`) precede generated breakdown and Confirm; the last eligible scanned ID overwrites earlier IDs. WuGu generated no-ops retain original discards and pending tags (`:5326–5346, 5509–5512`). Public tests cover final Before payloads/consumption, preserved tags, mixed package ordering, normalized metadata, JSON resume and stale nested parents. The reviewer independently passed 3 suites / 54 tests (30 ImperialOrder, 19 ImperialEdict, 5 scenario). NotActive invocation/reset, ImperialEdict introduction and direct use/choice effects are correctly deferred. Visibility remains normalized, without a native wire-parity claim for uninitialized `open`.
+
+Summary: Standards 0 findings; Spec 0 findings. Full validation and remaining graph limits are recorded in the knowledge note; this review establishes scoped routing/tag conformance rather than complete ImperialOrder gameplay.
