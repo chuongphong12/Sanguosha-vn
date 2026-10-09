@@ -187,3 +187,17 @@ Independent review: zero documented violations and zero actionable smell finding
 Independent review: zero findings. Confirmation uses current membership in a fixed post-Choosing candidate list; indexed loops retain post-confirmation source/recipients; shared payload reaches the child and outer lifecycle; void child returns are ignored. Resource preparation, concrete effects, content registration and unwind remain explicitly deferred. The CI correction matches the legacy optional Ying Zi branch. The reviewer independently passed three files / 83 tests.
 
 Summary: Standards 0 findings; Spec 0 findings. Full validation passed: 54 files / 586 tests, lint/typecheck and production build; 42 inherited warnings, zero errors. Final graph checkpoint is recorded in knowledge. This target dispatcher is not complete native card-use or production gameplay parity.
+
+## Part 4k — normal-path GameRule resource review (2026-10-09)
+
+Fixed baseline: `4bff808521086f075e89026dd63ad0b4ffebf4ea`. Independent reviewers inspected the tracked diff and explicitly read the new resource source/test files. Spec: implementation ledger Part 4k and pinned `gamerule.cpp:563–629`, card/wrapped-card identity and flag primitives, and movement's forced-visible hand condition. The approved public dispatch/resume seam and local source-derived plan supply review authority.
+
+### Standards
+
+Zero documented hard violations and zero actionable Fowler smells. One non-blocking documentation finding was resolved: the CardUsed factory comment still said target dispatch only, although the factory now supports optional resource preparation/restoration. The corrected comment separates those normal-path resources from adapter-owned executable effects. Integration remains surgical; callbacks stay in the registry, wrapped resources share existing storage, and tests exercise registered public operations. CodeGraph confirms resource dependencies remain within CardUsed and its test registries; the CardFinished factory currently has only the resource fixture as a consumer. UNKNOWN factory impact is not treated as proof of absence. This reviewer did not rerun tests.
+
+### Spec
+
+Zero findings. Jink initialization precedes Record; nonempty backup restores using the final source/current key, even after selection of a non-Slash. Global flags append duplicate sentinels and write shared use/room/card tags. Nested shared-object and distinct-object/same-key cases preserve native tag behavior. Priority-zero cleanup uses the latest reference, preserves unrelated tags and wrapped `modified`, and respects consumption. Physical keys are canonical numeric IDs; discard composition correctly removes `visible`. Preflight, copied callbacks, JSON reload and replay rejection use the approved seam. The reviewer independently passed three focused files / 134 tests. Executable effects, package reference/conversion discovery, transport, production routing and interruption unwind remain explicitly deferred.
+
+Summary: Standards 1 documentation finding resolved, 0 hard violations or smell findings; Spec 0 findings. Full validation passed: 55 files / 639 tests, lint/typecheck and production build; 42 inherited warnings, zero errors. Final graph evidence is recorded in knowledge. This completes scoped normal-path resources rather than complete native card-use or production gameplay parity.
