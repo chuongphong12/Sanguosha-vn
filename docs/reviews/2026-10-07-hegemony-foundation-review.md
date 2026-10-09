@@ -157,3 +157,19 @@ Zero documented hard violations and zero actionable Fowler smell findings, inclu
 One finding resolved after the initial zero-finding review: the root's supplemental source audit found that reconstructing physical packets from merged OneTime notifications lost distinct reason/last-handcard boundaries and reset cards together that native refilters separately. Two direct/JSON Confirm resume regressions failed red, then passed when the continuation retained native-ordered separated `cardPackets`. A source-order rewrite guard also passes. The Spec reviewer independently confirmed the native distinction (`room.cpp:5078–5143, 5242–5251`), acknowledged the initially missed grouping detail and reran all 36 wrapped tests, with zero remaining scoped findings. Full ViewHas/TriggerSkill eligibility, wrapped pointers/subcards, client reset/update visibility, equipment hooks, dynamic ancestry adapters and enabled gameplay remain deferred.
 
 Summary: Standards 0 findings; Spec 1 finding resolved, 0 outstanding. Full checkpoint validation and graph limits are recorded in the knowledge note; this is source-derived normalized lifecycle conformance, not native differential or production E2E parity.
+
+## Part 4i — normalized non-Skill onUse lifecycle
+
+Fixed baseline: 0569a49eb93addc92710a2555a702cd4a443cd27. Independent reviewers inspected the uncommitted docs diff and explicitly read both new untracked onUse source/test files against the Part 4i plan and pinned ce4e62b source. The approved local spec supplies review authority; optional issue-tracker setup is not required for this checkpoint.
+
+### Standards
+
+Zero documented hard violations and zero actionable Fowler smell findings. The original, post-Pre and latest event snapshots serve distinct contracts, and cursor stages follow the existing movement operation convention. The narrowed post-Pre assertion follows a stage invariant. Outer material-location checks serve pure preflight before frame allocation; moving them into private movement helpers would broaden this slice without a demonstrated need. The operation composes existing child operations, and tests observe public dispatch/resume, payloads and inventory without mocks/private-helper assertions. The reviewer independently passed the then-current 42 focused tests. A supplemental current-actor sorting case adds coverage without changing the reviewed implementation.
+
+### Spec
+
+Zero findings. Native `card.cpp:746–895`, the void `moveCardsAtomic` wrapper (`room.cpp:5144–5154`) and current-place table lookup (`:6620–6644`) support the ordering, independent snapshots, original-source targeting, reason provenance, consumption/cancellation and remaining-original-material cleanup. Nested operations and JSON resume preserve continuation boundaries; the reviewer independently passed the then-current 42 cases. Source/card identity mutation, GameRule target/effect and flag/tag cleanup, SkillCard/package hooks and interruption unwind are explicit deferred requirements rather than implemented gameplay. No production registration or scope creep was found.
+
+The reviewer also confirmed the supplemental 43rd case distinguishes sorting from the room's current player rather than the card source: `sortByActionOrder`/`CompareByActionOrder`/`getFront`/`getAllPlayers(true)` rotate seats from current (`room.cpp:192–215, 4597–4604, 8260–8264`; `serverplayer.cpp:1684–1688`). No implementation changed and no new finding was raised.
+
+Summary: Standards 0 findings; Spec 0 findings. Full checkpoint validation and graph limits are recorded in knowledge; this is the common normalized event/material lifecycle, not complete card-use or native runtime differential parity.
