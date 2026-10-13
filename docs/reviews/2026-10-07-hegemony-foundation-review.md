@@ -201,3 +201,17 @@ Zero documented hard violations and zero actionable Fowler smells. One non-block
 Zero findings. Jink initialization precedes Record; nonempty backup restores using the final source/current key, even after selection of a non-Slash. Global flags append duplicate sentinels and write shared use/room/card tags. Nested shared-object and distinct-object/same-key cases preserve native tag behavior. Priority-zero cleanup uses the latest reference, preserves unrelated tags and wrapped `modified`, and respects consumption. Physical keys are canonical numeric IDs; discard composition correctly removes `visible`. Preflight, copied callbacks, JSON reload and replay rejection use the approved seam. The reviewer independently passed three focused files / 134 tests. Executable effects, package reference/conversion discovery, transport, production routing and interruption unwind remain explicitly deferred.
 
 Summary: Standards 1 documentation finding resolved, 0 hard violations or smell findings; Spec 0 findings. Full validation passed: 55 files / 639 tests, lint/typecheck and production build; 42 inherited warnings, zero errors. Final graph evidence is recorded in knowledge. This completes scoped normal-path resources rather than complete native card-use or production gameplay parity.
+
+## Part 4l — common use and room effect dispatch review (2026-10-13)
+
+Fixed baseline: `6fbe26dc1a01ba45947431d7796a97390f6d6610`. Independent reviewers inspected the tracked diff and explicitly read all four new source/test files. Spec: implementation ledger Part 4l, pinned `card.cpp:897–925`, `structs.cpp:161–164` and `room.cpp:4445–4463`. The approved public dispatch/resume seam and source-derived local plan supply review authority.
+
+### Standards
+
+Zero documented violations and zero actionable Fowler smells. Modules keep distinct responsibilities, follow existing serializable operation conventions and isolate pure callback inputs through copies. Public tests use registered dispatch/resume operations; existing engine contracts remain unchanged. Private resource/flag state and deferred production integration are accurately documented. The reviewer retained HIGH/UNKNOWN impact limitations rather than inferring clean risk from missing symbol coverage. No edits or test reruns by this reviewer.
+
+### Spec
+
+Zero findings. Both operations match scoped resource-list snapshots, original target/source/card boundaries, current-key writes/removal, fixed room recipients/eligibility, consumed-return/result behavior, original-recipient flag cleanup, null sources, JSON resume and preserved eager state. CodeGraph confirms test-only factory consumers. The reviewer independently passed two files / 55 tests. GameRule decisions, Nullification, concrete effects, native identity and interruption unwind are explicitly deferred. A supplemental source check clarified documentation: Slash inherits common use and overrides onUse/onEffect, so this skeleton is not complete Slash gameplay.
+
+Summary: Standards 0 findings; Spec 0 findings. Full validation passed: 57 files / 694 tests, lint/typecheck and production build; 42 inherited warnings, zero errors. Graph evidence and limits are recorded in knowledge. This is scoped normalized dispatch conformance, not native differential or production Hegemony E2E parity.
