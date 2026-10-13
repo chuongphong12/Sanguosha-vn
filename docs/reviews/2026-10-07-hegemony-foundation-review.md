@@ -215,3 +215,17 @@ Zero documented violations and zero actionable Fowler smells. Modules keep disti
 Zero findings. Both operations match scoped resource-list snapshots, original target/source/card boundaries, current-key writes/removal, fixed room recipients/eligibility, consumed-return/result behavior, original-recipient flag cleanup, null sources, JSON resume and preserved eager state. CodeGraph confirms test-only factory consumers. The reviewer independently passed two files / 55 tests. GameRule decisions, Nullification, concrete effects, native identity and interruption unwind are explicitly deferred. A supplemental source check clarified documentation: Slash inherits common use and overrides onUse/onEffect, so this skeleton is not complete Slash gameplay.
 
 Summary: Standards 0 findings; Spec 0 findings. Full validation passed: 57 files / 694 tests, lint/typecheck and production build; 42 inherited warnings, zero errors. Graph evidence and limits are recorded in knowledge. This is scoped normalized dispatch conformance, not native differential or production Hegemony E2E parity.
+
+## Part 4m — GameRule effect dispatch review (2026-10-13)
+
+Fixed baseline: `95ddde7378dbad3f5a4f287b8da0709c156a9725`. Independent reviewers inspected the staged diff including the new source/test module. Spec: approved implementation ledger Part 4m, pinned `gamerule.cpp:154–157, 794–816`, `room.cpp:4445–4463` and `player.cpp:249–264`. The local source-derived plan and approved dispatch/resume seam supply review authority without an external issue-tracker lookup.
+
+### Standards
+
+Zero documented violations and zero actionable Fowler smells. The change is confined to a new operation/rule module, unchanged validator-body exports, public tests and corresponding documentation. The required cancellation/onEffect adapters keep callbacks outside JSON cursors and follow existing scheduler conventions. Tests use registered public dispatch/resume, including complete pipeline compositions. This reviewer did not run heavy checks or edit files.
+
+### Spec
+
+Zero findings. The priority-zero rule matches non-Slash nullification before trick cancellation, required boolean child result, set-style flag insertion, separate Confirmed payload, ignored confirmation consumption/rewrites, late alive/current Slash gate and void onEffect return. Original versus rewritten recipient cleanup, nullable sources, nested effects, copied adapters, malformed boundaries, interruption freeze and JSON reload/replay are covered. The reviewer independently passed all 43 cases and revalidated the pinned native commit. Full cancellation internals, executable content, production registration, pointer semantics and exception unwind remain explicitly deferred.
+
+Summary: Standards 0 findings; Spec 0 findings. Full validation passes: 58 files / 737 tests, lint/typecheck and production build; 42 inherited warnings, zero errors. Refreshed graphs match validated source/test hashes; all seven affected flow IDs / 24 steps inspected. HIGH/UNKNOWN and global extraction limits are recorded in knowledge. This verifies normalized dispatch contracts rather than complete native or enabled Hegemony E2E parity.

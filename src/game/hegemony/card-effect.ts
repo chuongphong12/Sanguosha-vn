@@ -30,7 +30,10 @@ type Cursor = {
   result: boolean;
 };
 
-function readCardEffect(game: CardEffectGame, data: TriggerData): CardEffect {
+export function readCardEffect(
+  game: CardEffectGame,
+  data: TriggerData,
+): CardEffect {
   if (
     !data ||
     typeof data !== "object" ||
@@ -101,7 +104,10 @@ function effectEligible<G extends CardEffectGame>(
   return game.alive[effect.to] || slash;
 }
 
-function readRecipientFlags(game: CardEffectGame, target: string): string[] {
+export function readRecipientFlags(
+  game: CardEffectGame,
+  target: string,
+): string[] {
   const flags = game.playerFlags;
   if (
     !flags ||
