@@ -52,7 +52,7 @@ function playerTags(game: SlashGame, player: string) {
     throw new Error("Invalid Slash player tags");
   return tags[player];
 }
-function qinggang(game: SlashGame, effect: SlashEffect) {
+function qinggang(game: SlashGame, effect: Pick<SlashEffect, "to" | "slash">) {
   if (effect.slash === null) return null;
   const { card } = readCardReference(game, effect.slash.reference);
   const tags = playerTags(game, effect.to);
@@ -61,7 +61,10 @@ function qinggang(game: SlashGame, effect: SlashEffect) {
     throw new Error("Invalid Qinggang list");
   return { tags, list: [...list], key: card.key };
 }
-function removeQinggang(game: SlashGame, effect: SlashEffect) {
+export function removeQinggang(
+  game: SlashGame,
+  effect: Pick<SlashEffect, "to" | "slash">,
+) {
   const input = qinggang(game, effect);
   if (!input || !input.list.length) return;
   const index = input.list.indexOf(input.key);
