@@ -454,7 +454,7 @@ function runNullification<G extends NullificationGame>(
     if (cursor.result) {
       const use = readCardUse(game, cursor.data);
       cursor.result = !strings(
-        (use as CardUse & { nullified?: TriggerData }).nullified,
+        (use as CardUse & { nullified_list?: TriggerData }).nullified_list,
       ).includes("_ALL_TARGETS");
     }
     cursor.stage = "decision";

@@ -861,7 +861,7 @@ describe("normalized Hegemony Nullification protocol", () => {
         });
       if (invalid === "used-list")
         rule(rules, "CardUsed", ({ event }) => {
-          Object.assign(event.data!, { nullified: null });
+          Object.assign(event.data!, { nullified_list: null });
           return { kind: "done", value: false };
         });
       if (invalid === "count")
@@ -974,9 +974,8 @@ describe("normalized Hegemony Nullification protocol", () => {
           event.data = null;
           return { kind: "done", value: true };
         }
-        (event.data as CardUse & { nullified: string[] }).nullified = [
-          mode === "all" ? "_ALL_TARGETS" : "b",
-        ];
+        (event.data as CardUse & { nullified_list: string[] }).nullified_list =
+          [mode === "all" ? "_ALL_TARGETS" : "b"];
         return { kind: "done", value: false };
       });
       const scheduler = dispatch(game, rules);
