@@ -15,7 +15,7 @@ import type {
   TriggerSkill,
 } from "./scheduler";
 
-function ruleInput(game: DamageGame, data: TriggerData) {
+export function ruleInput(game: DamageGame, data: TriggerData) {
   if (!data || typeof data !== "object" || Array.isArray(data))
     throw new Error("Invalid damage rule input");
   if (data.target === null) return null;
@@ -80,7 +80,7 @@ export function createSlashHitOperation<
     },
   };
 }
-function damageRule<G extends DamageGame>(
+export function damageRule<G extends DamageGame>(
   event: string,
   operation: string,
 ): TriggerSkill<G> {
@@ -230,7 +230,7 @@ export function createDamageDoneRule<G extends DamageGame>(): TriggerSkill<G> {
   return damageRule("DamageDone", "damage-done");
 }
 
-function allPlayers(game: DamageGame): string[] {
+export function allPlayers(game: DamageGame): string[] {
   if (game.currentPlayer === null) return [...game.seatOrder];
   const index = game.seatOrder.indexOf(game.currentPlayer);
   if (index < 0) throw new Error("Invalid damage current player");
