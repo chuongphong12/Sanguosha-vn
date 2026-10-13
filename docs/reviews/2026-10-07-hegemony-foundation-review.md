@@ -229,3 +229,17 @@ Zero documented violations and zero actionable Fowler smells. The change is conf
 Zero findings. The priority-zero rule matches non-Slash nullification before trick cancellation, required boolean child result, set-style flag insertion, separate Confirmed payload, ignored confirmation consumption/rewrites, late alive/current Slash gate and void onEffect return. Original versus rewritten recipient cleanup, nullable sources, nested effects, copied adapters, malformed boundaries, interruption freeze and JSON reload/replay are covered. The reviewer independently passed all 43 cases and revalidated the pinned native commit. Full cancellation internals, executable content, production registration, pointer semantics and exception unwind remain explicitly deferred.
 
 Summary: Standards 0 findings; Spec 0 findings. Full validation passes: 58 files / 737 tests, lint/typecheck and production build; 42 inherited warnings, zero errors. Refreshed graphs match validated source/test hashes; all seven affected flow IDs / 24 steps inspected. HIGH/UNKNOWN and global extraction limits are recorded in knowledge. This verifies normalized dispatch contracts rather than complete native or enabled Hegemony E2E parity.
+
+## Part 4n — Room cancellation state review (2026-10-13)
+
+Fixed baseline: `41ce4b41006cfbc5e492660d2e7dbdc2195187c7`. Independent reviewers inspected the staged diff including the new source/test module. Spec: approved ledger Part 4n and pinned `room.cpp:1195–1231`, `card.cpp:931–934`, `standard-tricks.cpp:89–92`, `player.cpp:2209–2224`. The approved public dispatch/resume seam and source-derived local plan supply review authority.
+
+### Standards
+
+Zero documented violations and zero actionable Fowler smells. The source-independent resource extraction keeps existing source-tag validation while sharing card/room/wrapped/storage parsing. Cancellation scope matches the approved operation boundary, callbacks stay outside JSON cursors, and all tests exercise public dispatch/resume/composition rather than private helpers. The reviewer read the full source diff and 955-line test file; no heavy checks or indexers were run.
+
+### Spec
+
+Zero findings. Cancelability precedes resource/cache reads; cache hits preserve shared tags; misses initialize them before the ask. The boolean return is independent of the valid bit. Fanout retains the saved list and duplicates, uses current living friendship and original-reference key/ancestry, and does not restore nested tags. Nullable sources, callback isolation, live identity changes, interrupted/eager states, malformed boundaries and JSON resume/replay are covered. The extraction retains all original CardUse player-tag/card/wrapped/storage checks. The reviewer independently revalidated the pinned native source and passed both focused suites: 2 files / 103 cases. Full response/counter protocol, content, transport, discovery/pointers, unwind and production routing remain explicitly deferred.
+
+Summary: Standards 0 findings; Spec 0 findings. Full validation passes: 59 files / 787 tests, lint/typecheck and production build; 42 inherited warnings, zero errors. Both graphs rebuilt against validated source/test hashes; all 16 staged affected flow IDs / 67 ordered steps were inspected. CRITICAL/UNKNOWN, lower-bound interfaces and global extraction limits remain recorded in knowledge. Normalized cancellation state is not complete playable Nullification or production Hegemony E2E parity.

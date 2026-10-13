@@ -28,19 +28,12 @@ function isRecord(value: unknown): value is Record<string, TriggerData> {
   return Boolean(value && typeof value === "object" && !Array.isArray(value));
 }
 
-export function readResourceCard(
-  game: CardResourceGame,
-  use: CardUse,
-  rules: CardUseResourceRules,
-) {
+/** Source-independent identity/storage lookup; nullable effects have no player tag owner. */
+export function readCardReference(game: CardResourceGame, reference: string) {
   const ledger = game.cardResources;
-  const reference = rules.reference(structuredClone(use));
   if (
     !ledger ||
     !isRecord(ledger.roomTags) ||
-    !isRecord(ledger.playerTags) ||
-    !Object.prototype.hasOwnProperty.call(ledger.playerTags, use.from) ||
-    !isRecord(ledger.playerTags[use.from]) ||
     !isRecord(ledger.cards) ||
     typeof reference !== "string" ||
     !Object.prototype.hasOwnProperty.call(ledger.cards, reference)
@@ -71,7 +64,27 @@ export function readResourceCard(
     !isRecord(storage.tags)
   )
     throw new Error("Invalid card resource storage");
-  return { ledger, card, storage, playerTags: ledger.playerTags[use.from] };
+  return { ledger, card, storage };
+}
+
+export function readResourceCard(
+  game: CardResourceGame,
+  use: CardUse,
+  rules: CardUseResourceRules,
+) {
+  const reference = rules.reference(structuredClone(use));
+  const ledger = game.cardResources;
+  if (
+    !ledger ||
+    !isRecord(ledger.playerTags) ||
+    !Object.prototype.hasOwnProperty.call(ledger.playerTags, use.from) ||
+    !isRecord(ledger.playerTags[use.from])
+  )
+    throw new Error("Invalid card resources");
+  return {
+    ...readCardReference(game, reference),
+    playerTags: ledger.playerTags[use.from],
+  };
 }
 
 export function prepareJink(
