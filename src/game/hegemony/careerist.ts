@@ -127,18 +127,18 @@ function runCareerist<G extends CareeristGame>(
   while (cursor.index < cursor.players.length) {
     const player = cursor.players[cursor.index++],
       identity = readDeathIdentity(game, player);
+    if (identity.headShown) continue;
+    const scenarioShown = game.scenarioRoleShown?.[player];
+    if (scenarioShown !== undefined && typeof scenarioShown !== "boolean")
+      throw new Error("Invalid scenario role shown");
     const seeming =
-      !identity.headShown && !identity.deputyShown
+      !identity.headShown && !identity.deputyShown && scenarioShown !== true
         ? ""
         : identity.role === "careerist" ||
             identity.role.startsWith("careerist_")
           ? identity.role
           : identity.kingdom;
-    if (
-      identity.headShown ||
-      seeming === "careerist" ||
-      identity.headKingdom !== "careerist"
-    )
+    if (seeming === "careerist" || identity.headKingdom !== "careerist")
       continue;
     cursor.noGameOver = true;
     cursor.leader = player;

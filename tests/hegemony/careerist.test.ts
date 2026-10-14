@@ -414,13 +414,19 @@ describe("Current careerist/recruit eligibility and native replies", () => {
     expect(game.hp.c).toBe(2);
     expect(game.hp.b).toBe(2);
   });
-  it("does not exclude an actual hidden-head lord that is not currently Player::isLord", () => {
+  it("skips an actual hidden-head lord through the coherent Player::isLord fact", () => {
     const game = fixture();
     game.identities.c.actualHeadLord = true;
+    game.identities.c.lord = true;
+    game.identities.c.headShown = false;
     game.cardResources.roomTags.replies = ["yes"];
     run(game, fullRegistry());
-    expect(game.identities.c.role).toBe("careerist_a-head");
-    expect(game.scenarioRoleShown.c).toBe(true);
+    expect(game.identities.c.role).toBe("wei");
+    expect(game.scenarioRoleShown.c).toBe(false);
+    expect(game.identities.b.role).toBe("careerist_a-head");
+    expect(
+      game.seen.filter((e) => e.name === "request").map((e) => e.target),
+    ).toEqual(["b"]);
   });
   it("asks a careerist-head candidate only no and normalizes an unsupported yes to refusal", () => {
     const game = fixture();
