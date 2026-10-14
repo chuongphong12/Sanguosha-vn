@@ -20,9 +20,12 @@ import type {
 } from "./scheduler";
 
 export interface DeathRelations<G extends DeathGame> {
+  /** Native hasShownOneGeneral, including retained scenario identity. */
+  hasShown: (game: Readonly<G>, target: string) => boolean;
   isFriend: (game: Readonly<G>, a: string, b: string) => boolean;
 }
-export interface BuryVictimRules {
+export interface BuryVictimRules<G extends DeathGame = DeathGame> {
+  hasShown: (game: Readonly<G>, target: string) => boolean;
   bury: (target: string) => TriggerOperation;
   reward: (killer: string, victim: string) => TriggerOperation;
   /** Hidden recipients receive a private notification, not an authoritative role change. */
@@ -43,7 +46,7 @@ type BuryCursor = {
 };
 function runBuryVictim<G extends DeathGame>(
   { game, operation, continuation }: OperationContext<G>,
-  rules: BuryVictimRules,
+  rules: BuryVictimRules<G>,
 ): OperationStep {
   let cursor: BuryCursor;
   if (continuation === null) {
@@ -103,7 +106,7 @@ function runBuryVictim<G extends DeathGame>(
       identity.role.startsWith("careerist")
     )
       continue;
-    if (identity.headShown || identity.deputyShown)
+    if (rescueBoolean(rules.hasShown(structuredClone(game), target)))
       game.identities[target].role = "careerist";
     else
       return {
@@ -115,7 +118,7 @@ function runBuryVictim<G extends DeathGame>(
   return { kind: "return", value: null };
 }
 export function createBuryVictimOperation<G extends DeathGame>(
-  rules: BuryVictimRules,
+  rules: BuryVictimRules<G>,
 ): OperationHandler<G> {
   return {
     name: "bury-victim",
@@ -153,7 +156,7 @@ export function createRewardOperation<G extends DeathGame>(
       const { killer, victim } = rewardInput(game, operation.data);
       if (!readSlashAlive(game, killer)) return { kind: "return", value: null };
       const identity = readDeathIdentity(game, killer);
-      if (!identity.headShown && !identity.deputyShown)
+      if (!rescueBoolean(rules.hasShown(structuredClone(game), killer)))
         return { kind: "return", value: null };
       if (rescueBoolean(rules.isFriend(structuredClone(game), killer, victim)))
         return {

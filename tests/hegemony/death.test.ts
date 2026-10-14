@@ -54,6 +54,11 @@ import {
 } from "../../src/game/hegemony/scheduler";
 
 type Game = DeathGame & { seen: TriggerEvent[] };
+function shown(game: Readonly<Game>, target: string) {
+  return (
+    game.identities[target].headShown || game.identities[target].deputyShown
+  );
+}
 function record(data: TriggerData): Record<string, TriggerData> {
   if (!data || typeof data !== "object" || Array.isArray(data))
     throw new Error("fixture record");
@@ -94,6 +99,7 @@ function lifecycleRegistry(
       }),
     }),
     createBuryVictimOperation({
+      hasShown: shown,
       bury: (target) => ({ name: "bury", data: target }),
       reward: (killer, victim) => ({
         name: "reward-punish",
@@ -105,6 +111,7 @@ function lifecycleRegistry(
       }),
     }),
     createRewardOperation({
+      hasShown: shown,
       isFriend: friend,
       draw: (target, count) => ({
         name: "reward-draw",
@@ -115,6 +122,7 @@ function lifecycleRegistry(
     }),
     createBeforeGameOverJudgeOperation({ showGeneral }),
     createGetWinnerOperation({
+      hasShown: shown,
       isFriend: friend,
       willBeFriend: (g, a, b) =>
         g.identities[a].headKingdom === g.identities[b].kingdom,
@@ -499,6 +507,7 @@ describe("Hegemony death public dispatch", () => {
     rules.operations!.push(
       createBeforeGameOverJudgeOperation({ showGeneral }),
       createGetWinnerOperation({
+        hasShown: shown,
         showGeneral,
         isFriend: (g, a, b) =>
           g.identities[a].kingdom === g.identities[b].kingdom,
@@ -550,6 +559,7 @@ describe("Hegemony death public dispatch", () => {
     game.livingPlayers = ["a", "b"];
     rules.operations!.push(
       createGetWinnerOperation({
+        hasShown: shown,
         isFriend: (g, a, b) =>
           g.identities[a].kingdom === g.identities[b].kingdom,
         willBeFriend: () => true,
@@ -581,6 +591,7 @@ describe("Hegemony death public dispatch", () => {
     game.identities.a.deputyShown = false;
     rules.operations!.push(
       createGetWinnerOperation({
+        hasShown: shown,
         isFriend: (g, a, b) =>
           (g.identities[a].headShown || g.identities[a].deputyShown) &&
           g.identities[a].kingdom === g.identities[b].kingdom,
@@ -625,6 +636,7 @@ describe("Hegemony death public dispatch", () => {
     game.playerMarks.c.multi_kill_count = 1;
     rules.operations!.push(
       createBuryVictimOperation({
+        hasShown: shown,
         bury: (target) => ({ name: "bury-adapter", data: target }),
         reward: (killer, victim) => ({
           name: "unexpected-reward",
@@ -663,6 +675,7 @@ describe("Hegemony death public dispatch", () => {
     game.identities.c.role = "careerist";
     rules.operations!.push(
       createRewardOperation({
+        hasShown: shown,
         isFriend: (g, a, b) =>
           g.identities[a].kingdom === g.identities[b].kingdom,
         draw: (target, count) => ({

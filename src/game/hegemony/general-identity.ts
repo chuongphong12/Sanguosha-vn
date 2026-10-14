@@ -54,9 +54,19 @@ export function hasShownGeneral(game: GeneralGame, target: string) {
   if (role !== undefined && typeof role !== "boolean")
     throw new Error("Invalid scenario role shown");
   const identity = readDeathIdentity(game, target);
-  return role === true || identity.headShown || identity.deputyShown;
+  if (role === true || identity.headShown) return true;
+  if (!identity.deputyShown) return false;
+  const displayed = game.displayedGenerals?.[target];
+  if (
+    !displayed ||
+    typeof displayed !== "object" ||
+    Array.isArray(displayed) ||
+    typeof displayed.deputy !== "string"
+  )
+    throw new Error("Invalid displayed deputy");
+  return displayed.deputy !== "";
 }
-function seemingKingdom(game: GeneralGame, target: string) {
+export function seemingKingdom(game: GeneralGame, target: string) {
   if (!hasShownGeneral(game, target)) return "";
   const identity = readDeathIdentity(game, target);
   return identity.role === "careerist" || identity.role.startsWith("careerist_")

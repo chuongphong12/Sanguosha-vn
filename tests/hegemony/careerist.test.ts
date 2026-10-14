@@ -90,6 +90,16 @@ function registry(): TriggerRegistry<Game> {
     skills: [],
     operations: [
       createCareeristOperation({
+        hasShown: (g, p) => {
+          const scenarioShown = g.scenarioRoleShown?.[p];
+          if (scenarioShown !== undefined && typeof scenarioShown !== "boolean")
+            throw new Error("Invalid scenario role shown");
+          return (
+            scenarioShown === true ||
+            g.identities[p].headShown ||
+            g.identities[p].deputyShown
+          );
+        },
         showHead: (target) => ({
           name: "show-careerist",
           data: {
@@ -697,6 +707,10 @@ describe("Careerist snapshots, validation and serialized integration", () => {
     game.cardResources.roomTags.replies = ["yes"];
     rules.operations!.push(
       createGetWinnerOperation({
+        hasShown: (g, p) =>
+          g.scenarioRoleShown[p] ||
+          g.identities[p].headShown ||
+          g.identities[p].deputyShown,
         isFriend: (g, a, b) =>
           a === b || g.identities[a].role === g.identities[b].role,
         willBeFriend: () => true,

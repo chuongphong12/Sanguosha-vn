@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { hasShownGeneral } from "../../src/game/hegemony/general-identity";
 import {
   createGeneralShownOperation,
   createGeneralShownRule,
@@ -273,6 +274,7 @@ function lifecycleRegistry(actualWinner = false): TriggerRegistry<Game> {
       },
     },
     createCareeristOperation({
+      hasShown: hasShownGeneral,
       showHead: (target) => ({
         name: "show-general",
         data: { target, triggerEvent: false },
@@ -290,6 +292,7 @@ function lifecycleRegistry(actualWinner = false): TriggerRegistry<Game> {
     );
     rules.operations.push(
       createGetWinnerOperation({
+        hasShown: hasShownGeneral,
         isFriend: (_g, a, b) => a === b,
         willBeFriend: () => false,
         getLord: () => null,

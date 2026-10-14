@@ -1,4 +1,5 @@
 import { damageRoomTags } from "./damage";
+import { rescueBoolean } from "./dying-rule";
 import {
   deathOrder,
   livingPlayers,
@@ -16,7 +17,8 @@ export interface CareeristGame extends DeathGame {
   /** Private authoritative scenario_role_shown properties, not a player projection. */
   scenarioRoleShown: Record<string, boolean>;
 }
-export interface CareeristRules {
+export interface CareeristRules<G extends CareeristGame = CareeristGame> {
+  hasShown: (game: Readonly<G>, target: string) => boolean;
   /** Native showGeneral(head=true, trigger_event=false, sendLog=true, ignore_rule=true). */
   showHead: (target: string) => TriggerOperation;
 }
@@ -36,7 +38,7 @@ type Cursor = {
 };
 function runCareerist<G extends CareeristGame>(
   { game, continuation, operationChild }: OperationContext<G>,
-  rules: CareeristRules,
+  rules: CareeristRules<G>,
 ): OperationStep {
   const cursor: Cursor =
     continuation === null
@@ -128,16 +130,13 @@ function runCareerist<G extends CareeristGame>(
     const player = cursor.players[cursor.index++],
       identity = readDeathIdentity(game, player);
     if (identity.headShown) continue;
-    const scenarioShown = game.scenarioRoleShown?.[player];
-    if (scenarioShown !== undefined && typeof scenarioShown !== "boolean")
-      throw new Error("Invalid scenario role shown");
-    const seeming =
-      !identity.headShown && !identity.deputyShown && scenarioShown !== true
-        ? ""
-        : identity.role === "careerist" ||
-            identity.role.startsWith("careerist_")
-          ? identity.role
-          : identity.kingdom;
+    const seeming = !rescueBoolean(
+      rules.hasShown(structuredClone(game), player),
+    )
+      ? ""
+      : identity.role === "careerist" || identity.role.startsWith("careerist_")
+        ? identity.role
+        : identity.kingdom;
     if (seeming === "careerist" || identity.headKingdom !== "careerist")
       continue;
     cursor.noGameOver = true;
@@ -153,7 +152,7 @@ function runCareerist<G extends CareeristGame>(
   return { kind: "return", value: cursor.noGameOver };
 }
 export function createCareeristOperation<G extends CareeristGame>(
-  rules: CareeristRules,
+  rules: CareeristRules<G>,
 ): OperationHandler<G> {
   return {
     name: "careerist-rule",

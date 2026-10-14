@@ -145,8 +145,8 @@ function canWin<G extends DeathGame>(
     for (const b of players) {
       const left = readDeathIdentity(game, a),
         right = readDeathIdentity(game, b);
-      const shownA = left.headShown || left.deputyShown,
-        shownB = right.headShown || right.deputyShown;
+      const shownA = rescueBoolean(rules.hasShown(structuredClone(game), a)),
+        shownB = rescueBoolean(rules.hasShown(structuredClone(game), b));
       if (
         shownA &&
         shownB &&
@@ -180,7 +180,7 @@ function canWin<G extends DeathGame>(
   }
   for (const player of game.seatOrder) {
     const identity = readDeathIdentity(game, player),
-      shown = identity.headShown || identity.deputyShown;
+      shown = rescueBoolean(rules.hasShown(structuredClone(game), player));
     if (!shown && lords.size) return false;
     const kingdom = shown ? identity.kingdom : identity.headKingdom;
     if (lords.has(kingdom)) continue;

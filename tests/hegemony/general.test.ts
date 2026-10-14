@@ -4,7 +4,10 @@ import {
   createHideGeneralOperation,
   type GeneralRules,
 } from "../../src/game/hegemony/general";
-import type { GeneralGame } from "../../src/game/hegemony/general-identity";
+import {
+  hasShownGeneral,
+  type GeneralGame,
+} from "../../src/game/hegemony/general-identity";
 import {
   createTriggerScheduler,
   dispatchTriggerOperation,
@@ -787,6 +790,7 @@ describe("general lifecycle through public operation dispatch", () => {
     game.identities.a.kingdom = "god";
     registry.operations!.push(
       createCareeristOperation({
+        hasShown: hasShownGeneral,
         showHead: (target) => ({
           name: "show-general",
           data: { target, triggerEvent: false },
@@ -844,6 +848,7 @@ describe("general lifecycle through public operation dispatch", () => {
     run(game, registry, "hide-general");
     registry.operations!.push(
       createCareeristOperation({
+        hasShown: hasShownGeneral,
         showHead: (target) => ({
           name: "show-general",
           data: { target, triggerEvent: false },
@@ -863,6 +868,7 @@ describe("general lifecycle through public operation dispatch", () => {
     game.scenarioRoleShown.a = null as unknown as boolean;
     registry.operations!.push(
       createCareeristOperation({
+        hasShown: hasShownGeneral,
         showHead: (target) => ({ name: "show-general", data: { target } }),
       }),
     );
