@@ -39,7 +39,15 @@ Only these two game source/test files changed. Existing non-Skill readers, sched
 - Final `npm run check`: exit 0, 71 files / 1,636 tests; lint/typecheck pass with the same 42 inherited warnings and zero errors. `npm run build`: exit 0. No game source/test changes followed these commands or the exact-byte reviews.
 - `git diff --cached --check`: exit 0 before the source commit. Reviewer blob hashes, staged/worktree blobs and GitNexus file SHA256 values matched.
 
-Knowledge publication, import, link checking and snapshot verification are a separate sealing record below; baseline docs verification does not certify the new snapshot before those checks execute.
+Knowledge publication, import, link checking and snapshot verification are recorded separately below. Baseline docs verification alone does not certify a new snapshot.
+
+## Knowledge delivery validation
+
+- Prepared canonical snapshot `ac209fc7405a07f5c070aa9ea2a9843a7ff2c370` was imported through `npm run docs:sync -- <full-SHA> --from <local-canonical-repository>`; import and `npm run docs:verify -- --from <local-canonical-repository>` both exited 0. The corresponding game lock was committed.
+- Canonical publication to the selected public knowledge repository succeeded; `git ls-remote` confirmed main at that exact prepared SHA. `npm run docs:verify:upstream` then exited 0 against the published canonical commit/tree.
+- Canonical relative-link check passed: 41 Markdown files and 131 relative links. Documentation diff whitespace and formatting checks passed.
+- `npm run docs:test` exited 0: all five real-Git tests passed, including ordinary clone, branch switch, worktree, offline verification, malformed/stale locks, false provenance, local-edit preservation and broken links. This local run took about 275 seconds; no CLI implementation change was made for its duration.
+- This sealing record is a documentation-only update after those checks. The final imported canonical SHA/tree belongs in the game's `knowledge.lock.json`; this report does not self-embed its containing commit. Source/test bytes remain the reviewed blobs above. Game-branch publication, a new game PR and production deployment are not asserted.
 
 ## Independent reviews
 
