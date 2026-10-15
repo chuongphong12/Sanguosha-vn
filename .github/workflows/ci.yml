@@ -10,6 +10,22 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  knowledge:
+    name: Knowledge snapshot and checkout
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Verify tracked knowledge and navigation
+        run: npm run docs:verify
+      - name: Verify canonical documentation commit
+        run: npm run docs:verify:upstream
+      - name: Exercise real Git synchronization and checkout
+        run: npm run docs:test
+
   check:
     name: Lint, typecheck and test
     runs-on: ubuntu-latest

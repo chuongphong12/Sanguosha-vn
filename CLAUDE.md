@@ -45,6 +45,13 @@ This project is indexed by GitNexus as **Sanguosha-vn** (1713 symbols, 6581 rela
 
 ## Agent skills
 
+### Current game knowledge
+
+For rules, architecture, privacy or implementation status, start at
+[knowledge/README.md](knowledge/README.md). Run `npm run docs:verify` before relying
+on the snapshot. Refresh affected contracts through the canonical repository and
+import the reviewed full commit with the related code change; see its update workflow.
+
 ### Issue tracker
 
 Specs and tickets live in GitHub Issues for chuongphong12/Sanguosha-vn. See docs/agents/issue-tracker.md.
@@ -55,7 +62,7 @@ Use the configured canonical role mapping. See docs/agents/triage-labels.md.
 
 ### Domain docs
 
-Single context: root CONTEXT.md and docs/adr/, created as needed. See docs/agents/domain.md.
+Single context: root CONTEXT.md and docs/adr/ point to the canonical glossary and decisions in knowledge/. See docs/agents/domain.md.
 
 ### Lifecycle
 
