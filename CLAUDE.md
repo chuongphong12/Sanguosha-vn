@@ -42,3 +42,21 @@ This project is indexed by GitNexus as **Sanguosha-vn** (1713 symbols, 6581 rela
 | Index, status, clean, wiki CLI commands | `.claude/skills/gitnexus-cli/SKILL.md` |
 
 <!-- gitnexus:end -->
+
+## Agent skills
+
+### Issue tracker
+
+Specs and tickets live in GitHub Issues for chuongphong12/Sanguosha-vn. See docs/agents/issue-tracker.md.
+
+### Triage labels
+
+Use the configured canonical role mapping. See docs/agents/triage-labels.md.
+
+### Domain docs
+
+Single context: root CONTEXT.md and docs/adr/, created as needed. See docs/agents/domain.md.
+
+### Lifecycle
+
+Choose the applicable Matt Pocock route and preserve the approved project gates. See docs/agents/lifecycle.md.
