@@ -1,8 +1,12 @@
 # Domain docs
 
-This repo uses one domain context. Read root CONTEXT.md if present and relevant records under docs/adr/ before domain work.
+This repo uses one domain context. Root [CONTEXT.md](../../CONTEXT.md) and
+[docs/adr/](../adr/README.md) are navigation entry points to the canonical glossary
+and decisions in the tracked knowledge snapshot. Read those targets before domain work.
 
-If these artifacts do not exist, proceed with the available source and approved specification. Domain-modeling creates them when terms or meaningful decisions resolve; their absence alone is not a blocker.
+Verify the snapshot with `npm run docs:verify`. Create or update domain terms and
+meaningful decisions in the canonical knowledge repository, then import its reviewed
+commit with the related source change; see [the update workflow](../../knowledge/README.md#updating-knowledge-with-the-game).
 
 CONTEXT.md is a domain glossary only. Use its canonical terms in specs, tickets, tests and explanations. Keep implementation plans, progress, test counts and command output in their appropriate artifacts.
 

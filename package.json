@@ -24,6 +24,10 @@
     "test": "vitest run --config vitest.config.ts",
     "test:e2e": "tsc --project tsconfig.e2e.json && playwright test",
     "test:watch": "vitest --config vitest.config.ts",
+    "docs:sync": "node scripts/knowledge.mjs sync",
+    "docs:verify": "node scripts/knowledge.mjs verify",
+    "docs:verify:upstream": "node scripts/knowledge.mjs verify --upstream",
+    "docs:test": "node --test scripts/tests/knowledge.test.mjs",
     "check": "npm run lint && npm run typecheck && npm run test"
   },
   "dependencies": {

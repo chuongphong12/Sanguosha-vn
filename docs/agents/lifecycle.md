@@ -26,7 +26,7 @@ Use ask-matt as the route map. Use the applicable skills across the lifecycle; u
 - GitHub specification/ticket: canonical current requirements, acceptance criteria and dependencies.
 - Domain glossary/ADRs: accepted language and durable decisions.
 - Knowledge: durable source-derived contracts, authority assumptions and limitations.
-- One checkpoint record under the existing docs/reviews/ convention, named YYYY-MM-DD-<ticket>.md: source/reference identifiers, exact reviewed revision, adapter/dependency table, executed checks and exits, graph integrity/limits, separate Standards/Spec findings, evidence links and remaining scope. Other records link to this evidence; preserve existing historical records.
+- One checkpoint record under knowledge/reviews/, named YYYY-MM-DD-<ticket>.md: source/reference identifiers, exact reviewed revision, adapter/dependency table, executed checks and exits, graph integrity/limits, separate Standards/Spec findings, evidence links and remaining scope. Write it through the canonical knowledge repository and import its reviewed commit; see knowledge/README.md. Other records link to this evidence. Preserved historical records retain their original revision scope; source identities and intentional obsolete exclusions are recorded in knowledge/research/migration-manifest.json.
 - Ledger: compact status/next-dependency index linking the ticket and checkpoint. Keep historical evidence intact.
 
 Each slice identifies which authority/adapters are real, which are fixtures and which consumers remain unresolved. A passing test total is evidence for the named acceptance criteria, not proof of complete native parity or production readiness.
