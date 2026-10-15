@@ -61,8 +61,18 @@ Independent reviewer: **0 actionable findings** in `4b19fdd…21edfb2`. Fresh He
 
 ## Publication boundary
 
+### Initial local preparation
+
 The canonical remote is [chuongphong12/Sanguosha-vn-knowledge](https://github.com/chuongphong12/Sanguosha-vn-knowledge). After local validation/review, the coordinator found an existing owner session in the browser account switcher and created the approved public, empty repository under `chuongphong12`. The GitHub API confirmed public visibility and an empty repository. The CLI remains `hudson-porters`: read is available, push is false, and `git push --dry-run origin main` was rejected with HTTP 403. No credentials were extracted or shared.
 
-The browser's collaborator settings require owner email verification in GitHub sudo mode. The owner must finish that verification and grant the publishing account write access, or publish the prepared local repository themselves. No collaborator permission was changed by the coordinator. After access exists, publish the canonical documentation commit first, run the game upstream verifier against that remote, then publish the scoped migration branch for review. Canonical commit publication and remote-dependent CI remain unverified; no engine/main or cleanup-PR merge is part of this operation. No game branch was pushed while its required canonical commit was unavailable.
+At that point, the browser's collaborator settings required owner email verification in GitHub sudo mode. Canonical publication and remote-dependent CI were deferred until publishing access existed. No collaborator permission was changed by the coordinator, and no game branch was pushed while its required canonical commit was unavailable.
+
+### Publication follow-up — 2026-10-15
+
+After the user resumed work, the GitHub API confirmed that `hudson-porters` had push access. The canonical knowledge commit `3bc18f4d5c13957b294f0c1c96ed690159d5b0a1` was published first; the remote `main` SHA matched, and `npm run docs:verify:upstream` fetched that exact commit and verified tree `f23966b4b1148f211a2ce791b32792bdef215e73` against the game lock.
+
+The game baseline branch and migration branch were then published. [PR #15](https://github.com/chuongphong12/Sanguosha-vn/pull/15) targets `codex/hegemony-engine` at `4b19fdd`; its initial reviewed head is `f4138635e9f59728f6a6d1fc6dcf90dc17fd4e7d`. GitHub reported the PR mergeable. No engine/main or cleanup-PR merge was performed.
+
+[CI run 38705484747](https://github.com/chuongphong12/Sanguosha-vn/actions/runs/38705484747) succeeded for that initial head: both `Knowledge snapshot and checkout` and `Lint, typecheck and test` passed. The Linux knowledge job verified actual canonical provenance and exercised the five real-Git cases. This follow-up changes checkpoint text only; its imported snapshot receives a new exact lock and another PR check run. Consult the PR for the latest head's CI and Vercel results rather than treating the earlier run as certification of a later revision.
 
 Passing fixtures/builds do not establish full native match parity, Hegemony production readiness, asset reuse permission, remote Vercel success or 100% gameplay coverage. The [current port plan](../plans/hegemony-port.md) retains those separate gates.
