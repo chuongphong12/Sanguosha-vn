@@ -42,3 +42,17 @@ playwright/.cache/
 patch*.js
 *.py
 .assetpack/
+
+# Local diagnostics and generated reports
+/check-network.js
+/debug-console.mjs
+/screenshot.js
+/screenshot.png
+/audit-*.json
+/coverage/
+/.vercel/
+/.playwright-mcp/
+*.tsbuildinfo
+
+# Superseded patch-package file; pnpm uses boardgame.io@0.50.2.patch
+/patches/boardgame.io+0.50.2.patch
