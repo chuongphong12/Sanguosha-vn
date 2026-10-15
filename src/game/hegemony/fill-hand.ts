@@ -10,7 +10,7 @@ import type {
 export interface FillHandRules {
   draw: (target: string, count: number, reason: string) => TriggerOperation;
 }
-function handCount(game: DeathGame, target: string) {
+export function handCount(game: DeathGame, target: string) {
   if (
     !game.cardZones ||
     typeof game.cardZones !== "object" ||
