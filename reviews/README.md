@@ -3,6 +3,7 @@
 These reports preserve particular source snapshots, adapters and executed checks. Read [current engine scope](../engine/overview.md) and the [roadmap](../roadmap/README.md) for present implementation boundaries. Earlier “next” statements and totals are historical.
 
 - [Knowledge migration: local validation, reviews and publication boundary](2026-10-15-knowledge-migration.md)
+- [4y: isolated SkillCard onUse](2026-10-15-hegemony-part4y.md)
 - [Initial replacement analysis and complete-core scenarios](2026-10-07-hegemony-engine-replacement-analysis.md)
 - [Foundation review](2026-10-07-hegemony-foundation-review.md)
 - [Early setup/scheduler/movement/card-resolution checkpoints](early-engine-checkpoints.md)

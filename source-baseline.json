@@ -2,13 +2,13 @@
   "version": 1,
   "game": {
     "repository": "https://github.com/chuongphong12/Sanguosha-vn.git",
-    "commit": "4b19fddcb6547066de0db0ae078c0db7642877ba",
-    "availability": "Inspected locally; not asserted published at curation time"
+    "commit": "eb769fc52bfd8af4811cf6b8e200e0b6a2530c32",
+    "availability": "Inspected and committed locally; game branch publication is not asserted"
   },
   "native": {
     "repository": "https://github.com/TamQuocSat-LangKhach/QSanguosha-QuocChien.git",
     "commit": "ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f",
     "release": "2.3.43-beta2"
   },
-  "scope": "Source-derived documentation through normalized Part 4x. Production registration still uses Standard2013; no new native runtime or full-match parity is certified."
+  "scope": "Source-derived documentation through isolated Part 4y SkillCard onUse. Shared SkillCard GameRule/resources/effects and admission/response remain adapters or pending integration. Production registration still uses Standard2013; no native runtime differential or full-match parity is certified."
 }

@@ -2,7 +2,7 @@
 
 ## Engine
 
-See the [current Hegemony port plan](../plans/hegemony-port.md) for completed library boundaries and remaining production gates. The next engine dependency is generic SkillCard integration; this documentation migration does not enable it.
+See the [current Hegemony port plan](../plans/hegemony-port.md) for completed library boundaries and remaining production gates. Part 4y adds [isolated SkillCard onUse](../engine/skill-card-on-use.md); the next dependency is shared SkillCard GameRule/resource/effect execution, followed by admission/response integration. This checkpoint does not enable production SkillCards.
 
 ## Knowledge migration
 

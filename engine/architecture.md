@@ -4,14 +4,14 @@ This page describes the game source baseline recorded in [source-baseline.json](
 
 ## Stack that remains useful
 
-| Layer | Verified implementation at the source baseline |
-| --- | --- |
-| Language and tooling | TypeScript, ES modules, Node 22; `package.json`, `tsconfig.json` |
-| Rendering | PixiJS 8, shared navigation/audio/resize utilities under `src/engine/`, application screens and components under `src/app/` |
-| Match transport | boardgame.io 0.50.2; `src/client/MatchClient.ts` selects local or Socket.IO transport |
-| Server | `server/server.ts` creates a boardgame.io server |
-| Build and assets | Vite, AssetPack and `scripts/cache-assets.mjs`; see [asset provenance](../assets/provenance.md) |
-| Verification | Vitest rule/integration suites and Playwright browser infrastructure; configured in `package.json` |
+| Layer                | Verified implementation at the source baseline                                                                              |
+| -------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| Language and tooling | TypeScript, ES modules, Node 22; `package.json`, `tsconfig.json`                                                            |
+| Rendering            | PixiJS 8, shared navigation/audio/resize utilities under `src/engine/`, application screens and components under `src/app/` |
+| Match transport      | boardgame.io 0.50.2; `src/client/MatchClient.ts` selects local or Socket.IO transport                                       |
+| Server               | `server/server.ts` creates a boardgame.io server                                                                            |
+| Build and assets     | Vite, AssetPack and `scripts/cache-assets.mjs`; see [asset provenance](../assets/provenance.md)                             |
+| Verification         | Vitest rule/integration suites and Playwright browser infrastructure; configured in `package.json`                          |
 
 The rendering shell and transport are reusable infrastructure. Existing Standard catalogues, roles, legal-action generation and skill controls are not Quốc Chiến contracts merely because the infrastructure can display them.
 
@@ -25,7 +25,7 @@ The separate `src/game/hegemony/` library contains paired setup, identity and no
 
 `src/game/hegemony/scheduler.ts` separates native trigger events from internal operations. Its public library seam consists of scheduler creation, operation/event dispatch, viewer-specific prompt retrieval and prompt resume. Registries hold executable skill/operation handlers outside persisted state; frames, continuations and shared event data contain JSON values. Registry versions must match the saved scheduler version.
 
-Operations compose movement, card-use resources and dispatch, cancellation/Nullification, Slash responses, damage/recovery/rescue, death/burial/victory, general reveal/hide, relationships, careerist recruitment and reward-token methods. The implementation includes scoped source-derived behavior through Part 4x. These are normalized contracts with supplied package and transport adapters, not a complete selectable native card/general catalogue.
+Operations compose movement, card-use resources and dispatch, cancellation/Nullification, Slash responses, damage/recovery/rescue, death/burial/victory, general reveal/hide, relationships, careerist recruitment and reward-token methods. Part 4y adds a separate [SkillCard onUse envelope](skill-card-on-use.md), retaining named shared-execution and transport/package adapters. These are normalized contracts with supplied package and transport adapters, not a complete selectable native card/general catalogue.
 
 The scheduler validates responder, prompt ID, frame identity, offered choices and registry version before accepting a reply; order prompts additionally refresh occurrence eligibility. Existing regression examples are in `tests/hegemony/scheduler.test.ts` and `tests/hegemony/reward-tokens.test.ts`. This library protection does not establish authentication or replay safety for a future network adapter without integration tests.
 
