@@ -1,4 +1,4 @@
-import { readCardUse, type CardUse } from "./card-on-use";
+import { readExecutionCardUse, type CardUse } from "./card-on-use";
 import {
   prepareJink,
   prepareEffectResources,
@@ -43,14 +43,14 @@ function runCardUsed<G extends CardResourceGame>(
     continuation === null
       ? {
           stage: -1,
-          use: readCardUse(game, operation.data),
+          use: readExecutionCardUse(game, operation.data),
           targets: [],
           from: "",
           index: 0,
           jinkBackup: [],
         }
       : (structuredClone(continuation) as Cursor);
-  if (child) cursor.use = readCardUse(game, child.event.data);
+  if (child) cursor.use = readExecutionCardUse(game, child.event.data);
   while (cursor.stage < 8) {
     let name: string;
     let target: string;
@@ -144,7 +144,7 @@ export function createCardUsedOperation<G extends CardResourceGame>(
   return {
     name: "card-used",
     validate: (game, operation) => {
-      const use = readCardUse(game, operation.data);
+      const use = readExecutionCardUse(game, operation.data);
       if (rules.resources) {
         readResourceCard(game, use, rules.resources);
         readEffectUse(use);
@@ -171,7 +171,7 @@ export function createCardUsedRule<
           continuation: null,
         };
       const result = operationChild.value as { data: CardUse };
-      event.data = readCardUse(game, result.data);
+      event.data = readExecutionCardUse(game, result.data);
       return { kind: "done", value: false };
     },
   };

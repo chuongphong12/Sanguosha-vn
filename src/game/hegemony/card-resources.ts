@@ -1,4 +1,4 @@
-import { readCardUse, type CardUse } from "./card-on-use";
+import { readExecutionCardUse, type CardUse } from "./card-on-use";
 import type { CardMovementGame } from "./movement";
 import type { TriggerData, TriggerSkill } from "./scheduler";
 
@@ -161,7 +161,7 @@ export function createCardFinishedRule<G extends CardResourceGame>(
     priority: 0,
     rule: true,
     effect: ({ game, event }) => {
-      const use = readCardUse(game, event.data);
+      const use = readExecutionCardUse(game, event.data);
       const { ledger, card, storage, playerTags } = readResourceCard(
         game,
         use,

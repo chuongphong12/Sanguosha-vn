@@ -11,11 +11,12 @@ export interface CardOnUseRules {
   discardZone: string;
 }
 
+// Shared GameRule descriptor; each onUse entry point retains its own guard.
 export type CardUse = {
   from: string;
   to: string[];
   card: {
-    type: "basic" | "trick" | "equip";
+    type: "basic" | "trick" | "equip" | "skill";
     name: string;
     className: string;
     skillName: string;
@@ -30,7 +31,7 @@ type Cursor = {
   use: CardUse;
 };
 
-export function readCardUse(
+export function readExecutionCardUse(
   game: CardMovementGame,
   data: TriggerData,
 ): CardUse {
@@ -53,7 +54,7 @@ export function readCardUse(
   const card = data.card;
   if (
     typeof card.type !== "string" ||
-    !["basic", "trick", "equip"].includes(card.type) ||
+    !["basic", "trick", "equip", "skill"].includes(card.type) ||
     typeof card.name !== "string" ||
     !card.name ||
     typeof card.className !== "string" ||
@@ -69,6 +70,16 @@ export function readCardUse(
   )
     throw new Error("Invalid card use");
   return structuredClone(data) as CardUse;
+}
+
+/** Non-SkillCard onUse guard; shared execution also accepts SkillCards. */
+export function readCardUse(
+  game: CardMovementGame,
+  data: TriggerData,
+): CardUse {
+  const use = readExecutionCardUse(game, data);
+  if (use.card.type === "skill") throw new Error("Invalid card use");
+  return use;
 }
 
 function validateOnUse(
@@ -134,7 +145,12 @@ function runCardOnUse<G extends CardMovementGame>(
     cursor = { stage: 0, original: structuredClone(use), afterPre: null, use };
   } else {
     cursor = structuredClone(continuation) as Cursor;
-    if (child) cursor.use = readCardUse(game, child.event.data);
+    if (child)
+      // GameRule may replace the card with a SkillCard during shared execution.
+      cursor.use =
+        cursor.stage >= 4
+          ? readExecutionCardUse(game, child.event.data)
+          : readCardUse(game, child.event.data);
   }
   while (cursor.stage < 6) {
     const stage = cursor.stage++;

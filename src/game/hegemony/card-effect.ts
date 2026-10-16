@@ -1,4 +1,4 @@
-import { readCardUse, type CardUse } from "./card-on-use";
+import { readExecutionCardUse, type CardUse } from "./card-on-use";
 import type { CardResourceGame } from "./card-resources";
 import type {
   OperationContext,
@@ -47,7 +47,7 @@ export function readCardEffect(
     typeof data.disresponsive !== "boolean"
   )
     throw new Error("Invalid card effect");
-  readCardUse(game, {
+  readExecutionCardUse(game, {
     from: data.from ?? data.to,
     to: [data.to],
     card: data.card,

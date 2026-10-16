@@ -1,4 +1,4 @@
-import type { CardUse } from "./card-on-use";
+import { readExecutionCardUse, type CardUse } from "./card-on-use";
 import { readRecipientFlags, type CardEffectGame } from "./card-effect";
 import type {
   OperationHandler,
@@ -153,7 +153,7 @@ function positions(game: CardEffectGame, use: SkillCardUse, player: string) {
 type Cursor = {
   stage: number;
   original: SkillCardUse;
-  use: SkillCardUse;
+  use: CardUse;
   afterPre: SkillCardUse | null;
   materials: number[];
 };
@@ -229,7 +229,7 @@ export function createSkillCardOnUseOperation<G extends CardEffectGame>(
       if (use.card.skillPosition) positions(game, use, use.from);
     },
     run: ({ game, operation, currentActor, continuation, child }) => {
-      const cursor =
+      const cursor: Cursor =
         continuation === null
           ? {
               stage: 0,
@@ -239,7 +239,12 @@ export function createSkillCardOnUseOperation<G extends CardEffectGame>(
               materials: [] as number[],
             }
           : (structuredClone(continuation) as Cursor);
-      if (child) cursor.use = readUse(game, child.event.data);
+      if (child)
+        // Shared GameRule replacements need only the execution descriptor.
+        cursor.use =
+          cursor.stage >= 7
+            ? readExecutionCardUse(game, child.event.data)
+            : readUse(game, child.event.data);
       if (continuation === null) {
         if (cursor.original.card.skillPosition) {
           const { tags, key, list } = positions(
@@ -263,11 +268,11 @@ export function createSkillCardOnUseOperation<G extends CardEffectGame>(
         let nested: TriggerOperation | null;
         if (stage === 0)
           nested = rules.notifyUse({
-            use: structuredClone(cursor.use),
-            hidden: !cursor.use.card.willThrow,
+            use: readUse(game, cursor.use),
+            hidden: !cursor.original.card.willThrow,
           });
         else if (stage === 2) {
-          cursor.afterPre = structuredClone(cursor.use);
+          cursor.afterPre = readUse(game, cursor.use);
           const flags = readRecipientFlags(game, cursor.afterPre.from);
           if (!flags.includes("HuanshenSkillChecking"))
             flags.push("HuanshenSkillChecking");

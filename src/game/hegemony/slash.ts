@@ -4,7 +4,7 @@ import {
   type CardEffect,
   type CardEffectGame,
 } from "./card-effect";
-import { readCardUse, type CardUse } from "./card-on-use";
+import { readCardUse, readExecutionCardUse, type CardUse } from "./card-on-use";
 import { readCardReference } from "./card-resources";
 import type {
   OperationContext,
@@ -105,7 +105,11 @@ export function readSlashCard(
     typeof value.reference !== "string"
   )
     throw new Error("Invalid Slash card");
-  const use = readCardUse(game, { from: player, to: [], card: value.card });
+  const use = readExecutionCardUse(game, {
+    from: player,
+    to: [],
+    card: value.card,
+  });
   readCardReference(game, value.reference);
   return { reference: value.reference, card: use.card };
 }

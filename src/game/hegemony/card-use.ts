@@ -1,4 +1,4 @@
-import { readCardUse, type CardUse } from "./card-on-use";
+import { readExecutionCardUse, type CardUse } from "./card-on-use";
 import {
   readEffectUse,
   readResourceCard,
@@ -29,7 +29,7 @@ function readUseResources(
   data: TriggerData,
   rules: CardUseEffectRules,
 ): Cursor {
-  const use = readCardUse(game, data);
+  const use = readExecutionCardUse(game, data);
   const { ledger, storage } = readResourceCard(game, use, rules);
   const taggedUse = {
     ...use,
