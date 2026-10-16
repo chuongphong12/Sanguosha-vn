@@ -14,7 +14,7 @@ The [source baseline](source-baseline.json) identifies the game revision inspect
 | Setup, hidden information and faction  | [Setup and privacy](engine/setup-and-privacy.md), [general lifecycle and relations](engine/generals-and-relations.md)                                          |
 | Trigger order and persistence          | [Scheduler](engine/scheduler.md)                                                                                                                               |
 | Movement and card resolution           | [Movement](engine/movement.md), [card use/effects](engine/card-use-and-effects.md), [Nullification/Slash](engine/nullification-and-slash.md)                   |
-| Isolated SkillCard event/cost envelope | [SkillCard onUse](engine/skill-card-on-use.md), [native integration boundaries](research/skillcard-integration.md)                                             |
+| SkillCard envelope and shared execution | [SkillCard onUse](engine/skill-card-on-use.md), [shared execution](engine/skill-card-execution.md), [native boundaries](research/skillcard-shared-execution.md)                                             |
 | HP, rescue and terminal flow           | [Damage/rescue](engine/damage-and-rescue.md), [death/careerist](engine/death-and-careerist.md)                                                                 |
 | Reveal rewards                         | [Rewards and token methods](engine/reveal-rewards-and-tokens.md)                                                                                               |
 | What remains before production         | [Roadmap](roadmap/README.md), [port plan](plans/hegemony-port.md), [initial design baseline](specs/hegemony-engine-baseline.md)                                |
