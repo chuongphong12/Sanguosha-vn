@@ -68,7 +68,10 @@ The initial GitNexus incremental rebuild after the review fix failed while copyi
 
 - Canonical relative-link validation passed: 44 Markdown files / 150 relative links. Documentation whitespace checks passed.
 - npm run docs:test exited 0: five real-Git tests passed, covering ordinary clone/switch/worktree, explicit pin/offline verification, malformed/stale locks and false provenance, edit preservation and broken links. This run took about 282 seconds; the CLI implementation was not changed.
-- Publication/import and actual-checkpoint clone/switch validation: pending. This preparation record does not assert those steps have completed.
+- Prepared canonical snapshot `38e3166d2fee39b00264e8310f2155a262986d85` was published successfully and imported by the supported `npm run docs:sync -- <full-SHA>` command. The game lock was committed at `c80ae21d73a5ad68e779a572956bf9ee7da76e8b`; its documentation tree was `b7cffcd7a72ad193d0ecb2bee11c402afbcc3055`.
+- Offline `npm run docs:verify` and published-canonical `npm run docs:verify:upstream` both exited 0 against that prepared snapshot. The game delta after the source commit contained only knowledge files and its lock.
+- An ordinary local clone of game checkpoint `c80ae21d73a5ad68e779a572956bf9ee7da76e8b` contained the 4z contract immediately. Switching to the 4y baseline restored its old knowledge lock and removed the 4z contract; switching back restored the exact 4z pin and file. All three offline verifications passed and the validation clone stayed clean. This verifies local checkpoint checkout behavior, not remote publication of the game branch.
+- This sealing record adds only actual delivery results after those checks. Its containing canonical SHA/tree is recorded in the final game lock rather than self-embedded here. Final snapshot verification must use that lock. No game PR, game-branch publication, remote game CI or production deployment is asserted.
 
 ## Remaining dependency
 
