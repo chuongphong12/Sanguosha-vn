@@ -272,6 +272,348 @@ function hegGame(targets: string[] = ["b", "d"]) {
   return game;
 }
 
+function rawSkillResponse(game: Game) {
+  game.cardResources!.cards.raw = {
+    kind: "virtual",
+    key: "raw-skill-key",
+    isSlash: false,
+    isNDTrick: false,
+    flags: ["raw-flag"],
+    tags: { privateMetadata: "private-conversion" },
+  };
+  const raw: CardUse["card"] & { userString: string } = {
+    type: "skill",
+    name: "conversion_card",
+    className: "RawSkillCard",
+    skillName: "conversion",
+    materialIDs: [1],
+    flags: ["raw-flag"],
+    userString: "nullification",
+  };
+  return { player: "c", response: { reference: "raw", card: raw } };
+}
+
+// Private package conversion is a fixture; protocol/movement remain real operations.
+function convertRawSkill(rules: TriggerRegistry<Game>, reference = "reply") {
+  operation(rules, "validate", ({ game, operation }) => {
+    game.validated.push(structuredClone(operation.data));
+    return {
+      kind: "return",
+      value: {
+        reference,
+        card: {
+          ...card("nullification", [2]),
+          ...(reference === "heg"
+            ? { name: "heg_nullification", className: "HegNullification" }
+            : {}),
+        },
+      },
+    };
+  });
+}
+
+describe("raw SkillCard Nullification conversion", () => {
+  it("classifies converted HegNullification rather than the original SkillCard", () => {
+    const game = fixture(),
+      rules = registry();
+    game.cardResources!.cards.heg = structuredClone(
+      game.cardResources!.cards.reply,
+    );
+    game.cardResources!.roomTags["targetsduel-key"] = ["b", "d"];
+    game.replies.push(rawSkillResponse(game));
+    convertRawSkill(rules, "heg");
+    const scheduler = dispatch(game, rules);
+    const prompt = getTriggerPrompt(scheduler, "c")!;
+    expect(prompt.choices.map((choice) => choice.id)).toEqual([
+      "single",
+      "all",
+    ]);
+    expect(getTriggerPrompt(scheduler, "a")).toBeNull();
+    expect(
+      resumeTriggerPrompt(scheduler, game, rules, "c", {
+        id: prompt.id,
+        choice: "all",
+      }),
+    ).toBe(true);
+    expect(scheduler.operationCompletion?.value).toBe(true);
+    expect(game.cardResources!.roomTags.HegNullificationValid).toBe(true);
+    expect(game.cardZones.discard.cards).toEqual([2]);
+    expect(game.after).toMatchObject([
+      {
+        original: { reference: "raw" },
+        use: { card: { type: "trick", className: "HegNullification" } },
+      },
+    ]);
+  });
+
+  it("retries null conversion before spending materials or running the original after-hook", () => {
+    const game = fixture(),
+      rules = registry();
+    const reply = rawSkillResponse(game);
+    game.replies = [reply, structuredClone(reply)];
+    operation(rules, "validate", ({ game, operation }) => {
+      expect(game.cardZones.hand.cards).toEqual([1, 2]);
+      expect(game.after).toEqual([]);
+      game.validated.push(structuredClone(operation.data));
+      return {
+        kind: "return",
+        value:
+          game.validated.length === 1
+            ? null
+            : { reference: "reply", card: card("nullification", [2]) },
+      };
+    });
+    const scheduler = dispatch(game, rules);
+    expect(scheduler.operationCompletion?.value).toBe(true);
+    expect(game.races).toHaveLength(2);
+    expect(game.validated).toHaveLength(2);
+    expect(game.cardZones.hand.cards).toEqual([1]);
+    expect(game.cardZones.discard.cards).toEqual([2]);
+    expect(game.after).toHaveLength(1);
+    expect(game.after).toMatchObject([{ original: { reference: "raw" } }]);
+  });
+
+  it("returns false after rejected conversion and an empty refreshed race", () => {
+    const game = fixture(),
+      rules = registry();
+    game.replies.push(rawSkillResponse(game));
+    operation(rules, "validate", ({ game, operation }) => {
+      game.validated.push(operation.data);
+      return { kind: "return", value: null };
+    });
+    expect(dispatch(game, rules).operationCompletion?.value).toBe(false);
+    expect(game.validated).toHaveLength(1);
+    expect(game.cardZones.hand.cards).toEqual([1, 2]);
+    expect(game.cardZones.table.cards).toEqual([]);
+    expect(game.cardZones.discard.cards).toEqual([]);
+    expect(game.after).toEqual([]);
+  });
+
+  it.each(["validate", "reveal", "after"])(
+    "reloads raw/converted identities at %s without replaying conversion or cleanup",
+    (boundary) => {
+      let game = fixture();
+      const rules = registry();
+      game.replies.push(rawSkillResponse(game));
+      convertRawSkill(rules);
+      const saved = rules.operations!.find((entry) => entry.name === boundary)!;
+      operation(rules, boundary, (context) =>
+        context.continuation === null
+          ? {
+              kind: "prompt",
+              actor: "c",
+              choices: ["continue"],
+              canCancel: false,
+              continuation: true,
+            }
+          : saved.run({ ...context, continuation: null, answer: null }),
+      );
+      let scheduler = dispatch(game, rules);
+      game = JSON.parse(JSON.stringify(game));
+      scheduler = JSON.parse(JSON.stringify(scheduler));
+      const prompt = getTriggerPrompt(scheduler, "c")!;
+      expect(getTriggerPrompt(scheduler, "a")).toBeNull();
+      expect(JSON.stringify(prompt)).not.toContain("private-conversion");
+      expect(JSON.stringify(prompt)).not.toContain("RawSkillCard");
+      const answer = { id: prompt.id, choice: "continue" };
+      const before = JSON.stringify({ game, scheduler });
+      expect(resumeTriggerPrompt(scheduler, game, rules, "a", answer)).toBe(
+        false,
+      );
+      expect(
+        resumeTriggerPrompt(scheduler, game, rules, "c", {
+          ...answer,
+          id: "stale",
+        }),
+      ).toBe(false);
+      expect(
+        resumeTriggerPrompt(scheduler, game, rules, "c", {
+          ...answer,
+          choice: "invalid",
+        }),
+      ).toBe(false);
+      expect(
+        resumeTriggerPrompt(
+          scheduler,
+          game,
+          { ...rules, version: "stale-registry" },
+          "c",
+          answer,
+        ),
+      ).toBe(false);
+      expect(JSON.stringify({ game, scheduler })).toBe(before);
+      expect(resumeTriggerPrompt(scheduler, game, rules, "c", answer)).toBe(
+        true,
+      );
+      expect(scheduler.operationCompletion?.value).toBe(true);
+      expect(scheduler.frames).toEqual([]);
+      expect(game.validated).toHaveLength(1);
+      expect(game.revealed).toHaveLength(1);
+      expect(game.after).toHaveLength(1);
+      expect(game.cardZones.discard.cards).toEqual([2]);
+      expect(game.after).toMatchObject([
+        {
+          original: {
+            reference: "raw",
+            card: { type: "skill", userString: "nullification" },
+          },
+          use: { card: { type: "trick" } },
+        },
+      ]);
+      const done = JSON.stringify({ game, scheduler });
+      expect(resumeTriggerPrompt(scheduler, game, rules, "c", answer)).toBe(
+        false,
+      );
+      expect(JSON.stringify({ game, scheduler })).toBe(done);
+    },
+  );
+
+  it.each([
+    "raw-reference",
+    "raw-type",
+    "raw-materials",
+    "raw-flags",
+    "converted-reference",
+    "converted-materials",
+  ])(
+    "rejects malformed %s without material movement or after-hook",
+    (invalid) => {
+      const game = fixture(),
+        rules = registry(),
+        reply = rawSkillResponse(game);
+      if (invalid === "raw-reference")
+        reply.response.reference = "unregistered";
+      if (invalid === "raw-type")
+        Object.assign(reply.response.card, { type: "invalid" });
+      if (invalid === "raw-materials") reply.response.card.materialIDs = [1, 1];
+      if (invalid === "raw-flags")
+        Object.assign(reply.response.card, { flags: [1] });
+      game.replies.push(reply);
+      operation(rules, "validate", ({ game, operation }) => {
+        game.validated.push(operation.data);
+        return {
+          kind: "return",
+          value: {
+            reference:
+              invalid === "converted-reference" ? "unregistered" : "reply",
+            card: card(
+              "nullification",
+              invalid === "converted-materials" ? [2, 2] : [2],
+            ),
+          },
+        };
+      });
+      expect(() => dispatch(game, rules)).toThrow();
+      expect(game.validated).toHaveLength(
+        invalid.startsWith("converted") ? 1 : 0,
+      );
+      expect(game.cardZones.hand.cards).toEqual([1, 2]);
+      expect(game.cardZones.table.cards).toEqual([]);
+      expect(game.cardZones.discard.cards).toEqual([]);
+      expect(game.after).toEqual([]);
+    },
+  );
+
+  it.each(["turn-broken", "stage-change", "game-over"] as const)(
+    "preserves eager conversion state when interrupted with %s",
+    (reason) => {
+      const game = fixture(),
+        rules = registry();
+      game.replies.push(rawSkillResponse(game));
+      operation(rules, "validate", ({ game, operation }) => {
+        game.validated.push(operation.data);
+        game.cardResources!.roomTags.ConversionFixturePaid = true;
+        return { kind: "interrupt", reason };
+      });
+      const scheduler = dispatch(game, rules);
+      expect(scheduler.interruption?.reason).toBe(reason);
+      expect(game.cardResources!.roomTags.ConversionFixturePaid).toBe(true);
+      expect(game.cardZones.hand.cards).toEqual([1, 2]);
+      expect(game.cardZones.table.cards).toEqual([]);
+      expect(game.after).toEqual([]);
+      expect(game.events.some((event) => event.name === "CardFinished")).toBe(
+        false,
+      );
+    },
+  );
+
+  it("retains a SkillCard returned by private validation through the direct response lifecycle", () => {
+    const game = fixture();
+    game.replies.push(rawSkillResponse(game));
+    const scheduler = dispatch(game);
+    expect(scheduler.operationCompletion?.value).toBe(true);
+    expect(game.cardZones.discard.cards).toEqual([1]);
+    expect(game.after).toMatchObject([
+      {
+        original: { reference: "raw", card: { type: "skill" } },
+        use: { card: { type: "skill", userString: "nullification" } },
+      },
+    ]);
+  });
+
+  it("converts before use and retains the raw card for after-validation", () => {
+    const game = fixture(),
+      rules = registry();
+    game.replies.push(rawSkillResponse(game));
+    operation(rules, "validate", ({ game, operation }) => {
+      game.validated.push(structuredClone(operation.data));
+      return {
+        kind: "return",
+        value: { reference: "reply", card: card("nullification", [2]) },
+      };
+    });
+    const resources = { reference: () => "reply" };
+    rules.operations!.push(
+      createCardUsedOperation({
+        resources,
+        use: (data) => ({ name: "empty-nullification-use-fixture", data }),
+      }),
+      {
+        name: "empty-nullification-use-fixture",
+        run: () => ({ kind: "return", value: null }),
+      },
+    );
+    rules.skills.push(createCardUsedRule(), createCardFinishedRule(resources));
+    const scheduler = createTriggerScheduler(game.seatOrder, rules.version);
+    expect(
+      dispatchTriggerOperation(
+        scheduler,
+        game,
+        rules,
+        {
+          name: "ask-nullification",
+          data: { effect: effect(), reference: "trick", positive: true },
+        },
+        "a",
+      ),
+    ).toBe(true);
+    expect(scheduler.operationCompletion?.value).toBe(true);
+    expect(game.validated).toMatchObject([
+      {
+        response: {
+          reference: "raw",
+          card: { type: "skill", userString: "nullification" },
+        },
+      },
+    ]);
+    expect(game.cardZones.hand.cards).toEqual([1]);
+    expect(game.cardZones.discard.cards).toEqual([2]);
+    expect(game.after).toMatchObject([
+      {
+        original: {
+          reference: "raw",
+          card: { type: "skill", materialIDs: [1] },
+        },
+        use: { card: { type: "trick", materialIDs: [2] } },
+      },
+    ]);
+    expect(game.cardResources!.cards.raw).toMatchObject({
+      flags: ["raw-flag"],
+    });
+    expect(scheduler.frames).toEqual([]);
+  });
+});
+
 describe("normalized Hegemony Nullification protocol", () => {
   it("reloads within hegemonic skillChoice before eager type/material mutations without replaying the choice", () => {
     let game = hegGame();

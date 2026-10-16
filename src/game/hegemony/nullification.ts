@@ -4,7 +4,7 @@ import {
   type CardEffectGame,
 } from "./card-effect";
 import { readCardReference } from "./card-resources";
-import { readCardUse, type CardUse } from "./card-on-use";
+import { readExecutionCardUse, type CardUse } from "./card-on-use";
 import type {
   OperationContext,
   OperationHandler,
@@ -154,7 +154,11 @@ function readResponse(
     typeof data.reference !== "string"
   )
     throw new Error("Invalid nullification response");
-  const use = readCardUse(game, { from: player, to: [], card: data.card });
+  const use = readExecutionCardUse(game, {
+    from: player,
+    to: [],
+    card: data.card,
+  });
   readCardReference(game, data.reference);
   return { reference: data.reference, card: use.card };
 }
@@ -422,7 +426,7 @@ function runNullification<G extends NullificationGame>(
     };
   }
   if (cursor.stage === "pre") {
-    cursor.afterPre = readCardUse(game, child!.event.data);
+    cursor.afterPre = readExecutionCardUse(game, child!.event.data);
     cursor.data = structuredClone(cursor.afterPre);
     cursor.stage = "table";
     const movement = materialMove(game, cursor, rules, false);
@@ -452,7 +456,7 @@ function runNullification<G extends NullificationGame>(
     cursor.data = structuredClone(child!.event.data);
     cursor.result = !child!.consumed;
     if (cursor.result) {
-      const use = readCardUse(game, cursor.data);
+      const use = readExecutionCardUse(game, cursor.data);
       cursor.result = !strings(
         (use as CardUse & { nullified_list?: TriggerData }).nullified_list,
       ).includes("_ALL_TARGETS");
