@@ -192,6 +192,210 @@ function setup(overrides: Partial<CardCommandRules<Game>> = {}) {
   return { game, rules, scheduler, admission };
 }
 describe("authoritative card command admission", () => {
+  it.each(["pending choice", "ChoiceMade"])(
+    "accepts the same offer when keys reorder during %s across JSON restore",
+    (when) => {
+      const setupResult = setup({
+        offers: (game) => {
+          const current = offer();
+          if (game.playerFlags.a.includes("reorder-offer")) {
+            current.entry.use.card = {
+              flags: [],
+              materialIDs: [1],
+              skillName: "",
+              className: "Test",
+              name: "test",
+              type: "basic",
+            };
+            return [
+              {
+                entry: { use: current.entry.use, reference: "Test" },
+                multipleVotes: false,
+                targetFixed: true,
+                label: current.label,
+                version: current.version,
+                id: current.id,
+              },
+            ];
+          }
+          return [current];
+        },
+      });
+      const { rules, admission } = setupResult;
+      let { game, scheduler } = setupResult;
+      rules.skills.push({
+        id: "reorder-on-choice",
+        events: ["ChoiceMade"],
+        priority: 5,
+        rule: true,
+        effect: ({ game }) => {
+          if (when === "ChoiceMade") game.playerFlags.a.push("reorder-offer");
+          return { kind: "done", value: false };
+        },
+      });
+      expect(
+        dispatchTriggerOperation(
+          scheduler,
+          game,
+          rules,
+          { name: "card-use-request", data: request() },
+          "a",
+        ),
+      ).toBe(true);
+      if (when === "pending choice") game.playerFlags.a.push("reorder-offer");
+      for (let step = 0; step < 2; step++) {
+        ({ game, scheduler } = JSON.parse(JSON.stringify({ game, scheduler })));
+        const view = admission.view(scheduler, session("a"))!;
+        expect(
+          admission.submit(scheduler, game, rules, session("a"), {
+            id: view.id,
+            choice: view.choices[0].id,
+          }),
+        ).toBe(true);
+      }
+      expect(scheduler.operationCompletion?.value).toEqual({ status: "used" });
+      expect(game.cardZones.discard.cards).toEqual([1]);
+      expect(game.playerHistory.a.Test).toBe(1);
+    },
+  );
+  const changedOffers: [string, (current: CardCommandOffer) => void][] = [
+    [
+      "ID",
+      (current) => {
+        current.id = "replacement";
+      },
+    ],
+    [
+      "version",
+      (current) => {
+        current.version = "fixture-next";
+      },
+    ],
+    [
+      "label",
+      (current) => {
+        current.label = "Different card";
+      },
+    ],
+    [
+      "resource",
+      (current) => {
+        current.entry.reference = "Other";
+      },
+    ],
+    [
+      "target policy",
+      (current) => {
+        current.targetFixed = false;
+      },
+    ],
+    [
+      "card name",
+      (current) => {
+        current.entry.use.card.name = "other";
+      },
+    ],
+    [
+      "card class",
+      (current) => {
+        current.entry.use.card.className = "Other";
+      },
+    ],
+    [
+      "card type",
+      (current) => {
+        current.entry.use.card.type = "trick";
+      },
+    ],
+    [
+      "skill",
+      (current) => {
+        current.entry.use.card.skillName = "other";
+      },
+    ],
+    [
+      "material value",
+      (current) => {
+        current.entry.use.card.materialIDs = [2];
+      },
+    ],
+    [
+      "material order",
+      (current) => {
+        current.entry.use.card.materialIDs.reverse();
+      },
+    ],
+    [
+      "flag value",
+      (current) => {
+        current.entry.use.card.flags = ["other"];
+      },
+    ],
+    [
+      "flag order",
+      (current) => {
+        current.entry.use.card.flags.reverse();
+      },
+    ],
+    [
+      "additional metadata",
+      (current) => {
+        Object.assign(current, { metadata: null });
+      },
+    ],
+  ];
+  it.each(
+    changedOffers.flatMap(([name, change]) =>
+      ["select", "confirm"].map((stage) => ({ name, change, stage })),
+    ),
+  )(
+    "rejects a changed $name at $stage without paying or advancing",
+    ({ change, stage }) => {
+      const { game, rules, scheduler, admission } = setup({
+        offers: (game) => {
+          const current = offer();
+          current.entry.use.card.materialIDs = [1, 2];
+          current.entry.use.card.flags = ["first", "second"];
+          if (game.playerFlags.a.includes("change-offer")) change(current);
+          return [current];
+        },
+      });
+      game.cardZones.hand.cards = [1, 2];
+      game.cardResources!.cards.Other = structuredClone(
+        game.cardResources!.cards.Test,
+      );
+      expect(
+        dispatchTriggerOperation(
+          scheduler,
+          game,
+          rules,
+          { name: "card-use-request", data: request() },
+          "a",
+        ),
+      ).toBe(true);
+      if (stage === "confirm") {
+        const view = admission.view(scheduler, session("a"))!;
+        expect(
+          admission.submit(scheduler, game, rules, session("a"), {
+            id: view.id,
+            choice: view.choices[0].id,
+          }),
+        ).toBe(true);
+      }
+      game.playerFlags.a.push("change-offer");
+      const view = admission.view(scheduler, session("a"))!;
+      const before = structuredClone({ game, scheduler });
+      expect(
+        admission.submit(scheduler, game, rules, session("a"), {
+          id: view.id,
+          choice: view.choices[0].id,
+        }),
+      ).toBe(false);
+      expect({ game, scheduler }).toEqual(before);
+      expect(game.playerHistory.a).toEqual({});
+      expect(game.cardZones.hand.cards).toEqual([1, 2]);
+    },
+  );
   it.each(["back", "cancel"] as const)(
     "allows %s to discard an inaccessible selection without paying",
     (action) => {

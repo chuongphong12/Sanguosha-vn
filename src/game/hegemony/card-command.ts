@@ -127,6 +127,17 @@ function privatePrompt(scheduler: TriggerScheduler) {
     return null;
   return { prompt, cursor: frame.continuation as Cursor };
 }
+function offerSignature(offer: CardCommandOffer): string {
+  return JSON.stringify(offer, (_key, value: unknown) => {
+    if (value && typeof value === "object" && !Array.isArray(value))
+      return Object.fromEntries(
+        Object.entries(value).sort(([left], [right]) =>
+          left < right ? -1 : left > right ? 1 : 0,
+        ),
+      );
+    return value;
+  });
+}
 export function createCardCommandAdmission<G extends CardCommandGame, Auth>(
   rules: CardCommandRules<G>,
   authenticate: (context: Auth) => string | null,
@@ -201,7 +212,7 @@ export function createCardCommandAdmission<G extends CardCommandGame, Auth>(
     offer: CardCommandOffer,
   ): boolean {
     return offers(game, cursor.request).some(
-      (current) => JSON.stringify(current) === JSON.stringify(offer),
+      (current) => offerSignature(current) === offerSignature(offer),
     );
   }
   function targetsValid(
