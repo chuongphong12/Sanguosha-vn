@@ -30,4 +30,4 @@ JSON reload tests pause at shared operations, target/finish events, recovery and
 
 ## Next dependency
 
-Admission/history, phase and skill ownership, availability/material/target legality, and distinct play/response-use/pure-response paths remain a separate slice. Live catalogue/identity authorities, full mutable native pointers, production registration/privacy/transport, exception unwind, native runtime differential and full-match E2E remain later gates. Production still uses Standard2013 until the approved playable-replacement cutover.
+Part 4aa supplies the [normal Room wrapper and authoritative Play/targetful response-use gateway](room-use-and-admission.md), including supplied phase, skill, availability/material/target policies. Live implementations of those authorities and distinct direct response/rescue paths remain separate work. Live catalogue/identity authorities, full mutable native pointers, production registration/privacy/transport, exception unwind, native runtime differential and full-match E2E remain later gates. Production still uses Standard2013 until the approved playable-replacement cutover.

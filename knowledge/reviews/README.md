@@ -2,6 +2,7 @@
 
 These reports preserve particular source snapshots, adapters and executed checks. Read [current engine scope](../engine/overview.md) and the [roadmap](../roadmap/README.md) for present implementation boundaries. Earlier “next” statements and totals are historical.
 
+- [4aa: Room wrapper and authoritative command admission](2026-10-19-hegemony-part4aa.md)
 - [Knowledge migration: local validation, reviews and publication boundary](2026-10-15-knowledge-migration.md)
 - [Raw SkillCard Nullification conversion repair (#18)](2026-10-16-nullification-skill-response.md)
 - [Admission/history and response audit after 4z](2026-10-16-hegemony-admission-audit.md)
