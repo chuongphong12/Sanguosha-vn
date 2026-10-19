@@ -2,7 +2,7 @@
   "version": 1,
   "game": {
     "repository": "https://github.com/chuongphong12/Sanguosha-vn.git",
-    "commit": "89b8e5d130ffdc9ad9d53f494bfa4f400f8b5d46",
+    "commit": "0ac2aabf98645d48208d8609696d0be4e2c9ff62",
     "availability": "Inspected and committed locally; game branch publication is not asserted"
   },
   "native": {
@@ -10,5 +10,5 @@
     "commit": "ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f",
     "release": "2.3.43-beta2"
   },
-  "scope": "Source-derived documentation through Part 4z shared SkillCard execution plus #18 raw SkillCard Nullification response conversion and its own shared-event reloads. Generic admission/history, other distinct response entries and live production authorities remain pending. Production registration still uses Standard2013; no native runtime differential or full-match parity is certified."
+  "scope": "Source-derived documentation through Part 4aa normal Room::useCard/history/conversion/wrapped state and authoritative staged Play/targetful response-use admission, with real SkillCard/token composition. Direct response/rescue entries, live package/authentication/network authorities, phase orchestration and native unwind remain pending. Production still registers Standard2013; no native runtime differential or full-match parity is certified."
 }

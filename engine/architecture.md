@@ -29,6 +29,8 @@ Operations compose movement, card-use resources and dispatch, cancellation/Nulli
 
 The scheduler validates responder, prompt ID, frame identity, offered choices and registry version before accepting a reply; order prompts additionally refresh occurrence eligibility. Existing regression examples are in `tests/hegemony/scheduler.test.ts` and `tests/hegemony/reward-tokens.test.ts`. This library protection does not establish authentication or replay safety for a future network adapter without integration tests.
 
+Part 4aa adds the [Room wrapper and authoritative staged request gateway](room-use-and-admission.md), with trusted authentication context kept separate from public replies. Internal operations and raw scheduler resume are private; the deployed authentication/network binding remains pending.
+
 Completed child operations and eager mutations are not globally rolled back when a later invariant fails. Interruptions currently freeze frames; operation-specific exception unwind and native cleanup must be completed and tested before claiming uninterrupted/aborted-match parity. An event's consumed return is interpreted by its caller; it is not automatically a whole-game cancellation.
 
 ## Privacy and UI boundary
