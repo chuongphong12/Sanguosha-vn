@@ -2,7 +2,7 @@
   "version": 1,
   "game": {
     "repository": "https://github.com/chuongphong12/Sanguosha-vn.git",
-    "commit": "ea8c98cd13224d26207458e281a127a3ba221e6d",
+    "commit": "31386093782099772db6be363b53f45a9226974f",
     "availability": "Inspected and committed locally; game branch publication is not asserted"
   },
   "native": {
@@ -10,5 +10,5 @@
     "commit": "ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f",
     "release": "2.3.43-beta2"
   },
-  "scope": "Source-derived documentation through Part 4ab.2 direct MethodResponse acquisition/provide/retry and CardResponded lifecycle with independent hand/material snapshots and provision-sensitive cleanup. Existing 4ab.1 MethodUse and 4aa Room wrapper/admission remain present. Remaining methods/retrial, rescue Room composition, live package/authentication/network authorities, phase orchestration and native unwind remain pending. Production still registers Standard2013; no native runtime differential or full-match parity is certified."
+  "scope": "Source-derived documentation through Part 4ab.3 None/Discard, retrial acquisition, shared ready-judgment replacement/result and representative Guicai/Guidao cost/reveal/effect composition. Existing direct MethodUse/Response and Room wrapper/admission remain present. Outer judge orchestration, other retrial packages, rescue Room composition, live package/authentication/network authorities, phase orchestration and native unwind remain pending. Production still registers Standard2013; no native runtime differential or full-match parity is certified."
 }

@@ -17,6 +17,7 @@ The [source baseline](source-baseline.json) identifies the game revision inspect
 | SkillCard envelope and shared execution  | [SkillCard onUse](engine/skill-card-on-use.md), [shared execution](engine/skill-card-execution.md), [native boundaries](research/skillcard-shared-execution.md) |
 | Room wrapper and authoritative requests  | [Room use and admission](engine/room-use-and-admission.md)                                                                                                      |
 | Direct MethodUse/MethodResponse requests | [CardAsked, provide, retry and distinct use/response lifecycles](engine/direct-card-use.md)                                                                     |
+| Selection and judgment replacement       | [MethodNone/Discard, retrial and Guicai/Guidao](engine/retrial.md)                                                                                              |
 | HP, rescue and terminal flow             | [Damage/rescue](engine/damage-and-rescue.md), [death/careerist](engine/death-and-careerist.md)                                                                  |
 | Reveal rewards                           | [Rewards and token methods](engine/reveal-rewards-and-tokens.md)                                                                                                |
 | What remains before production           | [Roadmap](roadmap/README.md), [port plan](plans/hegemony-port.md), [initial design baseline](specs/hegemony-engine-baseline.md)                                 |
