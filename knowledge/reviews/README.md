@@ -4,6 +4,7 @@ These reports preserve particular source snapshots, adapters and executed checks
 
 - [4aa: Room wrapper and authoritative command admission](2026-10-19-hegemony-part4aa.md)
 - [4ab.1: MethodUse CardAsked/provide/retry and direct response](2026-10-20-hegemony-part4ab1.md)
+- [4ab.2: MethodResponse acquisition and CardResponded lifecycle](2026-10-20-hegemony-part4ab2.md)
 - [Offer equality: key-order false rejection repair](2026-10-19-offer-equality-fix.md)
 - [Knowledge migration: local validation, reviews and publication boundary](2026-10-15-knowledge-migration.md)
 - [Raw SkillCard Nullification conversion repair (#18)](2026-10-16-nullification-skill-response.md)

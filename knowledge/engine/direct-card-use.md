@@ -1,6 +1,8 @@
-# Direct MethodUse card requests
+# Direct MethodUse and MethodResponse card requests
 
 Part 4ab.1 adds `src/game/hegemony/ask-card-use.ts`: registered `ask-card-use` plus `provideCard`. Public regressions are in `tests/hegemony/ask-card-use.test.ts`, using real scheduler, movement, CardUsed/CardFinished GameRule and SlashProceed/JinkEffect/SlashResult composition. The [native investigation](../research/2026-10-20-direct-response-native.md) and [approved expanded scope](../research/2026-10-20-part4ab-response-matrix.md#approved-expansion-for-implementation) distinguish this entry from targetful [4aa requests](room-use-and-admission.md). Revision-specific checks and adapters are recorded in the [checkpoint](../reviews/2026-10-20-hegemony-part4ab1.md).
+
+Part 4ab.2 adds a separate `createAskCardResponseOperation` factory registering `ask-card-response` in the same module, with shared acquisition and the same room-wide provided slot. Its [native contract](../research/2026-10-20-method-response.md) and [checkpoint](../reviews/2026-10-20-hegemony-part4ab2.md) distinguish this lifecycle from MethodUse. The original MethodUse factory and rules interface remain unchanged.
 
 ## Acquisition and response validation
 
@@ -14,6 +16,8 @@ Non-null provided/AI replies pass the supplied MethodUse limitation predicate be
 
 Private validateResponse receives the original parsed card and may return another registered response, a SkillCard or null. A null result retains eager effects, sets the actor's continuing flag, resets skillName to empty and provision to false, and retries the original other request fields. That next attempt skips CardAsked once, clears continuing before acquisition, and does not emit ChoiceMade or run an after-hook for the failed conversion. Nested room reason/pattern values are not restored by the outer ask.
 
+Both methods use this acquisition contract. MethodResponse sets response reason instead of response-use and accepts the bare Slash pattern. Its trusted request/limitation adapters must apply MethodResponse semantics. Calling either factory does not expose a client submission endpoint or grant package legality.
+
 ## Direct use lifecycle
 
 An accepted notification adapter owns physical wrapped update/reset delivery and method-specific log/emotion/broadcast. Then emit the validated current resource key in ChoiceMade, followed by the owned-skill notification adapter. Initial material IDs are resolved from the validated identity after these children and before PreCardUsed; require a unique physical location for each material before moving it.
@@ -26,10 +30,20 @@ Finish selection checks the current storage of the original validated identity. 
 
 Cleanup resolves current materials of the original validated identity again and discards only those still on table, rather than following a replacement event card or freezing the initial material array. It uses actual movement and supplied current skill/position/general metadata for movement reasons. Materials taken elsewhere are not discarded twice. Then invoke the original raw card's validateAfter with the local use and its current validated-card metadata. Return the current validated response. This hook is not validateInResponseAfter.
 
+## Direct response lifecycle
+
+After the accepted wrapped/log notification child, capture `m_isHandcard` from the validated identity's current materials before ChoiceMade: nonempty and all owned by the responder in hand. ChoiceMade and the skill notice may subsequently change materials or locations. Resolve initial movement IDs after those children, preserving a separate snapshot from hand provenance.
+
+Move initial materials atomically and openly to table with response movement metadata, then run reveal/Huashen. Emit CardResponded at the responder with `m_card` (registered validated reference plus current private descriptor), nullable `m_who` (request recipient), `m_isUse=false`, `m_isRetrial=false`, captured `m_isHandcard` and original request `m_data`. Recipient is not the responder unless the request supplied it. Zero-material responses have false hand provenance and still run the lifecycle.
+
+CardResponded consumption or payload replacement does not change this owner's validated return/cleanup identity or raw after-hook identity. Unless isProvision, resolve current validated materials and discard only those still on table. isProvision skips only this discard, retaining initial movement, reveal, event, hook and return. Then invoke the original selected card's `validateInResponseAfter` child and return the current validated response. Validation-null retry resets isProvision to false under the shared native retry defaults.
+
+This envelope adds no PreCardUsed/CardUsed/CardFinished, ordinary use, history or finish notices and does not clear flags or use MethodUse's finish-suppression cleanup. Package CardResponded listeners retain their own native responsibilities. MethodResponse rules replace `validateAfter` with `validateInResponseAfter`; they retain explicit acquisition, metadata, notice, reveal and movement-reason adapters.
+
 ## Adapters, privacy and remaining entries
 
 Request admission, actual package conversion, current reference metadata/subcards, wrapped/log/skill notices, showSkill/Huashen and native skill/general movement metadata are mandatory named adapters. They are fixture implementations in the new tests; real scheduler, movement, GameRule resources and Slash caller implementations are composed. A callback/fixture does not enable a package, production login, network gateway or response button. Private provided state, catalogues, raw descriptors, frames and completion remain server-owned; the application must expose a separately authenticated filtered request contract.
 
 Registered child events and operations can suspend and restore JSON, including actual table/discard movement. Wrong actor, stale/replayed prompt and registry mismatch do not repeat work. Interruption retains eager state and freezes remaining frames under the current scheduler policy; no native exception unwind or rollback is added.
 
-MethodResponse/CardResponded, MethodNone/Discard, retrial and actual SinglePeach → Room composition remain separate work. Nullification keeps its race/counter lifecycle. Production still registers Standard2013; these library contracts do not establish a playable Quốc Chiến match or complete native parity.
+MethodNone/Discard, retrial and actual SinglePeach → Room composition remain separate work. ArcheryAttack/Duel-shaped request/result fixtures establish MethodResponse caller contracts, not complete package handlers. Nullification keeps its race/counter lifecycle. Production still registers Standard2013; these library contracts do not establish a playable Quốc Chiến match or complete native parity.
