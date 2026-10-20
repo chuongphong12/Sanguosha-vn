@@ -6,23 +6,23 @@ The [source baseline](source-baseline.json) identifies the game revision inspect
 
 ## Find the relevant contract
 
-| Need                                   | Start here                                                                                                                                                     |
-| -------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Domain terms and durable decisions     | [Glossary](CONTEXT.md), [subtree decision](adr/0001-canonical-knowledge-with-subtree.md), [rules authority decision](adr/0002-hegemony-knowledge-authority.md) |
-| Which source defines the rules         | [Source authority](rules/source-authority.md)                                                                                                                  |
-| What the web engine implements         | [Engine overview](engine/overview.md), [architecture and production boundary](engine/architecture.md)                                                          |
-| Setup, hidden information and faction  | [Setup and privacy](engine/setup-and-privacy.md), [general lifecycle and relations](engine/generals-and-relations.md)                                          |
-| Trigger order and persistence          | [Scheduler](engine/scheduler.md)                                                                                                                               |
-| Movement and card resolution           | [Movement](engine/movement.md), [card use/effects](engine/card-use-and-effects.md), [Nullification/Slash](engine/nullification-and-slash.md)                   |
-| SkillCard envelope and shared execution | [SkillCard onUse](engine/skill-card-on-use.md), [shared execution](engine/skill-card-execution.md), [native boundaries](research/skillcard-shared-execution.md)                                             |
-| Room wrapper and authoritative requests | [Room use and admission](engine/room-use-and-admission.md) |
-| Direct MethodUse acquisition/response | [CardAsked, provide, retry and direct use](engine/direct-card-use.md) |
-| HP, rescue and terminal flow           | [Damage/rescue](engine/damage-and-rescue.md), [death/careerist](engine/death-and-careerist.md)                                                                 |
-| Reveal rewards                         | [Rewards and token methods](engine/reveal-rewards-and-tokens.md)                                                                                               |
-| What remains before production         | [Roadmap](roadmap/README.md), [port plan](plans/hegemony-port.md), [initial design baseline](specs/hegemony-engine-baseline.md)                                |
-| Assets and reuse evidence              | [Provenance](assets/provenance.md)                                                                                                                             |
-| Why old documents changed              | [Curation assessment](research/architecture-and-provenance-assessment.md), [complete migration manifest](research/migration-manifest.json)                     |
-| Historical verification                | [Evidence index](reviews/README.md)                                                                                                                            |
+| Need                                     | Start here                                                                                                                                                      |
+| ---------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Domain terms and durable decisions       | [Glossary](CONTEXT.md), [subtree decision](adr/0001-canonical-knowledge-with-subtree.md), [rules authority decision](adr/0002-hegemony-knowledge-authority.md)  |
+| Which source defines the rules           | [Source authority](rules/source-authority.md)                                                                                                                   |
+| What the web engine implements           | [Engine overview](engine/overview.md), [architecture and production boundary](engine/architecture.md)                                                           |
+| Setup, hidden information and faction    | [Setup and privacy](engine/setup-and-privacy.md), [general lifecycle and relations](engine/generals-and-relations.md)                                           |
+| Trigger order and persistence            | [Scheduler](engine/scheduler.md)                                                                                                                                |
+| Movement and card resolution             | [Movement](engine/movement.md), [card use/effects](engine/card-use-and-effects.md), [Nullification/Slash](engine/nullification-and-slash.md)                    |
+| SkillCard envelope and shared execution  | [SkillCard onUse](engine/skill-card-on-use.md), [shared execution](engine/skill-card-execution.md), [native boundaries](research/skillcard-shared-execution.md) |
+| Room wrapper and authoritative requests  | [Room use and admission](engine/room-use-and-admission.md)                                                                                                      |
+| Direct MethodUse/MethodResponse requests | [CardAsked, provide, retry and distinct use/response lifecycles](engine/direct-card-use.md)                                                                     |
+| HP, rescue and terminal flow             | [Damage/rescue](engine/damage-and-rescue.md), [death/careerist](engine/death-and-careerist.md)                                                                  |
+| Reveal rewards                           | [Rewards and token methods](engine/reveal-rewards-and-tokens.md)                                                                                                |
+| What remains before production           | [Roadmap](roadmap/README.md), [port plan](plans/hegemony-port.md), [initial design baseline](specs/hegemony-engine-baseline.md)                                 |
+| Assets and reuse evidence                | [Provenance](assets/provenance.md)                                                                                                                              |
+| Why old documents changed                | [Curation assessment](research/architecture-and-provenance-assessment.md), [complete migration manifest](research/migration-manifest.json)                      |
+| Historical verification                  | [Evidence index](reviews/README.md)                                                                                                                             |
 
 Code paths in code spans refer to the named game/native repository at the stated baseline. They are not relative links to files in this repository. Historical reports retain their original scope and source identities; their test totals do not certify a later revision.
 
