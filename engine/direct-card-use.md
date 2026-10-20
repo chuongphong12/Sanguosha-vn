@@ -1,0 +1,35 @@
+# Direct MethodUse card requests
+
+Part 4ab.1 adds `src/game/hegemony/ask-card-use.ts`: registered `ask-card-use` plus `provideCard`. Public regressions are in `tests/hegemony/ask-card-use.test.ts`, using real scheduler, movement, CardUsed/CardFinished GameRule and SlashProceed/JinkEffect/SlashResult composition. The [native investigation](../research/2026-10-20-direct-response-native.md) and [approved expanded scope](../research/2026-10-20-part4ab-response-matrix.md#approved-expansion-for-implementation) distinguish this entry from targetful [4aa requests](room-use-and-admission.md). Revision-specific checks and adapters are recorded in the [checkpoint](../reviews/2026-10-20-hegemony-part4ab1.md).
+
+## Acquisition and response validation
+
+This is a trusted internal MethodUse request: actor, pattern, prompt, request data, optional recipient represented as null or a known seat, skill name and provision option. It rejects the native forbidden MethodUse Slash pattern and unsupported method/retrial execution. It is not a client-facing card submission endpoint. Catalogue/ownership/skill/pattern admission and authenticated input remain responsibilities of the supplied request adapter.
+
+Each attempt delegates focus notification, sets private currentCardUsePattern and response-use reason, then emits CardAsked with only pattern/prompt unless the actor's continuing flag is set. CardAsked consumption and payload rewrites do not replace the captured request. Clear continuing before acquisition. A room-wide provided slot takes precedence over acquisition, including when the actor has died. If no provider and the actor is dead, take the no-card branch without calling the request adapter.
+
+`provideCard(game, card)` stores a private clone in the shared slot; explicit null still occupies it. Duplicate provision rejects even for null. Nested requests may consume the same room-wide slot. Consumption removes the slot before validation or subsequent children. Normalize the unsafe native null limitation path: a null provided/dead response emits nil ChoiceMade and returns null without invoking a limitation predicate on null.
+
+Non-null provided/AI replies pass the supplied MethodUse limitation predicate before conversion; human parsing/admission belongs to the trusted request adapter, preserving the native branch distinction without trusting client descriptors. There is no second generic limitation check after conversion. The request adapter owns AI DummyCard normalization, delay, deadlines, transport and parsing. Pure predicates/metadata authorities receive copied state/data.
+
+Private validateResponse receives the original parsed card and may return another registered response, a SkillCard or null. A null result retains eager effects, sets the actor's continuing flag, resets skillName to empty and provision to false, and retries the original other request fields. That next attempt skips CardAsked once, clears continuing before acquisition, and does not emit ChoiceMade or run an after-hook for the failed conversion. Nested room reason/pattern values are not restored by the outer ask.
+
+## Direct use lifecycle
+
+An accepted notification adapter owns physical wrapped update/reset delivery and method-specific log/emotion/broadcast. Then emit the validated current resource key in ChoiceMade, followed by the owned-skill notification adapter. Initial material IDs are resolved from the validated identity after these children and before PreCardUsed; require a unique physical location for each material before moving it.
+
+Create separate local and event-use snapshots. The local use has the validated card, original responder and empty targets. Defined constructor defaults (`m_isOwnerUse`, `m_addHistory` true, empty nullified/disresponsive lists) are retained; unspecified native m_reason/m_isHandcard/index are omitted. This normalization does not emulate uninitialized C++ fields. No actual history increment follows from m_addHistory here.
+
+Run PreCardUsed, actual atomic initial-material movement to table, showSkill/Huashen reveal adapter, then CardUsed. PreCardUsed and CardUsed consumption are not cancellation gates for this owner. Later shared events and GameRule see mutable event payload; the captured local responder/targets and original raw after-hook identity remain separate. Do not insert ordinary onUse/TargetSelected or Room::useCard history into this entry. Shared CardUsed can still invoke its normal package use implementation.
+
+Finish selection checks the current storage of the original validated identity. Normally dispatch CardFinished with current event data and compose the existing shared rule. With cardNotTriggerCardFinished, skip that event, clear local-card flags, remove its NDTrick HegNullificationTargets, delegate current living-recipient notification, then remove its Slash Jink tag. Normal CardFinished notification delivery remains the existing external integration responsibility.
+
+Cleanup resolves current materials of the original validated identity again and discards only those still on table, rather than following a replacement event card or freezing the initial material array. It uses actual movement and supplied current skill/position/general metadata for movement reasons. Materials taken elsewhere are not discarded twice. Then invoke the original raw card's validateAfter with the local use and its current validated-card metadata. Return the current validated response. This hook is not validateInResponseAfter.
+
+## Adapters, privacy and remaining entries
+
+Request admission, actual package conversion, current reference metadata/subcards, wrapped/log/skill notices, showSkill/Huashen and native skill/general movement metadata are mandatory named adapters. They are fixture implementations in the new tests; real scheduler, movement, GameRule resources and Slash caller implementations are composed. A callback/fixture does not enable a package, production login, network gateway or response button. Private provided state, catalogues, raw descriptors, frames and completion remain server-owned; the application must expose a separately authenticated filtered request contract.
+
+Registered child events and operations can suspend and restore JSON, including actual table/discard movement. Wrong actor, stale/replayed prompt and registry mismatch do not repeat work. Interruption retains eager state and freezes remaining frames under the current scheduler policy; no native exception unwind or rollback is added.
+
+MethodResponse/CardResponded, MethodNone/Discard, retrial and actual SinglePeach → Room composition remain separate work. Nullification keeps its race/counter lifecycle. Production still registers Standard2013; these library contracts do not establish a playable Quốc Chiến match or complete native parity.
