@@ -10,7 +10,7 @@ import type {
 
 export interface AskCardUseGame extends CardResourceGame {
   playerFlags: Record<string, string[]>;
-  currentCardUseReason?: "play" | "response" | "response-use";
+  currentCardUseReason?: "play" | "response" | "response-use" | "unknown";
   currentCardUsePattern?: string;
   providedCard?: { card: SlashCard | null };
 }
@@ -22,10 +22,21 @@ export type AskCardUseRequest = {
   to: string | null;
   skillName: string;
   isProvision: boolean;
+  isRetrial?: boolean;
 };
+type AskCardMethod = "use" | "response" | "none" | "discard";
 export type AskCardUseNotice =
   | { kind: "focus"; actor: string }
-  | { kind: "accepted" | "skill"; actor: string; card: SlashCard }
+  | {
+      kind: "accepted" | "skill";
+      actor: string;
+      card: SlashCard;
+      context?: {
+        method: AskCardMethod;
+        skillName: string;
+        isRetrial: boolean;
+      };
+    }
   | { kind: "finish"; players: string[] };
 export interface AskCardUseRules<G extends AskCardUseGame> {
   tableZone: string;
@@ -61,6 +72,12 @@ export type AskCardResponseRules<G extends AskCardUseGame> = Omit<
     original: SlashCard,
   ) => TriggerOperation;
 };
+export type AskCardNoneRules<G extends AskCardUseGame> = Pick<
+  AskCardUseRules<G>,
+  "isAI" | "request" | "validateResponse" | "resolve" | "notify"
+>;
+export type AskCardDiscardRules<G extends AskCardUseGame> =
+  AskCardNoneRules<G> & Pick<AskCardUseRules<G>, "limited" | "discardZone">;
 export type CardResponseData = {
   m_card: SlashCard;
   m_who: string | null;
@@ -94,7 +111,7 @@ type Cursor = {
   ai: boolean;
   isHandcard: boolean;
 };
-function readResponse(
+export function readResponse(
   game: AskCardUseGame,
   value: TriggerData,
   actor: string,
@@ -118,10 +135,29 @@ function readResponse(
     card: use.card,
   };
 }
+/** Resolve mutable native identity without allowing an adapter to substitute another card. */
+export function resolveResponse<G extends AskCardUseGame>(
+  game: G,
+  actor: string,
+  original: SlashCard,
+  resolve: AskCardUseRules<G>["resolve"],
+): SlashCard {
+  const response = readResponse(
+    game,
+    resolve(structuredClone(game), structuredClone(original)),
+    actor,
+  );
+  if (response.reference !== original.reference)
+    throw new Error("Changed response identity");
+  response.card.flags = [
+    ...readCardReference(game, response.reference).storage.flags,
+  ];
+  return response;
+}
 function readRequest(
   game: AskCardUseGame,
   data: TriggerData,
-  method: "use" | "response",
+  method: AskCardMethod,
 ): AskCardUseRequest {
   const input = data as
     | (Partial<AskCardUseRequest> & { method?: string; isRetrial?: boolean })
@@ -139,10 +175,10 @@ function readRequest(
     (input.to !== null && !game.seatOrder.includes(input.to ?? "")) ||
     input.data === undefined ||
     (input.method !== undefined && input.method !== method) ||
-    input.isRetrial === true
+    (input.isRetrial !== undefined && typeof input.isRetrial !== "boolean")
   )
     throw new Error(
-      `Invalid Method${method === "use" ? "Use" : "Response"} request`,
+      `Invalid Method${method[0].toUpperCase()}${method.slice(1)} request`,
     );
   return structuredClone({
     actor: input.actor!,
@@ -152,6 +188,7 @@ function readRequest(
     to: input.to!,
     skillName: input.skillName,
     isProvision: input.isProvision,
+    ...(input.isRetrial !== undefined ? { isRetrial: input.isRetrial } : {}),
   });
 }
 function boolean(value: boolean): boolean {
@@ -163,19 +200,37 @@ export function createAskCardUseOperation<G extends AskCardUseGame>(
 ): OperationHandler<G> {
   return createAskCardOperation({ ...rules, method: "use" });
 }
+export function createAskCardNoneOperation<G extends AskCardUseGame>(
+  rules: AskCardNoneRules<G>,
+): OperationHandler<G> {
+  return createAskCardOperation({ ...rules, method: "none" });
+}
+export function createAskCardDiscardOperation<G extends AskCardUseGame>(
+  rules: AskCardDiscardRules<G>,
+): OperationHandler<G> {
+  return createAskCardOperation({ ...rules, method: "discard" });
+}
 function createAskCardOperation<G extends AskCardUseGame>(
   rules:
     | (AskCardUseRules<G> & { method: "use" })
-    | (AskCardResponseRules<G> & { method: "response" }),
+    | (AskCardResponseRules<G> & { method: "response" })
+    | (AskCardNoneRules<G> & { method: "none" })
+    | (AskCardDiscardRules<G> & { method: "discard" }),
 ): OperationHandler<G> {
   return {
-    name: rules.method === "use" ? "ask-card-use" : "ask-card-response",
+    name: `ask-card-${rules.method}`,
     validate: (game, operation) => {
       readRequest(game, operation.data, rules.method);
-      for (const [key, place] of [
-        [rules.tableZone, "table"],
-        [rules.discardZone, "discard"],
-      ]) {
+      const destinations =
+        rules.method === "none"
+          ? []
+          : rules.method === "discard"
+            ? [[rules.discardZone, "discard"]]
+            : [
+                [rules.tableZone, "table"],
+                [rules.discardZone, "discard"],
+              ];
+      for (const [key, place] of destinations) {
         const zone = game.cardZones[key];
         if (!zone || zone.place !== place || zone.owner !== null)
           throw new Error("Invalid response destination");
@@ -208,24 +263,26 @@ function createAskCardOperation<G extends AskCardUseGame>(
         event: { name, target: actor, data },
         continuation: cursor,
       });
-      const current = () => {
-        const response = readResponse(
-          game,
-          rules.resolve(
-            structuredClone(game),
-            structuredClone(cursor.validated!),
-          ),
-          actor,
-        );
-        if (response.reference !== cursor.validated!.reference)
-          throw new Error("Changed response identity");
-        response.card.flags = [
-          ...readCardReference(game, response.reference).storage.flags,
-        ];
-        return response;
-      };
+      const current = () =>
+        resolveResponse(game, actor, cursor.validated!, rules.resolve);
       const notice = (value: AskCardUseNotice) => {
-        const next = rules.notify(structuredClone(value));
+        const next = rules.notify(
+          structuredClone(
+            value.kind === "accepted" &&
+              (rules.method === "none" ||
+                rules.method === "discard" ||
+                cursor.request.isRetrial)
+              ? {
+                  ...value,
+                  context: {
+                    method: rules.method,
+                    skillName: cursor.request.skillName,
+                    isRetrial: cursor.request.isRetrial === true,
+                  },
+                }
+              : value,
+          ),
+        );
         return next ? operationStep(next) : null;
       };
       const move = (
@@ -233,11 +290,12 @@ function createAskCardOperation<G extends AskCardUseGame>(
         to: string,
         atomic: boolean,
       ): OperationStep => {
-        const reason = rules.moveReason(
-          structuredClone(game),
-          actor,
-          current(),
-        );
+        if (rules.method === "none")
+          throw new Error("Selection cannot move cards");
+        const reason =
+          rules.method === "discard"
+            ? { kind: "throw", actor }
+            : rules.moveReason(structuredClone(game), actor, current());
         return operationStep({
           name: "move-cards",
           data: {
@@ -258,8 +316,16 @@ function createAskCardOperation<G extends AskCardUseGame>(
           case 1:
             game.currentCardUsePattern = cursor.request.pattern;
             game.currentCardUseReason =
-              rules.method === "use" ? "response-use" : "response";
-            if (!game.playerFlags[actor].includes("continuing"))
+              rules.method === "use"
+                ? "response-use"
+                : rules.method === "response"
+                  ? "response"
+                  : "unknown";
+            if (
+              (rules.method === "use" || rules.method === "response") &&
+              !cursor.request.isRetrial &&
+              !game.playerFlags[actor].includes("continuing")
+            )
               return event("CardAsked", [
                 cursor.request.pattern,
                 cursor.request.prompt,
@@ -276,6 +342,7 @@ function createAskCardOperation<G extends AskCardUseGame>(
                 provided === null ? null : readResponse(game, provided, actor);
               if (
                 cursor.original &&
+                rules.method !== "none" &&
                 boolean(
                   rules.limited(
                     structuredClone(game),
@@ -304,6 +371,7 @@ function createAskCardOperation<G extends AskCardUseGame>(
             if (
               cursor.original &&
               cursor.ai &&
+              rules.method !== "none" &&
               boolean(
                 rules.limited(
                   structuredClone(game),
@@ -367,11 +435,21 @@ function createAskCardOperation<G extends AskCardUseGame>(
             );
           }
           case 6: {
+            if (
+              rules.method === "none" ||
+              (rules.method !== "discard" && cursor.request.isRetrial)
+            ) {
+              cursor.stage = 14;
+              break;
+            }
+            if (rules.method === "discard") break;
             const next = notice({ kind: "skill", actor, card: current() });
             if (next) return next;
             break;
           }
           case 7: {
+            if (rules.method === "none")
+              throw new Error("Invalid selection continuation");
             const response = current();
             cursor.ids = [...response.card.materialIDs];
             for (const id of cursor.ids) {
@@ -382,6 +460,12 @@ function createAskCardOperation<G extends AskCardUseGame>(
               );
               if (count !== 1)
                 throw new Error("Invalid response material location");
+            }
+            if (rules.method === "discard") {
+              cursor.stage = 14;
+              if (cursor.ids.length)
+                return move(cursor.ids, rules.discardZone, false);
+              break;
             }
             if (rules.method === "response") {
               cursor.stage = 9;
@@ -402,11 +486,15 @@ function createAskCardOperation<G extends AskCardUseGame>(
             return event("PreCardUsed", cursor.eventData);
           }
           case 8:
+            if (!("tableZone" in rules))
+              throw new Error("Invalid selection continuation");
             cursor.eventData = structuredClone(child!.event.data);
             if (cursor.ids.length)
               return move(cursor.ids, rules.tableZone, true);
             break;
           case 9:
+            if (!("reveal" in rules))
+              throw new Error("Invalid selection continuation");
             return operationStep(rules.reveal(actor, current()));
           case 10:
             if (rules.method === "response") {
@@ -423,6 +511,8 @@ function createAskCardOperation<G extends AskCardUseGame>(
             return event("CardUsed", cursor.eventData);
           case 11: {
             if (rules.method === "response") break;
+            if (rules.method !== "use")
+              throw new Error("Invalid selection continuation");
             cursor.eventData = structuredClone(child!.event.data);
             const { card, storage, ledger } = readCardReference(
               game,
@@ -444,6 +534,8 @@ function createAskCardOperation<G extends AskCardUseGame>(
             break;
           }
           case 12: {
+            if (!("tableZone" in rules))
+              throw new Error("Invalid selection continuation");
             if (rules.method === "response" && cursor.request.isProvision)
               break;
             if (cursor.suppressed) {
@@ -470,6 +562,8 @@ function createAskCardOperation<G extends AskCardUseGame>(
                   structuredClone(cursor.original!),
                 ),
               );
+            if (rules.method !== "use")
+              throw new Error("Invalid selection continuation");
             return operationStep(
               rules.validateAfter(actor, structuredClone(cursor.original!), {
                 ...cursor.local!,

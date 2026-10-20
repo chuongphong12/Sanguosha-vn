@@ -2,6 +2,8 @@ import { describe, expect, it } from "vitest";
 import {
   createAskCardUseOperation,
   createAskCardResponseOperation,
+  createAskCardNoneOperation,
+  createAskCardDiscardOperation,
   provideCard,
   type AskCardUseGame,
   type AskCardUseRules,
@@ -64,7 +66,7 @@ const request = (): AskCardUseRequest => ({
 });
 function setup(
   overrides: Partial<AskCardUseRules<Game>> = {},
-  method: "use" | "response" = "use",
+  method: "use" | "response" | "none" | "discard" = "use",
 ) {
   const game: Game = {
     seatOrder: ["a", "b"],
@@ -162,13 +164,17 @@ function setup(
     operations: [
       method === "use"
         ? createAskCardUseOperation(policy)
-        : createAskCardResponseOperation({
-            ...policy,
-            validateInResponseAfter: (actor, original) => ({
-              name: "response-after-fixture",
-              data: { actor, original },
-            }),
-          }),
+        : method === "none"
+          ? createAskCardNoneOperation(policy)
+          : method === "discard"
+            ? createAskCardDiscardOperation(policy)
+            : createAskCardResponseOperation({
+                ...policy,
+                validateInResponseAfter: (actor, original) => ({
+                  name: "response-after-fixture",
+                  data: { actor, original },
+                }),
+              }),
       createCardMovementOperation(),
       createCardUsedOperation({
         resources,
@@ -228,6 +234,287 @@ const events = (game: Game) =>
         "event" in item,
     )
     .map((item) => item.event);
+describe("selection-only and discard requests", () => {
+  it.each(["none", "discard"] as const)(
+    "consumes null/dead acquisition for %s without CardAsked or request",
+    (method) => {
+      for (const provision of [true, false]) {
+        const { game, rules, scheduler } = setup({}, method);
+        game.playerFlags.b = ["continuing"];
+        if (provision) provideCard(game, null);
+        else game.alive.b = false;
+        dispatchTriggerOperation(
+          scheduler,
+          game,
+          rules,
+          { name: `ask-card-${method}`, data: request() },
+          "a",
+        );
+        expect(game.requests).toEqual([]);
+        expect(game.providedCard).toBeUndefined();
+        expect(game.playerFlags.b).toEqual([]);
+        expect(events(game)).toEqual(["ChoiceMade"]);
+        expect(scheduler.operationCompletion?.value).toBeNull();
+      }
+    },
+  );
+  it.each(["use", "response", "none", "discard"] as const)(
+    "retains retrial acquisition but suppresses ordinary %s execution",
+    (method) => {
+      const { game, rules, scheduler } = setup({}, method);
+      game.validations = [null, card()];
+      dispatchTriggerOperation(
+        scheduler,
+        game,
+        rules,
+        { name: `ask-card-${method}`, data: { ...request(), isRetrial: true } },
+        "a",
+      );
+      expect(events(game)).toEqual(["ChoiceMade"]);
+      expect(game.requests).toEqual([
+        { ...request(), isRetrial: true, ai: false },
+        {
+          ...request(),
+          skillName: "",
+          isProvision: false,
+          isRetrial: true,
+          ai: false,
+        },
+      ]);
+      expect(game.cardZones.table.cards).toEqual([]);
+      expect(game.cardZones.discard.cards).toEqual(
+        method === "discard" ? [1] : [],
+      );
+      expect(game.trace).toContainEqual({
+        operation: "notice-fixture",
+        data: {
+          kind: "accepted",
+          actor: "b",
+          card: card(),
+          context: { method, skillName: "", isRetrial: true },
+        },
+      });
+      expect(scheduler.operationCompletion?.value).toEqual(card());
+      expect(
+        game.trace.filter(
+          (item) =>
+            typeof item === "object" &&
+            item !== null &&
+            !Array.isArray(item) &&
+            [
+              "reveal-fixture",
+              "after-fixture",
+              "response-after-fixture",
+            ].includes(String(item.operation)),
+        ),
+      ).toHaveLength(0);
+    },
+  );
+  it.each(["AI", "provided"])(
+    "bypasses limitations for None %s while Discard still applies them",
+    (source) => {
+      for (const method of ["none", "discard"] as const) {
+        const { game, rules, scheduler } = setup({}, method);
+        game.denied = true;
+        game.ai = source === "AI";
+        if (source === "provided") provideCard(game, card());
+        dispatchTriggerOperation(
+          scheduler,
+          game,
+          rules,
+          { name: `ask-card-${method}`, data: request() },
+          "a",
+        );
+        expect(scheduler.operationCompletion?.value).toEqual(
+          method === "none" ? card() : null,
+        );
+        expect(events(game)).toEqual(["ChoiceMade"]);
+      }
+    },
+  );
+  it.each(["none", "discard"] as const)(
+    "supports %s without unrelated use/response dependencies",
+    (method) => {
+      const { game, rules, scheduler, policy } = setup({}, method);
+      const common = {
+        isAI: policy.isAI,
+        request: policy.request,
+        validateResponse: policy.validateResponse,
+        resolve: policy.resolve,
+        notify: policy.notify,
+      };
+      rules.operations![0] =
+        method === "none"
+          ? createAskCardNoneOperation(common)
+          : createAskCardDiscardOperation({
+              ...common,
+              discardZone: "discard",
+              limited: policy.limited,
+            });
+      if (method === "none") {
+        delete game.cardZones.table;
+        delete game.cardZones.discard;
+      }
+      dispatchTriggerOperation(
+        scheduler,
+        game,
+        rules,
+        { name: `ask-card-${method}`, data: request() },
+        "a",
+      );
+      expect(scheduler.operationCompletion?.value).toEqual(card());
+    },
+  );
+  it("uses post-choice discard materials with THROW, independently of request/card skill names", () => {
+    const { game, rules, scheduler } = setup({}, "discard");
+    game.catalog.Jink.card.skillName = "card-skill";
+    const moves: TriggerData[] = [];
+    rules.skills.push({
+      id: "discard-observer",
+      rule: true,
+      priority: 10,
+      events: ["ChoiceMade", "BeforeCardsMove"],
+      effect: ({ game, event }) => {
+        if (event.name === "ChoiceMade")
+          game.catalog.Jink.card.materialIDs = [2];
+        else if (event.target === "a") moves.push(structuredClone(event.data));
+        return { kind: "done", value: false };
+      },
+    });
+    dispatchTriggerOperation(
+      scheduler,
+      game,
+      rules,
+      { name: "ask-card-discard", data: request() },
+      "a",
+    );
+    expect(moves).toEqual([
+      {
+        moves: [
+          expect.objectContaining({
+            ids: [2],
+            to: "discard",
+            reason: { kind: "throw", actor: "b" },
+          }),
+        ],
+      },
+    ]);
+    expect(game.cardZones.hand.cards).toEqual([1]);
+    expect(game.trace).toContainEqual({
+      operation: "notice-fixture",
+      data: {
+        kind: "accepted",
+        actor: "b",
+        card: { ...card(), card: { ...card().card, skillName: "card-skill" } },
+        context: {
+          method: "discard",
+          skillName: "fixture-skill",
+          isRetrial: false,
+        },
+      },
+    });
+  });
+  it.each(["none", "discard"] as const)(
+    "accepts zero-material %s without movement or hooks",
+    (method) => {
+      const { game, rules, scheduler } = setup({}, method);
+      game.reply = game.catalog.Jink = card("Jink", []);
+      dispatchTriggerOperation(
+        scheduler,
+        game,
+        rules,
+        {
+          name: `ask-card-${method}`,
+          data: { ...request(), pattern: "slash" },
+        },
+        "a",
+      );
+      expect(game.cardZones.hand.cards).toEqual([1, 2]);
+      expect(scheduler.operationCompletion?.value).toEqual(card("Jink", []));
+      expect(events(game)).toEqual(["ChoiceMade"]);
+    },
+  );
+  it.each(["ChoiceMade", "BeforeCardsMove", "CardsMoveOneTime"])(
+    "restores direct discard at %s without repeating payment",
+    (pause) => {
+      const state = setup({}, "discard");
+      const { rules } = state;
+      let { game, scheduler } = state;
+      rules.skills.push({
+        id: "pause-discard",
+        rule: true,
+        priority: 50,
+        events: [pause],
+        effect: ({ continuation }) =>
+          continuation === null
+            ? {
+                kind: "prompt",
+                actor: "b",
+                choices: ["go"],
+                canCancel: false,
+                continuation: true,
+              }
+            : { kind: "done", value: false },
+      });
+      dispatchTriggerOperation(
+        scheduler,
+        game,
+        rules,
+        { name: "ask-card-discard", data: request() },
+        "a",
+      );
+      let pauses = 0;
+      while (scheduler.prompt) {
+        expect(++pauses).toBeLessThan(4);
+        ({ game, scheduler } = JSON.parse(JSON.stringify({ game, scheduler })));
+        const view = getTriggerPrompt(scheduler, "b")!;
+        expect(
+          resumeTriggerPrompt(scheduler, game, rules, "b", {
+            id: view.id,
+            choice: "go",
+          }),
+        ).toBe(true);
+      }
+      expect(pauses).toBeGreaterThan(0);
+      expect(game.cardZones.discard.cards).toEqual([1]);
+      expect(game.requests).toHaveLength(1);
+      expect(game.trace.filter((item) => item === "validate")).toHaveLength(1);
+    },
+  );
+  it.each(["none", "discard"] as const)(
+    "owns the distinct %s selection lifecycle",
+    (method) => {
+      const { game, rules, scheduler } = setup({}, method);
+      dispatchTriggerOperation(
+        scheduler,
+        game,
+        rules,
+        { name: `ask-card-${method}`, data: request() },
+        "a",
+      );
+      expect(events(game)).toEqual(["ChoiceMade"]);
+      expect(game.currentCardUseReason).toBe("unknown");
+      expect(game.cardZones.table.cards).toEqual([]);
+      expect(game.cardZones.discard.cards).toEqual(
+        method === "discard" ? [1] : [],
+      );
+      expect(scheduler.operationCompletion?.value).toEqual(card());
+      expect(
+        game.trace.filter(
+          (item) =>
+            typeof item === "object" &&
+            item !== null &&
+            !Array.isArray(item) &&
+            [
+              "reveal-fixture",
+              "after-fixture",
+              "response-after-fixture",
+            ].includes(String(item.operation)),
+        ),
+      ).toHaveLength(0);
+    },
+  );
+});
 describe("direct MethodResponse askForCard", () => {
   it("pays and discards with response actor/skill metadata through real movement events", () => {
     const { game, rules, scheduler } = setup({}, "response");
@@ -378,7 +665,7 @@ describe("direct MethodResponse askForCard", () => {
       const data = {
         ...request(),
         ...(variant === "retrial"
-          ? { isRetrial: true }
+          ? { isRetrial: "invalid" }
           : variant === "actor"
             ? { actor: "unknown" }
             : variant === "target"
@@ -1106,7 +1393,7 @@ describe("direct MethodUse askForCard", () => {
         ...(variant === "use"
           ? { pattern: "slash" }
           : variant === "retrial"
-            ? { isRetrial: true }
+            ? { isRetrial: "invalid" }
             : variant === "actor"
               ? { actor: "unknown" }
               : variant === "target"
