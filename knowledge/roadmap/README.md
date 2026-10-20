@@ -2,7 +2,7 @@
 
 ## Engine
 
-See the [current Hegemony port plan](../plans/hegemony-port.md) for completed library boundaries and remaining production gates. Parts 4y/4z provide the [SkillCard envelope](../engine/skill-card-on-use.md) and [shared GameRule/resources/effects](../engine/skill-card-execution.md). Part 4aa adds the [normal Room wrapper and authoritative Play/targetful response-use gateway](../engine/room-use-and-admission.md). Next complete the distinct direct MethodUse/MethodResponse/askForCard and rescue entries, then phase/unwind and live package/application integration. This checkpoint does not enable production SkillCards.
+See the [current Hegemony port plan](../plans/hegemony-port.md) for completed library boundaries and remaining production gates. Parts 4y/4z provide the [SkillCard envelope](../engine/skill-card-on-use.md) and [shared GameRule/resources/effects](../engine/skill-card-execution.md). Part 4aa adds the [normal Room wrapper and authoritative Play/targetful response-use gateway](../engine/room-use-and-admission.md). Part 4ab.1 adds [MethodUse CardAsked/provide/acquisition/retry and direct execution](../engine/direct-card-use.md). Next complete MethodResponse and its request composition, explicitly scoped remaining methods/retrial and rescue integration, then phase/unwind and live package/application integration. These checkpoints do not enable production SkillCards.
 
 ## Knowledge migration
 

@@ -3,6 +3,7 @@
 These reports preserve particular source snapshots, adapters and executed checks. Read [current engine scope](../engine/overview.md) and the [roadmap](../roadmap/README.md) for present implementation boundaries. Earlier “next” statements and totals are historical.
 
 - [4aa: Room wrapper and authoritative command admission](2026-10-19-hegemony-part4aa.md)
+- [4ab.1: MethodUse CardAsked/provide/retry and direct response](2026-10-20-hegemony-part4ab1.md)
 - [Offer equality: key-order false rejection repair](2026-10-19-offer-equality-fix.md)
 - [Knowledge migration: local validation, reviews and publication boundary](2026-10-15-knowledge-migration.md)
 - [Raw SkillCard Nullification conversion repair (#18)](2026-10-16-nullification-skill-response.md)
