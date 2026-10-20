@@ -68,6 +68,18 @@ _Avoid_: Card reference
 The mutable face, flags and tags associated with a physical card while preserving that physical card's identity.
 _Avoid_: New physical card
 
+**Judgment**:
+A rule procedure that evaluates a judgment card against a pattern for a particular player and reason.
+_Avoid_: Card use
+
+**Retrial**:
+Replacement of a judgment card through a retrial effect, with the old card discarded or exchanged according to that effect.
+_Avoid_: Restarting a turn
+
+**Judgment result**:
+The good or bad classification of a judgment card under its pattern and good-condition rule; a negative judgment effect uses the inverse classification.
+_Avoid_: Card color alone
+
 **Dying player**:
 A player undergoing the nonpositive-HP rescue procedure before the corresponding death decision.
 _Avoid_: Dead player

@@ -1,4 +1,4 @@
-# Direct MethodUse and MethodResponse card requests
+# Direct card requests
 
 Part 4ab.1 adds `src/game/hegemony/ask-card-use.ts`: registered `ask-card-use` plus `provideCard`. Public regressions are in `tests/hegemony/ask-card-use.test.ts`, using real scheduler, movement, CardUsed/CardFinished GameRule and SlashProceed/JinkEffect/SlashResult composition. The [native investigation](../research/2026-10-20-direct-response-native.md) and [approved expanded scope](../research/2026-10-20-part4ab-response-matrix.md#approved-expansion-for-implementation) distinguish this entry from targetful [4aa requests](room-use-and-admission.md). Revision-specific checks and adapters are recorded in the [checkpoint](../reviews/2026-10-20-hegemony-part4ab1.md).
 
@@ -6,9 +6,9 @@ Part 4ab.2 adds a separate `createAskCardResponseOperation` factory registering 
 
 ## Acquisition and response validation
 
-This is a trusted internal MethodUse request: actor, pattern, prompt, request data, optional recipient represented as null or a known seat, skill name and provision option. It rejects the native forbidden MethodUse Slash pattern and unsupported method/retrial execution. It is not a client-facing card submission endpoint. Catalogue/ownership/skill/pattern admission and authenticated input remain responsibilities of the supplied request adapter.
+This is a trusted internal request: actor, pattern, prompt, request data, optional recipient represented as null or a known seat, skill name, provision option and optional retrial flag. MethodUse rejects the native forbidden bare Slash pattern. Part 4ab.3 adds separate None/Discard factories and retrial acquisition; their suppression rules and representative package composition are defined in [selection and retrial](retrial.md). This is not a client-facing card submission endpoint. Catalogue/ownership/skill/pattern admission and authenticated input remain responsibilities of the supplied request adapter.
 
-Each attempt delegates focus notification, sets private currentCardUsePattern and response-use reason, then emits CardAsked with only pattern/prompt unless the actor's continuing flag is set. CardAsked consumption and payload rewrites do not replace the captured request. Clear continuing before acquisition. A room-wide provided slot takes precedence over acquisition, including when the actor has died. If no provider and the actor is dead, take the no-card branch without calling the request adapter.
+Each attempt delegates focus notification, sets private currentCardUsePattern and method-specific reason, then emits CardAsked with only pattern/prompt for ordinary Use/Response unless continuing is set. Selection and retrial suppress CardAsked. Consumption and payload rewrites do not replace the captured request. Clear continuing before acquisition. A room-wide provided slot takes precedence over acquisition, including when the actor has died. If no provider and the actor is dead, take the no-card branch without calling the request adapter.
 
 `provideCard(game, card)` stores a private clone in the shared slot; explicit null still occupies it. Duplicate provision rejects even for null. Nested requests may consume the same room-wide slot. Consumption removes the slot before validation or subsequent children. Normalize the unsafe native null limitation path: a null provided/dead response emits nil ChoiceMade and returns null without invoking a limitation predicate on null.
 
@@ -16,7 +16,7 @@ Non-null provided/AI replies pass the supplied MethodUse limitation predicate be
 
 Private validateResponse receives the original parsed card and may return another registered response, a SkillCard or null. A null result retains eager effects, sets the actor's continuing flag, resets skillName to empty and provision to false, and retries the original other request fields. That next attempt skips CardAsked once, clears continuing before acquisition, and does not emit ChoiceMade or run an after-hook for the failed conversion. Nested room reason/pattern values are not restored by the outer ask.
 
-Both methods use this acquisition contract. MethodResponse sets response reason instead of response-use and accepts the bare Slash pattern. Its trusted request/limitation adapters must apply MethodResponse semantics. Calling either factory does not expose a client submission endpoint or grant package legality.
+Use/Response use this acquisition contract. MethodResponse sets response reason instead of response-use and accepts the bare Slash pattern. Its trusted request/limitation adapters must apply MethodResponse semantics. None/Discard use unknown reason; None bypasses the limitation predicate. Retry preserves retrial and resets skillName/provision. Shared `readResponse` and `resolveResponse` validate registered identity, apply copied-state metadata resolution without changing reference identity and refresh flags from the current resource ledger. Calling a factory does not expose a client submission endpoint or grant package legality.
 
 ## Direct use lifecycle
 
@@ -46,4 +46,4 @@ Request admission, actual package conversion, current reference metadata/subcard
 
 Registered child events and operations can suspend and restore JSON, including actual table/discard movement. Wrong actor, stale/replayed prompt and registry mismatch do not repeat work. Interruption retains eager state and freezes remaining frames under the current scheduler policy; no native exception unwind or rollback is added.
 
-MethodNone/Discard, retrial and actual SinglePeach → Room composition remain separate work. ArcheryAttack/Duel-shaped request/result fixtures establish MethodResponse caller contracts, not complete package handlers. Nullification keeps its race/counter lifecycle. Production still registers Standard2013; these library contracts do not establish a playable Quốc Chiến match or complete native parity.
+Part 4ab.3 supplies [MethodNone/Discard and normalized retrial](retrial.md), including actual Guicai/Guidao cost/reveal/effect composition. Actual SinglePeach → Room composition remains separate work. ArcheryAttack/Duel-shaped request/result fixtures establish MethodResponse caller contracts, not complete package handlers. Nullification keeps its race/counter lifecycle. Production still registers Standard2013; these library contracts do not establish a playable Quốc Chiến match or complete native parity.
