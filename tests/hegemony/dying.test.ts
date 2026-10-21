@@ -36,7 +36,11 @@ import {
   createDamageCompleteRule,
 } from "../../src/game/hegemony/damage-rule";
 import { createCardMovementOperation } from "../../src/game/hegemony/movement";
-import { createCardOnUseOperation } from "../../src/game/hegemony/card-on-use";
+import {
+  createCardOnUseOperation,
+  readExecutionCardUse,
+} from "../../src/game/hegemony/card-on-use";
+import { createSkillCardOnUseOperation } from "../../src/game/hegemony/skill-card-on-use";
 import {
   createCardUsedOperation,
   createCardUsedRule,
@@ -48,8 +52,15 @@ import {
   createCardEffectedRule,
 } from "../../src/game/hegemony/card-effected";
 import { createCardFinishedRule } from "../../src/game/hegemony/card-resources";
+import type { CardUseResourceRules } from "../../src/game/hegemony/card-resources";
 import type { SlashCard } from "../../src/game/hegemony/slash";
-type Game = DyingGame & { seen: TriggerEvent[] };
+import type {
+  RoomUseGame,
+  RoomUseRules,
+} from "../../src/game/hegemony/room-use-card";
+import { peachRoomOperations } from "./fixtures/peach-room";
+type Game = DyingGame &
+  RoomUseGame & { seen: TriggerEvent[]; currentCardUsePattern?: string };
 function fixture(): Game {
   return {
     seatOrder: ["a", "b", "c"],
@@ -62,6 +73,7 @@ function fixture(): Game {
     damageStack: [],
     playerMarks: { a: {}, b: {}, c: {} },
     playerFlags: { a: [], b: [], c: [] },
+    playerHistory: { a: {}, b: {}, c: {} },
     currentdying: { a: "", b: "previous", c: "" },
     cardZones: {},
     cardResources: {
@@ -125,6 +137,7 @@ describe("Hegemony dying lifecycle", () => {
     });
     rules.operations!.push(
       createSinglePeachOperation({
+        resolve: (_, card) => card,
         request: (request) => ({ name: "reply", data: request }),
         isLimited: () => false,
         cardString: () => "peach:ref",
@@ -132,12 +145,15 @@ describe("Hegemony dying lifecycle", () => {
           name: "validate",
           data: { saver, reply },
         }),
-        use: (use, addHistory) => ({ name: "use", data: { use, addHistory } }),
         validateAfter: (saver, original) => ({
           name: "after",
           data: { saver, original },
         }),
       }),
+      ...peachRoomOperations<Game>(({ use }) => ({
+        name: "use",
+        data: { use, addHistory: false },
+      })),
       {
         name: "reply",
         run: () => ({ kind: "return", value: response("parsed") }),
@@ -194,6 +210,7 @@ describe("Hegemony dying lifecycle", () => {
       "a",
     );
     expect(game.hp.b).toBe(1);
+    expect(game.playerHistory.c).toEqual({});
     expect(game.currentCardUseReason).toBe("response-use");
     expect(game.seen.find((e) => e.name === "after")?.data).toMatchObject({
       saver: "c",
@@ -380,10 +397,12 @@ function fullRegistry(
   options: {
     rescue?: Partial<RescueRules<Game>>;
     single?: Partial<SinglePeachRules<Game>>;
+    room?: Partial<RoomUseRules<Game>>;
+    resources?: CardUseResourceRules;
   } = {},
 ): TriggerRegistry<Game> {
   const rules = registry(),
-    resources = {
+    resources = options.resources ?? {
       reference: (use: { card: { materialIDs: number[] } }) =>
         `peach${use.card.materialIDs[0] ?? 0}`,
     };
@@ -404,6 +423,7 @@ function fullRegistry(
     }),
     createRecoveryOperation(),
     createSinglePeachOperation({
+      resolve: (_, card) => card,
       request: (data) => ({ name: "reply", data }),
       isLimited: () => false,
       cardString: (_, card) => card.reference,
@@ -411,16 +431,16 @@ function fullRegistry(
         name: "validate",
         data: { saver, card },
       }),
-      use: (use, addHistory) => ({
-        name: "use-peach",
-        data: { use, addHistory },
-      }),
       validateAfter: (saver, original) => ({
         name: "after",
         data: { saver, original },
       }),
       ...options.single,
     }),
+    ...peachRoomOperations<Game>(
+      ({ use }) => ({ name: "use-peach", data: { use } }),
+      options.room,
+    ),
     {
       name: "reply",
       run: ({ game, operation }) => {
@@ -452,7 +472,7 @@ function fullRegistry(
     },
     {
       name: "use-peach",
-      run: ({ operation, continuation }) => {
+      run: ({ game, operation, continuation }) => {
         if (continuation !== null) return { kind: "return", value: null };
         if (
           !operation.data ||
@@ -460,9 +480,14 @@ function fullRegistry(
           Array.isArray(operation.data)
         )
           throw new Error("Expected use fixture");
+        const use = readExecutionCardUse(game, operation.data.use);
         return {
           kind: "operation",
-          operation: { name: "card-on-use", data: operation.data.use },
+          operation: {
+            name:
+              use.card.type === "skill" ? "skill-card-on-use" : "card-on-use",
+            data: use,
+          },
           continuation: true,
         };
       },
@@ -495,6 +520,20 @@ function fullRegistry(
     },
     createCardMovementOperation(),
     createCardOnUseOperation({ tableZone: "table", discardZone: "discard" }),
+    createSkillCardOnUseOperation({
+      tableZone: "table",
+      discardZone: "discard",
+      extraCost: () => null,
+      showSkill: () => ({ name: "skill-notice", data: null }),
+      afterShow: () => ({ name: "skill-notice", data: null }),
+      notifyUse: () => ({ name: "skill-notice", data: null }),
+      generalName: () => "",
+      cardState: (_, card) => ({
+        flags: card.flags,
+        materialIDs: card.materialIDs,
+      }),
+    }),
+    { name: "skill-notice", run: () => ({ kind: "return", value: null }) },
     createCardUsedOperation({
       resources,
       use: (data) => ({ name: "card-use", data }),
@@ -895,6 +934,29 @@ describe("Rescue rules and recovery", () => {
 });
 
 describe("Single Peach response and full damage composition", () => {
+  it.each(["raw", "validated"])(
+    "accepts a %s SkillCard through actual Room and the rescue result gate",
+    (kind) => {
+      const game = prepared(),
+        raw = peach("parsed"),
+        accepted = peach();
+      Object.assign((kind === "raw" ? raw : accepted).card, {
+        type: "skill",
+        skillPosition: "",
+        showSkill: "",
+        willThrow: false,
+      });
+      game.hp.b = 0;
+      game.cardResources.roomTags.answers = [raw];
+      game.cardResources.roomTags.validations = [accepted];
+      run(game, fullRegistry(), "ask-for-peaches", {
+        target: "c",
+        data: { who: "b", damage: null },
+      });
+      expect(game.hp.b).toBe(1);
+      expect(game.seen.filter((e) => e.name === "after")).toHaveLength(1);
+    },
+  );
   it.each([null, peach()])(
     "emits refusal for null or limited response without validation/use: %s",
     (reply) => {
@@ -955,11 +1017,36 @@ describe("Single Peach response and full damage composition", () => {
     });
     expect(scheduler.operationCompletion?.value).toMatchObject({
       reference: "peach0",
-      card: { flags: ["keep", "UsedBySecondWay"] },
+      card: { flags: [] },
     });
     expect(game.seen.find((e) => e.name === "after")?.data).toMatchObject({
       saver: "c",
       original: { reference: "parsed" },
+    });
+  });
+  it("returns current accepted flags after Room CardFinished cleanup", () => {
+    const game = prepared();
+    game.cardResources.roomTags.answers = [peach()];
+    const rules = fullRegistry();
+    rules.skills.push({
+      id: "post-finish-flags",
+      events: ["CardFinished"],
+      priority: -1,
+      rule: true,
+      effect: ({ game }) => {
+        const resource = game.cardResources.cards.peach0;
+        if (resource.kind !== "virtual") throw new Error("Expected virtual");
+        resource.flags = ["after-finish"];
+        return { kind: "done", value: false };
+      },
+    });
+    const scheduler = run(game, rules, "ask-single-peach", {
+      saver: "c",
+      who: "b",
+    });
+    expect(scheduler.operationCompletion?.value).toMatchObject({
+      reference: "peach0",
+      card: { flags: ["after-finish"] },
     });
   });
   it.each([
@@ -1361,60 +1448,73 @@ describe("Dying boundaries and continuation safety", () => {
     expect(game.hp.b).toBe(0);
     expect(game.seen.filter((e) => e.name === "request")).toHaveLength(2);
   });
-  it.each(["reply", "validate", "use-peach", "after"])(
-    "resumes JSON at response child %s with exact-once use",
-    (name) => {
-      let game = prepared();
-      game.cardResources.roomTags.answers = [peach()];
-      const rules = fullRegistry();
-      const original = rules.operations!.find((op) => op.name === name)!;
-      rules.operations = rules.operations!.map((op) =>
-        op.name !== name
-          ? op
-          : {
-              ...op,
-              run: (context) =>
-                context.continuation === null
-                  ? {
-                      kind: "prompt",
-                      actor: "c",
-                      choices: ["continue"],
-                      canCancel: false,
-                      continuation: { stage: "resume" },
-                    }
-                  : original.run({
-                      ...context,
-                      continuation:
-                        context.continuation &&
-                        typeof context.continuation === "object" &&
-                        !Array.isArray(context.continuation) &&
-                        context.continuation.stage === "resume"
-                          ? null
-                          : context.continuation,
-                    }),
-            },
-      );
-      let scheduler = run(game, rules, "ask-single-peach", {
-        saver: "c",
-        who: "b",
-      });
-      const prompt = getTriggerPrompt(scheduler, "c")!;
-      expect(prompt).not.toBeNull();
-      ({ game, scheduler } = JSON.parse(JSON.stringify({ game, scheduler })));
-      expect(
-        resumeTriggerPrompt(scheduler, game, rules, "c", {
-          id: prompt.id,
-          choice: "continue",
-        }),
-      ).toBe(true);
-      expect(game.hp.b).toBe(0);
-      expect(game.seen.filter((e) => e.name === "after")).toHaveLength(1);
-      expect(game.seen.filter((e) => e.name === "CardFinished")).toHaveLength(
-        1,
-      );
-      expect(scheduler.frames).toEqual([]);
-    },
-  );
+  it.each([
+    "reply",
+    "validate",
+    "room-validate-fixture",
+    "use-peach",
+    "room-after-fixture",
+    "after",
+  ])("resumes JSON at response child %s with exact-once use", (name) => {
+    let game = prepared();
+    game.cardResources.roomTags.answers = [peach()];
+    const rules = fullRegistry();
+    const original = rules.operations!.find((op) => op.name === name)!;
+    rules.operations = rules.operations!.map((op) =>
+      op.name !== name
+        ? op
+        : {
+            ...op,
+            run: (context) =>
+              context.continuation === null
+                ? {
+                    kind: "prompt",
+                    actor: "c",
+                    choices: ["continue"],
+                    canCancel: false,
+                    continuation: { stage: "resume" },
+                  }
+                : original.run({
+                    ...context,
+                    continuation:
+                      context.continuation &&
+                      typeof context.continuation === "object" &&
+                      !Array.isArray(context.continuation) &&
+                      context.continuation.stage === "resume"
+                        ? null
+                        : context.continuation,
+                  }),
+          },
+    );
+    let scheduler = run(game, rules, "ask-single-peach", {
+      saver: "c",
+      who: "b",
+    });
+    const prompt = getTriggerPrompt(scheduler, "c")!;
+    expect(prompt).not.toBeNull();
+    const before = structuredClone({ game, scheduler });
+    expect(
+      resumeTriggerPrompt(
+        scheduler,
+        game,
+        { ...rules, version: "obsolete" },
+        "c",
+        { id: prompt.id, choice: "continue" },
+      ),
+    ).toBe(false);
+    expect({ game, scheduler }).toEqual(before);
+    ({ game, scheduler } = JSON.parse(JSON.stringify({ game, scheduler })));
+    expect(
+      resumeTriggerPrompt(scheduler, game, rules, "c", {
+        id: prompt.id,
+        choice: "continue",
+      }),
+    ).toBe(true);
+    expect(game.hp.b).toBe(0);
+    expect(game.seen.filter((e) => e.name === "after")).toHaveLength(1);
+    expect(game.seen.filter((e) => e.name === "CardFinished")).toHaveLength(1);
+    expect(scheduler.frames).toEqual([]);
+  });
   it.each(["turn-broken", "stage-change", "game-over"] as const)(
     "freezes the active saver property and dying tag at %s",
     (reason) => {
@@ -1428,6 +1528,369 @@ describe("Dying boundaries and continuation safety", () => {
       expect(game.playerFlags.b).toEqual(["Global_Dying"]);
       expect(game.cardResources.roomTags.CurrentDying).toEqual(["b"]);
       expect(game.seen.filter((e) => e.name === "QuitDying")).toEqual([]);
+    },
+  );
+});
+
+describe("SinglePeach through actual Room wrapper", () => {
+  it.each(["limited", "validation-null"])(
+    "keeps nonnull response and raw after-hook when Room returns false: %s",
+    (mode) => {
+      const game = prepared();
+      game.cardResources.roomTags.answers = [peach("parsed")];
+      game.cardResources.roomTags.validations = [peach()];
+      const rules = fullRegistry({
+        room: {
+          limited: () => mode === "limited",
+          validate: (data) => ({ name: "reject-room", data }),
+        },
+      });
+      rules.operations!.push({
+        name: "reject-room",
+        run: () => ({ kind: "return", value: null }),
+      });
+      const scheduler = run(game, rules, "ask-single-peach", {
+        saver: "c",
+        who: "b",
+      });
+      expect(scheduler.operationCompletion?.value).toMatchObject({
+        reference: "peach0",
+        card: { flags: ["UsedBySecondWay"] },
+      });
+      expect(game.hp.b).toBe(-1);
+      expect(
+        game.seen.filter((e) => e.name === "after").map((e) => e.data),
+      ).toMatchObject([{ saver: "c", original: { reference: "parsed" } }]);
+      expect(game.seen.filter((e) => e.name === "CardFinished")).toEqual([]);
+      expect(game.playerHistory.c).toEqual({});
+    },
+  );
+  it("asks again after an ineffective nonnull Room result and stops at refusal", () => {
+    const game = prepared();
+    game.cardResources.roomTags.answers = [peach(), null];
+    const rules = fullRegistry({ room: { limited: () => true } });
+    run(game, rules, "ask-for-peaches", {
+      target: "c",
+      data: { who: "b", damage: null },
+    });
+    expect(game.hp.b).toBe(-1);
+    expect(game.seen.filter((e) => e.name === "request")).toHaveLength(2);
+    expect(game.seen.filter((e) => e.name === "after")).toHaveLength(1);
+    expect(
+      game.seen.filter((e) => e.name === "ChoiceMade").map((e) => e.data),
+    ).toEqual(["peach:b:2:peach0", "peach:b:2:"]);
+  });
+  it("keeps accepted/raw identities separate from Room conversion and its default child history", () => {
+    const game = prepared();
+    game.cardResources.roomTags.answers = [peach("parsed")];
+    game.cardResources.roomTags.validations = [peach()];
+    const rules = fullRegistry({
+      room: {
+        validate: (data) => ({ name: "convert-room", data }),
+        after: (data) => ({ name: "room-hook", data }),
+      },
+    });
+    rules.operations!.push(
+      {
+        name: "convert-room",
+        run: ({ game, operation }) => {
+          const data =
+            operation.data as import("../../src/game/hegemony/room-use-card").RoomCardUse;
+          game.seen.push({ name: "room-validation", target: null, data });
+          return {
+            kind: "return",
+            value: {
+              entry: data,
+              validated:
+                data.reference === "peach0"
+                  ? {
+                      reference: "peach1",
+                      use: { ...data.use, card: peach("peach1", [1]).card },
+                    }
+                  : data,
+            },
+          };
+        },
+      },
+      {
+        name: "room-hook",
+        run: ({ game, operation }) => {
+          game.seen.push({
+            name: "room-after",
+            target: null,
+            data: operation.data,
+          });
+          return { kind: "return", value: null };
+        },
+      },
+    );
+    const scheduler = run(game, rules, "ask-single-peach", {
+      saver: "c",
+      who: "b",
+    });
+    expect(game.hp.b).toBe(0);
+    expect(game.cardZones.discard.cards).toEqual([1]);
+    expect(game.playerHistory.c).toEqual({ Peach: 1 });
+    expect(scheduler.operationCompletion?.value).toMatchObject({
+      reference: "peach0",
+    });
+    expect(
+      game.seen.filter((e) => e.name === "room-validation").map((e) => e.data),
+    ).toMatchObject([
+      { reference: "peach0", use: { m_addHistory: false, m_isOwnerUse: true } },
+      { reference: "peach1" },
+    ]);
+    expect(
+      game.seen.filter((e) => e.name === "room-after").map((e) => e.data),
+    ).toMatchObject([{ reference: "peach1" }, { reference: "peach0" }]);
+    expect(
+      game.seen
+        .filter((e) => e.name === "room-after" || e.name === "after")
+        .map((e) => e.name),
+    ).toEqual(["room-after", "room-after", "after"]);
+    expect(game.seen.find((e) => e.name === "after")?.data).toMatchObject({
+      original: { reference: "parsed" },
+    });
+  });
+  it("resolves current payment materials after ChoiceMade and raw metadata before its response after-hook", () => {
+    const game = prepared();
+    game.cardResources.roomTags.answers = [peach("parsed")];
+    game.cardResources.roomTags.validations = [peach()];
+    const rules = fullRegistry({
+      resources: { reference: () => "peach0" },
+      single: {
+        resolve: (g, card) =>
+          card.reference === "peach0" && g.cardResources.roomTags.changed
+            ? { ...card, card: { ...card.card, materialIDs: [2] } }
+            : card,
+      },
+    });
+    hook(rules, "ChoiceMade", ({ game }) => {
+      game.cardResources.roomTags.changed = true;
+      return { kind: "done", value: false };
+    });
+    rules.skills.push({
+      id: "raw-metadata",
+      events: ["CardFinished"],
+      priority: -1,
+      rule: true,
+      effect: ({ game }) => {
+        const raw = game.cardResources.cards.parsed;
+        if (raw.kind !== "virtual") throw new Error("Expected virtual");
+        raw.flags = ["raw-after-room"];
+        return { kind: "done", value: false };
+      },
+    });
+    const scheduler = run(game, rules, "ask-single-peach", {
+      saver: "c",
+      who: "b",
+    });
+    expect(game.cardZones.hand.cards).toEqual([1]);
+    expect(game.cardZones.discard.cards).toEqual([2]);
+    expect(scheduler.operationCompletion?.value).toMatchObject({
+      reference: "peach0",
+      card: { materialIDs: [2], flags: [] },
+    });
+    expect(game.seen.find((e) => e.name === "after")?.data).toMatchObject({
+      original: { reference: "parsed", card: { flags: ["raw-after-room"] } },
+    });
+  });
+  it("uses the exact physical wrapped reference through Room parse/update and cleanup", () => {
+    const game = prepared();
+    game.cardResources.cards.peach1 = {
+      kind: "wrapped",
+      id: 1,
+      key: "1",
+      isSlash: false,
+      isNDTrick: false,
+    };
+    game.wrappedCards = {
+      1: {
+        name: "peach",
+        className: "Peach",
+        suit: "heart",
+        number: 3,
+        skillName: "",
+        modified: false,
+        flags: ["keep"],
+        tags: { retained: true },
+      },
+    };
+    game.cardResources.roomTags.answers = [peach("peach1", [1])];
+    const rules = fullRegistry({
+      room: {
+        parse: (g, data) => {
+          expect(data.reference).toBe("peach1");
+          expect(g.wrappedCards![1].flags).toEqual(["keep", "UsedBySecondWay"]);
+          return data;
+        },
+      },
+    });
+    const scheduler = run(game, rules, "ask-single-peach", {
+      saver: "c",
+      who: "b",
+    });
+    expect(game.hp.b).toBe(0);
+    expect(game.cardZones.discard.cards).toEqual([1]);
+    expect(game.wrappedCards[1].tags).toMatchObject({ retained: true });
+    expect(scheduler.operationCompletion?.value).toMatchObject({
+      reference: "peach1",
+      card: { flags: [] },
+    });
+  });
+  it.each(["BeforeCardsMove", "CardsMoveOneTime"])(
+    "restores real table/discard movement at %s without paying or healing twice",
+    (event) => {
+      let game = prepared();
+      game.cardResources.roomTags.answers = [peach("peach1", [1])];
+      const rules = fullRegistry();
+      hook(rules, event, ({ event: current, continuation }) =>
+        current.target !== "c"
+          ? { kind: "done", value: false }
+          : continuation === null
+            ? {
+                kind: "prompt",
+                actor: "c",
+                choices: ["go"],
+                canCancel: false,
+                continuation: true,
+              }
+            : { kind: "done", value: false },
+      );
+      let scheduler = run(game, rules, "ask-single-peach", {
+          saver: "c",
+          who: "b",
+        }),
+        pauses = 0;
+      while (getTriggerPrompt(scheduler, "c")) {
+        const prompt = getTriggerPrompt(scheduler, "c")!;
+        ({ game, scheduler } = JSON.parse(JSON.stringify({ game, scheduler })));
+        expect(
+          resumeTriggerPrompt(scheduler, game, rules, "c", {
+            id: prompt.id,
+            choice: "go",
+          }),
+        ).toBe(true);
+        const after = structuredClone({ game, scheduler });
+        expect(
+          resumeTriggerPrompt(scheduler, game, rules, "c", {
+            id: prompt.id,
+            choice: "go",
+          }),
+        ).toBe(false);
+        expect({ game, scheduler }).toEqual(after);
+        if (++pauses > 2) throw new Error("Repeated payment");
+      }
+      expect(pauses).toBe(2);
+      expect(game.hp.b).toBe(0);
+      expect(game.cardZones.discard.cards).toEqual([1]);
+      expect(game.seen.filter((e) => e.name === "after")).toHaveLength(1);
+      expect(game.playerHistory.c).toEqual({});
+    },
+  );
+  it.each(["turn-broken", "stage-change", "game-over"] as const)(
+    "retains actual paid state without response after-hook on %s",
+    (reason) => {
+      const game = prepared();
+      game.cardResources.roomTags.answers = [peach("peach1", [1])];
+      const rules = fullRegistry();
+      hook(rules, "PreHpRecover", () => ({ kind: "interrupt", reason }));
+      const scheduler = run(game, rules, "ask-single-peach", {
+        saver: "c",
+        who: "b",
+      });
+      expect(scheduler.interruption?.reason).toBe(reason);
+      expect(game.cardZones.table.cards).toEqual([1]);
+      expect(game.hp.b).toBe(-1);
+      expect(game.seen.filter((e) => e.name === "after")).toEqual([]);
+      expect(game.playerHistory.c).toEqual({});
+    },
+  );
+});
+
+describe("SinglePeach current private metadata", () => {
+  it("refreshes the accepted descriptor after the original response after-hook", () => {
+    const game = prepared();
+    game.cardResources.roomTags.answers = [peach()];
+    const rules = fullRegistry({
+      single: {
+        validateAfter: (_, original) => ({
+          name: "late-response-hook",
+          data: original,
+        }),
+      },
+    });
+    rules.operations!.push({
+      name: "late-response-hook",
+      run: ({ game }) => {
+        const accepted = game.cardResources.cards.peach0;
+        if (accepted.kind !== "virtual") throw new Error("Expected virtual");
+        accepted.flags = ["after-response-hook"];
+        return { kind: "return", value: null };
+      },
+    });
+    const scheduler = run(game, rules, "ask-single-peach", {
+      saver: "c",
+      who: "b",
+    });
+    expect(scheduler.operationCompletion?.value).toMatchObject({
+      reference: "peach0",
+      card: { flags: ["after-response-hook"] },
+    });
+  });
+  it("isolates metadata authority mutations from the game and does not overwrite current-card pattern", () => {
+    const game = prepared();
+    game.currentCardUsePattern = "preserved-pattern";
+    game.cardResources.roomTags.answers = [peach()];
+    const rules = fullRegistry({
+      single: {
+        resolve: (copy, card) => {
+          copy.hp.b = 88;
+          return card;
+        },
+      },
+    });
+    run(game, rules, "ask-single-peach", { saver: "c", who: "b" });
+    expect(game.hp.b).toBe(0);
+    expect(game.playerHistory.c).toEqual({});
+    expect(game.currentCardUsePattern).toBe("preserved-pattern");
+  });
+  it("rejects metadata resolution that substitutes another registered identity", () => {
+    const game = prepared();
+    game.cardResources.roomTags.answers = [peach()];
+    const rules = fullRegistry({
+      single: { resolve: (_, card) => ({ ...card, reference: "peach1" }) },
+    });
+    expect(() =>
+      run(game, rules, "ask-single-peach", { saver: "c", who: "b" }),
+    ).toThrow("Changed response identity");
+    expect(game.hp.b).toBe(-1);
+    expect(game.cardZones.hand.cards).toEqual([1, 2]);
+  });
+  it.each(["healthy", "dead"])(
+    "still enters Room after ChoiceMade makes the captured target %s",
+    (state) => {
+      const game = prepared();
+      game.cardResources.roomTags.answers = [peach("peach1", [1])];
+      const rules = fullRegistry();
+      hook(rules, "ChoiceMade", ({ game, event }) => {
+        if (state === "healthy") game.hp.b = 4;
+        else game.alive.b = false;
+        game.cardResources.roomTags.CurrentDying = ["a"];
+        event.data = "peach:a:1:unrelated";
+        return { kind: "done", value: true };
+      });
+      const scheduler = run(game, rules, "ask-single-peach", {
+        saver: "c",
+        who: "b",
+      });
+      expect(game.cardZones.discard.cards).toEqual([1]);
+      expect(game.seen.filter((e) => e.name === "after")).toHaveLength(1);
+      expect(scheduler.operationCompletion?.value).toMatchObject({
+        reference: "peach1",
+      });
+      expect(game.hp.a).toBe(4);
+      expect(game.hp.b).toBe(state === "healthy" ? 4 : -1);
     },
   );
 });

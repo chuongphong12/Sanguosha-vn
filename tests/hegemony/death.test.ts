@@ -20,6 +20,7 @@ import {
 } from "../../src/game/hegemony/dying-rule";
 import { createSinglePeachOperation } from "../../src/game/hegemony/peach-response";
 import { createRecoveryOperation } from "../../src/game/hegemony/recovery";
+import { peachRoomOperations } from "./fixtures/peach-room";
 import {
   createGetWinnerOperation,
   createBeforeGameOverJudgeOperation,
@@ -341,14 +342,12 @@ function damageRegistry(): TriggerRegistry<Game> {
       }),
     }),
     createSinglePeachOperation({
+      resolve: (_, card) => card,
       request: (data) => ({ name: "refuse-peach", data }),
       isLimited: () => false,
       cardString: (_, card) => card.reference,
       validateResponse: () => {
         throw new Error("refusal has no validation");
-      },
-      use: () => {
-        throw new Error("refusal has no use");
       },
       validateAfter: () => {
         throw new Error("refusal has no after");
@@ -1550,6 +1549,7 @@ describe("Damage/rescue/death composition and serialized continuations", () => {
     rules.operations.push(
       createRecoveryOperation(),
       createSinglePeachOperation({
+        resolve: (_, card) => card,
         request: (data) => ({ name: "rescue-reply", data }),
         isLimited: () => false,
         cardString: (_, card) => card.reference,
@@ -1557,9 +1557,12 @@ describe("Damage/rescue/death composition and serialized continuations", () => {
           name: "rescue-validate",
           data: card,
         }),
-        use: (use) => ({ name: "rescue-use", data: use }),
         validateAfter: () => ({ name: "rescue-after", data: null }),
       }),
+      ...peachRoomOperations<Game>(({ use }) => ({
+        name: "rescue-use",
+        data: use,
+      })),
       {
         name: "rescue-reply",
         run: () => ({ kind: "return", value: response }),

@@ -1,5 +1,5 @@
 import { readCardReference } from "./card-resources";
-import type { CardUse } from "./card-on-use";
+import { resolveResponse } from "./ask-card-use";
 import { dyingPlayer, type DyingGame } from "./dying";
 import { rescueBoolean, type PeachRequest } from "./dying-rule";
 import { readSlashCard, readSlashInteger, type SlashCard } from "./slash";
@@ -17,7 +17,9 @@ export interface SinglePeachRules<G extends DyingGame> {
   isLimited: (game: Readonly<G>, saver: string, card: SlashCard) => boolean;
   validateResponse: (saver: string, card: SlashCard) => TriggerOperation;
   cardString: (game: Readonly<G>, card: SlashCard) => string;
-  use: (use: CardUse, addHistory: false) => TriggerOperation;
+  /** Current private descriptor/material authority; reference identity must not change. */
+  resolve: (game: Readonly<G>, card: SlashCard) => SlashCard;
+  /** Original parsed card's validateInResponseAfter, distinct from Room validateAfter. */
   validateAfter: (saver: string, original: SlashCard) => TriggerOperation;
 }
 function requestInput(game: DyingGame, value: TriggerData): PeachRequest {
@@ -52,6 +54,8 @@ function runSingle<G extends DyingGame>(
           validated: null,
         }
       : (structuredClone(continuation) as Cursor);
+  const current = (card: SlashCard) =>
+    resolveResponse(game, cursor.request.saver, card, rules.resolve);
   if (continuation === null) {
     game.currentCardUseReason = "response-use";
     return {
@@ -65,10 +69,8 @@ function runSingle<G extends DyingGame>(
   }
   if (cursor.stage === "reply") {
     if (operationChild!.value !== null) {
-      cursor.original = readSlashCard(
-        game,
-        operationChild!.value,
-        cursor.request.saver,
+      cursor.original = current(
+        readSlashCard(game, operationChild!.value, cursor.request.saver),
       );
       if (
         !rescueBoolean(
@@ -115,10 +117,8 @@ function runSingle<G extends DyingGame>(
         continuation: cursor,
       };
     }
-    cursor.validated = readSlashCard(
-      game,
-      operationChild!.value,
-      cursor.request.saver,
+    cursor.validated = current(
+      readSlashCard(game, operationChild!.value, cursor.request.saver),
     );
     const encoded = rules.cardString(
       structuredClone(game),
@@ -142,18 +142,26 @@ function runSingle<G extends DyingGame>(
     const { storage } = readCardReference(game, cursor.validated.reference);
     if (!storage.flags.includes("UsedBySecondWay"))
       storage.flags.push("UsedBySecondWay");
-    cursor.validated.card.flags = [...storage.flags];
+    cursor.validated = current(cursor.validated);
     cursor.stage = "used";
     return {
       kind: "operation",
-      operation: rules.use(
-        {
-          from: cursor.request.saver,
-          to: [cursor.request.who],
-          card: structuredClone(cursor.validated.card),
+      operation: {
+        name: "room-use-card",
+        data: {
+          reference: cursor.validated.reference,
+          addHistory: false,
+          use: {
+            from: cursor.request.saver,
+            to: [cursor.request.who],
+            card: structuredClone(cursor.validated.card),
+            m_isOwnerUse: true,
+            m_addHistory: true,
+            nullified_list: [],
+            disresponsive_list: [],
+          },
         },
-        false,
-      ),
+      },
       continuation: cursor,
     };
   }
@@ -163,12 +171,12 @@ function runSingle<G extends DyingGame>(
       kind: "operation",
       operation: rules.validateAfter(
         cursor.request.saver,
-        structuredClone(cursor.original!),
+        current(cursor.original!),
       ),
       continuation: cursor,
     };
   }
-  return { kind: "return", value: cursor.validated };
+  return { kind: "return", value: current(cursor.validated!) };
 }
 export function createSinglePeachOperation<G extends DyingGame>(
   rules: SinglePeachRules<G>,
