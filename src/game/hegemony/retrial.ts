@@ -24,8 +24,11 @@ export type JudgeState = {
   play_animation: boolean;
   result: "unknown" | "good" | "bad";
 };
+export type PendingJudgeState = Omit<JudgeState, "card"> & {
+  card: SlashCard | null;
+};
 export interface RetrialGame extends AskCardUseGame {
-  judges: Record<string, JudgeState>;
+  judges: Record<string, PendingJudgeState>;
 }
 type RetrialNotice = {
   kind: "changed-judge";
@@ -41,7 +44,10 @@ export interface RetrialRules<G extends RetrialGame> {
   canonical: (game: Readonly<G>, id: number) => SlashCard;
   notify: (notice: RetrialNotice) => TriggerOperation | null;
 }
-export function readJudge(game: RetrialGame, id: string): JudgeState {
+export function readPendingJudge(
+  game: RetrialGame,
+  id: string,
+): PendingJudgeState {
   const judge = Object.prototype.hasOwnProperty.call(game.judges, id)
     ? game.judges[id]
     : undefined;
@@ -59,14 +65,21 @@ export function readJudge(game: RetrialGame, id: string): JudgeState {
     !["unknown", "good", "bad"].includes(judge.result)
   )
     throw new Error("Invalid judge state");
-  readResponse(game, judge.card, judge.who);
+  if (judge.card !== null) readResponse(game, judge.card, judge.who);
   return judge;
 }
-export function judgeIsGood(judge: JudgeState): boolean {
+export function readJudge(game: RetrialGame, id: string): JudgeState {
+  const judge = readPendingJudge(game, id);
+  if (judge.card === null) throw new Error("Judge requires a ready card");
+  return judge as JudgeState;
+}
+export function judgeIsGood(judge: Pick<JudgeState, "result">): boolean {
   if (judge.result === "unknown") throw new Error("Judge result is unknown");
   return judge.result === "good";
 }
-export function judgeIsEffected(judge: JudgeState): boolean {
+export function judgeIsEffected(
+  judge: Pick<JudgeState, "result" | "negative">,
+): boolean {
   return judge.negative ? !judgeIsGood(judge) : judgeIsGood(judge);
 }
 export function createJudgeResultOperation<G extends RetrialGame>(rules: {
