@@ -2,6 +2,7 @@
 
 These reports preserve particular source snapshots, adapters and executed checks. Read [current engine scope](../engine/overview.md) and the [roadmap](../roadmap/README.md) for present implementation boundaries. Earlier “next” statements and totals are historical.
 
+- [4ac: Room judgment and draw pile engine](2026-10-21-hegemony-part4ac.md)
 - [4aa: Room wrapper and authoritative command admission](2026-10-19-hegemony-part4aa.md)
 - [4ab.1: MethodUse CardAsked/provide/retry and direct response](2026-10-20-hegemony-part4ab1.md)
 - [4ab.2: MethodResponse acquisition and CardResponded lifecycle](2026-10-20-hegemony-part4ab2.md)
