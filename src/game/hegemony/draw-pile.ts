@@ -2,6 +2,7 @@ import type { CardResourceGame } from "./card-resources";
 import { readSlashInteger } from "./slash";
 import type {
   OperationHandler,
+  OperationStep,
   TriggerData,
   TriggerOperation,
 } from "./scheduler";
@@ -17,6 +18,91 @@ export interface DrawPileRules {
   notify: (
     notice: { kind: "reset-pile" } | { kind: "update-pile"; count: number },
   ) => TriggerOperation | null;
+}
+function batchInput(data: TriggerData) {
+  const fromUp = fromTop(data);
+  if (
+    !data ||
+    typeof data !== "object" ||
+    Array.isArray(data) ||
+    (data.updatePileNumber !== undefined &&
+      typeof data.updatePileNumber !== "boolean")
+  )
+    throw new Error("Invalid get-n-cards request");
+  return {
+    count: readSlashInteger(data.count),
+    fromUp,
+    updatePileNumber: data.updatePileNumber !== false,
+  };
+}
+export function createGetNCardsOperation<G extends DrawPileGame>(
+  rules: DrawPileRules,
+): OperationHandler<G> {
+  type Cursor = ReturnType<typeof batchInput> & {
+    stage: "begin" | "drawing" | "drawn" | "noticed" | "terminal";
+    ids: number[];
+  };
+  return {
+    name: "get-n-cards",
+    validate: (game, operation) => {
+      batchInput(operation.data);
+      piles(game, rules);
+    },
+    run: ({ game, operation, continuation, operationChild }): OperationStep => {
+      const cursor: Cursor =
+        continuation === null
+          ? { ...batchInput(operation.data), stage: "begin", ids: [] }
+          : (structuredClone(continuation) as Cursor);
+      if (cursor.stage === "terminal")
+        throw new Error("Game-over operation must interrupt");
+      if (cursor.stage === "noticed")
+        return { kind: "return", value: cursor.ids };
+      if (cursor.stage === "begin") {
+        const { draw, discard } = piles(game, rules);
+        cursor.stage = "drawing";
+        if (cursor.count > draw.cards.length) {
+          if (cursor.count > draw.cards.length + discard.cards.length) {
+            cursor.stage = "terminal";
+            return {
+              kind: "operation",
+              operation: { name: "game-over", data: "." },
+              continuation: cursor,
+            };
+          }
+          return {
+            kind: "operation",
+            operation: { name: "swap-pile", data: null },
+            continuation: cursor,
+          };
+        }
+      }
+      if (cursor.stage === "drawn") {
+        const id = operationChild?.value;
+        if (typeof id !== "number" || !Number.isSafeInteger(id) || id < 0)
+          throw new Error("Invalid batch draw result");
+        cursor.ids.push(id);
+        cursor.stage = "drawing";
+      }
+      if (cursor.ids.length < cursor.count) {
+        cursor.stage = "drawn";
+        return {
+          kind: "operation",
+          operation: { name: "draw-card", data: { fromUp: cursor.fromUp } },
+          continuation: cursor,
+        };
+      }
+      cursor.stage = "noticed";
+      if (cursor.updatePileNumber) {
+        const next = rules.notify({
+          kind: "update-pile",
+          count: piles(game, rules).draw.cards.length,
+        });
+        if (next)
+          return { kind: "operation", operation: next, continuation: cursor };
+      }
+      return { kind: "return", value: cursor.ids };
+    },
+  };
 }
 function roomTags(game: DrawPileGame) {
   const tags = game.cardResources?.roomTags;
