@@ -19,6 +19,7 @@ The [source baseline](source-baseline.json) identifies the game revision inspect
 | Direct MethodUse/MethodResponse requests | [CardAsked, provide, retry and distinct use/response lifecycles](engine/direct-card-use.md)                                                                     |
 | Selection and judgment replacement       | [MethodNone/Discard, retrial and Guicai/Guidao](engine/retrial.md)                                                                                              |
 | Judgment and drawing                     | [Room judgment](engine/judgment.md), [draw pile and reservations](engine/draw-pile.md)                                                                          |
+| Batch/player drawing and Draw phase      | [Card drawing](engine/card-drawing.md), [Draw-phase owner](engine/draw-phase.md)                                                                                |
 | HP, rescue and terminal flow             | [Damage/rescue](engine/damage-and-rescue.md), [SinglePeach/Room](engine/single-peach.md), [death/careerist](engine/death-and-careerist.md)                      |
 | Reveal rewards                           | [Rewards and token methods](engine/reveal-rewards-and-tokens.md)                                                                                                |
 | What remains before production           | [Roadmap](roadmap/README.md), [port plan](plans/hegemony-port.md), [initial design baseline](specs/hegemony-engine-baseline.md)                                 |

@@ -14,7 +14,7 @@ zones are authoritative private state, not player projections or new public plac
 `draw-card` accepts `fromUp` (default true). It emits FetchDrawPileCard with null
 target and null data, ignores consumption and checks the latest available pile.
 If empty, it runs real `swap-pile` before selecting top/bottom. ID zero is valid.
-It does not implement getNCards batching, canonical card lookup or pile-count
+It does not itself implement batch acquisition, canonical card lookup or pile-count
 updates belonging to other native callers.
 
 `swap-pile` terminates through registered actual `game-over` with winner `.` when
@@ -42,3 +42,6 @@ native exception unwind is outside this slice.
 Validation uses public dispatch/resume, actual movement and terminal operation,
 seeded transcript vectors and JSON restoration. Exact test totals, reviewed source
 and final validation are in the [revision checkpoint](../reviews/2026-10-21-hegemony-part4ac.md).
+
+Part 4ad adds the separate actual [getNCards/player draw owner](card-drawing.md)
+and [Draw phase](draw-phase.md). Single-card drawing keeps its original semantics.
