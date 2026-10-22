@@ -2,6 +2,7 @@
 
 These reports preserve particular source snapshots, adapters and executed checks. Read [current engine scope](../engine/overview.md) and the [roadmap](../roadmap/README.md) for present implementation boundaries. Earlier “next” statements and totals are historical.
 
+- [4ae: global GameStart and luck cards](2026-10-22-hegemony-part4ae.md)
 - [4ad: batch/player drawing and Draw phase](2026-10-21-hegemony-part4ad.md)
 - [4ac: Room judgment and draw pile engine](2026-10-21-hegemony-part4ac.md)
 - [4aa: Room wrapper and authoritative command admission](2026-10-19-hegemony-part4aa.md)

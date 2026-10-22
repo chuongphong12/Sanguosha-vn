@@ -8,7 +8,7 @@ Baseline: game `4b19fddcb6547066de0db0ae078c0db7642877ba`; native authority is [
 
 `selectGeneralPair` validates actor, payload, offer membership, distinct head/deputy, bans and already-selected generals before mutation. Pair compatibility is directional: a careerist cannot be deputy; a careerist head uses the deputy's kingdoms; an ordinary pair uses their intersection. An ambiguous intersection needs an explicit valid kingdom. Max HP is `floor((head.headMaxHp + deputy.deputyMaxHp) / 2)` using already-adjusted slot contributions; those inputs are not the two printed HP totals.
 
-Successful selection sets two private slots, initial kingdom and HP atomically. All selected players produce status `ready`; this is the end of paired setup, not a battle start. Timeout/default pair choice, card dealing, battle authority creation and routing are adapters still to be supplied.
+Successful selection sets two private slots, initial kingdom and HP atomically. All selected players produce status `ready`; this is the end of paired setup, not a battle start. Timeout/default pair choice and setup-to-battle authority provisioning/routing remain adapters. The separate [global GameStart](game-start.md) and [luck-card owners](luck-cards.md) now supply normalized initial card workflow; paired setup does not invoke or synchronize those authorities automatically.
 
 Native evidence: `src/core/general.cpp` `compareKingdomsWith` (line 136), `src/server/serverplayer.cpp` paired max HP (line 1324), and `src/server/room.cpp` pair/kingdom/hidden setup (line 3694) at the selected pin.
 
