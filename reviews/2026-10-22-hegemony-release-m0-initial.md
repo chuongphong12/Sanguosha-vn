@@ -31,7 +31,7 @@ Accepted Q25–Q28 policies are recorded in the [session decision comment](https
 
 **Standards:** zero findings. Independent review reconfirmed the inventories/source hashes, installed bundle identity and local-only reference qualifications. Extractor scripts and raw graph receipts still in the original machine's Temp directory are explicitly labelled local evidence; a clean-clone extraction toolchain is not claimed.
 
-**Spec:** one initial finding: the session table omitted explicit start, terminal-result and host-transfer transitions required by the session ticket. Added those transitions, successful-create/once-only provisioning detail and four observable traces. Independent follow-up reported zero residual findings. The openly unfinished manifest remains unfinished; the session traces are proposals for prototype acceptance, not passing tests.
+**Spec:** one initial finding: the session table omitted explicit start, terminal-result and host-transfer transitions required by the session ticket. Added those transitions, successful-create/once-only provisioning detail and four observable traces. Independent follow-up reported zero residual findings. The openly unfinished manifest remains unfinished; the session traces are proposals for prototype acceptance, not passing tests. A subsequent parent audit clarified that the first staged-Master adapter is the prototype route within the accepted boardgame.io stack; the alternative standalone session protocol is only a bounded experiment and cannot authorize a stack change. Separate Standards and Spec follow-ups against `1672a1163d273680f5f677b5e9b7e46ab8e6d8a3` both reported zero residual findings for this clarification.
 
 ## Next gate
 
