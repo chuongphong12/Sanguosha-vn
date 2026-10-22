@@ -126,6 +126,13 @@ function randomInteger(game: DrawPileGame): number {
   value ^= value + Math.imul(value ^ (value >>> 7), value | 61);
   return ((value ^ (value >>> 14)) >>> 0) >>> 1;
 }
+/** Native forward modulo shuffle over a caller-owned available card list. */
+export function shufflePileCards(game: DrawPileGame, cards: number[]): void {
+  for (let i = 0; i < cards.length; i++) {
+    const r = (randomInteger(game) % (cards.length - i)) + i;
+    [cards[i], cards[r]] = [cards[r], cards[i]];
+  }
+}
 export function createSwapPileOperation<G extends DrawPileGame>(
   rules: DrawPileRules,
 ): OperationHandler<G> {
@@ -160,10 +167,7 @@ export function createSwapPileOperation<G extends DrawPileGame>(
             continuation: "terminal",
           };
         const shuffled = [...discard.cards];
-        for (let i = 0; i < shuffled.length; i++) {
-          const r = (randomInteger(game) % (shuffled.length - i)) + i;
-          [shuffled[i], shuffled[r]] = [shuffled[r], shuffled[i]];
-        }
+        shufflePileCards(game, shuffled);
         draw.cards.push(...shuffled);
         discard.cards = [];
         const next = rules.notify({ kind: "reset-pile" });
@@ -182,7 +186,10 @@ export function createSwapPileOperation<G extends DrawPileGame>(
     },
   };
 }
-function piles(game: DrawPileGame, rules: DrawPileRules) {
+function piles(
+  game: DrawPileGame,
+  rules: Pick<DrawPileRules, "drawZone" | "reservedZone" | "discardZone">,
+) {
   const keys = [rules.drawZone, rules.reservedZone, rules.discardZone];
   if (new Set(keys).size !== 3) throw new Error("Overlapping draw pile zones");
   const zones = keys.map((key, index) => {
@@ -210,6 +217,7 @@ function piles(game: DrawPileGame, rules: DrawPileRules) {
     }
   return { draw: zones[0], reserved: zones[1], discard: zones[2] };
 }
+export { piles as readDrawPiles };
 function fromTop(data: TriggerData) {
   if (
     !data ||

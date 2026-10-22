@@ -107,6 +107,7 @@ export function prepareWrappedCards<G extends CardMovementGame>(
   removedZones: Record<string, CardZone>,
   rules: WrappedCardRules<G>,
   forceVisible: boolean,
+  arrival: "atomic" | "manual" = "atomic",
 ): Record<number, WrappedCard> {
   validateWrappedCards(
     game,
@@ -171,6 +172,7 @@ export function prepareWrappedCards<G extends CardMovementGame>(
       }
     }
   }
+  if (arrival === "manual") return cards;
   for (const move of moves) {
     for (const id of move.ids) {
       const card = cards[id];
