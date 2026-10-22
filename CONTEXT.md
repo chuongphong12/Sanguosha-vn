@@ -91,3 +91,47 @@ _Avoid_: Automatic draw bonus
 **First-show inspection**:
 A reward effect that privately lets its requester inspect a chosen hidden general slot without publicly revealing it.
 _Avoid_: Public general reveal
+
+## Rooms and participation
+
+**Room**:
+The shared place where people occupy seats and participate in a configured match, including its waiting and result states.
+_Avoid_: Network connection, account
+
+**Match**:
+One progression of the faction game from setup to its terminal result, associated with a room.
+_Avoid_: Room membership
+
+**Human participant**:
+A person who occupies a room seat and has not left or lost the right to return. A disconnected or defeated participant is not automatically a departed participant.
+_Avoid_: Connected socket, living general
+
+**Bot-controlled seat**:
+A seat whose current game decisions are made by a bot, whether it is a permanent bot seat or a temporarily controlled human seat.
+_Avoid_: Human participant keeping the room alive
+
+**Room invitation**:
+The shared means of reaching a room and joining an available seat, without granting another participant's seat rights.
+_Avoid_: Seat recovery secret
+
+**Seat return**:
+A participant reclaiming the seat they already occupy during an allowed return window.
+_Avoid_: Joining any occupied seat
+
+**Explicit leave**:
+A participant deliberately ending their room membership through the room's leave action.
+_Avoid_: Defeat, refresh, transient disconnection
+
+**Transient disconnection**:
+A loss of communication during which the participant's right to return has not yet expired.
+_Avoid_: Explicit leave, room deletion
+
+## Visibility and release
+
+**Actor view**:
+The game information a particular seat is permitted to know, combining that seat's private information with information legitimately observed by it.
+_Avoid_: Global state, shared bot knowledge
+
+**Small-group trial**:
+The first release stage evaluated with an organized small group before wider promotion. It describes the testing audience and does not imply an access-controlled website.
+_Avoid_: Restricted room-creation permission, partial-content demo
