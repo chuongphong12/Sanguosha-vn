@@ -2,7 +2,7 @@
   "version": 1,
   "game": {
     "repository": "https://github.com/chuongphong12/Sanguosha-vn.git",
-    "commit": "9f84bd0152d9fafed5cc6e30533989e2d6f86495",
+    "commit": "17c61c710e236637e9ed9829a4893babb6401b06",
     "availability": "Inspected and committed locally; game branch publication is not asserted"
   },
   "native": {
@@ -10,5 +10,5 @@
     "commit": "ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f",
     "release": "2.3.43-beta2"
   },
-  "scope": "Source-derived documentation through Part 4ad actual getNCards/player drawing, fill-hand/token composition and normalized Draw-phase GameRule body with three actual free-chain boundaries. Existing Room judgment/retrial, draw/recycling/reservations, persisted portable RNG, SinglePeach/Room and admission remain present. Initial dealing/luck cards, remaining phase/turn owners, whole movement transport, live package/authentication/network authorities and native unwind remain pending. Qt bitwise RNG parity, native runtime differential and full-match parity are not certified. Production still registers Standard2013."
+  "scope": "Source-derived documentation through Part 4ae global GameStart (limited marks/private deputy view/FirstRound/initial drawing) and actual luck-card rounds/manual return/shared shuffle/sequential redeal, with explicit broadcast collection and private delivery adapters. Existing Draw phase, batch/player drawing, Room judgment/retrial, draw/recycling/reservations, portable persisted RNG and rescue/admission remain present. Full Room/RoomThread and per-player package startup, remaining phases/turns, whole movement transport, live catalogue/authentication/network authorities and native unwind remain pending. Qt bitwise RNG parity, native runtime differential and full-match parity are not certified. Production still registers Standard2013."
 }

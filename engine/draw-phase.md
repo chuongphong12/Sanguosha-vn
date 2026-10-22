@@ -33,5 +33,5 @@ Invalid rewritten counts reject after earlier eager flag/reward effects; interru
 freeze those effects/frames under the existing scheduler policy. JSON continuations
 retain the captured count and stage, preventing duplicate draws/reward grants.
 
-Initial dealing/luck-card flow, full phase/turn progression, movement transport,
+The separate [GameStart](game-start.md) and [luck-card owners](luck-cards.md) supply initial drawing. Full phase/turn progression, movement transport,
 whole enabled content, native unwind and production registration remain separate.
