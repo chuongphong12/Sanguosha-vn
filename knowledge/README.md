@@ -4,6 +4,8 @@ Current source-derived knowledge for developers and AI agents porting Quốc Chi
 
 The [source baseline](source-baseline.json) identifies the game revision inspected for this snapshot. Production still registers the legacy Standard 2013 game; paired setup `ready` and normalized operation fixtures do not establish a playable Quốc Chiến match. This repository records the migration target and actual implementation boundaries.
 
+The approved [complete-release plan and M0 route](plans/hegemony-release.md) now govern the first-release scope, bot/media requirements and room lifetime. The linked tracker specification/map own current requirements and dependencies; the normalized library remains at its documented checkpoint until implementation tickets pass their gates.
+
 ## Find the relevant contract
 
 | Need                                     | Start here                                                                                                                                                      |
