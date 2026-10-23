@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="vi">
+  <meta charset="utf-8" /><title>Prototype session Quốc Chiến</title>
+  <style>
+    body {
+      font: 17px system-ui;
+      max-width: 850px;
+      margin: 48px auto;
+      padding: 20px;
+      background: #171c24;
+      color: #eee;
+    }
+    button,
+    input {
+      font: inherit;
+      padding: 9px;
+      margin: 5px;
+    }
+    button {
+      cursor: pointer;
+    }
+    #state {
+      padding: 24px;
+      border: 1px solid #76899d;
+      line-height: 2;
+    }
+    small {
+      color: #a8b6c5;
+    }
+  </style>
+  <h1>Thử nghiệm session — chưa phải ván Quốc Chiến</h1>
+  <p>
+    Kiểm tra rút bài thật, view riêng và khôi phục trên ổ đĩa local. Bộ bài là
+    fixture; chưa có chọn tướng, lượt đầy đủ, bot cạnh tranh hoặc kết nối cloud.
+  </p>
+  <p>
+    <button id="create">Tạo phòng thử</button
+    ><input
+      id="room"
+      aria-label="Mã phòng"
+      placeholder="Mã phòng do người tạo gửi"
+    /><button id="join">Vào ghế trống</button
+    ><button id="restore">Lấy lại ghế đã lưu</button>
+  </p>
+  <section id="state">Chưa vào phòng.</section>
+  <p>
+    <button id="draw">Rút một lá</button
+    ><button id="take">Nhận quyền điều khiển</button
+    ><button id="leave">Rời phòng</button>
+  </p>
+  <p>
+    <small
+      >Mở hai cửa sổ riêng tư để thử hai người. Mở tab thứ hai cùng trình duyệt
+      rồi lấy lại ghế để thử chế độ chỉ xem và nhận quyền. Lưu ý: đồng hồ 60
+      giây và các luồng prompt chưa được đưa vào lát cắt này.</small
+    >
+  </p>
+  <p id="notice" role="status"></p>
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    const socket = io({ transports: ["websocket"] }),
+      state = document.querySelector("#state"),
+      notice = document.querySelector("#notice");
+    let auth, view;
+    function show(v) {
+      view = v;
+      state.textContent = `Phòng: ${v.room} | Ghế: ${v.actor} | Phiên bản: ${v.revision} | Điều khiển: ${v.controlling ? "Có" : "Chỉ xem"} | Bài trên tay: ${v.hand.join(", ") || "trống"} | Số lá ghế khác: ${Object.entries(
+        v.handCounts,
+      )
+        .filter(([p]) => p !== v.actor)
+        .map(([p, n]) => p + ": " + n)
+        .join(", ")}`;
+    }
+    socket.on("view", show);
+    socket.on("room-closed", () => {
+      state.textContent = "Phòng đã đóng.";
+      auth = null;
+    });
+    async function call(action, data = {}) {
+      notice.textContent = "Đang xử lý…";
+      try {
+        const r = await socket
+          .timeout(5000)
+          .emitWithAck("request", { action, ...data });
+        if (!r.ok) throw Error(r.error);
+        notice.textContent = "Đã xử lý.";
+        return r.result;
+      } catch (e) {
+        notice.textContent = e.message;
+        throw e;
+      }
+    }
+    async function bind(action, data) {
+      auth = await call(action, data);
+      localStorage.setItem("PROTOTYPE-seat", JSON.stringify(auth));
+      document.querySelector("#room").value = auth.room;
+      show(await call("view"));
+    }
+    document.querySelector("#create").onclick = () => bind("create");
+    document.querySelector("#join").onclick = () =>
+      bind("join", { room: document.querySelector("#room").value });
+    document.querySelector("#restore").onclick = () =>
+      bind("connect", {
+        auth: JSON.parse(localStorage.getItem("PROTOTYPE-seat") || "null"),
+      });
+    document.querySelector("#draw").onclick = async () => {
+      const r = await call("command", {
+        command: {
+          id: crypto.randomUUID(),
+          revision: view.revision,
+          generation: view.generation,
+          action: "draw",
+        },
+      });
+      show(r.view);
+    };
+    document.querySelector("#take").onclick = async () => {
+      auth = await call("take");
+      show(await call("view"));
+    };
+    document.querySelector("#leave").onclick = async () => {
+      await call("leave");
+      localStorage.removeItem("PROTOTYPE-seat");
+      auth = null;
+      state.textContent = "Đã rời phòng.";
+    };
+  </script>
+</html>
