@@ -2,7 +2,7 @@
   "version": 1,
   "game": {
     "repository": "https://github.com/chuongphong12/Sanguosha-vn.git",
-    "commit": "7e1b5f23f313683f6363b08b9a3937367b949f7d",
+    "commit": "bc3ceb996054cf6fc42f0204f553bf279e13899b",
     "availability": "Published prototype source on codex/hegemony-m0-prototypes; game production registration remains unchanged"
   },
   "native": {
@@ -10,5 +10,5 @@
     "commit": "ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f",
     "release": "2.3.43-beta2"
   },
-  "scope": "Production engine knowledge remains through Part4ae global GameStart and actual luck-card engine at source17c61c7. Inspected game revision7e1b5f2 adds an isolated throwaway M0 local tracer and actor-only policy baseline alongside prior knowledge delivery; production still registers Standard2013 and existing rule-kernel bytes are unchanged. The local proof executes only fixture drawing through staged boardgame.io Master and local file storage, with targeted process-crash/privacy/control evidence. Q31 accepted the session contract, but M0.3/M0.4 remain open: live pending-request/admission integration, service-time timers, automatic bot takeover, external store/provider recovery, full-manifest handlers and competitive strength are not accepted. Full Room/RoomThread remaining phases/turns, production movement transport/catalogue/authentication/network and native unwind remain pending. Qt bitwise RNG, native runtime differential and full-match parity are not certified. See the revision-scoped2026-10-23 prototype checkpoint."
+  "scope": "Production engine knowledge remains through Part4ae global GameStart and actual luck-card engine at source17c61c7. Inspected game revision bc3ceb9 extends the isolated throwaway M0 tracer with actual Play admission/Room use/Slash/MethodUse/Jink/movement/normal damage and pending-prompt process recovery under staged boardgame.io Master/local storage. It uses eight synthetic physical cards, two seats, a fixed Play context and one plain Slash; production still registers Standard2013 and existing kernel bytes are unchanged. Q31 accepted the session contract, but M0.3/M0.4 remain open: service-time timers, automatic bot takeover/execution, other pending request families, external store/provider recovery, full-manifest handlers and competitive strength remain pending. The Jink policy is explicitly invoked through the same socket boundary, not an automatic server job or persisted bot worker. Full Room/RoomThread remaining phases/turns, production movement transport/catalogue/authentication/network and native unwind remain pending. Qt bitwise RNG, shuffled draw progression, native runtime differential and full-match parity are not certified. See the revision-scoped 2026-10-23 pending Slash/Jink checkpoint."
 }
