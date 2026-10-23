@@ -2,13 +2,13 @@
   "version": 1,
   "game": {
     "repository": "https://github.com/chuongphong12/Sanguosha-vn.git",
-    "commit": "1fc4ff20bf261c3b7cf85c9d5c6c3a4b90e4cbae",
-    "availability": "Inspected and committed locally; game branch publication is not asserted"
+    "commit": "7e1b5f23f313683f6363b08b9a3937367b949f7d",
+    "availability": "Published prototype source on codex/hegemony-m0-prototypes; game production registration remains unchanged"
   },
   "native": {
     "repository": "https://github.com/TamQuocSat-LangKhach/QSanguosha-QuocChien.git",
     "commit": "ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f",
     "release": "2.3.43-beta2"
   },
-  "scope": "Source-derived documentation through Part 4ae global GameStart and actual luck-card engine; inspected game revision adds only reviewed knowledge delivery after source17c61c7. Approved complete-release constraints and initial M0 manifest/session/asset investigations are recorded separately from runtime capability. No M0 prototypes, durable network recovery, competitive-bot capacity or full-manifest implementation are certified by these research notes. Existing Draw phase, drawing, judgment/retrial, draw/recycling/reservations, RNG and rescue/admission remain present. Full Room/RoomThread/package startup, remaining phases/turns, movement transport, live catalogue/authentication/network and native unwind remain pending. Qt bitwise RNG, native runtime differential and full-match parity are not certified. Production still registers Standard2013."
+  "scope": "Production engine knowledge remains through Part4ae global GameStart and actual luck-card engine at source17c61c7. Inspected game revision7e1b5f2 adds an isolated throwaway M0 local tracer and actor-only policy baseline alongside prior knowledge delivery; production still registers Standard2013 and existing rule-kernel bytes are unchanged. The local proof executes only fixture drawing through staged boardgame.io Master and local file storage, with targeted process-crash/privacy/control evidence. Q31 accepted the session contract, but M0.3/M0.4 remain open: live pending-request/admission integration, service-time timers, automatic bot takeover, external store/provider recovery, full-manifest handlers and competitive strength are not accepted. Full Room/RoomThread remaining phases/turns, production movement transport/catalogue/authentication/network and native unwind remain pending. Qt bitwise RNG, native runtime differential and full-match parity are not certified. See the revision-scoped2026-10-23 prototype checkpoint."
 }
