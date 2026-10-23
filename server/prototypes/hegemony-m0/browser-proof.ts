@@ -62,6 +62,39 @@ try {
       .querySelector("#state")
       ?.textContent?.includes("Bài trên tay: 0, 1"),
   );
+  // Fixture Jink 3 goes to B after A has drawn cards 0, 1, 2.
+  await secondary.getByRole("button", { name: "Rút một lá" }).click();
+  await secondary.waitForFunction(() =>
+    document
+      .querySelector("#state")
+      ?.textContent?.includes("Bài trên tay: 0, 1, 2"),
+  );
+  await b.getByRole("button", { name: "Rút một lá" }).click();
+  await b.waitForFunction(() =>
+    document.querySelector("#state")?.textContent?.includes("Bài trên tay: 3"),
+  );
+  await secondary
+    .getByRole("button", { name: "Chơi Sát", exact: true })
+    .click();
+  await secondary
+    .getByRole("button", { name: "Sát", exact: true })
+    .first()
+    .click();
+  await secondary.getByRole("button", { name: "1", exact: true }).click();
+  await secondary
+    .getByRole("button", { name: "Xác nhận", exact: true })
+    .click();
+  await b.getByRole("button", { name: "Thiểm", exact: true }).waitFor();
+  assert.equal(await secondary.locator("#prompt button").count(), 0);
+  await b.reload();
+  await b.getByRole("button", { name: "Lấy lại ghế đã lưu" }).click();
+  await b.getByRole("button", { name: "Thiểm", exact: true }).click();
+  await b.waitForFunction(() =>
+    document.querySelector("#state")?.textContent?.includes("SlashMissed"),
+  );
+  assert.match(await b.locator("#state").innerText(), /Bài trên tay: trống/);
+  assert.match(await b.locator("#state").innerText(), /HP: 0: 4, 1: 4/);
+  assert.equal(await b.locator("#prompt button").count(), 0);
   console.log(
     JSON.stringify({
       status: "passed",
@@ -73,6 +106,9 @@ try {
         "secondary read-only",
         "control fencing",
         "refresh seat restore",
+        "actual Slash/Jink prompt and MethodUse",
+        "prompt owner privacy",
+        "refresh while awaiting Jink",
       ],
     }),
   );

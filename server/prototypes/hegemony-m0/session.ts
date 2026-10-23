@@ -10,6 +10,7 @@ import {
   proofGame,
   actorObservation,
   type ProofGame,
+  type EngineCommand,
 } from "./engine";
 
 export type Auth = {
@@ -24,10 +25,9 @@ export type Command = {
   id: string;
   revision: number;
   generation: number;
-  action: "draw";
-};
+} & EngineCommand;
 type Member = { secretHash: string; generation: number };
-type Receipt = { action: string; revision: number };
+type Receipt = { action: string; intent: EngineCommand; revision: number };
 type Room = {
   state: State<ProofGame>;
   metadata: Server.MatchData;
@@ -257,13 +257,30 @@ export async function createPrototype(
       !command ||
       typeof command.id !== "string" ||
       !/^[\w-]{1,80}$/.test(command.id) ||
-      command.action !== "draw"
+      !["draw", "play", "answer"].includes(command.action) ||
+      (command.action === "answer" &&
+        (!command.answer ||
+          typeof command.answer !== "object" ||
+          Array.isArray(command.answer) ||
+          Object.keys(command.answer).length !== 2 ||
+          typeof command.answer.id !== "string" ||
+          !(
+            command.answer.choice === null ||
+            typeof command.answer.choice === "string"
+          )))
     )
       throw new Error("Invalid command");
+    const intent: EngineCommand =
+      command.action === "answer"
+        ? {
+            action: "answer",
+            answer: { id: command.answer.id, choice: command.answer.choice },
+          }
+        : { action: command.action };
     const receiptKey = `${auth.actor}:${command.id}`,
       previous = room.receipts[receiptKey];
     if (previous) {
-      if (previous.action !== command.action)
+      if (JSON.stringify(previous.intent) !== JSON.stringify(intent))
         throw new Error("Intent collision");
       return { receipt: previous, view: view(auth), duplicate: true };
     }
@@ -288,8 +305,8 @@ export async function createPrototype(
       {
         type: "MAKE_MOVE",
         payload: {
-          type: command.action,
-          args: [],
+          type: "command",
+          args: [intent],
           playerID: auth.actor,
           credentials: "PROTOTYPE-server-bound",
         },
@@ -303,6 +320,7 @@ export async function createPrototype(
     staged.started = true;
     staged.receipts[receiptKey] = {
       action: command.action,
+      intent,
       revision: staged.state._stateID,
     };
     await commit(next);

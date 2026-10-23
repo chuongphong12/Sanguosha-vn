@@ -30,8 +30,9 @@
   </style>
   <h1>Thử nghiệm session — chưa phải ván Quốc Chiến</h1>
   <p>
-    Kiểm tra rút bài thật, view riêng và khôi phục trên ổ đĩa local. Bộ bài là
-    fixture; chưa có chọn tướng, lượt đầy đủ, bot cạnh tranh hoặc kết nối cloud.
+    Kiểm tra rút bài, Sát → Thiểm, view riêng và khôi phục trên ổ đĩa local. Bộ
+    bài là fixture; chưa có chọn tướng, lượt đầy đủ, bot cạnh tranh hoặc kết nối
+    cloud.
   </p>
   <p>
     <button id="create">Tạo phòng thử</button
@@ -43,8 +44,9 @@
     ><button id="restore">Lấy lại ghế đã lưu</button>
   </p>
   <section id="state">Chưa vào phòng.</section>
+  <section id="prompt" aria-label="Quyết định đang chờ"></section>
   <p>
-    <button id="draw">Rút một lá</button
+    <button id="draw">Rút một lá</button><button id="play">Chơi Sát</button
     ><button id="take">Nhận quyền điều khiển</button
     ><button id="leave">Rời phòng</button>
   </p>
@@ -52,7 +54,9 @@
     <small
       >Mở hai cửa sổ riêng tư để thử hai người. Mở tab thứ hai cùng trình duyệt
       rồi lấy lại ghế để thử chế độ chỉ xem và nhận quyền. Lưu ý: đồng hồ 60
-      giây và các luồng prompt chưa được đưa vào lát cắt này.</small
+      giây chưa có trong lát cắt này. Để thử Sát → Thiểm: ghế 0 rút trước, ghế 1
+      rút sau; ghế 0 bấm Chơi Sát, chọn Sát → 1 → Xác nhận. Ghế 1 dùng hoặc từ
+      chối Thiểm. Mỗi phòng thử chỉ chơi một Sát.</small
     >
   </p>
   <p id="notice" role="status"></p>
@@ -69,12 +73,35 @@
       )
         .filter(([p]) => p !== v.actor)
         .map(([p, n]) => p + ": " + n)
-        .join(", ")}`;
+        .join(", ")} | HP: ${Object.entries(v.battle.hp)
+        .map(([p, hp]) => p + ": " + hp)
+        .join(", ")} | Kết quả: ${v.battle.outcomes.join(", ") || "chưa có"}`;
+      const panel = document.querySelector("#prompt");
+      panel.replaceChildren();
+      if (v.prompt) {
+        for (const choice of v.prompt.choices) {
+          const button = document.createElement("button");
+          button.textContent = choice.label;
+          button.disabled = !v.controlling;
+          button.onclick = () =>
+            sendCommand("answer", { id: v.prompt.id, choice: choice.id });
+          panel.append(button);
+        }
+        if (v.prompt.canCancel && v.prompt.kind === "play") {
+          const cancel = document.createElement("button");
+          cancel.textContent = "Hủy chọn bài";
+          cancel.disabled = !v.controlling;
+          cancel.onclick = () =>
+            sendCommand("answer", { id: v.prompt.id, choice: null });
+          panel.append(cancel);
+        }
+      }
     }
     socket.on("view", show);
     socket.on("room-closed", () => {
       state.textContent = "Phòng đã đóng.";
       auth = null;
+      document.querySelector("#prompt").replaceChildren();
     });
     async function call(action, data = {}) {
       notice.textContent = "Đang xử lý…";
@@ -103,17 +130,20 @@
       bind("connect", {
         auth: JSON.parse(localStorage.getItem("PROTOTYPE-seat") || "null"),
       });
-    document.querySelector("#draw").onclick = async () => {
+    async function sendCommand(action, answer) {
       const r = await call("command", {
         command: {
           id: crypto.randomUUID(),
           revision: view.revision,
           generation: view.generation,
-          action: "draw",
+          action,
+          ...(answer ? { answer } : {}),
         },
       });
       show(r.view);
-    };
+    }
+    document.querySelector("#draw").onclick = () => sendCommand("draw");
+    document.querySelector("#play").onclick = () => sendCommand("play");
     document.querySelector("#take").onclick = async () => {
       auth = await call("take");
       show(await call("view"));
@@ -123,6 +153,7 @@
       localStorage.removeItem("PROTOTYPE-seat");
       auth = null;
       state.textContent = "Đã rời phòng.";
+      document.querySelector("#prompt").replaceChildren();
     };
   </script>
 </html>

@@ -238,11 +238,13 @@ describe("M0 staged Master local persistence proof", () => {
       expect(other.hand).toEqual([]);
       expect(Object.keys(other).sort()).toEqual([
         "actor",
+        "battle",
         "controlling",
         "decision",
         "generation",
         "hand",
         "handCounts",
+        "prompt",
         "revision",
         "room",
       ]);
