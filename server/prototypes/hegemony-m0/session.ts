@@ -1,10 +1,10 @@
-/** THROWAWAY: single writer, two seats, local disk; not a provider DB adapter. */
-import { open, readFile, rename, unlink } from "node:fs/promises";
+/** THROWAWAY: single writer and two fixture seats, outside production. */
 import { randomBytes, createHash } from "node:crypto";
 import { Master } from "boardgame.io/master";
 import { InitializeGame, Sync } from "boardgame.io/internal";
 import type { State, Server } from "boardgame.io";
 import { chooseBot, policyVersion, type Memory } from "./bot";
+import { openFileStore, type SessionStore } from "./storage";
 import {
   systemClock,
   initialDeadlines,
@@ -101,37 +101,19 @@ export async function createPrototype(
     beforeCommit?: () => Promise<void>;
     clock?: ServiceClock;
     onChange?: () => void;
+    openStore?: () => Promise<SessionStore>;
   } = {},
 ) {
-  const lockPath = path + ".writer",
-    owner = { pid: process.pid, nonce: nonce() };
-  async function acquire(): Promise<void> {
-    try {
-      const f = await open(lockPath, "wx", 0o600);
-      await f.writeFile(JSON.stringify(owner));
-      await f.close();
-    } catch (e: any) {
-      if (e.code !== "EEXIST") throw e;
-      const previous = JSON.parse(await readFile(lockPath, "utf8"));
-      try {
-        process.kill(previous.pid, 0);
-      } catch (err: any) {
-        if (err.code !== "ESRCH") throw err;
-        await unlink(lockPath);
-        return acquire();
-      }
-      throw new Error("Prototype writer already active");
-    }
-  }
-  await acquire();
+  const store = options.openStore
+    ? await options.openStore()
+    : await openFileStore(path, options.beforeCommit);
   let db: Database;
   try {
-    try {
-      db = JSON.parse(await readFile(path, "utf8"));
-    } catch (e: any) {
-      if (e.code !== "ENOENT") throw e;
-      db = { schema: identity, revision: 0, elapsed: 0, rooms: {} };
-    }
+    const saved = await store.read();
+    db =
+      saved === null
+        ? { schema: identity, revision: 0, elapsed: 0, rooms: {} }
+        : JSON.parse(saved);
     if (
       db.schema !== identity ||
       !Number.isFinite(db.elapsed) ||
@@ -139,7 +121,7 @@ export async function createPrototype(
     )
       throw new Error("Incompatible prototype save");
   } catch (e) {
-    await unlink(lockPath);
+    await store.close();
     throw e;
   }
   let closed = false,
@@ -161,6 +143,7 @@ export async function createPrototype(
   function serial<T>(f: () => Promise<T>): Promise<T> {
     const result = tail.then(() => {
       if (closed) throw new Error("Writer closed");
+      store.assertActive();
       return f();
     });
     tail = result.catch(() => {});
@@ -170,15 +153,7 @@ export async function createPrototype(
     const sampled = clock.now();
     next.elapsed = serviceTime(sampled);
     next.revision++;
-    const f = await open(path + ".next", "w", 0o600);
-    try {
-      await f.writeFile(JSON.stringify(next));
-      await f.sync();
-    } finally {
-      await f.close();
-    }
-    await options.beforeCommit?.();
-    await rename(path + ".next", path);
+    await store.write(JSON.stringify(next));
     db = next;
     mark = sampled;
   }
@@ -570,7 +545,7 @@ export async function createPrototype(
       await commit(next);
     }
   } catch (error) {
-    await unlink(lockPath);
+    await store.close();
     throw error;
   }
   booting = false;
@@ -614,7 +589,7 @@ export async function createPrototype(
       cancel();
       await tail;
       closed = true;
-      await unlink(lockPath);
+      await store.close();
     },
   };
 }

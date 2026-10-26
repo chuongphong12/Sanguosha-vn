@@ -4,6 +4,7 @@ import { readFile } from "node:fs/promises";
 import { Server } from "socket.io";
 import { createPrototype, type Auth, type Command } from "./session";
 import type { ServiceClock } from "./deadlines";
+import type { SessionStore } from "./storage";
 
 export async function startProofServer(
   path: string,
@@ -12,11 +13,13 @@ export async function startProofServer(
     dropOneCommandAck?: boolean;
     beforeBind?: (disconnected: AbortSignal) => Promise<void>;
     clock?: ServiceClock;
+    openStore?: () => Promise<SessionStore>;
   } = {},
 ) {
   let announce = () => {};
   const session = await createPrototype(path, {
     clock: options.clock,
+    openStore: options.openStore,
     onChange: () => announce(),
   });
   const http = createServer(async (_req, res) => {
