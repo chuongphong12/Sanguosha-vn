@@ -245,6 +245,102 @@
       "checked_on": "2026-10-26",
       "author": null,
       "business_owner": null
+    },
+    {
+      "id": "web.m0.engine.fbe60f6",
+      "kind": "primary_code",
+      "repository": "https://github.com/chuongphong12/Sanguosha-vn",
+      "revision": "fbe60f6b911956d2b432840f0cfe8970218acd35",
+      "path": "server/prototypes/hegemony-m0/engine.ts",
+      "url": "https://github.com/chuongphong12/Sanguosha-vn/blob/fbe60f6b911956d2b432840f0cfe8970218acd35/server/prototypes/hegemony-m0/engine.ts",
+      "locator": "clock-v3 identity and unchanged bounded fixture",
+      "checked_on": "2026-10-26",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "web.m0.session.fbe60f6",
+      "kind": "primary_code",
+      "repository": "https://github.com/chuongphong12/Sanguosha-vn",
+      "revision": "fbe60f6b911956d2b432840f0cfe8970218acd35",
+      "path": "server/prototypes/hegemony-m0/session.ts",
+      "url": "https://github.com/chuongphong12/Sanguosha-vn/blob/fbe60f6b911956d2b432840f0cfe8970218acd35/server/prototypes/hegemony-m0/session.ts",
+      "locator": "serviceTime/commit/pulse/update, command execution, recovery, takeover and projection",
+      "checked_on": "2026-10-26",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "web.m0.deadlines.fbe60f6",
+      "kind": "primary_code",
+      "repository": "https://github.com/chuongphong12/Sanguosha-vn",
+      "revision": "fbe60f6b911956d2b432840f0cfe8970218acd35",
+      "path": "server/prototypes/hegemony-m0/deadlines.ts",
+      "url": "https://github.com/chuongphong12/Sanguosha-vn/blob/fbe60f6b911956d2b432840f0cfe8970218acd35/server/prototypes/hegemony-m0/deadlines.ts",
+      "locator": "trusted ServiceClock and independent deadline synchronization",
+      "checked_on": "2026-10-26",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "web.m0.transport.fbe60f6",
+      "kind": "primary_code",
+      "repository": "https://github.com/chuongphong12/Sanguosha-vn",
+      "revision": "fbe60f6b911956d2b432840f0cfe8970218acd35",
+      "path": "server/prototypes/hegemony-m0/transport.ts",
+      "url": "https://github.com/chuongphong12/Sanguosha-vn/blob/fbe60f6b911956d2b432840f0cfe8970218acd35/server/prototypes/hegemony-m0/transport.ts",
+      "locator": "scheduled commit publication and socket-bound actor views",
+      "checked_on": "2026-10-26",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "web.m0.bot.fbe60f6",
+      "kind": "primary_code",
+      "repository": "https://github.com/chuongphong12/Sanguosha-vn",
+      "revision": "fbe60f6b911956d2b432840f0cfe8970218acd35",
+      "path": "server/prototypes/hegemony-m0/bot.ts",
+      "url": "https://github.com/chuongphong12/Sanguosha-vn/blob/fbe60f6b911956d2b432840f0cfe8970218acd35/server/prototypes/hegemony-m0/bot.ts",
+      "locator": "actor-only deterministic policy and versioned memory",
+      "checked_on": "2026-10-26",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "web.m0.deadline-tests.fbe60f6",
+      "kind": "test_code",
+      "repository": "https://github.com/chuongphong12/Sanguosha-vn",
+      "revision": "fbe60f6b911956d2b432840f0cfe8970218acd35",
+      "path": "tests/prototypes/m0-deadline.test.ts",
+      "url": "https://github.com/chuongphong12/Sanguosha-vn/blob/fbe60f6b911956d2b432840f0cfe8970218acd35/tests/prototypes/m0-deadline.test.ts",
+      "locator": "ten public-session and transport deadline/recovery/failure/race cases",
+      "checked_on": "2026-10-26",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "web.m0.prompt-tests.fbe60f6",
+      "kind": "test_code",
+      "repository": "https://github.com/chuongphong12/Sanguosha-vn",
+      "revision": "fbe60f6b911956d2b432840f0cfe8970218acd35",
+      "path": "tests/prototypes/m0-prompt.test.ts",
+      "url": "https://github.com/chuongphong12/Sanguosha-vn/blob/fbe60f6b911956d2b432840f0cfe8970218acd35/tests/prototypes/m0-prompt.test.ts",
+      "locator": "actual process-kill/restart cases and committed prompt remainder",
+      "checked_on": "2026-10-26",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "web.m0.browser-proof.fbe60f6",
+      "kind": "test_code",
+      "repository": "https://github.com/chuongphong12/Sanguosha-vn",
+      "revision": "fbe60f6b911956d2b432840f0cfe8970218acd35",
+      "path": "server/prototypes/hegemony-m0/browser-proof.ts",
+      "url": "https://github.com/chuongphong12/Sanguosha-vn/blob/fbe60f6b911956d2b432840f0cfe8970218acd35/server/prototypes/hegemony-m0/browser-proof.ts",
+      "locator": "real Chromium prompt/refresh/privacy and default OS heartbeat publication",
+      "checked_on": "2026-10-26",
+      "author": null,
+      "business_owner": null
     }
   ],
   "pages": [
@@ -269,9 +365,9 @@
       "path": "engine/prototype-session.md",
       "status": "supported",
       "reviewed_on": "2026-10-26",
-      "review_scope": "Source inspection of the bounded local session/Slash/Jink contract and production boundary. Historical execution is attributed to its checkpoint, not re-run; no full-match, whole-corpus semantic or production certification.",
+      "review_scope": "Bounded local session/Slash/Jink plus independent service-time deadlines, automatic pending decisions, recovery and precision limits; not full game, provider or competitive-bot certification.",
       "applies_to": {
-        "game_commit": "bc3ceb996054cf6fc42f0204f553bf279e13899b",
+        "game_commit": "fbe60f6b911956d2b432840f0cfe8970218acd35",
         "native_commit": "ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f"
       },
       "source_ids": [
@@ -286,7 +382,15 @@
         "knowledge.m0.release.0204d2a",
         "web.production.server.bc3ceb9",
         "web.production.client.bc3ceb9",
-        "web.production.game.bc3ceb9"
+        "web.production.game.bc3ceb9",
+        "web.m0.engine.fbe60f6",
+        "web.m0.session.fbe60f6",
+        "web.m0.deadlines.fbe60f6",
+        "web.m0.transport.fbe60f6",
+        "web.m0.bot.fbe60f6",
+        "web.m0.deadline-tests.fbe60f6",
+        "web.m0.prompt-tests.fbe60f6",
+        "web.m0.browser-proof.fbe60f6"
       ]
     }
   ],
@@ -462,6 +566,78 @@
         "web.production.game.bc3ceb9"
       ],
       "scope": "Bounded local session/Slash/Jink composition or unchanged production registration at the pinned source. Primary code, test assertions, reported execution and accepted plan have distinct roles; not independent confirmations of full gameplay."
+    },
+    {
+      "subject": "page:engine/prototype-session.md",
+      "predicate": "derived_from",
+      "object": "source:web.m0.engine.fbe60f6",
+      "evidence": [
+        "web.m0.engine.fbe60f6"
+      ],
+      "scope": "Local clock-v3 session/Slash/Jink fixture and service-time deadlines; code and test assertions are distinct from execution receipts and complete production behavior."
+    },
+    {
+      "subject": "page:engine/prototype-session.md",
+      "predicate": "derived_from",
+      "object": "source:web.m0.session.fbe60f6",
+      "evidence": [
+        "web.m0.session.fbe60f6"
+      ],
+      "scope": "Local clock-v3 session/Slash/Jink fixture and service-time deadlines; code and test assertions are distinct from execution receipts and complete production behavior."
+    },
+    {
+      "subject": "page:engine/prototype-session.md",
+      "predicate": "derived_from",
+      "object": "source:web.m0.deadlines.fbe60f6",
+      "evidence": [
+        "web.m0.deadlines.fbe60f6"
+      ],
+      "scope": "Local clock-v3 session/Slash/Jink fixture and service-time deadlines; code and test assertions are distinct from execution receipts and complete production behavior."
+    },
+    {
+      "subject": "page:engine/prototype-session.md",
+      "predicate": "derived_from",
+      "object": "source:web.m0.transport.fbe60f6",
+      "evidence": [
+        "web.m0.transport.fbe60f6"
+      ],
+      "scope": "Local clock-v3 session/Slash/Jink fixture and service-time deadlines; code and test assertions are distinct from execution receipts and complete production behavior."
+    },
+    {
+      "subject": "page:engine/prototype-session.md",
+      "predicate": "derived_from",
+      "object": "source:web.m0.bot.fbe60f6",
+      "evidence": [
+        "web.m0.bot.fbe60f6"
+      ],
+      "scope": "Local clock-v3 session/Slash/Jink fixture and service-time deadlines; code and test assertions are distinct from execution receipts and complete production behavior."
+    },
+    {
+      "subject": "page:engine/prototype-session.md",
+      "predicate": "derived_from",
+      "object": "source:web.m0.deadline-tests.fbe60f6",
+      "evidence": [
+        "web.m0.deadline-tests.fbe60f6"
+      ],
+      "scope": "Local clock-v3 session/Slash/Jink fixture and service-time deadlines; code and test assertions are distinct from execution receipts and complete production behavior."
+    },
+    {
+      "subject": "page:engine/prototype-session.md",
+      "predicate": "derived_from",
+      "object": "source:web.m0.prompt-tests.fbe60f6",
+      "evidence": [
+        "web.m0.prompt-tests.fbe60f6"
+      ],
+      "scope": "Local clock-v3 session/Slash/Jink fixture and service-time deadlines; code and test assertions are distinct from execution receipts and complete production behavior."
+    },
+    {
+      "subject": "page:engine/prototype-session.md",
+      "predicate": "derived_from",
+      "object": "source:web.m0.browser-proof.fbe60f6",
+      "evidence": [
+        "web.m0.browser-proof.fbe60f6"
+      ],
+      "scope": "Local clock-v3 session/Slash/Jink fixture and service-time deadlines; code and test assertions are distinct from execution receipts and complete production behavior."
     }
   ]
 }
