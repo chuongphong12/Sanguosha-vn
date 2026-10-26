@@ -36,6 +36,8 @@ Only the bound actor receives display labels and choice tokens. Raw descriptors,
 
 ## Remaining authorities and release gates
 
+The later [local session experiment](prototype-session.md) exercises this Play gateway and Room wrapper through an authenticated socket and staged local Master for one physical Slash. That bounded consumer does not complete the production package, phase, privacy, bot or deployment gates below.
+
 Parsing, identity/ancestry, card availability, skill ownership/ViewAs policy, pattern matching, legal material selection, target semantics, validation, card-specific onUse/after methods and notifications are supplied private authorities. The tests compose real onUse/GameRule/resource/movement operations and real token cost/use; they do not enable a complete package or production command.
 
 Native exception unwind is excluded: turn-broken, stage-change and game-over preserve eager changes and freeze uncompleted frames. Subsequent [4ab.1/4ab.2 direct MethodUse/MethodResponse requests](direct-card-use.md) and [4ab.3 selection/retrial](retrial.md) supply distinct acquisition and execution contracts. Part 4ab.4 adds [actual SinglePeach/Room rescue composition](single-peach.md). Subsequent [Room judgment](judgment.md), [persisted draw/RNG](draw-pile.md), [global GameStart](game-start.md) and [luck-card owners](luck-cards.md) supply separate actual library consumers. Remaining work includes complete startup/phase loops, content manifests, trusted seed/setup provisioning, application authentication/network/UI/bot integration and complete-match E2E. Production still registers Standard2013. No native runtime differential, all-packages or playable Quốc Chiến claim follows from this library checkpoint.

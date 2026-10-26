@@ -2,6 +2,8 @@
 
 These reports preserve particular source snapshots, adapters and executed checks. Read [current engine scope](../engine/overview.md) and the [roadmap](../roadmap/README.md) for present implementation boundaries. Earlier “next” statements and totals are historical.
 
+- [2026-10-26: reconcile current M0 knowledge and maintenance schema](2026-10-26-knowledge-refresh.md)
+
 - [M0.3/M0.4: pending Slash/Jink, commit and restart tracer](2026-10-23-hegemony-m0-pending-jink.md)
 - [M0.3/M0.4: first executable local tracer](2026-10-23-hegemony-m0-prototype-tracer.md)
 - [Release M0: publication and initial research](2026-10-22-hegemony-release-m0-initial.md)

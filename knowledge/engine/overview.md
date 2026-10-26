@@ -4,6 +4,8 @@ This snapshot describes the web code at the game revision in [source metadata](.
 
 The new `src/game/hegemony/` modules provide paired setup and independently registered normalized scheduler operations. `src/game/hegemony/types.ts` defines setup status as `selecting-generals | ready`; `src/game/hegemony/index.ts` explicitly states that **ready is not a playable match**. No implemented library operation should be presented as an enabled player command without a production action, legality and privacy adapter.
 
+The separate [local session experiment](prototype-session.md) now composes real draw/Play/Room/Slash/MethodUse/Jink/movement/damage operations under staged Master, with private prompt and process-crash recovery checks. It uses synthetic fixture authorities, two seats and one Slash; it does not register a playable production mode. Its [checkpoint](../reviews/2026-10-23-hegemony-m0-pending-jink.md) records execution evidence; service-time clocks, automatic bots and external storage remain pending.
+
 ## Read by subsystem
 
 | Contract                                                                       | Main web modules                                                                                              | Public regression files under `tests/hegemony/`                               |

@@ -24,6 +24,8 @@ A cancelable counter gets a fresh null-source effect with responder as recipient
 
 ## Slash preparation and response
 
+For the later actor-private socket/commit consumer of a plain Slash and physical Jink, see the [local session contract](prototype-session.md). It preserves the operation semantics below while retaining explicit fixture/package limits; it does not integrate the Nullification race or full native content.
+
 `slash-on-use` clears target-fix/assignee flags on currently living seats, transfers no-distance/disable-extra-target flags to current card storage, handles a positive drank mark and delegates repeated-Slash cause to an adapter. That adapter owns Play-phase and shown paoxiao → shown paoxiao_xh → Crossbow precedence. The current flags flow into common onUse; slashDisableExtraTarget suppresses TargetSelected. Wrapped and virtual references retain their own resource storage.
 
 `slash-on-effect` consumes one signed integer from the source's current-key Jink list even if disresponsive then sets the requirement to zero. Emptying removes the tag; otherwise keep the remainder. A nonnull source/nonempty adapted list is required. Missing drank defaults zero; nature is package-resolved. Consumed Jink requirements are not restored after a later error.

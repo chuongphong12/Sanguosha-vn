@@ -6,6 +6,8 @@ The [source baseline](source-baseline.json) identifies the game revision inspect
 
 The approved [complete-release plan and M0 route](plans/hegemony-release.md) now govern the first-release scope, bot/media requirements and room lifetime. The linked tracker specification/map own current requirements and dependencies; the normalized library remains at its documented checkpoint until implementation tickets pass their gates.
 
+Current application experiment: the [local session and Slash/Jink contract](engine/prototype-session.md) composes real operations with synthetic fixture authorities. Its [revision-scoped checkpoint](reviews/2026-10-23-hegemony-m0-pending-jink.md) records reported tests and graph limitations. M0.3/M0.4 remain open; the next bounded slice is independent service-time prompt/disconnect clocks. The [2026-10-26 maintenance review](reviews/2026-10-26-knowledge-refresh.md) records the knowledge reconciliation and its limits.
+
 ## Find the relevant contract
 
 | Need                                     | Start here                                                                                                                                                      |
@@ -15,6 +17,7 @@ The approved [complete-release plan and M0 route](plans/hegemony-release.md) now
 | What the web engine implements           | [Engine overview](engine/overview.md), [architecture and production boundary](engine/architecture.md)                                                           |
 | Setup, hidden information and faction    | [Setup and privacy](engine/setup-and-privacy.md), [general lifecycle and relations](engine/generals-and-relations.md)                                           |
 | Trigger order and persistence            | [Scheduler](engine/scheduler.md)                                                                                                                                |
+| Local session, private prompts and crash recovery | [Prototype session contract](engine/prototype-session.md), [pending Jink checkpoint](reviews/2026-10-23-hegemony-m0-pending-jink.md) |
 | Movement and card resolution             | [Movement](engine/movement.md), [card use/effects](engine/card-use-and-effects.md), [Nullification/Slash](engine/nullification-and-slash.md)                    |
 | SkillCard envelope and shared execution  | [SkillCard onUse](engine/skill-card-on-use.md), [shared execution](engine/skill-card-execution.md), [native boundaries](research/skillcard-shared-execution.md) |
 | Room wrapper and authoritative requests  | [Room use and admission](engine/room-use-and-admission.md)                                                                                                      |
@@ -27,10 +30,21 @@ The approved [complete-release plan and M0 route](plans/hegemony-release.md) now
 | Reveal rewards                           | [Rewards and token methods](engine/reveal-rewards-and-tokens.md)                                                                                                |
 | What remains before production           | [Roadmap](roadmap/README.md), [port plan](plans/hegemony-port.md), [initial design baseline](specs/hegemony-engine-baseline.md)                                 |
 | Assets and reuse evidence                | [Provenance](assets/provenance.md)                                                                                                                              |
+| Free hosting candidate facts | [Original investigation](research/2026-10-22-m0-hosting-options.md), [2026-10-26 official-document refresh](research/2026-10-26-m0-hosting-refresh.md) |
 | Why old documents changed                | [Curation assessment](research/architecture-and-provenance-assessment.md), [complete migration manifest](research/migration-manifest.json)                      |
 | Historical verification                  | [Evidence index](reviews/README.md)                                                                                                                             |
+| Maintain or ingest knowledge             | [Agent schema](AGENTS.md), [source conventions](sources/README.md), [source registry](sources/registry.json), [maintenance journal](log.md) |
+| Historical repository design             | [Design investigation](research/knowledge-repository-design.md), [migration specification](specs/knowledge-migration.md) |
 
 Code paths in code spans refer to the named game/native repository at the stated baseline. They are not relative links to files in this repository. Historical reports retain their original scope and source identities; their test totals do not certify a later revision.
+
+## Query remotely or maintain knowledge
+
+For a game checkout, use its verified `knowledge.lock.json` revision; do not silently replace it with knowledge `main`. For a standalone query, resolve the requested branch/tag (default `main`) to one full knowledge commit. Read this README, [AGENTS.md](AGENTS.md), [source-baseline.json](source-baseline.json), [source authority](rules/source-authority.md) and relevant linked pages at that commit through GitHub APIs or an available MCP connector. A local clone is optional for querying. Return evidence with repository, commit, path and section/line range; code citations use their recorded game/native revisions.
+
+The existing contracts form the compiled wiki. Immutable external source references provide the raw-source layer; mutable documents need authorized versioned exports when ingested. The schema defines ingest/query/lint. Start new maintenance from the schema and record actual work in the journal. Registry coverage is scoped to GameStart and the local session/Slash/Jink experiment; other contracts retain their existing pinned citations.
+
+The hub's query interface supplies evidence for the caller's agent to synthesize. Knowledge writes are a separate reviewed workflow. Remote reads and game subtree imports serve different consumers; the existing subtree decision and import commands below remain applicable to migrated game branches.
 
 ## Updating knowledge with the game
 
@@ -46,4 +60,4 @@ Offline verification checks the lock against the committed snapshot and rejects 
 
 Sync stops on dirty tracked files, local subtree additions, malformed locks, missing commits or mismatched trees. It preserves local work and leaves conflicts for deliberate resolution; it never force-resets files. Ordinary game build/test consumes tracked files and does not fetch this repository. To contribute, edit this repository and reimport a reviewed commit rather than editing the game subtree in isolation.
 
-The selected public repository must be provisioned by its owner before publication. Local preparation and fixture validation are possible before that step; they do not establish remote availability or successful remote CI.
+Publication of a knowledge revision does not establish publication of the corresponding game revision or successful remote CI. Check the named revisions and their actual delivery evidence.

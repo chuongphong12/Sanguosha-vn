@@ -42,6 +42,8 @@ This envelope adds no PreCardUsed/CardUsed/CardFinished, ordinary use, history o
 
 ## Adapters, privacy and remaining entries
 
+The later [local session experiment](prototype-session.md) supplies a bounded physical-Jink socket admission/MethodUse consumer with pending-prompt persistence. Its fixture catalogue/no-skill hooks and test-client bot do not replace the production package, notification or complete request authorities described here.
+
 Request admission, actual package conversion, current reference metadata/subcards, wrapped/log/skill notices, showSkill/Huashen and native skill/general movement metadata are mandatory named adapters. They are fixture implementations in the new tests; real scheduler, movement, GameRule resources and Slash caller implementations are composed. A callback/fixture does not enable a package, production login, network gateway or response button. Private provided state, catalogues, raw descriptors, frames and completion remain server-owned; the application must expose a separately authenticated filtered request contract.
 
 Registered child events and operations can suspend and restore JSON, including actual table/discard movement. Wrong actor, stale/replayed prompt and registry mismatch do not repeat work. Interruption retains eager state and freezes remaining frames under the current scheduler policy; no native exception unwind or rollback is added.

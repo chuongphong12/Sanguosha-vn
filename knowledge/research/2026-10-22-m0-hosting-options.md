@@ -4,6 +4,8 @@ Investigation started 2026-10-22; official pricing/free-plan pages refreshed 202
 
 ## Recommendation to test, not a vendor selection
 
+Later document access and additional operational caveats are recorded in the [2026-10-26 refresh](2026-10-26-m0-hosting-refresh.md). This original investigation retains its October 23 access date and evidence; neither note selects or provisions a provider.
+
 **First candidate:** one Render Free Node service plus a separate Neon Free Postgres project, preferably both in Singapore. Keep the existing TypeScript/PixiJS/boardgame.io stack and application-owned sequencing/staged Master output. This combination is an engineering hypothesis: the documents establish available components, not that the full five-room/bot workload fits or that the session implementation satisfies the contract. Supabase Free Postgres is an alternative if its pause and connectivity behavior prove acceptable. No provider is selected by this note.
 
 Finish the local real-transport/storage experiment first. A scratch local file proves only that local experiment; it cannot certify durable recovery on an ephemeral provider filesystem. Provider execution needs separately authorized access and a genuine external-store adapter. Keep the remote portion of M0.4 open until those traces execute on the selected service.
