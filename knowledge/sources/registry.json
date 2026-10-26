@@ -425,6 +425,54 @@
       "checked_on": "2026-10-26",
       "author": null,
       "business_owner": null
+    },
+    {
+      "id": "web.m0.session.b00ab43",
+      "kind": "primary_code",
+      "repository": "https://github.com/chuongphong12/Sanguosha-vn",
+      "revision": "b00ab435c1c37e982f675a80070c2b5d449a6a78",
+      "path": "server/prototypes/hegemony-m0/session.ts",
+      "url": "https://github.com/chuongphong12/Sanguosha-vn/blob/b00ab435c1c37e982f675a80070c2b5d449a6a78/server/prototypes/hegemony-m0/session.ts",
+      "locator": "nullable Member credential, leave and human-only synchronize; existing worker/persistence unchanged",
+      "checked_on": "2026-10-26",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "web.m0.leave-tests.b00ab43",
+      "kind": "test_code",
+      "repository": "https://github.com/chuongphong12/Sanguosha-vn",
+      "revision": "b00ab435c1c37e982f675a80070c2b5d449a6a78",
+      "path": "tests/prototypes/m0-leave.test.ts",
+      "url": "https://github.com/chuongphong12/Sanguosha-vn/blob/b00ab435c1c37e982f675a80070c2b5d449a6a78/tests/prototypes/m0-leave.test.ts",
+      "locator": "seven session scenarios for takeover, revoked tabs, Play/Jink, recovery, grace and answer/Leave ordering",
+      "checked_on": "2026-10-26",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "web.m0.prompt-tests.b00ab43",
+      "kind": "test_code",
+      "repository": "https://github.com/chuongphong12/Sanguosha-vn",
+      "revision": "b00ab435c1c37e982f675a80070c2b5d449a6a78",
+      "path": "tests/prototypes/m0-prompt.test.ts",
+      "url": "https://github.com/chuongphong12/Sanguosha-vn/blob/b00ab435c1c37e982f675a80070c2b5d449a6a78/tests/prototypes/m0-prompt.test.ts",
+      "locator": "actual Socket.IO failed file Leave retains human rights and prompt",
+      "checked_on": "2026-10-26",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "web.m0.sql-proof.b00ab43",
+      "kind": "test_code",
+      "repository": "https://github.com/chuongphong12/Sanguosha-vn",
+      "revision": "b00ab435c1c37e982f675a80070c2b5d449a6a78",
+      "path": "tests/prototypes/m0-postgres.proof.ts",
+      "url": "https://github.com/chuongphong12/Sanguosha-vn/blob/b00ab435c1c37e982f675a80070c2b5d449a6a78/tests/prototypes/m0-postgres.proof.ts",
+      "locator": "seven SQL cases including permanent handoff SIGKILL/recovery and failed Leave authority restore",
+      "checked_on": "2026-10-26",
+      "author": null,
+      "business_owner": null
     }
   ],
   "pages": [
@@ -449,9 +497,9 @@
       "path": "engine/prototype-session.md",
       "status": "supported",
       "reviewed_on": "2026-10-26",
-      "review_scope": "Bounded local session/Slash/Jink plus independent service-time deadlines, automatic pending decisions, recovery and precision limits; not full game, provider or competitive-bot certification. Optional separate local PostgreSQL store, writer fencing and explicit remaining hosted-provider gates.",
+      "review_scope": "Bounded local session/Slash/Jink plus independent service-time deadlines, automatic pending decisions, recovery and precision limits; not full game, provider or competitive-bot certification. Optional separate local PostgreSQL store, writer fencing and explicit remaining hosted-provider gates. Bounded explicit-Leave permanent bot membership, revoked credentials, human presence/grace and real file/SQL recovery.",
       "applies_to": {
-        "game_commit": "816191df12e6b9b5849b727104afd4a350d58ca9",
+        "game_commit": "b00ab435c1c37e982f675a80070c2b5d449a6a78",
         "native_commit": "ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f"
       },
       "source_ids": [
@@ -481,7 +529,11 @@
         "web.m0.transport.816191d",
         "web.m0.sql-proof.816191d",
         "web.m0.storage-tests.816191d",
-        "web.m0.sql-runner.816191d"
+        "web.m0.sql-runner.816191d",
+        "web.m0.session.b00ab43",
+        "web.m0.leave-tests.b00ab43",
+        "web.m0.prompt-tests.b00ab43",
+        "web.m0.sql-proof.b00ab43"
       ]
     }
   ],
@@ -792,6 +844,42 @@
         "web.m0.sql-runner.816191d"
       ],
       "scope": "Optional separate local PostgreSQL persistence/recovery within the two-seat synthetic session; code/assertions do not establish hosted-provider or full-game acceptance."
+    },
+    {
+      "subject": "page:engine/prototype-session.md",
+      "predicate": "derived_from",
+      "object": "source:web.m0.session.b00ab43",
+      "evidence": [
+        "web.m0.session.b00ab43"
+      ],
+      "scope": "Permanent explicit-Leave bot membership and existing supported requests in the isolated two-seat fixture; not full-turn, full-content or production multi-seat certification."
+    },
+    {
+      "subject": "page:engine/prototype-session.md",
+      "predicate": "derived_from",
+      "object": "source:web.m0.leave-tests.b00ab43",
+      "evidence": [
+        "web.m0.leave-tests.b00ab43"
+      ],
+      "scope": "Permanent explicit-Leave bot membership and existing supported requests in the isolated two-seat fixture; not full-turn, full-content or production multi-seat certification."
+    },
+    {
+      "subject": "page:engine/prototype-session.md",
+      "predicate": "derived_from",
+      "object": "source:web.m0.prompt-tests.b00ab43",
+      "evidence": [
+        "web.m0.prompt-tests.b00ab43"
+      ],
+      "scope": "Permanent explicit-Leave bot membership and existing supported requests in the isolated two-seat fixture; not full-turn, full-content or production multi-seat certification."
+    },
+    {
+      "subject": "page:engine/prototype-session.md",
+      "predicate": "derived_from",
+      "object": "source:web.m0.sql-proof.b00ab43",
+      "evidence": [
+        "web.m0.sql-proof.b00ab43"
+      ],
+      "scope": "Permanent explicit-Leave bot membership and existing supported requests in the isolated two-seat fixture; not full-turn, full-content or production multi-seat certification."
     }
   ]
 }
