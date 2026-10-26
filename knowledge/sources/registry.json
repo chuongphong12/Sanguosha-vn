@@ -341,6 +341,90 @@
       "checked_on": "2026-10-26",
       "author": null,
       "business_owner": null
+    },
+    {
+      "id": "web.m0.session.816191d",
+      "kind": "primary_code",
+      "repository": "https://github.com/chuongphong12/Sanguosha-vn",
+      "revision": "816191df12e6b9b5849b727104afd4a350d58ca9",
+      "path": "server/prototypes/hegemony-m0/session.ts",
+      "url": "https://github.com/chuongphong12/Sanguosha-vn/blob/816191df12e6b9b5849b727104afd4a350d58ca9/server/prototypes/hegemony-m0/session.ts",
+      "locator": "SessionStore selection, commit and serial authority guard",
+      "checked_on": "2026-10-26",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "web.m0.storage.816191d",
+      "kind": "primary_code",
+      "repository": "https://github.com/chuongphong12/Sanguosha-vn",
+      "revision": "816191df12e6b9b5849b727104afd4a350d58ca9",
+      "path": "server/prototypes/hegemony-m0/storage.ts",
+      "url": "https://github.com/chuongphong12/Sanguosha-vn/blob/816191df12e6b9b5849b727104afd4a350d58ca9/server/prototypes/hegemony-m0/storage.ts",
+      "locator": "SessionStore interface and default file writer lifecycle",
+      "checked_on": "2026-10-26",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "web.m0.postgres.816191d",
+      "kind": "primary_code",
+      "repository": "https://github.com/chuongphong12/Sanguosha-vn",
+      "revision": "816191df12e6b9b5849b727104afd4a350d58ca9",
+      "path": "server/prototypes/hegemony-m0/postgres.ts",
+      "url": "https://github.com/chuongphong12/Sanguosha-vn/blob/816191df12e6b9b5849b727104afd4a350d58ca9/server/prototypes/hegemony-m0/postgres.ts",
+      "locator": "direct Client/advisory ownership, document CAS and restart-required fencing",
+      "checked_on": "2026-10-26",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "web.m0.transport.816191d",
+      "kind": "primary_code",
+      "repository": "https://github.com/chuongphong12/Sanguosha-vn",
+      "revision": "816191df12e6b9b5849b727104afd4a350d58ca9",
+      "path": "server/prototypes/hegemony-m0/transport.ts",
+      "url": "https://github.com/chuongphong12/Sanguosha-vn/blob/816191df12e6b9b5849b727104afd4a350d58ca9/server/prototypes/hegemony-m0/transport.ts",
+      "locator": "server-only store factory and actual socket session boundary",
+      "checked_on": "2026-10-26",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "web.m0.sql-proof.816191d",
+      "kind": "test_code",
+      "repository": "https://github.com/chuongphong12/Sanguosha-vn",
+      "revision": "816191df12e6b9b5849b727104afd4a350d58ca9",
+      "path": "tests/prototypes/m0-postgres.proof.ts",
+      "url": "https://github.com/chuongphong12/Sanguosha-vn/blob/816191df12e6b9b5849b727104afd4a350d58ca9/tests/prototypes/m0-postgres.proof.ts",
+      "locator": "five real PostgreSQL/socket process/fault/recovery cases",
+      "checked_on": "2026-10-26",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "web.m0.storage-tests.816191d",
+      "kind": "test_code",
+      "repository": "https://github.com/chuongphong12/Sanguosha-vn",
+      "revision": "816191df12e6b9b5849b727104afd4a350d58ca9",
+      "path": "tests/prototypes/m0-storage.test.ts",
+      "url": "https://github.com/chuongphong12/Sanguosha-vn/blob/816191df12e6b9b5849b727104afd4a350d58ca9/tests/prototypes/m0-storage.test.ts",
+      "locator": "selected store failure rejects without local fallback",
+      "checked_on": "2026-10-26",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "web.m0.sql-runner.816191d",
+      "kind": "primary_code",
+      "repository": "https://github.com/chuongphong12/Sanguosha-vn",
+      "revision": "816191df12e6b9b5849b727104afd4a350d58ca9",
+      "path": "scripts/prototype-postgres.mjs",
+      "url": "https://github.com/chuongphong12/Sanguosha-vn/blob/816191df12e6b9b5849b727104afd4a350d58ca9/scripts/prototype-postgres.mjs",
+      "locator": "pinned image and isolated loopback container ownership/cleanup",
+      "checked_on": "2026-10-26",
+      "author": null,
+      "business_owner": null
     }
   ],
   "pages": [
@@ -365,9 +449,9 @@
       "path": "engine/prototype-session.md",
       "status": "supported",
       "reviewed_on": "2026-10-26",
-      "review_scope": "Bounded local session/Slash/Jink plus independent service-time deadlines, automatic pending decisions, recovery and precision limits; not full game, provider or competitive-bot certification.",
+      "review_scope": "Bounded local session/Slash/Jink plus independent service-time deadlines, automatic pending decisions, recovery and precision limits; not full game, provider or competitive-bot certification. Optional separate local PostgreSQL store, writer fencing and explicit remaining hosted-provider gates.",
       "applies_to": {
-        "game_commit": "fbe60f6b911956d2b432840f0cfe8970218acd35",
+        "game_commit": "816191df12e6b9b5849b727104afd4a350d58ca9",
         "native_commit": "ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f"
       },
       "source_ids": [
@@ -390,7 +474,14 @@
         "web.m0.bot.fbe60f6",
         "web.m0.deadline-tests.fbe60f6",
         "web.m0.prompt-tests.fbe60f6",
-        "web.m0.browser-proof.fbe60f6"
+        "web.m0.browser-proof.fbe60f6",
+        "web.m0.session.816191d",
+        "web.m0.storage.816191d",
+        "web.m0.postgres.816191d",
+        "web.m0.transport.816191d",
+        "web.m0.sql-proof.816191d",
+        "web.m0.storage-tests.816191d",
+        "web.m0.sql-runner.816191d"
       ]
     }
   ],
@@ -638,6 +729,69 @@
         "web.m0.browser-proof.fbe60f6"
       ],
       "scope": "Local clock-v3 session/Slash/Jink fixture and service-time deadlines; code and test assertions are distinct from execution receipts and complete production behavior."
+    },
+    {
+      "subject": "page:engine/prototype-session.md",
+      "predicate": "derived_from",
+      "object": "source:web.m0.session.816191d",
+      "evidence": [
+        "web.m0.session.816191d"
+      ],
+      "scope": "Optional separate local PostgreSQL persistence/recovery within the two-seat synthetic session; code/assertions do not establish hosted-provider or full-game acceptance."
+    },
+    {
+      "subject": "page:engine/prototype-session.md",
+      "predicate": "derived_from",
+      "object": "source:web.m0.storage.816191d",
+      "evidence": [
+        "web.m0.storage.816191d"
+      ],
+      "scope": "Optional separate local PostgreSQL persistence/recovery within the two-seat synthetic session; code/assertions do not establish hosted-provider or full-game acceptance."
+    },
+    {
+      "subject": "page:engine/prototype-session.md",
+      "predicate": "derived_from",
+      "object": "source:web.m0.postgres.816191d",
+      "evidence": [
+        "web.m0.postgres.816191d"
+      ],
+      "scope": "Optional separate local PostgreSQL persistence/recovery within the two-seat synthetic session; code/assertions do not establish hosted-provider or full-game acceptance."
+    },
+    {
+      "subject": "page:engine/prototype-session.md",
+      "predicate": "derived_from",
+      "object": "source:web.m0.transport.816191d",
+      "evidence": [
+        "web.m0.transport.816191d"
+      ],
+      "scope": "Optional separate local PostgreSQL persistence/recovery within the two-seat synthetic session; code/assertions do not establish hosted-provider or full-game acceptance."
+    },
+    {
+      "subject": "page:engine/prototype-session.md",
+      "predicate": "derived_from",
+      "object": "source:web.m0.sql-proof.816191d",
+      "evidence": [
+        "web.m0.sql-proof.816191d"
+      ],
+      "scope": "Optional separate local PostgreSQL persistence/recovery within the two-seat synthetic session; code/assertions do not establish hosted-provider or full-game acceptance."
+    },
+    {
+      "subject": "page:engine/prototype-session.md",
+      "predicate": "derived_from",
+      "object": "source:web.m0.storage-tests.816191d",
+      "evidence": [
+        "web.m0.storage-tests.816191d"
+      ],
+      "scope": "Optional separate local PostgreSQL persistence/recovery within the two-seat synthetic session; code/assertions do not establish hosted-provider or full-game acceptance."
+    },
+    {
+      "subject": "page:engine/prototype-session.md",
+      "predicate": "derived_from",
+      "object": "source:web.m0.sql-runner.816191d",
+      "evidence": [
+        "web.m0.sql-runner.816191d"
+      ],
+      "scope": "Optional separate local PostgreSQL persistence/recovery within the two-seat synthetic session; code/assertions do not establish hosted-provider or full-game acceptance."
     }
   ]
 }
