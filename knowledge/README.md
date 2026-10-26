@@ -6,7 +6,7 @@ The [source baseline](source-baseline.json) identifies the game revision inspect
 
 The approved [complete-release plan and M0 route](plans/hegemony-release.md) now govern the first-release scope, bot/media requirements and room lifetime. The linked tracker specification/map own current requirements and dependencies; the normalized library remains at its documented checkpoint until implementation tickets pass their gates.
 
-Current application experiment: the [local session and Slash/Jink contract](engine/prototype-session.md) composes real operations with synthetic fixture authorities. Its [revision-scoped checkpoint](reviews/2026-10-23-hegemony-m0-pending-jink.md) records reported tests and graph limitations. M0.3/M0.4 remain open; the next bounded slice is independent service-time prompt/disconnect clocks. The [2026-10-26 maintenance review](reviews/2026-10-26-knowledge-refresh.md) records the knowledge reconciliation and its limits.
+Current application experiment: the [local session and Slash/Jink contract](engine/prototype-session.md) composes real operations with synthetic fixture authorities. Its [service-clock checkpoint](reviews/2026-10-26-hegemony-m0-service-clocks.md) records independent saved prompt/disconnect clocks, bounded automatic decisions, executed checks and graph limits; the [earlier pending Jink report](reviews/2026-10-23-hegemony-m0-pending-jink.md) remains historical evidence. M0.3/M0.4 remain open for broader request/bot ownership integration and external-store/provider proofs, including measured timing precision. The [2026-10-26 maintenance review](reviews/2026-10-26-knowledge-refresh.md) records the preceding knowledge reconciliation and its limits.
 
 ## Find the relevant contract
 
@@ -17,7 +17,7 @@ Current application experiment: the [local session and Slash/Jink contract](engi
 | What the web engine implements           | [Engine overview](engine/overview.md), [architecture and production boundary](engine/architecture.md)                                                           |
 | Setup, hidden information and faction    | [Setup and privacy](engine/setup-and-privacy.md), [general lifecycle and relations](engine/generals-and-relations.md)                                           |
 | Trigger order and persistence            | [Scheduler](engine/scheduler.md)                                                                                                                                |
-| Local session, private prompts and crash recovery | [Prototype session contract](engine/prototype-session.md), [pending Jink checkpoint](reviews/2026-10-23-hegemony-m0-pending-jink.md) |
+| Local session, private prompts, clocks and crash recovery | [Prototype session contract](engine/prototype-session.md), [service-clock checkpoint](reviews/2026-10-26-hegemony-m0-service-clocks.md) |
 | Movement and card resolution             | [Movement](engine/movement.md), [card use/effects](engine/card-use-and-effects.md), [Nullification/Slash](engine/nullification-and-slash.md)                    |
 | SkillCard envelope and shared execution  | [SkillCard onUse](engine/skill-card-on-use.md), [shared execution](engine/skill-card-execution.md), [native boundaries](research/skillcard-shared-execution.md) |
 | Room wrapper and authoritative requests  | [Room use and admission](engine/room-use-and-admission.md)                                                                                                      |

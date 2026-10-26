@@ -2,7 +2,7 @@
 
 Approved release destination and M0 frontier: [complete Quốc Chiến release](../plans/hegemony-release.md). Current requirements and native issue relationships live in the linked release specification/map; a completed library checkpoint is not a playable-release certificate.
 
-Current M0 evidence: [local session/Slash/Jink contract](../engine/prototype-session.md) and its [pending decision checkpoint](../reviews/2026-10-23-hegemony-m0-pending-jink.md). M0.2's contract is accepted/closed; manifest M0.1 and prototypes M0.3/M0.4 remain open. The immediate prototype frontier is independent durable prompt/disconnect clocks excluding downtime, followed by broader bot execution and external-store/provider proofs. Remaining library phase/turn work below belongs to the wider release route, not an instruction to bypass the current M0 slice.
+Current M0 evidence: [local session/Slash/Jink contract](../engine/prototype-session.md) and its [pending decision checkpoint](../reviews/2026-10-23-hegemony-m0-pending-jink.md). M0.2's contract is accepted/closed; manifest M0.1 and prototypes M0.3/M0.4 remain open. The [local service-clock slice](../reviews/2026-10-26-hegemony-m0-service-clocks.md) now covers independent saved deadlines excluding downtime and bounded automatic pending decisions. The immediate frontier is broader request/bot ownership integration and external-store/provider proofs, with measured timing precision. Remaining library phase/turn work below belongs to the wider release route, not an instruction to bypass the current M0 slice.
 
 ## Engine
 

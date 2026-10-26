@@ -2,6 +2,7 @@
 
 These reports preserve particular source snapshots, adapters and executed checks. Read [current engine scope](../engine/overview.md) and the [roadmap](../roadmap/README.md) for present implementation boundaries. Earlier “next” statements and totals are historical.
 
+- [M0.3/M0.4: independent service-time clocks and bounded automatic decisions](2026-10-26-hegemony-m0-service-clocks.md)
 - [2026-10-26: reconcile current M0 knowledge and maintenance schema](2026-10-26-knowledge-refresh.md)
 
 - [M0.3/M0.4: pending Slash/Jink, commit and restart tracer](2026-10-23-hegemony-m0-pending-jink.md)
