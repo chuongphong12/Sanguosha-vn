@@ -3,6 +3,7 @@ import { createServer } from "node:http";
 import { readFile } from "node:fs/promises";
 import { Server } from "socket.io";
 import { createPrototype, type Auth, type Command } from "./session";
+import type { ServiceClock } from "./deadlines";
 
 export async function startProofServer(
   path: string,
@@ -10,9 +11,14 @@ export async function startProofServer(
     port?: number;
     dropOneCommandAck?: boolean;
     beforeBind?: (disconnected: AbortSignal) => Promise<void>;
+    clock?: ServiceClock;
   } = {},
 ) {
-  const session = await createPrototype(path);
+  let announce = () => {};
+  const session = await createPrototype(path, {
+    clock: options.clock,
+    onChange: () => announce(),
+  });
   const http = createServer(async (_req, res) => {
     res.setHeader("Content-Type", "text/html; charset=utf-8");
     res.end(await readFile(new URL("./demo.html", import.meta.url)));
@@ -23,16 +29,24 @@ export async function startProofServer(
   });
   const bound = new Map<string, Auth>();
   let drop = options.dropOneCommandAck ?? false;
-  async function publish() {
-    for (const [id, auth] of bound) {
-      try {
-        io.to(id).emit("view", await session.view(auth));
-      } catch {
-        io.to(id).emit("room-closed");
-        bound.delete(id);
+  let publication = Promise.resolve();
+  function publish() {
+    const next = publication.then(async () => {
+      for (const [id, auth] of bound) {
+        try {
+          io.to(id).emit("view", await session.view(auth));
+        } catch {
+          io.to(id).emit("room-closed");
+          bound.delete(id);
+        }
       }
-    }
+    });
+    publication = next.catch(() => {});
+    return next;
   }
+  announce = () => {
+    void publish().catch(() => {});
+  };
   io.on("connection", (socket) => {
     let binding = false;
     const disconnected = new AbortController();

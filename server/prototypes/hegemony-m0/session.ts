@@ -4,6 +4,15 @@ import { randomBytes, createHash } from "node:crypto";
 import { Master } from "boardgame.io/master";
 import { InitializeGame, Sync } from "boardgame.io/internal";
 import type { State, Server } from "boardgame.io";
+import { chooseBot, policyVersion, type Memory } from "./bot";
+import {
+  systemClock,
+  initialDeadlines,
+  synchronizeDeadlines,
+  graceMs,
+  type ServiceClock,
+  type Deadlines,
+} from "./deadlines";
 import {
   copy,
   identity,
@@ -26,7 +35,11 @@ export type Command = {
   revision: number;
   generation: number;
 } & EngineCommand;
-type Member = { secretHash: string; generation: number };
+type Member = {
+  secretHash: string;
+  generation: number;
+  control: "human" | "bot";
+};
 type Receipt = { action: string; intent: EngineCommand; revision: number };
 type Room = {
   state: State<ProofGame>;
@@ -34,10 +47,13 @@ type Room = {
   members: Record<string, Member>;
   receipts: Record<string, Receipt>;
   started: boolean;
+  deadlines: Deadlines;
+  botMemory: Record<string, Memory>;
 };
 type Database = {
   schema: typeof identity;
   revision: number;
+  elapsed: number;
   rooms: Record<string, Room>;
 };
 const hash = (s: string) => createHash("sha256").update(s).digest("hex");
@@ -81,7 +97,11 @@ class StagedStore extends Sync {
 }
 export async function createPrototype(
   path: string,
-  options: { beforeCommit?: () => Promise<void> } = {},
+  options: {
+    beforeCommit?: () => Promise<void>;
+    clock?: ServiceClock;
+    onChange?: () => void;
+  } = {},
 ) {
   const lockPath = path + ".writer",
     owner = { pid: process.pid, nonce: nonce() };
@@ -110,15 +130,29 @@ export async function createPrototype(
       db = JSON.parse(await readFile(path, "utf8"));
     } catch (e: any) {
       if (e.code !== "ENOENT") throw e;
-      db = { schema: identity, revision: 0, rooms: {} };
+      db = { schema: identity, revision: 0, elapsed: 0, rooms: {} };
     }
-    if (db.schema !== identity) throw new Error("Incompatible prototype save");
+    if (
+      db.schema !== identity ||
+      !Number.isFinite(db.elapsed) ||
+      db.elapsed < 0
+    )
+      throw new Error("Incompatible prototype save");
   } catch (e) {
     await unlink(lockPath);
     throw e;
   }
   let closed = false,
     tail: Promise<unknown> = Promise.resolve();
+  const clock = options.clock ?? systemClock;
+  let mark = clock.now(),
+    booting = true,
+    stopping = false;
+  function serviceTime(now = clock.now()) {
+    if (!Number.isFinite(now) || now < mark)
+      throw new Error("Invalid service clock");
+    return db.elapsed + (booting ? 0 : now - mark);
+  }
   const connections = new Map<string, Map<string, () => boolean>>(),
     controllers = new Map<string, string>();
   const key = (a: Pick<Auth, "room" | "actor">) => `${a.room}:${a.actor}`;
@@ -133,6 +167,8 @@ export async function createPrototype(
     return result;
   }
   async function commit(next: Database) {
+    const sampled = clock.now();
+    next.elapsed = serviceTime(sampled);
     next.revision++;
     const f = await open(path + ".next", "w", 0o600);
     try {
@@ -144,6 +180,7 @@ export async function createPrototype(
     await options.beforeCommit?.();
     await rename(path + ".next", path);
     db = next;
+    mark = sampled;
   }
   function authenticate(auth: Auth, data = db) {
     const room = data.rooms[auth.room],
@@ -161,7 +198,17 @@ export async function createPrototype(
       revision: room.state._stateID,
       generation: member.generation,
       ...actorObservation(e, auth.actor),
-      controlling: controllers.get(key(auth)) === auth.tab && live(auth),
+      controlling:
+        member.control === "human" &&
+        controllers.get(key(auth)) === auth.tab &&
+        live(auth),
+      timing: {
+        control: member.control,
+        remainingMs:
+          room.deadlines.prompt?.actor === auth.actor
+            ? Math.max(0, room.deadlines.prompt.until - db.elapsed)
+            : null,
+      },
     };
   }
   async function connect(
@@ -176,7 +223,16 @@ export async function createPrototype(
       controller = controllers.get(id),
       claim = takeControl || !controller || tabs.get(controller)?.() !== true,
       next = copy(db);
-    if (claim) next.rooms[auth.room].members[auth.actor].generation++;
+    if (claim) {
+      next.rooms[auth.room].members[auth.actor].generation++;
+      next.rooms[auth.room].members[auth.actor].control = "human";
+    }
+    synchronize(
+      auth.room,
+      next.rooms[auth.room],
+      serviceTime(),
+      isConnected() ? [auth.actor] : [],
+    );
     await commit(next);
     tabs.set(tab, isConnected);
     connections.set(id, tabs);
@@ -205,10 +261,20 @@ export async function createPrototype(
         createdAt: Date.now(),
         updatedAt: Date.now(),
       },
-      members: { "0": { secretHash: hash(secret), generation: 1 } },
+      members: {
+        "0": { secretHash: hash(secret), generation: 1, control: "human" },
+      },
       receipts: {},
       started: false,
+      deadlines: initialDeadlines(),
+      botMemory: {},
     };
+    synchronize(
+      roomID,
+      next.rooms[roomID],
+      serviceTime(),
+      isConnected() ? ["0"] : [],
+    );
     await commit(next);
     const auth = {
       room: roomID,
@@ -231,7 +297,14 @@ export async function createPrototype(
     next.rooms[roomID].members["1"] = {
       secretHash: hash(secret),
       generation: 1,
+      control: "human",
     };
+    synchronize(
+      roomID,
+      next.rooms[roomID],
+      serviceTime(),
+      isConnected() ? ["1"] : [],
+    );
     await commit(next);
     const auth = {
       room: roomID,
@@ -249,6 +322,7 @@ export async function createPrototype(
     const { room, member } = authenticate(auth);
     if (
       controllers.get(key(auth)) !== auth.tab ||
+      member.control !== "human" ||
       command?.generation !== member.generation ||
       !live(auth)
     )
@@ -287,7 +361,28 @@ export async function createPrototype(
     if (command.revision !== room.state._stateID)
       throw new Error("Stale revision");
     const next = copy(db),
-      staged = next.rooms[auth.room],
+      staged = next.rooms[auth.room];
+    await execute(staged, auth.room, auth.actor, intent);
+    synchronize(auth.room, staged, serviceTime());
+    staged.receipts[receiptKey] = {
+      action: command.action,
+      intent,
+      revision: staged.state._stateID,
+    };
+    await commit(next);
+    return {
+      receipt: staged.receipts[receiptKey],
+      view: view(auth),
+      duplicate: false,
+    };
+  }
+  async function execute(
+    staged: Room,
+    roomID: string,
+    actor: string,
+    intent: EngineCommand,
+  ) {
+    const revision = staged.state._stateID,
       pending: unknown[] = [];
     // Stock Master sends BEFORE storage writes: stage output, subscriber and writes.
     const master = new Master(proofGame, new StagedStore(staged), {
@@ -307,35 +402,26 @@ export async function createPrototype(
         payload: {
           type: "command",
           args: [intent],
-          playerID: auth.actor,
+          playerID: actor,
           credentials: "PROTOTYPE-server-bound",
         },
       },
-      command.revision,
-      auth.room,
-      auth.actor,
+      revision,
+      roomID,
+      actor,
     );
-    if (error || staged.state._stateID !== room.state._stateID + 1)
+    if (error || staged.state._stateID !== revision + 1)
       throw new Error("Engine rejected command");
     staged.started = true;
-    staged.receipts[receiptKey] = {
-      action: command.action,
-      intent,
-      revision: staged.state._stateID,
-    };
-    await commit(next);
-    // Never release raw Master packets/subscriber state. Derive a fresh actor view.
-    return {
-      receipt: staged.receipts[receiptKey],
-      view: view(auth),
-      duplicate: false,
-    };
   }
   async function disconnect(auth: Auth) {
     authenticate(auth);
     const id = key(auth);
     connections.get(id)?.delete(auth.tab);
     if (controllers.get(id) === auth.tab) controllers.delete(id);
+    const next = copy(db);
+    synchronize(auth.room, next.rooms[auth.room], serviceTime());
+    await commit(next);
   }
   async function leave(auth: Auth) {
     const { member } = authenticate(auth);
@@ -355,7 +441,10 @@ export async function createPrototype(
           ),
       );
     if (!otherOnline) delete next.rooms[auth.room];
-    else delete room.members[auth.actor];
+    else {
+      delete room.members[auth.actor];
+      synchronize(auth.room, room, serviceTime());
+    }
     await commit(next);
     for (const id of [...connections.keys()])
       if (
@@ -367,18 +456,162 @@ export async function createPrototype(
       }
     return { deleted: !next.rooms[auth.room] };
   }
+  function synchronize(
+    roomID: string,
+    room: Room,
+    now: number,
+    arriving: string[] = [],
+  ) {
+    const online = Object.keys(room.members).filter(
+      (actor) =>
+        arriving.includes(actor) ||
+        [...(connections.get(`${roomID}:${actor}`)?.values() ?? [])].some(
+          (isLive) => isLive(),
+        ),
+    );
+    synchronizeDeadlines(
+      room.deadlines,
+      Object.keys(room.members),
+      online,
+      room.state.G.engine.scheduler.prompt,
+      now,
+    );
+  }
+  async function pulse(checkpoint = false) {
+    if (!Object.keys(db.rooms).length) return false;
+    const now = serviceTime(),
+      next = copy(db);
+    if (
+      !checkpoint &&
+      !Object.values(next.rooms).some(
+        (room) =>
+          (room.deadlines.emptyUntil !== null &&
+            room.deadlines.emptyUntil <= now) ||
+          Object.entries(room.deadlines.offline).some(
+            ([actor, until]) =>
+              until <= now && room.members[actor]?.control === "human",
+          ) ||
+          (room.deadlines.prompt &&
+            (room.deadlines.prompt.until <= now ||
+              room.members[room.deadlines.prompt.actor]?.control === "bot")),
+      )
+    )
+      return false;
+    for (const [roomID, room] of Object.entries(next.rooms)) {
+      synchronize(roomID, room, now);
+      if (
+        room.deadlines.emptyUntil !== null &&
+        now >= room.deadlines.emptyUntil
+      ) {
+        delete next.rooms[roomID];
+        continue;
+      }
+      for (const [actor, until] of Object.entries(room.deadlines.offline)) {
+        const member = room.members[actor];
+        if (now >= until && member.control === "human") {
+          member.control = "bot";
+          member.generation++;
+        }
+      }
+      const deadline = room.deadlines.prompt;
+      if (!deadline) continue;
+      const member = room.members[deadline.actor];
+      if (!member || (now < deadline.until && member.control !== "bot"))
+        continue;
+      const observation = actorObservation(room.state.G.engine, deadline.actor);
+      if (observation.prompt?.id !== deadline.id) continue;
+      const result = chooseBot(
+        observation.decision,
+        room.botMemory[deadline.actor] ?? {
+          version: policyVersion,
+          actor: deadline.actor,
+          seed: 17 + Number(deadline.actor),
+          decisions: 0,
+        },
+      );
+      const choice = observation.prompt.choices.some(
+        (c) => c.id === result.choice,
+      )
+        ? result.choice
+        : null;
+      if (choice === null && !observation.prompt.canCancel) continue;
+      const intent: EngineCommand = {
+        action: "answer",
+        answer: { id: deadline.id, choice },
+      };
+      await execute(room, roomID, deadline.actor, intent);
+      room.botMemory[deadline.actor] = result.memory;
+      room.receipts[
+        `system:${deadline.actor}:${deadline.id}:${member.generation}`
+      ] = {
+        action: "answer",
+        intent,
+        revision: room.state._stateID,
+      };
+      synchronize(roomID, room, now);
+    }
+    await commit(next);
+    for (const id of [...connections.keys()]) {
+      if (!db.rooms[id.slice(0, id.indexOf(":"))]) {
+        connections.delete(id);
+        controllers.delete(id);
+      }
+    }
+    return true;
+  }
+  // Persist recovery grace before exposing a ready session. Downtime is never a wall-time delta.
+  try {
+    if (Object.keys(db.rooms).length) {
+      const next = copy(db);
+      for (const [roomID, room] of Object.entries(next.rooms)) {
+        room.deadlines.emptyUntil = db.elapsed + graceMs;
+        synchronize(roomID, room, db.elapsed);
+      }
+      await commit(next);
+    }
+  } catch (error) {
+    await unlink(lockPath);
+    throw error;
+  }
+  booting = false;
+  mark = clock.now();
+  let cancel = () => {};
+  function arm() {
+    if (stopping) return;
+    cancel = clock.schedule(async () => {
+      try {
+        if (await serial(() => pulse(true))) options.onChange?.();
+      } catch {
+        if (!stopping) console.error("Prototype clock checkpoint failed");
+      } finally {
+        arm();
+      }
+    }, 1000);
+  }
+  arm();
+  function update<T>(action: () => Promise<T>) {
+    let changed = false;
+    return serial(async () => {
+      changed = await pulse();
+      return action();
+    }).finally(() => {
+      if (changed) options.onChange?.();
+    });
+  }
   return {
     create: (tab?: string, isLive?: () => boolean) =>
-      serial(() => create(tab, isLive)),
+      update(() => create(tab, isLive)),
     join: (room: string, tab?: string, isLive?: () => boolean) =>
-      serial(() => join(room, tab, isLive)),
+      update(() => join(room, tab, isLive)),
     connect: (a: Auth, tab: string, take = false, isLive?: () => boolean) =>
-      serial(() => connect(a, tab, take, isLive)),
-    command: (a: Auth, c: Command) => serial(() => command(a, c)),
+      update(() => connect(a, tab, take, isLive)),
+    command: (a: Auth, c: Command) => update(() => command(a, c)),
     view: (a: Auth) => serial(async () => view(a)),
-    disconnect: (a: Auth) => serial(() => disconnect(a)),
-    leave: (a: Auth) => serial(() => leave(a)),
+    disconnect: (a: Auth) => update(() => disconnect(a)),
+    leave: (a: Auth) => update(() => leave(a)),
     close: async () => {
+      stopping = true;
+      cancel();
       await tail;
       closed = true;
       await unlink(lockPath);

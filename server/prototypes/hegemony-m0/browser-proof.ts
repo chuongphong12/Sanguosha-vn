@@ -86,6 +86,12 @@ try {
     .click();
   await b.getByRole("button", { name: "Thiểm", exact: true }).waitFor();
   assert.equal(await secondary.locator("#prompt button").count(), 0);
+  await b.waitForFunction(() => {
+    const match = document
+      .querySelector("#state")
+      ?.textContent?.match(/Thời gian quyết định: (\d+)s/);
+    return match && Number(match[1]) < 60 && Number(match[1]) > 0;
+  });
   await b.reload();
   await b.getByRole("button", { name: "Lấy lại ghế đã lưu" }).click();
   await b.getByRole("button", { name: "Thiểm", exact: true }).click();
@@ -109,6 +115,7 @@ try {
         "actual Slash/Jink prompt and MethodUse",
         "prompt owner privacy",
         "refresh while awaiting Jink",
+        "real OS heartbeat publishes the remaining decision time",
       ],
     }),
   );

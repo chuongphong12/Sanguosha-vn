@@ -53,10 +53,11 @@
   <p>
     <small
       >Mở hai cửa sổ riêng tư để thử hai người. Mở tab thứ hai cùng trình duyệt
-      rồi lấy lại ghế để thử chế độ chỉ xem và nhận quyền. Lưu ý: đồng hồ 60
-      giây chưa có trong lát cắt này. Để thử Sát → Thiểm: ghế 0 rút trước, ghế 1
-      rút sau; ghế 0 bấm Chơi Sát, chọn Sát → 1 → Xác nhận. Ghế 1 dùng hoặc từ
-      chối Thiểm. Mỗi phòng thử chỉ chơi một Sát.</small
+      rồi lấy lại ghế để thử chế độ chỉ xem và nhận quyền. Mỗi quyết định có 60
+      giây; hết giờ bot xử lý một quyết định. Mất kết nối có đồng hồ 60 giây
+      riêng; bot không giữ phòng khi không còn người. Để thử Sát → Thiểm: ghế 0
+      rút trước, ghế 1 rút sau; ghế 0 bấm Chơi Sát, chọn Sát → 1 → Xác nhận. Ghế
+      1 dùng hoặc từ chối Thiểm. Mỗi phòng thử chỉ chơi một Sát.</small
     >
   </p>
   <p id="notice" role="status"></p>
@@ -75,7 +76,9 @@
         .map(([p, n]) => p + ": " + n)
         .join(", ")} | HP: ${Object.entries(v.battle.hp)
         .map(([p, hp]) => p + ": " + hp)
-        .join(", ")} | Kết quả: ${v.battle.outcomes.join(", ") || "chưa có"}`;
+        .join(
+          ", ",
+        )} | Kết quả: ${v.battle.outcomes.join(", ") || "chưa có"} | Thời gian quyết định: ${v.timing.remainingMs === null ? "—" : Math.ceil(v.timing.remainingMs / 1000) + "s"}`;
       const panel = document.querySelector("#prompt");
       panel.replaceChildren();
       if (v.prompt) {

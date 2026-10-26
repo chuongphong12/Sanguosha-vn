@@ -247,6 +247,7 @@ describe("M0 staged Master local persistence proof", () => {
         "prompt",
         "revision",
         "room",
+        "timing",
       ]);
       await expect(
         rpc(b, {

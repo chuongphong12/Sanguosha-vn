@@ -26,7 +26,7 @@ import {
   type BattleState,
 } from "./battle";
 
-export const identity = "PROTOTYPE-ce4e62b-prompt-v2";
+export const identity = "PROTOTYPE-ce4e62b-clock-v3";
 export type Engine = DrawPileGame &
   BattleState & { scheduler: TriggerScheduler };
 export type EngineCommand =

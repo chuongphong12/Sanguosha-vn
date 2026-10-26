@@ -295,6 +295,10 @@ it("resumes a pending Jink after SIGKILL and deduplicates its committed answer a
     const restored = await rpc(returning, { action: "connect", auth: bAuth });
     const waiting = await rpc(returning, { action: "view" });
     expect(waiting.prompt).toEqual(pending.prompt);
+    expect(waiting.timing.remainingMs).toBeGreaterThan(0);
+    expect(waiting.timing.remainingMs).toBeLessThanOrEqual(
+      pending.timing.remainingMs,
+    );
     expect(waiting.hand).toEqual([1]);
     expect(waiting.battle).toEqual(pending.battle);
     const intent = {
