@@ -262,6 +262,43 @@ async function processServer(path: string, dropAck = false) {
   const [ready] = await once(child, "message");
   return { child, url: ready.url as string };
 }
+it("preserves the human's seat and pending reply when committing Leave fails on real disk", async () => {
+  const dir = await mkdtemp(join(tmpdir(), "PROTOTYPE-wipe-me-")),
+    path = join(dir, "rooms.json");
+  const clock = { now: () => 0, schedule: () => () => {} };
+  const server = await startProofServer(path, { clock });
+  const a = await client(server.url),
+    b = await client(server.url);
+  try {
+    const auth = await rpc(a, { action: "create" });
+    const bAuth = await rpc(b, { action: "join", room: auth.room });
+    await command(a, "draw");
+    await command(b, "draw");
+    await slash(a);
+    const waiting = await rpc(b, { action: "view" }),
+      updates: unknown[] = [];
+    b.on("view", (view) => updates.push(view));
+    await mkdir(path + ".next");
+    await expect(rpc(b, { action: "leave" })).rejects.toThrow("Commit failed");
+    expect(updates).toEqual([]);
+    expect(await rpc(b, { action: "view" })).toEqual(waiting);
+    expect(waiting.controlling).toBe(true);
+    await rm(path + ".next", { recursive: true });
+    expect(await rpc(b, { action: "leave" })).toEqual({ deleted: false });
+    await expect(rpc(b, { action: "connect", auth: bAuth })).rejects.toThrow(
+      "Unauthorized or deleted room",
+    );
+    expect((await rpc(a, { action: "view" })).battle.hp).toEqual({
+      "0": 4,
+      "1": 4,
+    });
+  } finally {
+    a.disconnect();
+    b.disconnect();
+    await server.close();
+    await rm(dir, { recursive: true, force: true });
+  }
+});
 async function kill(child: ChildProcess) {
   if (child.exitCode === null && child.signalCode === null) {
     const exited = once(child, "exit");

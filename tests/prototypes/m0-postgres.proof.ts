@@ -397,3 +397,119 @@ it("persists last-human deletion and rejects old links and credentials on a new 
     for (const server of servers) await server.close();
   }
 });
+
+it("restores permanent bot ownership after game-server kills and never grants the departed human access again", async () => {
+  const name = crypto.randomUUID(),
+    first = await processServer(name),
+    children = [first.child],
+    sockets: Socket[] = [];
+  try {
+    const a = await client(first.url),
+      b = await client(first.url);
+    sockets.push(a, b);
+    const auth = await rpc(a, { action: "create" }),
+      bAuth = await rpc(b, { action: "join", room: auth.room });
+    await pending(a, b);
+    expect(await rpc(b, { action: "leave" })).toEqual({ deleted: false });
+    await kill(first.child);
+    const second = await processServer(name);
+    children.push(second.child);
+    const returning = await client(second.url),
+      revoked = await client(second.url);
+    sockets.push(returning, revoked);
+    await expect(
+      rpc(revoked, { action: "connect", auth: bAuth }),
+    ).rejects.toThrow("Unauthorized or deleted room");
+    await rpc(returning, { action: "connect", auth });
+    await expect
+      .poll(
+        async () => (await rpc(returning, { action: "view" })).battle.outcomes,
+      )
+      .toEqual(["SlashMissed"]);
+    expect((await rpc(returning, { action: "view" })).battle.discard).toEqual([
+      0, 1,
+    ]);
+    await kill(second.child);
+    const third = await processServer(name);
+    children.push(third.child);
+    const final = await client(third.url);
+    sockets.push(final);
+    await rpc(final, { action: "connect", auth });
+    expect((await rpc(final, { action: "view" })).battle.outcomes).toEqual([
+      "SlashMissed",
+    ]);
+    expect(await rpc(final, { action: "leave" })).toEqual({ deleted: true });
+    await kill(third.child);
+    const fourth = await processServer(name);
+    children.push(fourth.child);
+    const deleted = await client(fourth.url);
+    sockets.push(deleted);
+    await expect(rpc(deleted, { action: "connect", auth })).rejects.toThrow(
+      "Unauthorized or deleted room",
+    );
+    await expect(
+      rpc(deleted, { action: "join", room: auth.room }),
+    ).rejects.toThrow("Room unavailable");
+  } finally {
+    sockets.forEach((s) => s.disconnect());
+    for (const child of children) await kill(child);
+  }
+});
+
+it("restores human rights after a real SQL Leave failure, then revokes them only when a new writer commits Leave", async () => {
+  const name = crypto.randomUUID(),
+    admin = new Client({ connectionString });
+  await admin.connect();
+  const first = await startProofServer("unused", {
+      openStore: store(name),
+      clock: frozenClock,
+    }),
+    servers = [first];
+  const a = await client(first.url),
+    b = await client(first.url),
+    sockets = [a, b];
+  try {
+    const auth = await rpc(a, { action: "create" }),
+      bAuth = await rpc(b, { action: "join", room: auth.room });
+    const waiting = await pending(a, b),
+      updates: unknown[] = [];
+    b.on("view", (view) => updates.push(view));
+    await admin.query(
+      "ALTER TABLE prototype_m0_sessions ADD CONSTRAINT proof_failed_leave CHECK (body IS NULL) NOT VALID",
+    );
+    await expect(rpc(b, { action: "leave" })).rejects.toThrow("Commit failed");
+    expect(updates).toEqual([]);
+    await admin.query(
+      "ALTER TABLE prototype_m0_sessions DROP CONSTRAINT proof_failed_leave",
+    );
+    await first.close();
+    const next = await startProofServer("unused", {
+      openStore: store(name),
+      clock: frozenClock,
+    });
+    servers.push(next);
+    const returnedA = await client(next.url),
+      returnedB = await client(next.url);
+    sockets.push(returnedA, returnedB);
+    await rpc(returnedA, { action: "connect", auth });
+    await rpc(returnedB, { action: "connect", auth: bAuth });
+    const restored = await rpc(returnedB, { action: "view" });
+    expect(restored.controlling).toBe(true);
+    expect(restored.prompt).toEqual(waiting.prompt);
+    expect(restored.hand).toEqual([1]);
+    expect(restored.battle).toEqual(waiting.battle);
+    expect(await rpc(returnedB, { action: "leave" })).toEqual({
+      deleted: false,
+    });
+    await expect(
+      rpc(returnedB, { action: "connect", auth: bAuth }),
+    ).rejects.toThrow("Unauthorized or deleted room");
+  } finally {
+    await admin.query(
+      "ALTER TABLE prototype_m0_sessions DROP CONSTRAINT IF EXISTS proof_failed_leave",
+    );
+    sockets.forEach((s) => s.disconnect());
+    for (const server of servers) await server.close();
+    await admin.end();
+  }
+});

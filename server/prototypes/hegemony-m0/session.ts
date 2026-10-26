@@ -36,7 +36,7 @@ export type Command = {
   generation: number;
 } & EngineCommand;
 type Member = {
-  secretHash: string;
+  secretHash: string | null;
   generation: number;
   control: "human" | "bot";
 };
@@ -411,13 +411,19 @@ export async function createPrototype(
       otherOnline = Object.keys(room.members).some(
         (p) =>
           p !== auth.actor &&
+          room.members[p].secretHash !== null &&
           [...(connections.get(`${auth.room}:${p}`)?.values() ?? [])].some(
             (isLive) => isLive(),
           ),
       );
     if (!otherOnline) delete next.rooms[auth.room];
     else {
-      delete room.members[auth.actor];
+      if (room.started) {
+        // Keep the game character and bot memory; revoke the human's return right.
+        room.members[auth.actor].secretHash = null;
+        room.members[auth.actor].control = "bot";
+        room.members[auth.actor].generation++;
+      } else delete room.members[auth.actor];
       synchronize(auth.room, room, serviceTime());
     }
     await commit(next);
@@ -437,7 +443,10 @@ export async function createPrototype(
     now: number,
     arriving: string[] = [],
   ) {
-    const online = Object.keys(room.members).filter(
+    const humans = Object.keys(room.members).filter(
+      (actor) => room.members[actor].secretHash !== null,
+    );
+    const online = humans.filter(
       (actor) =>
         arriving.includes(actor) ||
         [...(connections.get(`${roomID}:${actor}`)?.values() ?? [])].some(
@@ -446,7 +455,7 @@ export async function createPrototype(
     );
     synchronizeDeadlines(
       room.deadlines,
-      Object.keys(room.members),
+      humans,
       online,
       room.state.G.engine.scheduler.prompt,
       now,
