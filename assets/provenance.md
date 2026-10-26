@@ -6,6 +6,8 @@ Scope: source assets in the game baseline recorded by [source-baseline.json](../
 
 `raw-assets/` is the tracked build input. At the source baseline it contains 2,433 files totalling 182,828,266 bytes, under `main{m}{tps}/` and `preload{m}/`. Art, UI textures and sounds remain in the game repository.
 
+The [M0 inventory](../research/2026-10-22-m0-assets-inventory.md) and its linked data provide revision-labelled hashes and candidate mapping research. They do not establish a frozen enabled manifest, complete art/audio coverage or per-asset permission evidence.
+
 `scripts/assetpack-vite-plugin.ts` processes these inputs with AssetPack through Vite. It writes generated outputs under `public/assets/` and a manifest at `src/manifest.json`; the game `.gitignore` excludes both. `scripts/cache-assets.mjs` saves/restores generated asset output through `node_modules/.cache/assetpack-outputs/`. `SKIP_LOW_RES=true` changes generated resolutions; it does not establish source completeness or asset permission.
 
 `src/app/ui/assetAliases.ts` maps current card, general, equipment, faction and UI identifiers to assets. `tests/ui/asset-aliases.test.ts` checks paths and current legacy catalogue coverage. That test is not a Quốc Chiến catalogue audit or a license review. Existing Identity role images and aliases are historical implementation inputs, not Quốc Chiến game concepts.

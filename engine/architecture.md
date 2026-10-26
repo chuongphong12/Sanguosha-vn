@@ -19,7 +19,9 @@ The rendering shell and transport are reusable infrastructure. Existing Standard
 
 `server/server.ts` still registers `TqsGame`. `src/client/MatchClient.ts` uses the same game in both remote and local clients, including its bot setup. `src/game/TqsGame.ts` still names it `tam-quoc-sat-standard-2013` and imports the legacy setup, card engine and skill registry. These paths document unfinished cutover; Standard is not the target rules authority.
 
-The separate `src/game/hegemony/` library contains paired setup, identity and normalized resumable gameplay operations. `HegemonyState` in `types.ts` ends at `selecting-generals | ready`; `index.ts` explicitly defines `ready` as paired setup, not a playable match. The richer operation-specific game interfaces are not one registered boardgame.io game state. Production must establish coherent authority between them rather than serialize fixture objects directly to clients.
+The separate `src/game/hegemony/` library contains paired setup, identity and normalized resumable gameplay operations. `HegemonyState` in `types.ts` ends at `selecting-generals | ready`; `index.ts` explicitly defines `ready` as paired setup, not a playable match. The richer operation-specific game interfaces are not one production-registered boardgame.io game state. Production must establish coherent authority between them rather than serialize fixture objects directly to clients.
+
+An isolated [M0 session composition](prototype-session.md) exists under `server/prototypes/hegemony-m0/`: actual Master, existing rule operations, staged local commit, actor-only socket projection and pending Slash/Jink recovery. It is a separately named fixture game, with no production route or registration. Its bounded private prompt/UI/bot seam is exercised; full gameplay projection, timers, automatic bot ownership/execution and an external durable store still require integration.
 
 ## Internal rules execution
 

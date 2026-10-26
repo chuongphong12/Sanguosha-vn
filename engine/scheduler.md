@@ -18,6 +18,8 @@ Initial offers reconcile to surviving collected keys after record hooks and on o
 
 ## Prompt and interruption contract
 
+The [local session experiment](prototype-session.md) is a later application consumer of these JSON continuations, with owner-only Slash/Jink prompts, persist-before-projection and actual process restart tests. This does not add deadline policy or native unwind to the scheduler.
+
 A prompt has a monotonic ID, parent frame, responder, allowed choices and cancellation policy. `getTriggerPrompt` gives only the responder a copy. Malformed, stale, duplicate, wrong-player or wrong-registry responses cannot execute a stage. A production command router must exclude unrelated state-changing commands while a prompt is pending; the scheduler's valid reply alone does not authorize arbitrary game commands.
 
 Event consumption returns a child result to its caller; each caller decides whether that consumption affects its own flow. Do not generalize “consumed means cancel everything”: movement Before, CardUsed, CardEffected and many terminal notifications have different owning rules.
