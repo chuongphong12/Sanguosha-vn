@@ -15,3 +15,5 @@ Canonical requirements: [spec #10](https://github.com/chuongphong12/Sanguosha-vn
 The curation baseline is in [metadata](../source-baseline.json), and every old tracked document is accounted for in the [migration manifest](../research/migration-manifest.json). The source baseline identifies inspected input, not a claim that all later changes remain covered. Publication status and executed migration checks belong to the migration checkpoint, not this durable rules index.
 
 Current response-family evidence: [MethodResponse through fixture ArcheryAttack](../reviews/2026-10-27-hegemony-m0-method-response.md). This keeps MethodUse/Slash distinct, adds no full package/Nullification or full turn, and does not close M0.3/M0.4.
+
+Internal integration progress: [M1.1 match authority](../engine/match-authority.md) consumes setup into one Room and composes global startup. This explicitly authorized internal slice runs alongside open M0; it does not close M0/M1 or authorize production enablement. [Checkpoint](../reviews/2026-10-27-hegemony-m1-match-authority.md) records the actual evidence and next dependency.

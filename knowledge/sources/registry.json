@@ -641,6 +641,150 @@
       "checked_on": "2026-10-27",
       "author": null,
       "business_owner": null
+    },
+    {
+      "id": "web.m1.match.1e705ef",
+      "kind": "primary_code",
+      "repository": "https://github.com/chuongphong12/Sanguosha-vn",
+      "revision": "1e705eff4ca1252f0cf771615d5847820a9c8fd3",
+      "path": "src/game/hegemony/match.ts",
+      "url": "https://github.com/chuongphong12/Sanguosha-vn/blob/1e705eff4ca1252f0cf771615d5847820a9c8fd3/src/game/hegemony/match.ts",
+      "locator": "create/apply/view/restore, startup composition, metadata and settings binding",
+      "checked_on": "2026-10-27",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "web.m1.room.1e705ef",
+      "kind": "primary_code",
+      "repository": "https://github.com/chuongphong12/Sanguosha-vn",
+      "revision": "1e705eff4ca1252f0cf771615d5847820a9c8fd3",
+      "path": "src/game/hegemony/match-room.ts",
+      "url": "https://github.com/chuongphong12/Sanguosha-vn/blob/1e705eff4ca1252f0cf771615d5847820a9c8fd3/src/game/hegemony/match-room.ts",
+      "locator": "setup-to-Room mapping, HP/identity/marks, content/deck inputs",
+      "checked_on": "2026-10-27",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "web.m1.notice.1e705ef",
+      "kind": "primary_code",
+      "repository": "https://github.com/chuongphong12/Sanguosha-vn",
+      "revision": "1e705eff4ca1252f0cf771615d5847820a9c8fd3",
+      "path": "src/game/hegemony/match-notice.ts",
+      "url": "https://github.com/chuongphong12/Sanguosha-vn/blob/1e705eff4ca1252f0cf771615d5847820a9c8fd3/src/game/hegemony/match-notice.ts",
+      "locator": "strict startup presentation field allowlist",
+      "checked_on": "2026-10-27",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "web.m1.tests.1e705ef",
+      "kind": "test_code",
+      "repository": "https://github.com/chuongphong12/Sanguosha-vn",
+      "revision": "1e705eff4ca1252f0cf771615d5847820a9c8fd3",
+      "path": "tests/hegemony/match.test.ts",
+      "url": "https://github.com/chuongphong12/Sanguosha-vn/blob/1e705eff4ca1252f0cf771615d5847820a9c8fd3/tests/hegemony/match.test.ts",
+      "locator": "21 public match/projection/JSON and actual kernel composition assertions",
+      "checked_on": "2026-10-27",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "web.production.server.1e705ef",
+      "kind": "primary_code",
+      "repository": "https://github.com/chuongphong12/Sanguosha-vn",
+      "revision": "1e705eff4ca1252f0cf771615d5847820a9c8fd3",
+      "path": "server/server.ts",
+      "url": "https://github.com/chuongphong12/Sanguosha-vn/blob/1e705eff4ca1252f0cf771615d5847820a9c8fd3/server/server.ts",
+      "locator": "unchanged production TqsGame registration",
+      "checked_on": "2026-10-27",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "web.production.client.1e705ef",
+      "kind": "primary_code",
+      "repository": "https://github.com/chuongphong12/Sanguosha-vn",
+      "revision": "1e705eff4ca1252f0cf771615d5847820a9c8fd3",
+      "path": "src/client/MatchClient.ts",
+      "url": "https://github.com/chuongphong12/Sanguosha-vn/blob/1e705eff4ca1252f0cf771615d5847820a9c8fd3/src/client/MatchClient.ts",
+      "locator": "unchanged local/remote game selection",
+      "checked_on": "2026-10-27",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "web.production.game.1e705ef",
+      "kind": "primary_code",
+      "repository": "https://github.com/chuongphong12/Sanguosha-vn",
+      "revision": "1e705eff4ca1252f0cf771615d5847820a9c8fd3",
+      "path": "src/game/TqsGame.ts",
+      "url": "https://github.com/chuongphong12/Sanguosha-vn/blob/1e705eff4ca1252f0cf771615d5847820a9c8fd3/src/game/TqsGame.ts",
+      "locator": "legacy Standard2013 production game identity",
+      "checked_on": "2026-10-27",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "native.m1.room-start.ce4e62b",
+      "kind": "primary_code",
+      "repository": "https://github.com/TamQuocSat-LangKhach/QSanguosha-QuocChien",
+      "revision": "ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f",
+      "path": "src/server/room.cpp",
+      "url": "https://github.com/TamQuocSat-LangKhach/QSanguosha-QuocChien/blob/ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f/src/server/room.cpp",
+      "locator": "chooseGenerals3694–3795; startGame4724+",
+      "checked_on": "2026-10-27",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "native.m1.companion.ce4e62b",
+      "kind": "primary_code",
+      "repository": "https://github.com/TamQuocSat-LangKhach/QSanguosha-QuocChien",
+      "revision": "ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f",
+      "path": "src/core/general.cpp",
+      "url": "https://github.com/TamQuocSat-LangKhach/QSanguosha-QuocChien/blob/ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f/src/core/general.cpp",
+      "locator": "General::isCompanionWith375+ and constructor/kingdom metadata",
+      "checked_on": "2026-10-27",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "native.m1.lord.ce4e62b",
+      "kind": "primary_code",
+      "repository": "https://github.com/TamQuocSat-LangKhach/QSanguosha-QuocChien",
+      "revision": "ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f",
+      "path": "src/core/player.cpp",
+      "url": "https://github.com/TamQuocSat-LangKhach/QSanguosha-QuocChien/blob/ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f/src/core/player.cpp",
+      "locator": "isLord488–490 and getLord1795–1807",
+      "checked_on": "2026-10-27",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "native.m1.placeholder.ce4e62b",
+      "kind": "primary_code",
+      "repository": "https://github.com/TamQuocSat-LangKhach/QSanguosha-QuocChien",
+      "revision": "ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f",
+      "path": "src/package/standard-package.cpp",
+      "url": "https://github.com/TamQuocSat-LangKhach/QSanguosha-QuocChien/blob/ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f/src/package/standard-package.cpp",
+      "locator": "hidden anjiang definitions838–840",
+      "checked_on": "2026-10-27",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "native.m1.room-thread.ce4e62b",
+      "kind": "primary_code",
+      "repository": "https://github.com/TamQuocSat-LangKhach/QSanguosha-QuocChien",
+      "revision": "ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f",
+      "path": "src/server/roomthread.cpp",
+      "url": "https://github.com/TamQuocSat-LangKhach/QSanguosha-QuocChien/blob/ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f/src/server/roomthread.cpp",
+      "locator": "constructTriggerTable/addPlayerSkills/run174+; unimplemented complete startup/turn owner",
+      "checked_on": "2026-10-27",
+      "author": null,
+      "business_owner": null
     }
   ],
   "pages": [
@@ -716,6 +860,30 @@
         "native.m0.damage-card.ce4e62b",
         "native.m0.response-room.ce4e62b",
         "native.m0.damage-defaults.ce4e62b"
+      ]
+    },
+    {
+      "path": "engine/match-authority.md",
+      "status": "supported",
+      "reviewed_on": "2026-10-27",
+      "review_scope": "Internal M1.1 authority/handoff/global startup/private projection and JSON/configuration compatibility. Catalogue, package predicates, ordered deck, luck collection and presentation timing remain scoped adapters. Not full RoomThread/turn/session/production/native-runtime certification.",
+      "applies_to": {
+        "game_commit": "1e705eff4ca1252f0cf771615d5847820a9c8fd3",
+        "native_commit": "ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f"
+      },
+      "source_ids": [
+        "web.m1.match.1e705ef",
+        "web.m1.room.1e705ef",
+        "web.m1.notice.1e705ef",
+        "web.m1.tests.1e705ef",
+        "web.production.server.1e705ef",
+        "web.production.client.1e705ef",
+        "web.production.game.1e705ef",
+        "native.m1.room-start.ce4e62b",
+        "native.m1.companion.ce4e62b",
+        "native.m1.lord.ce4e62b",
+        "native.m1.placeholder.ce4e62b",
+        "native.m1.room-thread.ce4e62b"
       ]
     }
   ],
@@ -1188,6 +1356,114 @@
         "native.m0.damage-defaults.ce4e62b"
       ],
       "scope": "Default damage and nature for the bounded ArcheryAttack caller; declaration defaults are distinct from constructor initialization."
+    },
+    {
+      "subject": "page:engine/match-authority.md",
+      "predicate": "derived_from",
+      "object": "source:web.m1.match.1e705ef",
+      "evidence": [
+        "web.m1.match.1e705ef"
+      ],
+      "scope": "Bounded M1.1 implementation/assertions/native mapping or unchanged production-registration evidence; source roles are distinct, not complete release certification."
+    },
+    {
+      "subject": "page:engine/match-authority.md",
+      "predicate": "derived_from",
+      "object": "source:web.m1.room.1e705ef",
+      "evidence": [
+        "web.m1.room.1e705ef"
+      ],
+      "scope": "Bounded M1.1 implementation/assertions/native mapping or unchanged production-registration evidence; source roles are distinct, not complete release certification."
+    },
+    {
+      "subject": "page:engine/match-authority.md",
+      "predicate": "derived_from",
+      "object": "source:web.m1.notice.1e705ef",
+      "evidence": [
+        "web.m1.notice.1e705ef"
+      ],
+      "scope": "Bounded M1.1 implementation/assertions/native mapping or unchanged production-registration evidence; source roles are distinct, not complete release certification."
+    },
+    {
+      "subject": "page:engine/match-authority.md",
+      "predicate": "derived_from",
+      "object": "source:web.m1.tests.1e705ef",
+      "evidence": [
+        "web.m1.tests.1e705ef"
+      ],
+      "scope": "Bounded M1.1 implementation/assertions/native mapping or unchanged production-registration evidence; source roles are distinct, not complete release certification."
+    },
+    {
+      "subject": "page:engine/match-authority.md",
+      "predicate": "derived_from",
+      "object": "source:web.production.server.1e705ef",
+      "evidence": [
+        "web.production.server.1e705ef"
+      ],
+      "scope": "Bounded M1.1 implementation/assertions/native mapping or unchanged production-registration evidence; source roles are distinct, not complete release certification."
+    },
+    {
+      "subject": "page:engine/match-authority.md",
+      "predicate": "derived_from",
+      "object": "source:web.production.client.1e705ef",
+      "evidence": [
+        "web.production.client.1e705ef"
+      ],
+      "scope": "Bounded M1.1 implementation/assertions/native mapping or unchanged production-registration evidence; source roles are distinct, not complete release certification."
+    },
+    {
+      "subject": "page:engine/match-authority.md",
+      "predicate": "derived_from",
+      "object": "source:web.production.game.1e705ef",
+      "evidence": [
+        "web.production.game.1e705ef"
+      ],
+      "scope": "Bounded M1.1 implementation/assertions/native mapping or unchanged production-registration evidence; source roles are distinct, not complete release certification."
+    },
+    {
+      "subject": "page:engine/match-authority.md",
+      "predicate": "derived_from",
+      "object": "source:native.m1.room-start.ce4e62b",
+      "evidence": [
+        "native.m1.room-start.ce4e62b"
+      ],
+      "scope": "Bounded M1.1 implementation/assertions/native mapping or unchanged production-registration evidence; source roles are distinct, not complete release certification."
+    },
+    {
+      "subject": "page:engine/match-authority.md",
+      "predicate": "derived_from",
+      "object": "source:native.m1.companion.ce4e62b",
+      "evidence": [
+        "native.m1.companion.ce4e62b"
+      ],
+      "scope": "Bounded M1.1 implementation/assertions/native mapping or unchanged production-registration evidence; source roles are distinct, not complete release certification."
+    },
+    {
+      "subject": "page:engine/match-authority.md",
+      "predicate": "derived_from",
+      "object": "source:native.m1.lord.ce4e62b",
+      "evidence": [
+        "native.m1.lord.ce4e62b"
+      ],
+      "scope": "Bounded M1.1 implementation/assertions/native mapping or unchanged production-registration evidence; source roles are distinct, not complete release certification."
+    },
+    {
+      "subject": "page:engine/match-authority.md",
+      "predicate": "derived_from",
+      "object": "source:native.m1.placeholder.ce4e62b",
+      "evidence": [
+        "native.m1.placeholder.ce4e62b"
+      ],
+      "scope": "Bounded M1.1 implementation/assertions/native mapping or unchanged production-registration evidence; source roles are distinct, not complete release certification."
+    },
+    {
+      "subject": "page:engine/match-authority.md",
+      "predicate": "derived_from",
+      "object": "source:native.m1.room-thread.ce4e62b",
+      "evidence": [
+        "native.m1.room-thread.ce4e62b"
+      ],
+      "scope": "Bounded M1.1 implementation/assertions/native mapping or unchanged production-registration evidence; source roles are distinct, not complete release certification."
     }
   ]
 }

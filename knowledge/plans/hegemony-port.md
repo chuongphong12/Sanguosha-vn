@@ -51,3 +51,5 @@ These are dependency groups, not fixed-duration tickets or a claim that six smal
 The original full-core acceptance set remains required: its 18 conformance scenarios were defined in the baseline replacement analysis. Passing narrow fixtures does not satisfy those complete-core scenarios or establish 100% coverage. Consult the preserved revision-labelled evidence for their exact definitions; do not derive acceptance rules from obsolete Standard audits.
 
 Current response-family evidence: [MethodResponse through fixture ArcheryAttack](../reviews/2026-10-27-hegemony-m0-method-response.md). This keeps MethodUse/Slash distinct, adds no full package/Nullification or full turn, and does not close M0.3/M0.4.
+
+Internal integration progress: [M1.1 match authority](../engine/match-authority.md) consumes setup into one Room and composes global startup. This explicitly authorized internal slice runs alongside open M0; it does not close M0/M1 or authorize production enablement. [Checkpoint](../reviews/2026-10-27-hegemony-m1-match-authority.md) records the actual evidence and next dependency.
