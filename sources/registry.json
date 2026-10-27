@@ -473,6 +473,174 @@
       "checked_on": "2026-10-26",
       "author": null,
       "business_owner": null
+    },
+    {
+      "id": "web.m0.engine.3c835ce",
+      "kind": "primary_code",
+      "repository": "https://github.com/chuongphong12/Sanguosha-vn",
+      "revision": "3c835ce7a4ebdf89e1754d150a3dc31040977e58",
+      "path": "server/prototypes/hegemony-m0/engine.ts",
+      "url": "https://github.com/chuongphong12/Sanguosha-vn/blob/3c835ce7a4ebdf89e1754d150a3dc31040977e58/server/prototypes/hegemony-m0/engine.ts",
+      "locator": "response-v4, physical metadata/resources, play offers and actor-only projection",
+      "checked_on": "2026-10-27",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "web.m0.battle.3c835ce",
+      "kind": "primary_code",
+      "repository": "https://github.com/chuongphong12/Sanguosha-vn",
+      "revision": "3c835ce7a4ebdf89e1754d150a3dc31040977e58",
+      "path": "server/prototypes/hegemony-m0/battle.ts",
+      "url": "https://github.com/chuongphong12/Sanguosha-vn/blob/3c835ce7a4ebdf89e1754d150a3dc31040977e58/server/prototypes/hegemony-m0/battle.ts",
+      "locator": "separate MethodUse/MethodResponse, AOE admission/effects, prompt projection and fixture authorities",
+      "checked_on": "2026-10-27",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "web.m0.archery.3c835ce",
+      "kind": "primary_code",
+      "repository": "https://github.com/chuongphong12/Sanguosha-vn",
+      "revision": "3c835ce7a4ebdf89e1754d150a3dc31040977e58",
+      "path": "server/prototypes/hegemony-m0/archery.ts",
+      "url": "https://github.com/chuongphong12/Sanguosha-vn/blob/3c835ce7a4ebdf89e1754d150a3dc31040977e58/server/prototypes/hegemony-m0/archery.ts",
+      "locator": "AOE target expansion and ArcheryAttack response/damage owner",
+      "checked_on": "2026-10-27",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "web.m0.prompt-tests.3c835ce",
+      "kind": "test_code",
+      "repository": "https://github.com/chuongphong12/Sanguosha-vn",
+      "revision": "3c835ce7a4ebdf89e1754d150a3dc31040977e58",
+      "path": "tests/prototypes/m0-prompt.test.ts",
+      "url": "https://github.com/chuongphong12/Sanguosha-vn/blob/3c835ce7a4ebdf89e1754d150a3dc31040977e58/tests/prototypes/m0-prompt.test.ts",
+      "locator": "actual socket MethodResponse effect/privacy/admission/failed-write scenarios",
+      "checked_on": "2026-10-27",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "web.m0.deadline-tests.3c835ce",
+      "kind": "test_code",
+      "repository": "https://github.com/chuongphong12/Sanguosha-vn",
+      "revision": "3c835ce7a4ebdf89e1754d150a3dc31040977e58",
+      "path": "tests/prototypes/m0-deadline.test.ts",
+      "url": "https://github.com/chuongphong12/Sanguosha-vn/blob/3c835ce7a4ebdf89e1754d150a3dc31040977e58/tests/prototypes/m0-deadline.test.ts",
+      "locator": "deadline and permanent bot through MethodResponse/restart/MethodUse",
+      "checked_on": "2026-10-27",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "web.m0.sql-proof.3c835ce",
+      "kind": "test_code",
+      "repository": "https://github.com/chuongphong12/Sanguosha-vn",
+      "revision": "3c835ce7a4ebdf89e1754d150a3dc31040977e58",
+      "path": "tests/prototypes/m0-postgres.proof.ts",
+      "url": "https://github.com/chuongphong12/Sanguosha-vn/blob/3c835ce7a4ebdf89e1754d150a3dc31040977e58/tests/prototypes/m0-postgres.proof.ts",
+      "locator": "eight SQL cases including MethodResponse pending/commit-before-ACK recovery",
+      "checked_on": "2026-10-27",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "web.m0.storage-tests.3c835ce",
+      "kind": "test_code",
+      "repository": "https://github.com/chuongphong12/Sanguosha-vn",
+      "revision": "3c835ce7a4ebdf89e1754d150a3dc31040977e58",
+      "path": "tests/prototypes/m0-storage.test.ts",
+      "url": "https://github.com/chuongphong12/Sanguosha-vn/blob/3c835ce7a4ebdf89e1754d150a3dc31040977e58/tests/prototypes/m0-storage.test.ts",
+      "locator": "old clock-v3 save rejection",
+      "checked_on": "2026-10-27",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "web.m0.browser-proof.3c835ce",
+      "kind": "test_code",
+      "repository": "https://github.com/chuongphong12/Sanguosha-vn",
+      "revision": "3c835ce7a4ebdf89e1754d150a3dc31040977e58",
+      "path": "server/prototypes/hegemony-m0/browser-proof.ts",
+      "url": "https://github.com/chuongphong12/Sanguosha-vn/blob/3c835ce7a4ebdf89e1754d150a3dc31040977e58/server/prototypes/hegemony-m0/browser-proof.ts",
+      "locator": "actual MethodResponse controls, privacy, refresh and Archery after Slash",
+      "checked_on": "2026-10-27",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "web.m0.demo.3c835ce",
+      "kind": "primary_code",
+      "repository": "https://github.com/chuongphong12/Sanguosha-vn",
+      "revision": "3c835ce7a4ebdf89e1754d150a3dc31040977e58",
+      "path": "server/prototypes/hegemony-m0/demo.html",
+      "url": "https://github.com/chuongphong12/Sanguosha-vn/blob/3c835ce7a4ebdf89e1754d150a3dc31040977e58/server/prototypes/hegemony-m0/demo.html",
+      "locator": "Chơi bài and generated owner-only prompt controls",
+      "checked_on": "2026-10-27",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "native.m0.aoe.ce4e62b",
+      "kind": "primary_code",
+      "repository": "https://github.com/TamQuocSat-LangKhach/QSanguosha-QuocChien",
+      "revision": "ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f",
+      "path": "src/package/standard.cpp",
+      "url": "https://github.com/TamQuocSat-LangKhach/QSanguosha-QuocChien/blob/ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f/src/package/standard.cpp",
+      "locator": "AOE availability and onUse target expansion, 208-255",
+      "checked_on": "2026-10-27",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "native.m0.archery.ce4e62b",
+      "kind": "primary_code",
+      "repository": "https://github.com/TamQuocSat-LangKhach/QSanguosha-QuocChien",
+      "revision": "ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f",
+      "path": "src/package/standard-tricks.cpp",
+      "url": "https://github.com/TamQuocSat-LangKhach/QSanguosha-QuocChien/blob/ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f/src/package/standard-tricks.cpp",
+      "locator": "ArcheryAttack::onEffect MethodResponse and normal damage, 140-159",
+      "checked_on": "2026-10-27",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "native.m0.damage-card.ce4e62b",
+      "kind": "primary_code",
+      "repository": "https://github.com/TamQuocSat-LangKhach/QSanguosha-QuocChien",
+      "revision": "ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f",
+      "path": "src/core/structs.cpp",
+      "url": "https://github.com/TamQuocSat-LangKhach/QSanguosha-QuocChien/blob/ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f/src/core/structs.cpp",
+      "locator": "card DamageStruct constructor defaults/getReason, 132-160",
+      "checked_on": "2026-10-27",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "native.m0.response-room.ce4e62b",
+      "kind": "primary_code",
+      "repository": "https://github.com/TamQuocSat-LangKhach/QSanguosha-QuocChien",
+      "revision": "ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f",
+      "path": "src/server/room.cpp",
+      "url": "https://github.com/TamQuocSat-LangKhach/QSanguosha-QuocChien/blob/ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f/src/server/room.cpp",
+      "locator": "MethodResponse branch 1801-1847 and discard prepend 5277",
+      "checked_on": "2026-10-27",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "native.m0.damage-defaults.ce4e62b",
+      "kind": "primary_code",
+      "repository": "https://github.com/TamQuocSat-LangKhach/QSanguosha-QuocChien",
+      "revision": "ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f",
+      "path": "src/core/structs.h",
+      "url": "https://github.com/TamQuocSat-LangKhach/QSanguosha-QuocChien/blob/ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f/src/core/structs.h",
+      "locator": "DamageStruct card constructor default damage 1 and Normal nature, 44-46",
+      "checked_on": "2026-10-27",
+      "author": null,
+      "business_owner": null
     }
   ],
   "pages": [
@@ -496,10 +664,10 @@
     {
       "path": "engine/prototype-session.md",
       "status": "supported",
-      "reviewed_on": "2026-10-26",
-      "review_scope": "Bounded local session/Slash/Jink plus independent service-time deadlines, automatic pending decisions, recovery and precision limits; not full game, provider or competitive-bot certification. Optional separate local PostgreSQL store, writer fencing and explicit remaining hosted-provider gates. Bounded explicit-Leave permanent bot membership, revoked credentials, human presence/grace and real file/SQL recovery.",
+      "reviewed_on": "2026-10-27",
+      "review_scope": "Two-seat synthetic response-v4 session: distinct Slash/MethodUse and fixture ArcheryAttack/MethodResponse, owner prompts, existing clocks/bot/Leave and file/local-SQL composition, with explicit fixture/Nullification/save-version limitations; not full-game/provider certification.",
       "applies_to": {
-        "game_commit": "b00ab435c1c37e982f675a80070c2b5d449a6a78",
+        "game_commit": "3c835ce7a4ebdf89e1754d150a3dc31040977e58",
         "native_commit": "ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f"
       },
       "source_ids": [
@@ -533,7 +701,21 @@
         "web.m0.session.b00ab43",
         "web.m0.leave-tests.b00ab43",
         "web.m0.prompt-tests.b00ab43",
-        "web.m0.sql-proof.b00ab43"
+        "web.m0.sql-proof.b00ab43",
+        "web.m0.engine.3c835ce",
+        "web.m0.battle.3c835ce",
+        "web.m0.archery.3c835ce",
+        "web.m0.prompt-tests.3c835ce",
+        "web.m0.deadline-tests.3c835ce",
+        "web.m0.sql-proof.3c835ce",
+        "web.m0.storage-tests.3c835ce",
+        "web.m0.browser-proof.3c835ce",
+        "web.m0.demo.3c835ce",
+        "native.m0.aoe.ce4e62b",
+        "native.m0.archery.ce4e62b",
+        "native.m0.damage-card.ce4e62b",
+        "native.m0.response-room.ce4e62b",
+        "native.m0.damage-defaults.ce4e62b"
       ]
     }
   ],
@@ -880,6 +1062,132 @@
         "web.m0.sql-proof.b00ab43"
       ],
       "scope": "Permanent explicit-Leave bot membership and existing supported requests in the isolated two-seat fixture; not full-turn, full-content or production multi-seat certification."
+    },
+    {
+      "subject": "page:engine/prototype-session.md",
+      "predicate": "derived_from",
+      "object": "source:web.m0.engine.3c835ce",
+      "evidence": [
+        "web.m0.engine.3c835ce"
+      ],
+      "scope": "Bounded physical ArcheryAttack/MethodResponse in the two-seat session; native contract, code assertions and execution receipts remain distinct; no full package/native runtime certification."
+    },
+    {
+      "subject": "page:engine/prototype-session.md",
+      "predicate": "derived_from",
+      "object": "source:web.m0.battle.3c835ce",
+      "evidence": [
+        "web.m0.battle.3c835ce"
+      ],
+      "scope": "Bounded physical ArcheryAttack/MethodResponse in the two-seat session; native contract, code assertions and execution receipts remain distinct; no full package/native runtime certification."
+    },
+    {
+      "subject": "page:engine/prototype-session.md",
+      "predicate": "derived_from",
+      "object": "source:web.m0.archery.3c835ce",
+      "evidence": [
+        "web.m0.archery.3c835ce"
+      ],
+      "scope": "Bounded physical ArcheryAttack/MethodResponse in the two-seat session; native contract, code assertions and execution receipts remain distinct; no full package/native runtime certification."
+    },
+    {
+      "subject": "page:engine/prototype-session.md",
+      "predicate": "derived_from",
+      "object": "source:web.m0.prompt-tests.3c835ce",
+      "evidence": [
+        "web.m0.prompt-tests.3c835ce"
+      ],
+      "scope": "Bounded physical ArcheryAttack/MethodResponse in the two-seat session; native contract, code assertions and execution receipts remain distinct; no full package/native runtime certification."
+    },
+    {
+      "subject": "page:engine/prototype-session.md",
+      "predicate": "derived_from",
+      "object": "source:web.m0.deadline-tests.3c835ce",
+      "evidence": [
+        "web.m0.deadline-tests.3c835ce"
+      ],
+      "scope": "Bounded physical ArcheryAttack/MethodResponse in the two-seat session; native contract, code assertions and execution receipts remain distinct; no full package/native runtime certification."
+    },
+    {
+      "subject": "page:engine/prototype-session.md",
+      "predicate": "derived_from",
+      "object": "source:web.m0.sql-proof.3c835ce",
+      "evidence": [
+        "web.m0.sql-proof.3c835ce"
+      ],
+      "scope": "Bounded physical ArcheryAttack/MethodResponse in the two-seat session; native contract, code assertions and execution receipts remain distinct; no full package/native runtime certification."
+    },
+    {
+      "subject": "page:engine/prototype-session.md",
+      "predicate": "derived_from",
+      "object": "source:web.m0.storage-tests.3c835ce",
+      "evidence": [
+        "web.m0.storage-tests.3c835ce"
+      ],
+      "scope": "Bounded physical ArcheryAttack/MethodResponse in the two-seat session; native contract, code assertions and execution receipts remain distinct; no full package/native runtime certification."
+    },
+    {
+      "subject": "page:engine/prototype-session.md",
+      "predicate": "derived_from",
+      "object": "source:web.m0.browser-proof.3c835ce",
+      "evidence": [
+        "web.m0.browser-proof.3c835ce"
+      ],
+      "scope": "Bounded physical ArcheryAttack/MethodResponse in the two-seat session; native contract, code assertions and execution receipts remain distinct; no full package/native runtime certification."
+    },
+    {
+      "subject": "page:engine/prototype-session.md",
+      "predicate": "derived_from",
+      "object": "source:web.m0.demo.3c835ce",
+      "evidence": [
+        "web.m0.demo.3c835ce"
+      ],
+      "scope": "Bounded physical ArcheryAttack/MethodResponse in the two-seat session; native contract, code assertions and execution receipts remain distinct; no full package/native runtime certification."
+    },
+    {
+      "subject": "page:engine/prototype-session.md",
+      "predicate": "derived_from",
+      "object": "source:native.m0.aoe.ce4e62b",
+      "evidence": [
+        "native.m0.aoe.ce4e62b"
+      ],
+      "scope": "Bounded physical ArcheryAttack/MethodResponse in the two-seat session; native contract, code assertions and execution receipts remain distinct; no full package/native runtime certification."
+    },
+    {
+      "subject": "page:engine/prototype-session.md",
+      "predicate": "derived_from",
+      "object": "source:native.m0.archery.ce4e62b",
+      "evidence": [
+        "native.m0.archery.ce4e62b"
+      ],
+      "scope": "Bounded physical ArcheryAttack/MethodResponse in the two-seat session; native contract, code assertions and execution receipts remain distinct; no full package/native runtime certification."
+    },
+    {
+      "subject": "page:engine/prototype-session.md",
+      "predicate": "derived_from",
+      "object": "source:native.m0.damage-card.ce4e62b",
+      "evidence": [
+        "native.m0.damage-card.ce4e62b"
+      ],
+      "scope": "Bounded physical ArcheryAttack/MethodResponse in the two-seat session; native contract, code assertions and execution receipts remain distinct; no full package/native runtime certification."
+    },
+    {
+      "subject": "page:engine/prototype-session.md",
+      "predicate": "derived_from",
+      "object": "source:native.m0.response-room.ce4e62b",
+      "evidence": [
+        "native.m0.response-room.ce4e62b"
+      ],
+      "scope": "Bounded physical ArcheryAttack/MethodResponse in the two-seat session; native contract, code assertions and execution receipts remain distinct; no full package/native runtime certification."
+    },
+    {
+      "subject": "page:engine/prototype-session.md",
+      "predicate": "derived_from",
+      "object": "source:native.m0.damage-defaults.ce4e62b",
+      "evidence": [
+        "native.m0.damage-defaults.ce4e62b"
+      ],
+      "scope": "Default damage and nature for the bounded ArcheryAttack caller; declaration defaults are distinct from constructor initialization."
     }
   ]
 }

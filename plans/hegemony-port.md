@@ -49,3 +49,5 @@ These are dependency groups, not fixed-duration tickets or a claim that six smal
 - Store commands, revision-specific results and limitations once in a checkpoint. Update this roadmap and durable contracts without turning current knowledge into an accumulating test-count log.
 
 The original full-core acceptance set remains required: its 18 conformance scenarios were defined in the baseline replacement analysis. Passing narrow fixtures does not satisfy those complete-core scenarios or establish 100% coverage. Consult the preserved revision-labelled evidence for their exact definitions; do not derive acceptance rules from obsolete Standard audits.
+
+Current response-family evidence: [MethodResponse through fixture ArcheryAttack](../reviews/2026-10-27-hegemony-m0-method-response.md). This keeps MethodUse/Slash distinct, adds no full package/Nullification or full turn, and does not close M0.3/M0.4.
