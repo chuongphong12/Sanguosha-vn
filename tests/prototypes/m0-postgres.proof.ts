@@ -75,6 +75,21 @@ async function processServer(name: string, drop = false) {
   ]);
   return { child, url: ready.url as string };
 }
+async function pendingArchery(a: Socket, b: Socket) {
+  await command(a, "draw");
+  await command(b, "draw");
+  await command(a, "draw");
+  await command(a, "play");
+  for (const label of ["Vạn Tiễn Tề Phát", "Xác nhận"]) {
+    const view = await rpc(a, { action: "view" });
+    const choice = view.prompt.choices.find(
+      (c: { label: string }) => c.label === label,
+    );
+    expect(choice).toBeDefined();
+    await command(a, "answer", { id: view.prompt.id, choice: choice.id });
+  }
+  return rpc(b, { action: "view" });
+}
 async function kill(child: ChildProcess) {
   if (child.exitCode === null && child.signalCode === null) {
     const exited = once(child, "exit");
@@ -153,6 +168,61 @@ it("recovers pending Jink on a new SQL writer and deduplicates a committed respo
         },
       }),
     ).rejects.toThrow("Intent collision");
+  } finally {
+    sockets.forEach((s) => s.disconnect());
+    for (const child of children) await kill(child);
+  }
+});
+
+it("recovers a MethodResponse continuation and its committed CardResponded receipt after game-process kills", async () => {
+  const name = crypto.randomUUID(),
+    first = await processServer(name),
+    children = [first.child],
+    sockets: Socket[] = [];
+  try {
+    const a = await client(first.url),
+      b = await client(first.url);
+    sockets.push(a, b);
+    const auth = await rpc(a, { action: "create" }),
+      bAuth = await rpc(b, { action: "join", room: auth.room });
+    const waiting = await pendingArchery(a, b);
+    expect(waiting.prompt.method).toBe("response");
+    await kill(first.child);
+    const second = await processServer(name, true);
+    children.push(second.child);
+    const returning = await client(second.url);
+    sockets.push(returning);
+    const rebound = await rpc(returning, { action: "connect", auth: bAuth });
+    const restored = await rpc(returning, { action: "view" });
+    expect(restored.prompt).toEqual(waiting.prompt);
+    expect(restored.hand).toEqual([1]);
+    const intent = {
+      id: "sql-method-response",
+      action: "answer",
+      revision: restored.revision,
+      generation: rebound.generation,
+      answer: { id: restored.prompt.id, choice: "jink:1" },
+    };
+    await expect(
+      rpc(returning, { action: "command", command: intent }),
+    ).rejects.toThrow("operation has timed out");
+    await kill(second.child);
+    const third = await processServer(name);
+    children.push(third.child);
+    const final = await client(third.url);
+    sockets.push(final);
+    const returned = await rpc(final, { action: "connect", auth: bAuth });
+    const duplicate = await rpc(final, {
+      action: "command",
+      command: { ...intent, generation: returned.generation },
+    });
+    expect(duplicate.duplicate).toBe(true);
+    expect(duplicate.view.battle).toEqual({
+      hp: { "0": 4, "1": 4 },
+      discard: [2, 1],
+      outcomes: ["CardResponded"],
+    });
+    expect(duplicate.view.hand).toEqual([]);
   } finally {
     sockets.forEach((s) => s.disconnect());
     for (const child of children) await kill(child);

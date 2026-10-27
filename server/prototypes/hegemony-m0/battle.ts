@@ -1,4 +1,4 @@
-/** Bounded fixture composition: one plain Slash, physical Jink, no full turn/packages. */
+/** Bounded Slash/ArcheryAttack and physical Jink; no full turn/packages. */
 import {
   createCardCommandAdmission,
   type CardCommandGame,
@@ -6,6 +6,7 @@ import {
 import { createRoomUseCardOperation } from "../../../src/game/hegemony/room-use-card";
 import {
   createAskCardUseOperation,
+  createAskCardResponseOperation,
   type AskCardUseRequest,
 } from "../../../src/game/hegemony/ask-card-use";
 import {
@@ -57,6 +58,7 @@ import {
   type OperationHandler,
 } from "../../../src/game/hegemony/scheduler";
 import type { Engine } from "./engine";
+import { archeryOperations } from "./archery";
 
 export type BattleState = DamageGame & CardCommandGame & { outcomes: string[] };
 export const reference = (id: number) => `fixture:${id}`;
@@ -65,9 +67,9 @@ export function fixtureCard(id: number): SlashCard {
   return {
     reference: reference(id),
     card: {
-      type: "basic",
-      name: slash ? "slash" : "jink",
-      className: slash ? "Slash" : "Jink",
+      type: id === 2 ? "trick" : "basic",
+      name: id === 2 ? "archery_attack" : slash ? "slash" : "jink",
+      className: id === 2 ? "ArcheryAttack" : slash ? "Slash" : "Jink",
       skillName: "",
       materialIDs: [id],
       flags: [],
@@ -78,31 +80,34 @@ const resources = {
   reference: (use: Pick<CardUse, "card">) => reference(use.card.materialIDs[0]),
 };
 const inPlay = (game: Readonly<Engine>, actor: string) =>
-  game.currentPlayer === actor && !game.playerHistory[actor].Slash;
+  game.currentPlayer === actor;
+export const playableCards = (game: Readonly<Engine>, actor: string) =>
+  game.cardZones[actor].cards.filter(
+    (id) => id === 2 || (id % 2 === 0 && !game.playerHistory[actor].Slash),
+  );
 export const admission = createCardCommandAdmission<Engine, string>(
   {
     inPlay,
     contextValid: (_game, request) =>
       request.reason === "play" && request.context === "fixture-play",
     offers: (game, request) =>
-      game.cardZones[request.actor].cards
-        .filter((id) => fixtureCard(id).card.className === "Slash")
-        .map((id) => ({
-          id: reference(id),
-          version: "physical-v1",
-          label: "Sát",
-          entry: {
-            reference: reference(id),
-            use: { from: request.actor, to: [], card: fixtureCard(id).card },
-          },
-          targetFixed: false,
-          multipleVotes: false,
-        })),
+      playableCards(game, request.actor).map((id) => ({
+        id: reference(id),
+        version: "physical-v1",
+        label: id === 2 ? "Vạn Tiễn Tề Phát" : "Sát",
+        entry: {
+          reference: reference(id),
+          use: { from: request.actor, to: [], card: fixtureCard(id).card },
+        },
+        targetFixed: id === 2,
+        multipleVotes: false,
+      })),
     enabled: (game, request) => inPlay(game, request.actor),
     skillAllowed: (_game, _request, offer) =>
       offer.entry.use.card.skillName === "",
     matchesPattern: (_game, request, offer) =>
-      request.pattern === "slash" && offer.entry.use.card.className === "Slash",
+      request.pattern === "." &&
+      ["Slash", "ArcheryAttack"].includes(offer.entry.use.card.className),
     materialAllowed: (game, request, _offer, _id, zone) =>
       game.cardZones[zone].owner === request.actor &&
       game.cardZones[zone].place === "hand",
@@ -111,7 +116,13 @@ export const admission = createCardCommandAdmission<Engine, string>(
       target !== entry.use.from &&
       entry.use.to.length === 0,
     prohibited: () => false, // Only two living fixture seats: distance is always one; no skills/equipment.
-    feasible: (_game, _request, entry) => entry.use.to.length === 1,
+    feasible: (game, _request, entry) =>
+      entry.use.card.className === "ArcheryAttack"
+        ? entry.use.to.length === 0 &&
+          game.seatOrder.some(
+            (actor) => actor !== entry.use.from && game.alive[actor],
+          )
+        : entry.use.to.length === 1,
   },
   (actor) => actor,
 );
@@ -148,6 +159,10 @@ const requestJink: OperationHandler<Engine> = {
     };
   },
 };
+const requestResponseJink = {
+  ...requestJink,
+  name: "fixture-request-response-jink",
+};
 
 export const battleRules: {
   skills: TriggerRegistry<Engine>["skills"];
@@ -164,7 +179,7 @@ export const battleRules: {
     createDamageCompleteRule(),
     {
       id: "fixture-public-outcomes",
-      events: ["SlashHit", "SlashMissed"],
+      events: ["SlashHit", "SlashMissed", "CardResponded"],
       priority: 10,
       record: ({ game, event }) => {
         game.outcomes.push(event.name);
@@ -178,7 +193,13 @@ export const battleRules: {
       parse: (_game, entry) => entry,
       inPlay,
       validate: (data) => ({ name: "fixture-validate-use", data }),
-      onUse: ({ use }) => ({ name: "slash-on-use", data: use }),
+      onUse: ({ use }) => ({
+        name:
+          use.card.className === "Slash"
+            ? "slash-on-use"
+            : "fixture-archery-on-use",
+        data: use,
+      }),
       after: () => ({ name: "fixture-no-skill", data: null }),
       limited: () => false,
       notify: () => null,
@@ -221,13 +242,23 @@ export const battleRules: {
     createCardEffectOperation({
       isSlash: (_game, effect) => effect.card.className === "Slash",
     }),
+    ...archeryOperations,
+    // Explicit fixture authority: no Nullification cards/skills or race is enabled.
+    {
+      name: "fixture-no-cancel",
+      run: () => ({ kind: "return", value: false }),
+    },
     createCardEffectedOperation({
       isSlash: (_game, effect) => effect.card.className === "Slash",
-      isTrick: () => false,
-      cancel: () => {
-        throw new Error("No tricks in fixture");
-      },
-      onEffect: (data) => ({ name: "slash-on-effect", data }),
+      isTrick: (_game, effect) => effect.card.type === "trick",
+      cancel: () => ({ name: "fixture-no-cancel", data: null }),
+      onEffect: (data) => ({
+        name:
+          data.card.className === "Slash"
+            ? "slash-on-effect"
+            : "fixture-archery-on-effect",
+        data,
+      }),
     }),
     createSlashOnEffectOperation({ ...resources, nature: () => "normal" }),
     createSlashEffectOperation(),
@@ -264,6 +295,23 @@ export const battleRules: {
       validateAfter: () => ({ name: "fixture-no-skill", data: null }),
     }),
     requestJink,
+    createAskCardResponseOperation({
+      tableZone: "table",
+      discardZone: "discard",
+      isAI: () => false,
+      request: (data) => ({ name: requestResponseJink.name, data }),
+      limited: () => false,
+      validateResponse: (actor, card) => ({
+        name: "fixture-validate-jink",
+        data: { actor, card },
+      }),
+      resolve: (_game, card) => card,
+      notify: () => null,
+      reveal: () => ({ name: "fixture-no-skill", data: null }),
+      moveReason: (_game, actor) => ({ kind: "response", actor }),
+      validateInResponseAfter: () => ({ name: "fixture-no-skill", data: null }),
+    }),
+    requestResponseJink,
     {
       name: "fixture-validate-jink",
       run: ({ game, operation }) => {
@@ -294,12 +342,13 @@ export function battlePrompt(engine: Engine, actor: string) {
   if (
     !prompt ||
     frame?.kind !== "operation" ||
-    frame.operation.name !== requestJink.name
+    ![requestJink.name, requestResponseJink.name].includes(frame.operation.name)
   )
     return null;
   return {
     id: prompt.id,
     kind: "response" as const,
+    method: frame.operation.name === requestJink.name ? "use" : "response",
     canCancel: prompt.canCancel,
     choices: prompt.choices.map(({ id }) => ({
       id,
@@ -323,7 +372,7 @@ export function playRequest(actor: string): TriggerData {
     actor,
     reason: "play",
     context: "fixture-play",
-    pattern: "slash",
+    pattern: ".",
     prompt: "fixture-play",
     method: "use",
     addHistory: true,

@@ -62,6 +62,74 @@ async function pendingJink(session: Session) {
   return { a, b };
 }
 
+async function pendingArchery(session: Session) {
+  const a = await session.create(),
+    b = await session.join(a.room);
+  await send(session, a, { action: "draw" });
+  await send(session, b, { action: "draw" });
+  await send(session, a, { action: "draw" });
+  await send(session, a, { action: "play" });
+  await answer(session, a, "Vạn Tiễn Tề Phát");
+  await answer(session, a, "Xác nhận");
+  return { a, b };
+}
+
+it("automatically handles a MethodResponse deadline while retaining the online human's control", async () => {
+  const dir = await mkdtemp(join(tmpdir(), "PROTOTYPE-wipe-me-")),
+    clock = new ManualClock();
+  const session = await createPrototype(join(dir, "rooms.json"), { clock });
+  try {
+    const { b } = await pendingArchery(session),
+      waiting = await session.view(b);
+    expect(waiting.prompt?.method).toBe("response");
+    await clock.advance(60_000);
+    const result = await session.view(b);
+    expect(result.generation).toBe(waiting.generation);
+    expect(result.controlling).toBe(true);
+    expect(result.battle).toEqual({
+      hp: { "0": 4, "1": 4 },
+      discard: [2, 1],
+      outcomes: ["CardResponded"],
+    });
+    await clock.advance(60_000);
+    expect((await session.view(b)).battle.outcomes).toEqual(["CardResponded"]);
+  } finally {
+    await session.close();
+    await rm(dir, { recursive: true, force: true });
+  }
+});
+
+it("continues a permanent bot through MethodResponse, restart and the later MethodUse decision", async () => {
+  const dir = await mkdtemp(join(tmpdir(), "PROTOTYPE-wipe-me-")),
+    path = join(dir, "rooms.json");
+  let clock = new ManualClock(),
+    session = await createPrototype(path, { clock });
+  try {
+    const { a, b } = await pendingArchery(session);
+    await session.leave(b);
+    await clock.advance(1000);
+    expect((await session.view(a)).battle.outcomes).toEqual(["CardResponded"]);
+    await session.close();
+    clock = new ManualClock();
+    session = await createPrototype(path, { clock });
+    const returned = await session.connect(a, "after-response");
+    await expect(session.connect(b, "revoked")).rejects.toThrow(
+      "Unauthorized or deleted room",
+    );
+    await send(session, returned, { action: "play" });
+    for (const label of ["Sát", "1", "Xác nhận"])
+      await answer(session, returned, label);
+    await clock.advance(1000);
+    const view = await session.view(returned);
+    expect(view.battle.hp).toEqual({ "0": 4, "1": 3 });
+    expect(view.battle.outcomes).toEqual(["CardResponded", "SlashHit"]);
+    expect(view.battle.discard).toEqual([0, 2, 1]);
+  } finally {
+    await session.close();
+    await rm(dir, { recursive: true, force: true });
+  }
+});
+
 it("keeps the original prompt deadline when disconnection starts at second 59", async () => {
   const dir = await mkdtemp(join(tmpdir(), "PROTOTYPE-wipe-me-")),
     clock = new ManualClock();

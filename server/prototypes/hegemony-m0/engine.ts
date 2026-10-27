@@ -23,10 +23,11 @@ import {
   playRequest,
   fixtureCard,
   reference,
+  playableCards,
   type BattleState,
 } from "./battle";
 
-export const identity = "PROTOTYPE-ce4e62b-clock-v3";
+export const identity = "PROTOTYPE-ce4e62b-response-v4";
 export type Engine = DrawPileGame &
   BattleState & { scheduler: TriggerScheduler };
 export type EngineCommand =
@@ -81,8 +82,8 @@ export function initialEngine(): Engine {
             kind: "wrapped" as const,
             id,
             key: String(id),
-            isSlash: id % 2 === 0,
-            isNDTrick: false,
+            isSlash: fixtureCard(id).card.className === "Slash",
+            isNDTrick: fixtureCard(id).card.type === "trick",
           },
         ]),
       ),
@@ -158,7 +159,7 @@ export const proofGame: Game<ProofGame> = {
         else if (command.action === "play")
           accepted =
             playerID === "0" &&
-            !engine.playerHistory[playerID].Slash &&
+            playableCards(engine, playerID).length > 0 &&
             dispatchTriggerOperation(
               engine.scheduler,
               engine,

@@ -57,6 +57,182 @@ async function slash(a: Socket) {
   await answerLabel(a, "Xác nhận");
 }
 
+async function archery(a: Socket) {
+  await command(a, "play");
+  await answerLabel(a, "Vạn Tiễn Tề Phát");
+  await answerLabel(a, "Xác nhận");
+}
+async function archeryRoom(a: Socket, b: Socket) {
+  const auth = await rpc(a, { action: "create" });
+  const bAuth = await rpc(b, { action: "join", room: auth.room });
+  await command(a, "draw");
+  await command(b, "draw");
+  await command(a, "draw");
+  await archery(a);
+  return { auth, bAuth, waiting: await rpc(b, { action: "view" }) };
+}
+
+it("executes ArcheryAttack Jink through MethodResponse and CardResponded without SlashMissed", async () => {
+  const dir = await mkdtemp(join(tmpdir(), "PROTOTYPE-wipe-me-"));
+  const server = await startProofServer(join(dir, "rooms.json"));
+  const a = await client(server.url),
+    b = await client(server.url);
+  try {
+    const auth = await rpc(a, { action: "create" });
+    await rpc(b, { action: "join", room: auth.room });
+    await command(a, "draw"); // Slash 0
+    await command(b, "draw"); // Jink 1
+    await command(a, "draw"); // ArcheryAttack 2
+    await archery(a);
+    const waiting = await rpc(b, { action: "view" });
+    expect(waiting.prompt).toMatchObject({
+      kind: "response",
+      method: "response",
+      canCancel: true,
+    });
+    expect((await rpc(a, { action: "view" })).prompt).toBeNull();
+    const finished = await answerLabel(b, "Thiểm");
+    expect(finished.view.hand).toEqual([]);
+    expect(finished.view.battle).toEqual({
+      hp: { "0": 4, "1": 4 },
+      discard: [2, 1],
+      outcomes: ["CardResponded"],
+    });
+    expect((await rpc(a, { action: "view" })).hand).toEqual([0]);
+  } finally {
+    a.disconnect();
+    b.disconnect();
+    await server.close();
+    await rm(dir, { recursive: true, force: true });
+  }
+});
+
+it("declining MethodResponse damages the target once and leaves the actual Slash allowance available", async () => {
+  const dir = await mkdtemp(join(tmpdir(), "PROTOTYPE-wipe-me-"));
+  const server = await startProofServer(join(dir, "rooms.json"));
+  const a = await client(server.url),
+    b = await client(server.url);
+  try {
+    await archeryRoom(a, b);
+    const result = await answerLabel(b, "Không dùng Thiểm");
+    expect(result.view.battle).toEqual({
+      hp: { "0": 4, "1": 3 },
+      discard: [2],
+      outcomes: [],
+    });
+    expect(result.view.hand).toEqual([1]);
+    await slash(a);
+    expect((await rpc(b, { action: "view" })).prompt.method).toBe("use");
+    const defended = await answerLabel(b, "Thiểm");
+    expect(defended.view.battle.hp).toEqual({ "0": 4, "1": 3 });
+    expect(defended.view.battle.outcomes).toEqual(["SlashMissed"]);
+    expect(defended.view.battle.discard).toEqual([0, 1, 2]);
+    await expect(command(a, "play")).rejects.toThrow("Engine rejected command");
+  } finally {
+    a.disconnect();
+    b.disconnect();
+    await server.close();
+    await rm(dir, { recursive: true, force: true });
+  }
+});
+
+it("keeps MethodResponse private and fences wrong actors, stale prompts/controllers and duplicate costs", async () => {
+  const dir = await mkdtemp(join(tmpdir(), "PROTOTYPE-wipe-me-"));
+  const server = await startProofServer(join(dir, "rooms.json"));
+  const a = await client(server.url),
+    b = await client(server.url),
+    secondary = await client(server.url);
+  try {
+    const { bAuth, waiting } = await archeryRoom(a, b);
+    expect((await rpc(a, { action: "view" })).decision.offers).toEqual([]);
+    expect(JSON.stringify(await rpc(a, { action: "view" }))).not.toMatch(
+      /jink:|frames|providedCard/,
+    );
+    const answer = { id: waiting.prompt.id, choice: "jink:1" };
+    await expect(command(a, "answer", answer)).rejects.toThrow(
+      "Engine rejected command",
+    );
+    await expect(
+      command(b, "answer", { ...answer, id: "old-method-use" }),
+    ).rejects.toThrow("Engine rejected command");
+    await expect(
+      command(b, "answer", { ...answer, choice: "jink:3" }),
+    ).rejects.toThrow("Engine rejected command");
+    await rpc(secondary, { action: "connect", auth: bAuth });
+    const taken = await rpc(secondary, { action: "take" });
+    const intent = {
+      id: "method-response-cost",
+      action: "answer",
+      revision: waiting.revision,
+      generation: taken.generation,
+      answer,
+    };
+    await expect(
+      rpc(b, { action: "command", command: intent }),
+    ).rejects.toThrow("Stale controller");
+    const accepted = await rpc(secondary, {
+      action: "command",
+      command: intent,
+    });
+    expect(accepted.view.battle.outcomes).toEqual(["CardResponded"]);
+    const duplicate = await rpc(secondary, {
+      action: "command",
+      command: intent,
+    });
+    expect(duplicate.duplicate).toBe(true);
+    expect(duplicate.view.battle.discard).toEqual([2, 1]);
+    await expect(
+      rpc(secondary, {
+        action: "command",
+        command: { ...intent, answer: { ...answer, choice: "decline" } },
+      }),
+    ).rejects.toThrow("Intent collision");
+  } finally {
+    a.disconnect();
+    b.disconnect();
+    secondary.disconnect();
+    await server.close();
+    await rm(dir, { recursive: true, force: true });
+  }
+});
+
+it("retains the exact MethodResponse prompt and materials when a real file commit fails", async () => {
+  const dir = await mkdtemp(join(tmpdir(), "PROTOTYPE-wipe-me-")),
+    path = join(dir, "rooms.json");
+  const server = await startProofServer(path, {
+    clock: { now: () => 0, schedule: () => () => {} },
+  });
+  const a = await client(server.url),
+    b = await client(server.url);
+  try {
+    const { waiting } = await archeryRoom(a, b),
+      updates: unknown[] = [];
+    b.on("view", (view) => updates.push(view));
+    const intent = {
+      id: "method-response-disk-fault",
+      action: "answer",
+      revision: waiting.revision,
+      generation: waiting.generation,
+      answer: { id: waiting.prompt.id, choice: "jink:1" },
+    };
+    await mkdir(path + ".next");
+    await expect(
+      rpc(b, { action: "command", command: intent }),
+    ).rejects.toThrow("Commit failed");
+    expect(updates).toEqual([]);
+    expect(await rpc(b, { action: "view" })).toEqual(waiting);
+    await rm(path + ".next", { recursive: true });
+    const accepted = await rpc(b, { action: "command", command: intent });
+    expect(accepted.view.battle.discard).toEqual([2, 1]);
+    expect(accepted.view.battle.outcomes).toEqual(["CardResponded"]);
+  } finally {
+    a.disconnect();
+    b.disconnect();
+    await server.close();
+    await rm(dir, { recursive: true, force: true });
+  }
+});
+
 it("executes an actor-private Jink prompt through actual admission, MethodUse and SlashMissed", async () => {
   const dir = await mkdtemp(join(tmpdir(), "PROTOTYPE-wipe-me-"));
   const server = await startProofServer(join(dir, "rooms.json"));

@@ -74,7 +74,7 @@ try {
     document.querySelector("#state")?.textContent?.includes("Bài trên tay: 3"),
   );
   await secondary
-    .getByRole("button", { name: "Chơi Sát", exact: true })
+    .getByRole("button", { name: "Chơi bài", exact: true })
     .click();
   await secondary
     .getByRole("button", { name: "Sát", exact: true })
@@ -101,6 +101,35 @@ try {
   assert.match(await b.locator("#state").innerText(), /Bài trên tay: trống/);
   assert.match(await b.locator("#state").innerText(), /HP: 0: 4, 1: 4/);
   assert.equal(await b.locator("#prompt button").count(), 0);
+  // Slash history is spent; the remaining physical ArcheryAttack 2 is still legal.
+  await secondary.getByRole("button", { name: "Rút một lá" }).click();
+  await secondary.waitForFunction(() =>
+    document
+      .querySelector("#state")
+      ?.textContent?.includes("Bài trên tay: 1, 2, 4"),
+  );
+  await b.getByRole("button", { name: "Rút một lá" }).click();
+  await b.waitForFunction(() =>
+    document.querySelector("#state")?.textContent?.includes("Bài trên tay: 5"),
+  );
+  await secondary
+    .getByRole("button", { name: "Chơi bài", exact: true })
+    .click();
+  await secondary
+    .getByRole("button", { name: "Vạn Tiễn Tề Phát", exact: true })
+    .click();
+  await secondary
+    .getByRole("button", { name: "Xác nhận", exact: true })
+    .click();
+  await b.getByRole("button", { name: "Thiểm", exact: true }).waitFor();
+  assert.equal(await secondary.locator("#prompt button").count(), 0);
+  await b.reload();
+  await b.getByRole("button", { name: "Lấy lại ghế đã lưu" }).click();
+  await b.getByRole("button", { name: "Thiểm", exact: true }).click();
+  await b.waitForFunction(() =>
+    document.querySelector("#state")?.textContent?.includes("CardResponded"),
+  );
+  assert.match(await b.locator("#state").innerText(), /HP: 0: 4, 1: 4/);
   console.log(
     JSON.stringify({
       status: "passed",
@@ -116,6 +145,9 @@ try {
         "prompt owner privacy",
         "refresh while awaiting Jink",
         "real OS heartbeat publishes the remaining decision time",
+        "ArcheryAttack remains playable after Slash history is spent",
+        "actual MethodResponse and CardResponded through browser controls",
+        "owner-only MethodResponse prompt survives browser refresh",
       ],
     }),
   );

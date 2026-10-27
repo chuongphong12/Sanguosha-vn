@@ -30,9 +30,9 @@
   </style>
   <h1>Thử nghiệm session — chưa phải ván Quốc Chiến</h1>
   <p>
-    Kiểm tra rút bài, Sát → Thiểm, view riêng và khôi phục trên ổ đĩa local. Bộ
-    bài là fixture; chưa có chọn tướng, lượt đầy đủ, bot cạnh tranh hoặc kết nối
-    cloud.
+    Kiểm tra rút bài, Sát/Vạn Tiễn Tề Phát → Thiểm, view riêng và khôi phục trên
+    ổ đĩa local. Bộ bài là fixture; chưa có chọn tướng, lượt đầy đủ, bot cạnh
+    tranh hoặc kết nối cloud.
   </p>
   <p>
     <button id="create">Tạo phòng thử</button
@@ -46,7 +46,7 @@
   <section id="state">Chưa vào phòng.</section>
   <section id="prompt" aria-label="Quyết định đang chờ"></section>
   <p>
-    <button id="draw">Rút một lá</button><button id="play">Chơi Sát</button
+    <button id="draw">Rút một lá</button><button id="play">Chơi bài</button
     ><button id="take">Nhận quyền điều khiển</button
     ><button id="leave">Rời phòng</button>
   </p>
@@ -56,8 +56,10 @@
       rồi lấy lại ghế để thử chế độ chỉ xem và nhận quyền. Mỗi quyết định có 60
       giây; hết giờ bot xử lý một quyết định. Mất kết nối có đồng hồ 60 giây
       riêng; bot không giữ phòng khi không còn người. Để thử Sát → Thiểm: ghế 0
-      rút trước, ghế 1 rút sau; ghế 0 bấm Chơi Sát, chọn Sát → 1 → Xác nhận. Ghế
-      1 dùng hoặc từ chối Thiểm. Mỗi phòng thử chỉ chơi một Sát.</small
+      rút trước, ghế 1 rút sau; ghế 0 bấm Chơi bài, chọn Sát → 1 → Xác nhận. Ghế
+      1 dùng hoặc từ chối Thiểm. Để thử Vạn Tiễn: ghế 0 rút thêm lá 2, chọn Vạn
+      Tiễn Tề Phát → Xác nhận. Mỗi phòng thử chỉ chơi một Sát. Các save cũ không
+      dùng được với bộ fixture mới.</small
     >
   </p>
   <p id="notice" role="status"></p>
