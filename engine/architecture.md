@@ -26,6 +26,8 @@ An isolated [M0 session composition](prototype-session.md) exists under `server/
 
 The [explicit-Leave bot handoff](../reviews/2026-10-26-hegemony-m0-permanent-bot.md) now preserves the fixture character and revokes all departed-human rights, with human-only presence/grace accounting and file/SQL recovery evidence. Full-turn bots and production multi-seat integration remain separate. The [MethodResponse slice](../reviews/2026-10-27-hegemony-m0-method-response.md) additionally executes fixture ArcheryAttack with real CardResponded/movement/damage; response-v4 rejects old fixture saves. Nullification remains disabled, and this is not a complete package.
 
+The [M1.1 internal match module](match-authority.md) now builds that handoff explicitly: setup is consumed, the normalized Room maps become sole gameplay authority, and status/projection use that Room plus its scheduler. No production consumer or M0 store/socket integration was added. Prepared means global startup has drained; initial winner/per-player startup and full phase/turn ownership remain pending.
+
 ## Internal rules execution
 
 `src/game/hegemony/scheduler.ts` separates native trigger events from internal operations. Its public library seam consists of scheduler creation, operation/event dispatch, viewer-specific prompt retrieval and prompt resume. Registries hold executable skill/operation handlers outside persisted state; frames, continuations and shared event data contain JSON values. Registry versions must match the saved scheduler version.
