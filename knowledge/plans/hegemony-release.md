@@ -46,3 +46,5 @@ If free tier cannot meet the selected workload, keep the gate open and present m
 Accepted trade-offs are recorded in [full-manifest release](../adr/0003-full-manifest-first-release.md), [actor-view bots](../adr/0004-actor-view-bot-strategy.md) and [bounded guest-room lifetime](../adr/0005-guest-room-lifetime.md). Research and checkpoints remain revision-labelled; publication state is tracked by the issues, not inferred from this plan.
 
 Current bounded membership evidence: [permanent bot handoff](../reviews/2026-10-26-hegemony-m0-permanent-bot.md). This does not close M0.3/M0.4 or production gates.
+
+Current response-family evidence: [MethodResponse through fixture ArcheryAttack](../reviews/2026-10-27-hegemony-m0-method-response.md). This keeps MethodUse/Slash distinct, adds no full package/Nullification or full turn, and does not close M0.3/M0.4.
