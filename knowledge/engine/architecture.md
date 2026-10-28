@@ -38,7 +38,7 @@ The scheduler validates responder, prompt ID, frame identity, offered choices an
 
 Part 4aa adds the [Room wrapper and authoritative staged request gateway](room-use-and-admission.md), with trusted authentication context kept separate from public replies. Internal operations and raw scheduler resume are private; the deployed authentication/network binding remains pending.
 
-Completed child operations and eager mutations are not globally rolled back when a later invariant fails. Interruptions currently freeze frames; operation-specific exception unwind and native cleanup must be completed and tested before claiming uninterrupted/aborted-match parity. An event's consumed return is interpreted by its caller; it is not automatically a whole-game cancellation.
+Completed child operations and eager mutations are not globally rolled back when a later invariant fails. Default application profiles still freeze frames. [M1.3.1 opt-in unwind/yield](scheduler-unwind.md) adds cleanup continuation infrastructure; actual core native catch bodies and normal-turn ownership remain subsequent checkpoints before interrupted-match parity can be claimed. An event's consumed return is interpreted by its caller; it is not automatically a whole-game cancellation.
 
 ## Privacy and UI boundary
 

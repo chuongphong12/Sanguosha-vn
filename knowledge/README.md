@@ -10,6 +10,8 @@ Current application experiment: the [local session and Slash/Jink contract](engi
 
 A separate [internal match authority](engine/match-authority.md) consumes paired setup into one Room. [M1.2 startup ownership](engine/startup-owner.md) now runs the initial winner check, global startup and eligible per-player startup using two static tables. Prepared is still not a playable turn or production game. The [M1.1 checkpoint](reviews/2026-10-27-hegemony-m1-match-authority.md) and [M1.2 checkpoint](reviews/2026-10-28-hegemony-m12-startup-owner.md) retain revision-specific evidence; M0 and full phase/turn gates remain open.
 
+The accepted [M1.3 B route](specs/hegemony-turn-unwind.md) now has its first [scheduler unwind/yield checkpoint](reviews/2026-10-28-hegemony-m131-scheduler-unwind.md). This is opt-in infrastructure; current match/M0 profiles still freeze. Actual native core catches, phases/turns and match v3 are the next dependencies.
+
 ## Find the relevant contract
 
 | Need                                     | Start here                                                                                                                                                      |
@@ -20,6 +22,7 @@ A separate [internal match authority](engine/match-authority.md) consumes paired
 | Application authority and setup handoff | [Internal match interface](engine/match-authority.md), [approved M1.1 scope](specs/hegemony-match-authority.md) |
 | Native startup/table transition | [Startup owner](engine/startup-owner.md), [accepted M1.2 scope](specs/hegemony-startup-owner.md) |
 | Setup, hidden information and faction    | [Setup and privacy](engine/setup-and-privacy.md), [general lifecycle and relations](engine/generals-and-relations.md)                                           |
+| Opt-in unwind and cooperative work | [Scheduler cleanup interface](engine/scheduler-unwind.md), [accepted five-checkpoint design](specs/hegemony-turn-unwind.md) |
 | Trigger order and persistence            | [Scheduler](engine/scheduler.md)                                                                                                                                |
 | Local session, private prompts, clocks and crash recovery | [Prototype session contract](engine/prototype-session.md), [local PostgreSQL checkpoint](reviews/2026-10-26-hegemony-m0-postgres.md), [Leave/bot checkpoint](reviews/2026-10-26-hegemony-m0-permanent-bot.md), [MethodResponse checkpoint](reviews/2026-10-27-hegemony-m0-method-response.md) |
 | Movement and card resolution             | [Movement](engine/movement.md), [card use/effects](engine/card-use-and-effects.md), [Nullification/Slash](engine/nullification-and-slash.md)                    |

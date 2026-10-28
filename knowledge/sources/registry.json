@@ -893,6 +893,42 @@
       "checked_on": "2026-10-28",
       "author": null,
       "business_owner": null
+    },
+    {
+      "id": "web.m131.scheduler.32d3e5f",
+      "kind": "primary_code",
+      "repository": "https://github.com/chuongphong12/Sanguosha-vn",
+      "revision": "32d3e5f68b9d07af9ab6e1cb3f1291939094edd8",
+      "path": "src/game/hegemony/scheduler.ts",
+      "locator": "Opt-in unwind/cleanup handlers, distinct completion, monotonic interruption IDs and cooperative yield/continue; default profiles freeze",
+      "url": "https://github.com/chuongphong12/Sanguosha-vn/blob/32d3e5f68b9d07af9ab6e1cb3f1291939094edd8/src/game/hegemony/scheduler.ts",
+      "checked_on": "2026-10-28",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "web.m131.tests.32d3e5f",
+      "kind": "test_code",
+      "repository": "https://github.com/chuongphong12/Sanguosha-vn",
+      "revision": "32d3e5f68b9d07af9ab6e1cb3f1291939094edd8",
+      "path": "tests/hegemony/scheduler-unwind.test.ts",
+      "locator": "17 trace-handler public-seam cases; assertions are distinct from checkpoint executions and native core catch implementations",
+      "url": "https://github.com/chuongphong12/Sanguosha-vn/blob/32d3e5f68b9d07af9ab6e1cb3f1291939094edd8/tests/hegemony/scheduler-unwind.test.ts",
+      "checked_on": "2026-10-28",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "native.m131.trigger-catch.ce4e62b",
+      "kind": "primary_code",
+      "repository": "https://github.com/TamQuocSat-LangKhach/QSanguosha-QuocChien",
+      "revision": "ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f",
+      "path": "src/server/roomthread.cpp",
+      "locator": "Lines652–667: native event-stack departure on a rethrown TriggerEvent; not the complete per-operation native catch contract",
+      "url": "https://github.com/TamQuocSat-LangKhach/QSanguosha-QuocChien/blob/ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f/src/server/roomthread.cpp",
+      "checked_on": "2026-10-28",
+      "author": null,
+      "business_owner": null
     }
   ],
   "pages": [
@@ -1022,6 +1058,21 @@
         "web.m12.careerist.4cad857",
         "native.m12.roomthread.ce4e62b",
         "native.m12.winner.ce4e62b"
+      ]
+    },
+    {
+      "path": "engine/scheduler-unwind.md",
+      "status": "supported",
+      "reviewed_on": "2026-10-28",
+      "review_scope": "M1.3.1 opt-in interpreter continuation and cooperative bound, with trace fixtures. Actual native catch bodies, normal-turn/game integration and runtime parity remain unimplemented.",
+      "applies_to": {
+        "game_commit": "32d3e5f68b9d07af9ab6e1cb3f1291939094edd8",
+        "native_commit": "ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f"
+      },
+      "source_ids": [
+        "web.m131.scheduler.32d3e5f",
+        "web.m131.tests.32d3e5f",
+        "native.m131.trigger-catch.ce4e62b"
       ]
     }
   ],
@@ -1764,6 +1815,33 @@
         "native.m12.winner.ce4e62b"
       ],
       "scope": "M1.2 supplied-profile startup composition and trusted persistence; primary definitions, assertion source and checkpoint executions have distinct roles. No full-match or native runtime certification."
+    },
+    {
+      "subject": "page:engine/scheduler-unwind.md",
+      "predicate": "derived_from",
+      "object": "source:web.m131.scheduler.32d3e5f",
+      "evidence": [
+        "web.m131.scheduler.32d3e5f"
+      ],
+      "scope": "Bounded opt-in interpreter interface; source assertions, executions and native semantic inspiration remain distinct, not full catch/game certification."
+    },
+    {
+      "subject": "page:engine/scheduler-unwind.md",
+      "predicate": "derived_from",
+      "object": "source:web.m131.tests.32d3e5f",
+      "evidence": [
+        "web.m131.tests.32d3e5f"
+      ],
+      "scope": "Bounded opt-in interpreter interface; source assertions, executions and native semantic inspiration remain distinct, not full catch/game certification."
+    },
+    {
+      "subject": "page:engine/scheduler-unwind.md",
+      "predicate": "derived_from",
+      "object": "source:native.m131.trigger-catch.ce4e62b",
+      "evidence": [
+        "native.m131.trigger-catch.ce4e62b"
+      ],
+      "scope": "Bounded opt-in interpreter interface; source assertions, executions and native semantic inspiration remain distinct, not full catch/game certification."
     }
   ]
 }

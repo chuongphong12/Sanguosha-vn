@@ -39,7 +39,7 @@ Module paths in the table are relative to `src/game/hegemony/`. These tests use 
 - Physical card IDs have one physical location. Reference identity, current string keys, wrapper faces and movement notification groups remain distinct concepts.
 - Native local snapshots and mutable event data often differ. Preserve captured source, recipient, material and loop snapshots exactly where the owning caller does; later child rewrites do not universally replace them.
 - Preflight rejects malformed selected inputs before allocating a frame. Late boundary errors preserve earlier committed children and eager state. This is not a rollback transaction.
-- Turn-broken, stage-change and game-over interruptions freeze their stack and eager effects. Native exception-specific unwinding is still a separate implementation gate.
+- Default profiles freeze turn-broken, stage-change and game-over with eager effects. [M1.3.1 opt-in unwind/yield](scheduler-unwind.md) adds interpreter infrastructure; actual native catch handlers, turn ownership and enabled application integration remain subsequent gates.
 - Private head/deputy identities, scenario authority, raw card ledgers, resources, event payloads, frames and operation completions are not client state. The setup projection is not a complete battle projection.
 
 Sources: the exported interfaces and dispatch/resume implementation in `scheduler.ts`, authoritative types in `movement.ts`, `card-resources.ts`, `death.ts` and `general-identity.ts`, and projection in `index.ts` at this snapshot.

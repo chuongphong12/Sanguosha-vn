@@ -1,6 +1,6 @@
 # Trigger and operation scheduler
 
-Baseline: game `4b19fddcb6547066de0db0ae078c0db7642877ba`. Owning web source: `src/game/hegemony/scheduler.ts`; public cases: `tests/hegemony/scheduler.test.ts` and `operations.test.ts`. Native source: `src/server/roomthread.cpp` trigger processing (224–666) and `src/server/room.cpp` action order (192) at the [selected pin](../rules/source-authority.md).
+Baseline: game `32d3e5f68b9d07af9ab6e1cb3f1291939094edd8`. Owning web source: `src/game/hegemony/scheduler.ts`; public cases: `tests/hegemony/scheduler.test.ts` and `operations.test.ts`. Native source: `src/server/roomthread.cpp` trigger processing (224–666) and `src/server/room.cpp` action order (192) at the [selected pin](../rules/source-authority.md).
 
 ## Entry points and persisted state
 
@@ -24,4 +24,4 @@ A prompt has a monotonic ID, parent frame, responder, allowed choices and cancel
 
 Event consumption returns a child result to its caller; each caller decides whether that consumption affects its own flow. Do not generalize “consumed means cancel everything”: movement Before, CardUsed, CardEffected and many terminal notifications have different owning rules.
 
-Stage-change, turn-broken and game-over freeze frames and eager state for operation-specific unwind. They do not emit CardFinished, discard remaining materials, restore resources or finish a phase automatically. JSON reload and exact-once reply tests cover the implemented resume seam; no native exception cleanup or complete production command transport is implied.
+Default profiles freeze stage-change, turn-broken and game-over with frames/eager state intact. M1.3.1 adds the separate [opt-in unwind/cooperative-yield interface](scheduler-unwind.md): handlers can own resumable cleanup, but actual native core catches are the next checkpoint. No automatic CardFinished/material cleanup/phase finish is enabled in the existing application profiles. Complete production command transport and native exception parity remain open.
