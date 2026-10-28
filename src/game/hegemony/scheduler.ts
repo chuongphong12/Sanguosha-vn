@@ -106,6 +106,13 @@ export interface OperationHandler<G> {
     currentActor: string | null,
   ) => void;
   run: (context: OperationContext<G>) => OperationStep;
+  /** Opt-in native catch body; the handler owns protected-region eligibility. */
+  unwind?: (
+    context: OperationContext<G> & {
+      normalContinuation: TriggerData;
+      interruption: TriggerInterruption;
+    },
+  ) => OperationStep;
 }
 
 export interface TriggerContext<G> {
@@ -135,6 +142,9 @@ export interface TriggerRegistry<G> {
   version: string;
   skills: TriggerSkill<G>[];
   operations?: OperationHandler<G>[];
+  unwind?: boolean;
+  /** Optional cooperative interpreter bound; not a wall-clock deadline. */
+  stepBudget?: number;
 }
 
 interface TriggerFrame extends FrameContinuation {
@@ -155,9 +165,17 @@ interface TriggerFrame extends FrameContinuation {
 interface OperationFrame extends FrameContinuation {
   kind: "operation";
   operation: TriggerOperation;
+  cleanup?: { normalContinuation: TriggerData };
 }
 
 type SchedulerFrame = TriggerFrame | OperationFrame;
+
+export interface TriggerInterruption {
+  /** Opt-in profiles fence repeated throws from the same frame. */
+  id?: string;
+  reason: "turn-broken" | "stage-change" | "game-over";
+  eventId: string;
+}
 
 export interface TriggerScheduler {
   registryVersion: string;
@@ -166,10 +184,14 @@ export interface TriggerScheduler {
   frames: SchedulerFrame[];
   prompt: TriggerPrompt | null;
   /** Frames remain available to the later operation-specific unwind pipeline. */
-  interruption: {
-    reason: "turn-broken" | "stage-change" | "game-over";
-    eventId: string;
+  interruption: TriggerInterruption | null;
+  /** Private traversal state; normal dispatch remains blocked during cleanup. */
+  unwind?: {
+    interruption: TriggerInterruption;
+    boundary: string | null;
   } | null;
+  unwindCompletion?: TriggerInterruption | null;
+  yielded?: boolean;
   completion: {
     eventId: string;
     event: TriggerEvent;
@@ -389,7 +411,11 @@ function yieldTriggerStep<G>(
 ): boolean {
   if (result.kind === "done") return false;
   if (result.kind === "interrupt") {
-    scheduler.interruption = { reason: result.reason, eventId: frame.id };
+    scheduler.interruption = {
+      reason: result.reason,
+      eventId: frame.id,
+      ...(registry.unwind ? { id: `interruption-${scheduler.nextId++}` } : {}),
+    };
     return true;
   }
   if (
@@ -483,9 +509,10 @@ function invokeOperationHandler<G>(
   frame: OperationFrame,
   game: G,
   handler: OperationHandler<G>,
+  interruption?: TriggerInterruption,
 ): OperationStep {
-  return invokeWithValidData(frame.operation, () =>
-    handler.run({
+  return invokeWithValidData(frame.operation, () => {
+    const context: OperationContext<G> = {
       game,
       operation: frame.operation,
       currentActor: frame.actors[0],
@@ -493,7 +520,75 @@ function invokeOperationHandler<G>(
       answer: frame.answer,
       child: frame.child,
       operationChild: frame.operationChild,
-    }),
+    };
+    return interruption
+      ? handler.unwind!({
+          ...context,
+          normalContinuation: structuredClone(
+            frame.cleanup!.normalContinuation,
+          ),
+          interruption: structuredClone(interruption),
+        })
+      : handler.run(context);
+  });
+}
+
+function readStepBudget<G>(registry: TriggerRegistry<G>): number {
+  if (registry.stepBudget === undefined) return Infinity;
+  if (!Number.isSafeInteger(registry.stepBudget) || registry.stepBudget < 1)
+    throw new Error("Invalid scheduler step budget");
+  return registry.stepBudget;
+}
+
+function validUnwindState<G>(
+  scheduler: TriggerScheduler,
+  registry: TriggerRegistry<G>,
+): boolean {
+  if (
+    registry.unwind === true &&
+    scheduler.frames.some(
+      (frame) =>
+        frame.kind === "operation" &&
+        !registry.operations?.some(
+          (handler) => handler.name === frame.operation.name,
+        ),
+    )
+  )
+    return false;
+  const cleanupFrames = scheduler.frames.filter(
+    (frame) => frame.kind === "operation" && frame.cleanup,
+  );
+  const unwind = scheduler.unwind;
+  if (!unwind) return cleanupFrames.length === 0;
+  try {
+    for (const frame of cleanupFrames)
+      if (frame.kind === "operation")
+        assertTriggerData(frame.cleanup!.normalContinuation);
+  } catch {
+    return false;
+  }
+  if (
+    registry.unwind !== true ||
+    typeof unwind.interruption?.id !== "string" ||
+    !unwind.interruption.id ||
+    !["turn-broken", "stage-change", "game-over"].includes(
+      unwind.interruption.reason,
+    ) ||
+    typeof unwind.interruption.eventId !== "string" ||
+    cleanupFrames.some(
+      (frame) =>
+        frame.kind !== "operation" ||
+        typeof registry.operations?.find(
+          (handler) => handler.name === frame.operation.name,
+        )?.unwind !== "function",
+    )
+  )
+    return false;
+  if (unwind.boundary === null) return !scheduler.prompt;
+  return (
+    typeof unwind.boundary === "string" &&
+    unwind.boundary.length > 0 &&
+    cleanupFrames.at(-1)?.id === unwind.boundary
   );
 }
 
@@ -502,18 +597,51 @@ function runTriggers<G>(
   game: G,
   registry: TriggerRegistry<G>,
 ): void {
+  const budget = readStepBudget(registry);
+  let steps = 0;
   while (
-    scheduler.frames.length &&
+    (scheduler.frames.length || scheduler.unwind) &&
     !scheduler.prompt &&
     !scheduler.interruption
   ) {
+    if (steps++ === budget) {
+      scheduler.yielded = true;
+      return;
+    }
     const frame = scheduler.frames[scheduler.frames.length - 1];
+    if (scheduler.unwind && scheduler.unwind.boundary === null) {
+      if (!frame) {
+        scheduler.unwindCompletion = structuredClone(
+          scheduler.unwind.interruption,
+        );
+        scheduler.unwind = null;
+      } else if (
+        frame.kind === "operation" &&
+        !frame.cleanup &&
+        registry.operations?.find(
+          (handler) => handler.name === frame.operation.name,
+        )?.unwind
+      ) {
+        frame.cleanup = {
+          normalContinuation: structuredClone(frame.continuation),
+        };
+        clearStep(frame);
+        scheduler.unwind.boundary = frame.id;
+      } else scheduler.frames.pop();
+      continue;
+    }
     if (frame.kind === "operation") {
       const handler = registry.operations?.find(
         (handler) => handler.name === frame.operation.name,
       );
       if (!handler) throw new Error("Unknown scheduler operation");
-      const result = invokeOperationHandler(frame, game, handler);
+      const cleaning = scheduler.unwind?.boundary === frame.id;
+      const result = invokeOperationHandler(
+        frame,
+        game,
+        handler,
+        cleaning ? scheduler.unwind!.interruption : undefined,
+      );
       if (result.kind === "return") {
         assertTriggerData(result.value);
         const completion = {
@@ -522,7 +650,8 @@ function runTriggers<G>(
         };
         scheduler.frames.pop();
         const parent = scheduler.frames[scheduler.frames.length - 1];
-        if (parent) parent.operationChild = completion;
+        if (cleaning) scheduler.unwind!.boundary = null;
+        else if (parent) parent.operationChild = completion;
         else scheduler.operationCompletion = completion;
       } else {
         yieldTriggerStep(
@@ -701,6 +830,9 @@ function canDispatch<G>(
 ): boolean {
   if (
     scheduler.interruption ||
+    scheduler.unwind ||
+    scheduler.yielded ||
+    !validUnwindState(scheduler, registry) ||
     scheduler.frames.length ||
     registry.version !== scheduler.registryVersion ||
     (currentActor !== null && !scheduler.seatOrder.includes(currentActor))
@@ -711,6 +843,7 @@ function canDispatch<G>(
     registry.skills.length
   )
     throw new Error("Duplicate trigger skill");
+  readStepBudget(registry);
   return true;
 }
 
@@ -727,6 +860,7 @@ export function dispatchTriggerOperation<G>(
   );
   scheduler.completion = null;
   scheduler.operationCompletion = null;
+  if (scheduler.unwindCompletion) scheduler.unwindCompletion = null;
   runTriggers(scheduler, game, registry);
   return true;
 }
@@ -744,6 +878,64 @@ export function dispatchTriggerEvent<G>(
   );
   scheduler.completion = null;
   scheduler.operationCompletion = null;
+  if (scheduler.unwindCompletion) scheduler.unwindCompletion = null;
+  runTriggers(scheduler, game, registry);
+  return true;
+}
+
+/** Trusted owner entry; an actor reply can never start or clear an unwind. */
+export function unwindTriggerInterruption<G>(
+  scheduler: TriggerScheduler,
+  game: G,
+  registry: TriggerRegistry<G>,
+  expected: TriggerInterruption,
+): boolean {
+  const interruption = scheduler.interruption;
+  if (
+    registry.unwind !== true ||
+    registry.version !== scheduler.registryVersion ||
+    !interruption ||
+    !expected ||
+    !interruption.id ||
+    expected.id !== interruption.id ||
+    expected.reason !== interruption.reason ||
+    expected.eventId !== interruption.eventId ||
+    scheduler.frames.at(-1)?.id !== interruption.eventId ||
+    !validUnwindState(scheduler, registry) ||
+    scheduler.prompt
+  )
+    return false;
+  readStepBudget(registry);
+  scheduler.unwind = {
+    interruption: structuredClone(interruption),
+    boundary: null,
+  };
+  scheduler.interruption = null;
+  scheduler.completion = null;
+  scheduler.operationCompletion = null;
+  scheduler.unwindCompletion = null;
+  runTriggers(scheduler, game, registry);
+  return true;
+}
+
+/** Trusted continuation of a saved cooperative yield, never an actor decision. */
+export function continueTriggerWork<G>(
+  scheduler: TriggerScheduler,
+  game: G,
+  registry: TriggerRegistry<G>,
+): boolean {
+  if (
+    scheduler.yielded !== true ||
+    scheduler.prompt ||
+    scheduler.interruption ||
+    registry.version !== scheduler.registryVersion ||
+    registry.stepBudget === undefined ||
+    (!scheduler.frames.length && !scheduler.unwind) ||
+    !validUnwindState(scheduler, registry)
+  )
+    return false;
+  readStepBudget(registry);
+  scheduler.yielded = false;
   runTriggers(scheduler, game, registry);
   return true;
 }
@@ -768,6 +960,8 @@ export function resumeTriggerPrompt<G>(
   const prompt = scheduler.prompt;
   if (
     scheduler.interruption ||
+    scheduler.yielded ||
+    !validUnwindState(scheduler, registry) ||
     !prompt ||
     prompt.actor !== actor ||
     registry.version !== scheduler.registryVersion ||
@@ -801,6 +995,7 @@ export function resumeTriggerPrompt<G>(
   );
   if (prompt.kind === "order" && answer.choice !== null && !selected)
     return false;
+  readStepBudget(registry);
   if (prompt.kind === "step") {
     frame.answer = { choice: answer.choice };
   } else if (frame.kind === "event" && answer.choice === null) {
