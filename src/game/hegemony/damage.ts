@@ -289,5 +289,25 @@ export function createDamageOperation<
       damageInput(game, operation.data);
     },
     run: runDamage,
+    unwind: ({ game, normalContinuation, interruption }) => {
+      if (normalContinuation === null || interruption.reason === "game-over")
+        return { kind: "return", value: null };
+      const cursor = normalContinuation as DamageCursor;
+      if (
+        !Number.isSafeInteger(cursor.stage) ||
+        cursor.stage < 0 ||
+        cursor.stage > 11
+      )
+        throw new Error("Invalid damage cleanup continuation");
+      // ConfirmDamage/Predamage are before native Room::damage's try block.
+      if (cursor.stage >= 3) {
+        const tags = damageRoomTags(game);
+        const pending = stack(game);
+        delete tags.is_chained;
+        delete tags.CurrentDamageStruct;
+        pending.length = 0;
+      }
+      return { kind: "return", value: null };
+    },
   };
 }

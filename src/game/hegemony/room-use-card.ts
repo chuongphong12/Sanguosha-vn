@@ -7,6 +7,8 @@ import type {
 } from "./scheduler";
 import type { CardFace, WrappedCard } from "./wrapped-cards";
 import { readCardReference } from "./card-resources";
+import { shufflePileCards, type DrawPileGame } from "./draw-pile";
+import type { OperationStep } from "./scheduler";
 
 export interface RoomUseGame extends CardEffectGame {
   playerHistory: Record<string, Record<string, number>>;
@@ -317,6 +319,303 @@ export function createRoomUseCardOperation<G extends RoomUseGame>(
         };
       }
       return { kind: "return", value: true };
+    },
+    unwind: ({ game, normalContinuation, continuation, interruption }) => {
+      if (normalContinuation === null || interruption.reason === "game-over")
+        return { kind: "return", value: null };
+      const cursor = normalContinuation as Cursor;
+      if (
+        !Number.isSafeInteger(cursor.stage) ||
+        cursor.stage < 0 ||
+        cursor.stage > 7
+      )
+        throw new Error("Invalid Room-use cleanup continuation");
+      // Validation/history precede native useCard's try; wrapping/onUse/after do not.
+      if (cursor.stage < 4 || continuation !== null)
+        return { kind: "return", value: null };
+      return {
+        kind: "operation",
+        operation: {
+          name: "room-use-cleanup",
+          data: readEntry(game, cursor.entry),
+        },
+        continuation: true,
+      };
+    },
+  };
+}
+
+export type RoomUseCleanupGame = RoomUseGame &
+  DrawPileGame & {
+    /** Engine catalogue flags are distinct from each Room's live wrapped flags. */
+    engineCardFlags: Record<number, string[]>;
+  };
+export interface RoomUseCleanupRules {
+  discardZone: string;
+  /** Engine catalogue order; enabled reflects the pinned bans/conversions. */
+  physicalCards: readonly { id: number; enabled: boolean }[];
+  notify: (
+    notice:
+      | { kind: "player-flag"; player: string; flag: string }
+      | { kind: "card-flag"; id: number; flag: "-using" },
+  ) => TriggerOperation | null;
+}
+
+/** Native Room::useCard catch body, running as a child of its unwind owner. */
+export function createRoomUseCleanupOperation<G extends RoomUseCleanupGame>(
+  rules: RoomUseCleanupRules,
+): OperationHandler<G> {
+  const catalogue = structuredClone(rules.physicalCards);
+  if (
+    new Set(catalogue.map((card) => card.id)).size !== catalogue.length ||
+    catalogue.some(
+      (card) =>
+        !Number.isSafeInteger(card.id) ||
+        card.id < 0 ||
+        typeof card.enabled !== "boolean",
+    )
+  )
+    throw new Error("Invalid cleanup catalogue");
+  function location(game: G, id: number) {
+    const zones = Object.values(game.cardZones).filter((zone) =>
+      zone.cards.includes(id),
+    );
+    if (
+      zones.length !== 1 ||
+      zones[0].cards.filter((card) => card === id).length !== 1
+    )
+      throw new Error("Invalid cleanup physical location");
+    return zones[0];
+  }
+  function validate(game: G, data: TriggerData) {
+    const entry = readEntry(game, data);
+    const discard = game.cardZones[rules.discardZone];
+    if (
+      !discard ||
+      discard.place !== "discard" ||
+      discard.owner !== null ||
+      !Array.isArray(discard.cards)
+    )
+      throw new Error("Invalid cleanup discard zone");
+    if (
+      !game.pileRandom ||
+      game.pileRandom.algorithm !== "mulberry32-v1" ||
+      !Number.isInteger(game.pileRandom.state) ||
+      game.pileRandom.state < 0 ||
+      game.pileRandom.state > 0xffffffff
+    )
+      throw new Error("Invalid cleanup RNG");
+    for (const card of catalogue) {
+      const flags = game.engineCardFlags?.[card.id];
+      if (
+        !Array.isArray(flags) ||
+        flags.some((flag) => typeof flag !== "string")
+      )
+        throw new Error("Invalid engine card flags");
+      if (card.enabled) {
+        location(game, card.id);
+        const wrapped = game.wrappedCards?.[card.id];
+        if (
+          !wrapped ||
+          !Array.isArray(wrapped.flags) ||
+          wrapped.flags.some((flag) => typeof flag !== "string")
+        )
+          throw new Error("Invalid cleanup wrapped card");
+      }
+    }
+    for (const id of entry.use.card.materialIDs) {
+      if (!catalogue.some((card) => card.id === id))
+        throw new Error("Missing cleanup material catalogue");
+      location(game, id);
+    }
+    readRecipientFlags(game, entry.use.from);
+    for (const player of game.seatOrder) {
+      if (typeof game.alive[player] !== "boolean")
+        throw new Error("Invalid cleanup alive state");
+      if (!game.alive[player]) continue;
+      readRecipientFlags(game, player);
+      const tags = game.cardResources?.playerTags?.[player];
+      if (!tags || typeof tags !== "object" || Array.isArray(tags))
+        throw new Error("Invalid cleanup player tags");
+    }
+    return entry;
+  }
+  type CleanupCursor = {
+    stage: number;
+    entry: RoomCardUse;
+    players: string[];
+    player: number;
+    flags: string[] | null;
+    flag: number;
+    pool: number[];
+    index: number;
+    current: number | null;
+  };
+  function move(
+    ids: number[],
+    reason: TriggerData,
+    cursor: CleanupCursor,
+  ): OperationStep {
+    return {
+      kind: "operation",
+      operation: {
+        name: "move-cards",
+        data: {
+          moves: [{ ids, to: rules.discardZone, open: true, reason }],
+          forceVisible: true,
+        },
+      },
+      continuation: cursor,
+    };
+  }
+  return {
+    name: "room-use-cleanup",
+    validate: (game, operation) => {
+      validate(game, operation.data);
+    },
+    run: ({ game, operation, continuation }): OperationStep => {
+      const cursor: CleanupCursor =
+        continuation === null
+          ? {
+              stage: 0,
+              entry: validate(game, operation.data),
+              players: [],
+              player: 0,
+              flags: null,
+              flag: 0,
+              pool: [],
+              index: 0,
+              current: null,
+            }
+          : (structuredClone(continuation) as CleanupCursor);
+      while (true) {
+        if (cursor.stage === 0) {
+          const ids = cursor.entry.use.card.materialIDs.filter(
+            (id) => location(game, id).place === "table",
+          );
+          cursor.stage = 1;
+          if (ids.length)
+            return move(
+              ids,
+              {
+                kind: "unknown",
+                actor: cursor.entry.use.from,
+                skill: cursor.entry.use.card.skillName,
+                eventName: "",
+                target:
+                  cursor.entry.use.to.length === 1
+                    ? cursor.entry.use.to[0]
+                    : null,
+              },
+              cursor,
+            );
+        }
+        if (cursor.stage === 1) {
+          const flags = readRecipientFlags(game, cursor.entry.use.from);
+          if (!flags.includes("Global_ProcessBroken"))
+            flags.push("Global_ProcessBroken");
+          cursor.stage = 2;
+          return {
+            kind: "event",
+            event: {
+              name: "CardFinished",
+              target: cursor.entry.use.from,
+              data: structuredClone(cursor.entry.use),
+            },
+            continuation: cursor,
+          };
+        }
+        if (cursor.stage === 2) {
+          game.playerFlags[cursor.entry.use.from] = readRecipientFlags(
+            game,
+            cursor.entry.use.from,
+          ).filter((flag) => flag !== "Global_ProcessBroken");
+          cursor.players = game.seatOrder.filter(
+            (player) => game.alive[player],
+          );
+          cursor.stage = 3;
+        }
+        if (cursor.stage === 3) {
+          while (cursor.player < cursor.players.length) {
+            const player = cursor.players[cursor.player];
+            if (cursor.flags === null) {
+              delete game.cardResources!.playerTags[player].Qinggang;
+              cursor.flags = [...readRecipientFlags(game, player)];
+              cursor.flag = 0;
+            }
+            while (cursor.flag < cursor.flags.length) {
+              const flag = cursor.flags[cursor.flag++];
+              if (
+                flag !== "Global_GongxinOperator" &&
+                !flag.endsWith("_InTempMoving")
+              )
+                continue;
+              if (!readRecipientFlags(game, player).includes(flag)) continue;
+              game.playerFlags[player] = readRecipientFlags(
+                game,
+                player,
+              ).filter((value) => value !== flag);
+              const notice =
+                flag === "Global_GongxinOperator"
+                  ? null
+                  : rules.notify({
+                      kind: "player-flag",
+                      player,
+                      flag: "-" + flag,
+                    });
+              if (notice)
+                return {
+                  kind: "operation",
+                  operation: notice,
+                  continuation: cursor,
+                };
+            }
+            cursor.player++;
+            cursor.flags = null;
+          }
+          cursor.stage = 4;
+        }
+        if (cursor.stage === 4) {
+          // getRandomCards resets ENGINE flags, then filters and shuffles; not Room wrapper flags.
+          for (const card of catalogue) game.engineCardFlags[card.id] = [];
+          cursor.pool = catalogue
+            .filter((card) => card.enabled)
+            .map((card) => card.id);
+          shufflePileCards(game, cursor.pool);
+          cursor.stage = 5;
+        }
+        if (cursor.stage === 5) {
+          if (cursor.index === cursor.pool.length)
+            return { kind: "return", value: null };
+          const id = (cursor.current = cursor.pool[cursor.index++]);
+          cursor.stage = 6;
+          const place = location(game, id).place;
+          if (place === "table" || place === "judge")
+            return move([id], null, cursor);
+        }
+        if (cursor.stage === 6) {
+          const id = cursor.current!,
+            wrapped = game.wrappedCards![id];
+          cursor.stage = 5;
+          if (wrapped.flags.includes("using")) {
+            wrapped.flags = wrapped.flags.filter((flag) => flag !== "using");
+            wrapped.modified = true;
+            const notice = rules.notify({
+              kind: "card-flag",
+              id,
+              flag: "-using",
+            });
+            if (notice)
+              return {
+                kind: "operation",
+                operation: notice,
+                continuation: cursor,
+              };
+          }
+          continue;
+        }
+        throw new Error("Invalid Room-use cleanup continuation");
+      }
     },
   };
 }

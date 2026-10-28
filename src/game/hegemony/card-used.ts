@@ -33,6 +33,8 @@ type Cursor = {
   from: string;
   index: number;
   jinkBackup: TriggerData[];
+  /** Native local card_use at the last assignment inside its protected section. */
+  catchUse?: CardUse;
 };
 
 function runCardUsed<G extends CardResourceGame>(
@@ -86,6 +88,7 @@ function runCardUsed<G extends CardResourceGame>(
         name = "TargetConfirming";
         break;
       case 3:
+        cursor.catchUse = structuredClone(cursor.use);
         if (rules.resources)
           cursor.jinkBackup = prepareJink(game, cursor.use, rules.resources);
         // Native local card_use stays fixed throughout Record/Chosen/Confirmed.
@@ -117,6 +120,7 @@ function runCardUsed<G extends CardResourceGame>(
             cursor.use,
             rules.resources,
           );
+        cursor.catchUse = structuredClone(cursor.use);
         return {
           kind: "operation",
           operation: rules.use(structuredClone(cursor.use)),
@@ -151,6 +155,30 @@ export function createCardUsedOperation<G extends CardResourceGame>(
       }
     },
     run: (context) => runCardUsed(context, rules),
+    unwind: ({ game, normalContinuation, interruption }) => {
+      if (normalContinuation === null || interruption.reason === "game-over")
+        return { kind: "return", value: null };
+      const cursor = normalContinuation as Cursor;
+      if (
+        !Number.isSafeInteger(cursor.stage) ||
+        cursor.stage < -1 ||
+        cursor.stage > 8
+      )
+        throw new Error("Invalid CardUsed cleanup continuation");
+      // Pre-action/TargetChoosing/TargetConfirming precede the native try.
+      if (cursor.stage >= 4) {
+        if (!rules.resources || !cursor.catchUse)
+          throw new Error("Missing CardUsed cleanup resources/local");
+        const use = readExecutionCardUse(game, cursor.catchUse);
+        const { card, playerTags } = readResourceCard(
+          game,
+          use,
+          rules.resources,
+        );
+        delete playerTags[`Jink_${card.key}`];
+      }
+      return { kind: "return", value: null };
+    },
   };
 }
 
