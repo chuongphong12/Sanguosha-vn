@@ -2,13 +2,13 @@
   "version": 1,
   "game": {
     "repository": "https://github.com/chuongphong12/Sanguosha-vn.git",
-    "commit": "32d3e5f68b9d07af9ab6e1cb3f1291939094edd8",
-    "availability": "Published M1.3.1 opt-in scheduler infrastructure; M1.2/M0 and production profiles remain unchanged"
+    "commit": "9024429ba89e7a21b090734d51a2d042e85d7928",
+    "availability": "Published M1.3.2 protected library catches; current M1.2/M0/production profiles remain unchanged"
   },
   "native": {
     "repository": "https://github.com/TamQuocSat-LangKhach/QSanguosha-QuocChien.git",
     "commit": "ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f",
     "release": "2.3.43-beta2"
   },
-  "scope": "Game 32d3e5f68b9d07af9ab6e1cb3f1291939094edd8 adds only M1.3.1 opt-in unwind/cooperative yield to the shared scheduler plus17 public-seam trace tests. Default profiles preserve freeze and unbounded behavior. Native core catch handlers, phase/turn/recovery, actual phase bodies and match v3 remain M1.3.2–5 under the accepted B design. Current M1.2 create/apply/view/restore/startup stays at its4cad857 contract and prepared is not playable; M0 proofs retain their own revisions. New fullcheck2216/93/build/reviews establish the named interpreter contract, not full-match/native-runtime or hosted/network/storage/bot certification. No complete native package or production is enabled; all M0/content/media/bots/rooms/provider/load/cutover gates remain open."
+  "scope": "Game 9024429ba89e7a21b090734d51a2d042e85d7928 adds protected damage/CardUsed/Room-use catches and102 public-seam tests on the M1.3.1 scheduler. Actual child compositions and injected boundary fixtures are distinguished;2,318/94 check/build and reviews certify this checkpoint only. Default application profiles freeze; phases/GameRule cleanup, turns/recovery/bodies and match v3 remain M1.3.3–5. Production remains Standard2013 and all M0/content/media/competitive bot/room/provider/load/cutover gates remain open. No full match or native-runtime differential is claimed."
 }

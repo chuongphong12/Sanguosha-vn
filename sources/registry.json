@@ -929,6 +929,102 @@
       "checked_on": "2026-10-28",
       "author": null,
       "business_owner": null
+    },
+    {
+      "id": "web.m132.damage.9024429",
+      "kind": "primary_code",
+      "repository": "https://github.com/chuongphong12/Sanguosha-vn",
+      "revision": "9024429ba89e7a21b090734d51a2d042e85d7928",
+      "path": "src/game/hegemony/damage.ts",
+      "url": "https://github.com/chuongphong12/Sanguosha-vn/blob/9024429ba89e7a21b090734d51a2d042e85d7928/src/game/hegemony/damage.ts",
+      "locator": "M1.3.2 protected core catch definition or public-seam assertions; execution receipt is separate",
+      "checked_on": "2026-10-28",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "web.m132.card-used.9024429",
+      "kind": "primary_code",
+      "repository": "https://github.com/chuongphong12/Sanguosha-vn",
+      "revision": "9024429ba89e7a21b090734d51a2d042e85d7928",
+      "path": "src/game/hegemony/card-used.ts",
+      "url": "https://github.com/chuongphong12/Sanguosha-vn/blob/9024429ba89e7a21b090734d51a2d042e85d7928/src/game/hegemony/card-used.ts",
+      "locator": "M1.3.2 protected core catch definition or public-seam assertions; execution receipt is separate",
+      "checked_on": "2026-10-28",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "web.m132.room-use.9024429",
+      "kind": "primary_code",
+      "repository": "https://github.com/chuongphong12/Sanguosha-vn",
+      "revision": "9024429ba89e7a21b090734d51a2d042e85d7928",
+      "path": "src/game/hegemony/room-use-card.ts",
+      "url": "https://github.com/chuongphong12/Sanguosha-vn/blob/9024429ba89e7a21b090734d51a2d042e85d7928/src/game/hegemony/room-use-card.ts",
+      "locator": "M1.3.2 protected core catch definition or public-seam assertions; execution receipt is separate",
+      "checked_on": "2026-10-28",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "web.m132.tests.9024429",
+      "kind": "test_code",
+      "repository": "https://github.com/chuongphong12/Sanguosha-vn",
+      "revision": "9024429ba89e7a21b090734d51a2d042e85d7928",
+      "path": "tests/hegemony/core-unwind.test.ts",
+      "url": "https://github.com/chuongphong12/Sanguosha-vn/blob/9024429ba89e7a21b090734d51a2d042e85d7928/tests/hegemony/core-unwind.test.ts",
+      "locator": "M1.3.2 protected core catch definition or public-seam assertions; execution receipt is separate",
+      "checked_on": "2026-10-28",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "native.m132.room.ce4e62b",
+      "kind": "primary_code",
+      "repository": "https://github.com/TamQuocSat-LangKhach/QSanguosha-QuocChien",
+      "revision": "ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f",
+      "path": "src/server/room.cpp",
+      "url": "https://github.com/TamQuocSat-LangKhach/QSanguosha-QuocChien/blob/ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f/src/server/room.cpp#L4269-L4303",
+      "locator": "Room use catch; also inspected damage4490–4573, table selection6620–6645, player/card flag setters2240–2248/2450+",
+      "checked_on": "2026-10-28",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "native.m132.gamerule.ce4e62b",
+      "kind": "primary_code",
+      "repository": "https://github.com/TamQuocSat-LangKhach/QSanguosha-QuocChien",
+      "revision": "ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f",
+      "path": "src/server/gamerule.cpp",
+      "url": "https://github.com/TamQuocSat-LangKhach/QSanguosha-QuocChien/blob/ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f/src/server/gamerule.cpp#L562-L611",
+      "locator": "CardUsed protected local and unconditional Jink catch",
+      "checked_on": "2026-10-28",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "native.m132.engine.ce4e62b",
+      "kind": "primary_code",
+      "repository": "https://github.com/TamQuocSat-LangKhach/QSanguosha-QuocChien",
+      "revision": "ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f",
+      "path": "src/core/engine.cpp",
+      "url": "https://github.com/TamQuocSat-LangKhach/QSanguosha-QuocChien/blob/ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f/src/core/engine.cpp#L961-L999",
+      "locator": "Engine flag reset/filter/shuffle; current wrapper getCard547–579",
+      "checked_on": "2026-10-28",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "native.m132.wrappedcard.ce4e62b",
+      "kind": "primary_code",
+      "repository": "https://github.com/TamQuocSat-LangKhach/QSanguosha-QuocChien",
+      "revision": "ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f",
+      "path": "src/core/wrappedcard.cpp",
+      "url": "https://github.com/TamQuocSat-LangKhach/QSanguosha-QuocChien/blob/ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f/src/core/wrappedcard.cpp#L71-L77",
+      "locator": "Wrapped flag mutation sets modified",
+      "checked_on": "2026-10-28",
+      "author": null,
+      "business_owner": null
     }
   ],
   "pages": [
@@ -1074,6 +1170,26 @@
         "web.m131.tests.32d3e5f",
         "native.m131.trigger-catch.ce4e62b"
       ]
+    },
+    {
+      "path": "engine/core-interruption-cleanup.md",
+      "status": "supported",
+      "applies_to": {
+        "game_commit": "9024429ba89e7a21b090734d51a2d042e85d7928",
+        "native_commit": "ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f"
+      },
+      "source_ids": [
+        "web.m132.damage.9024429",
+        "web.m132.card-used.9024429",
+        "web.m132.room-use.9024429",
+        "web.m132.tests.9024429",
+        "native.m132.room.ce4e62b",
+        "native.m132.gamerule.ce4e62b",
+        "native.m132.engine.ce4e62b",
+        "native.m132.wrappedcard.ce4e62b"
+      ],
+      "reviewed_on": "2026-10-28",
+      "review_scope": "M1.3.2 bounded actual library cleanup with fixture authorities; no enabled full match or native runtime claim"
     }
   ],
   "relations": [
@@ -1842,6 +1958,78 @@
         "native.m131.trigger-catch.ce4e62b"
       ],
       "scope": "Bounded opt-in interpreter interface; source assertions, executions and native semantic inspiration remain distinct, not full catch/game certification."
+    },
+    {
+      "subject": "page:engine/core-interruption-cleanup.md",
+      "predicate": "derived_from",
+      "object": "source:web.m132.damage.9024429",
+      "evidence": [
+        "web.m132.damage.9024429"
+      ],
+      "scope": "Protected core catch source semantics/assertions; checkpoint executions distinct from source code and production enablement."
+    },
+    {
+      "subject": "page:engine/core-interruption-cleanup.md",
+      "predicate": "derived_from",
+      "object": "source:web.m132.card-used.9024429",
+      "evidence": [
+        "web.m132.card-used.9024429"
+      ],
+      "scope": "Protected core catch source semantics/assertions; checkpoint executions distinct from source code and production enablement."
+    },
+    {
+      "subject": "page:engine/core-interruption-cleanup.md",
+      "predicate": "derived_from",
+      "object": "source:web.m132.room-use.9024429",
+      "evidence": [
+        "web.m132.room-use.9024429"
+      ],
+      "scope": "Protected core catch source semantics/assertions; checkpoint executions distinct from source code and production enablement."
+    },
+    {
+      "subject": "page:engine/core-interruption-cleanup.md",
+      "predicate": "derived_from",
+      "object": "source:web.m132.tests.9024429",
+      "evidence": [
+        "web.m132.tests.9024429"
+      ],
+      "scope": "Protected core catch source semantics/assertions; checkpoint executions distinct from source code and production enablement."
+    },
+    {
+      "subject": "page:engine/core-interruption-cleanup.md",
+      "predicate": "derived_from",
+      "object": "source:native.m132.room.ce4e62b",
+      "evidence": [
+        "native.m132.room.ce4e62b"
+      ],
+      "scope": "Protected core catch source semantics/assertions; checkpoint executions distinct from source code and production enablement."
+    },
+    {
+      "subject": "page:engine/core-interruption-cleanup.md",
+      "predicate": "derived_from",
+      "object": "source:native.m132.gamerule.ce4e62b",
+      "evidence": [
+        "native.m132.gamerule.ce4e62b"
+      ],
+      "scope": "Protected core catch source semantics/assertions; checkpoint executions distinct from source code and production enablement."
+    },
+    {
+      "subject": "page:engine/core-interruption-cleanup.md",
+      "predicate": "derived_from",
+      "object": "source:native.m132.engine.ce4e62b",
+      "evidence": [
+        "native.m132.engine.ce4e62b"
+      ],
+      "scope": "Protected core catch source semantics/assertions; checkpoint executions distinct from source code and production enablement."
+    },
+    {
+      "subject": "page:engine/core-interruption-cleanup.md",
+      "predicate": "derived_from",
+      "object": "source:native.m132.wrappedcard.ce4e62b",
+      "evidence": [
+        "native.m132.wrappedcard.ce4e62b"
+      ],
+      "scope": "Protected core catch source semantics/assertions; checkpoint executions distinct from source code and production enablement."
     }
   ]
 }
