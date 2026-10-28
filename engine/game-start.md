@@ -12,7 +12,7 @@ FirstRound is a room tag, distinct from the player's Global_FirstRound flag. Nor
 
 Continuations capture per-viewer names, per-player skill lists, pending mark commits and the current startup stage. Resume does not repeat prior notices, mark commits or drawing. A separately dispatched fresh GameStart follows native behavior again; there is no new idempotency gate. Earlier eager effects survive interruption and later acquisition failure.
 
-The global owner composes the [actual luck-card state and transfer owner](luck-cards.md) when its configured limitation is positive, including in custom scenarios. Public dispatch/resume exercises that composition with real draw/acquisition/movement/terminal operations. Whole RoomThread startup, dynamic package discovery, paired-setup synchronization, actual network/private delivery, full turns and production remain separate.
+The global owner composes the [actual luck-card state and transfer owner](luck-cards.md) when its configured limitation is positive, including in custom scenarios. Public dispatch/resume exercises that composition with real draw/acquisition/movement/terminal operations. The later [M1.1 match handoff](match-authority.md) consumes paired setup into Room; [M1.2 startup ownership](startup-owner.md) adds initial winner/global/eligible-player orchestration for a supplied profile. Dynamic package discovery, actual network/private delivery, full phases/turns, native interruption cleanup and production remain separate. The core global GameStart implementation and its pilot review pin below are unchanged.
 
 ## Registered evidence pilot
 

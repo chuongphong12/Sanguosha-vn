@@ -785,6 +785,114 @@
       "checked_on": "2026-10-27",
       "author": null,
       "business_owner": null
+    },
+    {
+      "id": "web.m12.match.4cad857",
+      "kind": "primary_code",
+      "repository": "https://github.com/chuongphong12/Sanguosha-vn",
+      "revision": "4cad85771d797f1d960e2faf1f6dcfdb6ac032a4",
+      "path": "src/game/hegemony/match.ts",
+      "url": "https://github.com/chuongphong12/Sanguosha-vn/blob/4cad85771d797f1d960e2faf1f6dcfdb6ac032a4/src/game/hegemony/match.ts",
+      "locator": "createHegemonyMatch: schema-v2, actual winner relations, two registries, startup application and restore",
+      "checked_on": "2026-10-28",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "web.m12.owner.4cad857",
+      "kind": "primary_code",
+      "repository": "https://github.com/chuongphong12/Sanguosha-vn",
+      "revision": "4cad85771d797f1d960e2faf1f6dcfdb6ac032a4",
+      "path": "src/game/hegemony/match-startup.ts",
+      "url": "https://github.com/chuongphong12/Sanguosha-vn/blob/4cad85771d797f1d960e2faf1f6dcfdb6ac032a4/src/game/hegemony/match-startup.ts",
+      "locator": "createMatchStartup: stage/root validation, idle switch and continuation",
+      "checked_on": "2026-10-28",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "web.m12.tests.4cad857",
+      "kind": "test_code",
+      "repository": "https://github.com/chuongphong12/Sanguosha-vn",
+      "revision": "4cad85771d797f1d960e2faf1f6dcfdb6ac032a4",
+      "path": "tests/hegemony/match.test.ts",
+      "url": "https://github.com/chuongphong12/Sanguosha-vn/blob/4cad85771d797f1d960e2faf1f6dcfdb6ac032a4/tests/hegemony/match.test.ts",
+      "locator": "30 match cases including injected native-condition fixtures; assertions are distinct from execution receipts",
+      "checked_on": "2026-10-28",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "web.m12.winner.4cad857",
+      "kind": "primary_code",
+      "repository": "https://github.com/chuongphong12/Sanguosha-vn",
+      "revision": "4cad85771d797f1d960e2faf1f6dcfdb6ac032a4",
+      "path": "src/game/hegemony/victory.ts",
+      "url": "https://github.com/chuongphong12/Sanguosha-vn/blob/4cad85771d797f1d960e2faf1f6dcfdb6ac032a4/src/game/hegemony/victory.ts",
+      "locator": "Existing createGetWinnerOperation and createGameOverOperation composed by M1.2",
+      "checked_on": "2026-10-28",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "web.m12.relations.4cad857",
+      "kind": "primary_code",
+      "repository": "https://github.com/chuongphong12/Sanguosha-vn",
+      "revision": "4cad85771d797f1d960e2faf1f6dcfdb6ac032a4",
+      "path": "src/game/hegemony/general-relations.ts",
+      "url": "https://github.com/chuongphong12/Sanguosha-vn/blob/4cad85771d797f1d960e2faf1f6dcfdb6ac032a4/src/game/hegemony/general-relations.ts",
+      "locator": "Actual friend/prediction and include-dead lord helpers",
+      "checked_on": "2026-10-28",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "web.m12.general.4cad857",
+      "kind": "primary_code",
+      "repository": "https://github.com/chuongphong12/Sanguosha-vn",
+      "revision": "4cad85771d797f1d960e2faf1f6dcfdb6ac032a4",
+      "path": "src/game/hegemony/general.ts",
+      "url": "https://github.com/chuongphong12/Sanguosha-vn/blob/4cad85771d797f1d960e2faf1f6dcfdb6ac032a4/src/game/hegemony/general.ts",
+      "locator": "Existing show-general operation; package/filter/UI boundary adapters remain explicit",
+      "checked_on": "2026-10-28",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "web.m12.careerist.4cad857",
+      "kind": "primary_code",
+      "repository": "https://github.com/chuongphong12/Sanguosha-vn",
+      "revision": "4cad85771d797f1d960e2faf1f6dcfdb6ac032a4",
+      "path": "src/game/hegemony/careerist.ts",
+      "url": "https://github.com/chuongphong12/Sanguosha-vn/blob/4cad85771d797f1d960e2faf1f6dcfdb6ac032a4/src/game/hegemony/careerist.ts",
+      "locator": "Existing careerist-rule operation; M1.2 fixtures cover the no-recruitment branch",
+      "checked_on": "2026-10-28",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "native.m12.roomthread.ce4e62b",
+      "kind": "primary_code",
+      "repository": "https://github.com/TamQuocSat-LangKhach/QSanguosha-QuocChien",
+      "revision": "ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f",
+      "path": "src/server/roomthread.cpp",
+      "url": "https://github.com/TamQuocSat-LangKhach/QSanguosha-QuocChien/blob/ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f/src/server/roomthread.cpp",
+      "locator": "RoomThread::run/constructTriggerTable/addPlayerSkills: initial winner, global then conditional player startup; turns follow",
+      "checked_on": "2026-10-28",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "native.m12.winner.ce4e62b",
+      "kind": "primary_code",
+      "repository": "https://github.com/TamQuocSat-LangKhach/QSanguosha-QuocChien",
+      "revision": "ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f",
+      "path": "src/server/gamerule.cpp",
+      "url": "https://github.com/TamQuocSat-LangKhach/QSanguosha-QuocChien/blob/ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f/src/server/gamerule.cpp",
+      "locator": "GameRule::getWinner lines1058–1151: actual reveal, relationships, dead-lord and careerist behavior",
+      "checked_on": "2026-10-28",
+      "author": null,
+      "business_owner": null
     }
   ],
   "pages": [
@@ -865,10 +973,10 @@
     {
       "path": "engine/match-authority.md",
       "status": "supported",
-      "reviewed_on": "2026-10-27",
-      "review_scope": "Internal M1.1 authority/handoff/global startup/private projection and JSON/configuration compatibility. Catalogue, package predicates, ordered deck, luck collection and presentation timing remain scoped adapters. Not full RoomThread/turn/session/production/native-runtime certification.",
+      "reviewed_on": "2026-10-28",
+      "review_scope": "Internal M1.1 authority plus M1.2 initial-winner/global/eligible-player startup, static table/cursor/root/configuration compatibility and trusted JSON continuation. Supplied profile/content/package/presentation authorities remain explicit; no full turn, native cleanup, session/production or native-runtime certification.",
       "applies_to": {
-        "game_commit": "1e705eff4ca1252f0cf771615d5847820a9c8fd3",
+        "game_commit": "4cad85771d797f1d960e2faf1f6dcfdb6ac032a4",
         "native_commit": "ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f"
       },
       "source_ids": [
@@ -883,7 +991,37 @@
         "native.m1.companion.ce4e62b",
         "native.m1.lord.ce4e62b",
         "native.m1.placeholder.ce4e62b",
-        "native.m1.room-thread.ce4e62b"
+        "native.m1.room-thread.ce4e62b",
+        "web.m12.match.4cad857",
+        "web.m12.owner.4cad857",
+        "web.m12.tests.4cad857",
+        "web.m12.winner.4cad857",
+        "web.m12.relations.4cad857",
+        "web.m12.general.4cad857",
+        "web.m12.careerist.4cad857",
+        "native.m12.roomthread.ce4e62b",
+        "native.m12.winner.ce4e62b"
+      ]
+    },
+    {
+      "path": "engine/startup-owner.md",
+      "status": "supported",
+      "reviewed_on": "2026-10-28",
+      "review_scope": "Bounded M1.2 static-registry startup ownership and persistence. Tests use synthetic profiles and injected winner conditions; not full native manifest/turn/session/runtime certification.",
+      "applies_to": {
+        "game_commit": "4cad85771d797f1d960e2faf1f6dcfdb6ac032a4",
+        "native_commit": "ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f"
+      },
+      "source_ids": [
+        "web.m12.match.4cad857",
+        "web.m12.owner.4cad857",
+        "web.m12.tests.4cad857",
+        "web.m12.winner.4cad857",
+        "web.m12.relations.4cad857",
+        "web.m12.general.4cad857",
+        "web.m12.careerist.4cad857",
+        "native.m12.roomthread.ce4e62b",
+        "native.m12.winner.ce4e62b"
       ]
     }
   ],
@@ -1464,6 +1602,168 @@
         "native.m1.room-thread.ce4e62b"
       ],
       "scope": "Bounded M1.1 implementation/assertions/native mapping or unchanged production-registration evidence; source roles are distinct, not complete release certification."
+    },
+    {
+      "subject": "page:engine/match-authority.md",
+      "predicate": "derived_from",
+      "object": "source:web.m12.match.4cad857",
+      "evidence": [
+        "web.m12.match.4cad857"
+      ],
+      "scope": "M1.2 supplied-profile startup composition and trusted persistence; primary definitions, assertion source and checkpoint executions have distinct roles. No full-match or native runtime certification."
+    },
+    {
+      "subject": "page:engine/match-authority.md",
+      "predicate": "derived_from",
+      "object": "source:web.m12.owner.4cad857",
+      "evidence": [
+        "web.m12.owner.4cad857"
+      ],
+      "scope": "M1.2 supplied-profile startup composition and trusted persistence; primary definitions, assertion source and checkpoint executions have distinct roles. No full-match or native runtime certification."
+    },
+    {
+      "subject": "page:engine/match-authority.md",
+      "predicate": "derived_from",
+      "object": "source:web.m12.tests.4cad857",
+      "evidence": [
+        "web.m12.tests.4cad857"
+      ],
+      "scope": "M1.2 supplied-profile startup composition and trusted persistence; primary definitions, assertion source and checkpoint executions have distinct roles. No full-match or native runtime certification."
+    },
+    {
+      "subject": "page:engine/match-authority.md",
+      "predicate": "derived_from",
+      "object": "source:web.m12.winner.4cad857",
+      "evidence": [
+        "web.m12.winner.4cad857"
+      ],
+      "scope": "M1.2 supplied-profile startup composition and trusted persistence; primary definitions, assertion source and checkpoint executions have distinct roles. No full-match or native runtime certification."
+    },
+    {
+      "subject": "page:engine/match-authority.md",
+      "predicate": "derived_from",
+      "object": "source:web.m12.relations.4cad857",
+      "evidence": [
+        "web.m12.relations.4cad857"
+      ],
+      "scope": "M1.2 supplied-profile startup composition and trusted persistence; primary definitions, assertion source and checkpoint executions have distinct roles. No full-match or native runtime certification."
+    },
+    {
+      "subject": "page:engine/match-authority.md",
+      "predicate": "derived_from",
+      "object": "source:web.m12.general.4cad857",
+      "evidence": [
+        "web.m12.general.4cad857"
+      ],
+      "scope": "M1.2 supplied-profile startup composition and trusted persistence; primary definitions, assertion source and checkpoint executions have distinct roles. No full-match or native runtime certification."
+    },
+    {
+      "subject": "page:engine/match-authority.md",
+      "predicate": "derived_from",
+      "object": "source:web.m12.careerist.4cad857",
+      "evidence": [
+        "web.m12.careerist.4cad857"
+      ],
+      "scope": "M1.2 supplied-profile startup composition and trusted persistence; primary definitions, assertion source and checkpoint executions have distinct roles. No full-match or native runtime certification."
+    },
+    {
+      "subject": "page:engine/match-authority.md",
+      "predicate": "derived_from",
+      "object": "source:native.m12.roomthread.ce4e62b",
+      "evidence": [
+        "native.m12.roomthread.ce4e62b"
+      ],
+      "scope": "M1.2 supplied-profile startup composition and trusted persistence; primary definitions, assertion source and checkpoint executions have distinct roles. No full-match or native runtime certification."
+    },
+    {
+      "subject": "page:engine/match-authority.md",
+      "predicate": "derived_from",
+      "object": "source:native.m12.winner.ce4e62b",
+      "evidence": [
+        "native.m12.winner.ce4e62b"
+      ],
+      "scope": "M1.2 supplied-profile startup composition and trusted persistence; primary definitions, assertion source and checkpoint executions have distinct roles. No full-match or native runtime certification."
+    },
+    {
+      "subject": "page:engine/startup-owner.md",
+      "predicate": "derived_from",
+      "object": "source:web.m12.match.4cad857",
+      "evidence": [
+        "web.m12.match.4cad857"
+      ],
+      "scope": "M1.2 supplied-profile startup composition and trusted persistence; primary definitions, assertion source and checkpoint executions have distinct roles. No full-match or native runtime certification."
+    },
+    {
+      "subject": "page:engine/startup-owner.md",
+      "predicate": "derived_from",
+      "object": "source:web.m12.owner.4cad857",
+      "evidence": [
+        "web.m12.owner.4cad857"
+      ],
+      "scope": "M1.2 supplied-profile startup composition and trusted persistence; primary definitions, assertion source and checkpoint executions have distinct roles. No full-match or native runtime certification."
+    },
+    {
+      "subject": "page:engine/startup-owner.md",
+      "predicate": "derived_from",
+      "object": "source:web.m12.tests.4cad857",
+      "evidence": [
+        "web.m12.tests.4cad857"
+      ],
+      "scope": "M1.2 supplied-profile startup composition and trusted persistence; primary definitions, assertion source and checkpoint executions have distinct roles. No full-match or native runtime certification."
+    },
+    {
+      "subject": "page:engine/startup-owner.md",
+      "predicate": "derived_from",
+      "object": "source:web.m12.winner.4cad857",
+      "evidence": [
+        "web.m12.winner.4cad857"
+      ],
+      "scope": "M1.2 supplied-profile startup composition and trusted persistence; primary definitions, assertion source and checkpoint executions have distinct roles. No full-match or native runtime certification."
+    },
+    {
+      "subject": "page:engine/startup-owner.md",
+      "predicate": "derived_from",
+      "object": "source:web.m12.relations.4cad857",
+      "evidence": [
+        "web.m12.relations.4cad857"
+      ],
+      "scope": "M1.2 supplied-profile startup composition and trusted persistence; primary definitions, assertion source and checkpoint executions have distinct roles. No full-match or native runtime certification."
+    },
+    {
+      "subject": "page:engine/startup-owner.md",
+      "predicate": "derived_from",
+      "object": "source:web.m12.general.4cad857",
+      "evidence": [
+        "web.m12.general.4cad857"
+      ],
+      "scope": "M1.2 supplied-profile startup composition and trusted persistence; primary definitions, assertion source and checkpoint executions have distinct roles. No full-match or native runtime certification."
+    },
+    {
+      "subject": "page:engine/startup-owner.md",
+      "predicate": "derived_from",
+      "object": "source:web.m12.careerist.4cad857",
+      "evidence": [
+        "web.m12.careerist.4cad857"
+      ],
+      "scope": "M1.2 supplied-profile startup composition and trusted persistence; primary definitions, assertion source and checkpoint executions have distinct roles. No full-match or native runtime certification."
+    },
+    {
+      "subject": "page:engine/startup-owner.md",
+      "predicate": "derived_from",
+      "object": "source:native.m12.roomthread.ce4e62b",
+      "evidence": [
+        "native.m12.roomthread.ce4e62b"
+      ],
+      "scope": "M1.2 supplied-profile startup composition and trusted persistence; primary definitions, assertion source and checkpoint executions have distinct roles. No full-match or native runtime certification."
+    },
+    {
+      "subject": "page:engine/startup-owner.md",
+      "predicate": "derived_from",
+      "object": "source:native.m12.winner.ce4e62b",
+      "evidence": [
+        "native.m12.winner.ce4e62b"
+      ],
+      "scope": "M1.2 supplied-profile startup composition and trusted persistence; primary definitions, assertion source and checkpoint executions have distinct roles. No full-match or native runtime certification."
     }
   ]
 }
