@@ -2,6 +2,7 @@
 
 These reports preserve particular source snapshots, adapters and executed checks. Read [current engine scope](../engine/overview.md) and the [roadmap](../roadmap/README.md) for present implementation boundaries. Earlier “next” statements and totals are historical.
 
+- [M1.3.2: actual protected core catches](2026-10-28-hegemony-m132-core-unwind.md)
 - [M1.3.1: opt-in unwind interpreter and cooperative yield](2026-10-28-hegemony-m131-scheduler-unwind.md)
 - [M1.2: native startup owner and two static trigger registries](2026-10-28-hegemony-m12-startup-owner.md)
 - [M1.1: one authoritative match, setup handoff and global startup](2026-10-27-hegemony-m1-match-authority.md)
