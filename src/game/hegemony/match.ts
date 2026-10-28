@@ -21,11 +21,21 @@ import {
   createSwapPileOperation,
 } from "./draw-pile";
 import { createCardMovementOperation } from "./movement";
-import { createGameOverOperation } from "./victory";
+import {
+  createGameOverOperation,
+  createGetWinnerOperation,
+  type WinnerRules,
+} from "./victory";
+import { hasShownGeneral } from "./general-identity";
+import {
+  areGeneralFriends,
+  willBeGeneralFriends,
+  generalRoomLord,
+} from "./general-relations";
+import { createMatchStartup, type MatchStartup } from "./match-startup";
 import { matchStartupNotice } from "./match-notice";
 import {
   createTriggerScheduler,
-  dispatchTriggerEvent,
   getTriggerPrompt,
   resumeTriggerPrompt,
   type TriggerRegistry,
@@ -43,17 +53,24 @@ import {
 export type { MatchContent, HegemonyRoom } from "./match-room";
 
 interface MatchVersion {
-  schemaVersion: "hegemony-match-v1";
+  schemaVersion: "hegemony-match-v2";
   rulesVersion: "hegemony-ce4e62b";
   contentVersion: string;
   registryVersion: string;
   /** Room configuration is part of recovery identity, independent of registry code. */
   startupSettings: GameStartSettings;
+  /** Package global IDs bind registry classification across recovery. */
+  startupGlobals: string[];
 }
 export type HegemonyMatch = MatchVersion &
   (
     | { phase: "setup"; setup: HegemonyState; deck: MatchDeck }
-    | { phase: "room"; room: HegemonyRoom; scheduler: TriggerScheduler }
+    | {
+        phase: "room";
+        room: HegemonyRoom;
+        scheduler: TriggerScheduler;
+        startup: MatchStartup;
+      }
   );
 export type MatchCommand =
   | { kind: "choose-pair"; choice: GeneralPairChoice }
@@ -66,6 +83,9 @@ interface MatchRules {
     settings: GameStartSettings;
     visibleSkills: GameStartRules<HegemonyRoom>["visibleSkills"];
     hasLordSkill: GameStartRules<HegemonyRoom>["hasLordSkill"];
+    globalSkills: string[];
+    hasPlayerStartup: (room: Readonly<HegemonyRoom>, player: string) => boolean;
+    winner: Pick<WinnerRules<HegemonyRoom>, "showGeneral" | "careerist">;
   };
   skills?: TriggerRegistry<HegemonyRoom>["skills"];
   operations?: TriggerRegistry<HegemonyRoom>["operations"];
@@ -76,6 +96,7 @@ export function createHegemonyMatch(options: MatchRules) {
   const content = structuredClone(options.content),
     settings = structuredClone(options.startup.settings);
   validateMatchContent(content);
+  const globalIds = [...options.startup.globalSkills].sort();
   if (
     !options.registryVersion ||
     typeof settings.image !== "boolean" ||
@@ -85,12 +106,23 @@ export function createHegemonyMatch(options: MatchRules) {
     settings.luckLimit < 0
   )
     throw new Error("Invalid match registry/settings");
+  if (
+    new Set(globalIds).size !== globalIds.length ||
+    globalIds.some(
+      (id) => !(options.skills ?? []).some((skill) => skill.id === id),
+    ) ||
+    typeof options.startup.hasPlayerStartup !== "function" ||
+    typeof options.startup.winner?.showGeneral !== "function" ||
+    typeof options.startup.winner?.careerist !== "function"
+  )
+    throw new Error("Invalid match startup classification/adapters");
   const version: MatchVersion = {
-    schemaVersion: "hegemony-match-v1",
+    schemaVersion: "hegemony-match-v2",
     rulesVersion: "hegemony-ce4e62b",
     contentVersion: content.version,
     registryVersion: options.registryVersion,
     startupSettings: structuredClone(settings),
+    startupGlobals: globalIds,
   };
   const piles = {
     drawZone: "draw",
@@ -113,7 +145,7 @@ export function createHegemonyMatch(options: MatchRules) {
     notify: (notice) => ({ name: "match-start-notice", data: notice }),
   };
   const registry: TriggerRegistry<HegemonyRoom> = {
-    version: options.registryVersion,
+    version: `${options.registryVersion}:startup-full`,
     skills: [...(options.skills ?? []), createGameStartRule()],
     operations: [
       ...(options.operations ?? []),
@@ -124,6 +156,13 @@ export function createHegemonyMatch(options: MatchRules) {
       createSwapPileOperation(piles),
       createCardMovementOperation(),
       createGameOverOperation(),
+      createGetWinnerOperation({
+        ...options.startup.winner,
+        hasShown: hasShownGeneral,
+        isFriend: areGeneralFriends,
+        willBeFriend: willBeGeneralFriends,
+        getLord: (room, kingdom) => generalRoomLord(room, kingdom, true),
+      }),
       {
         name: "match-start-notice",
         run: ({ game, operation }) => {
@@ -140,6 +179,17 @@ export function createHegemonyMatch(options: MatchRules) {
     (settings.luckLimit > 0 && !operationNames.includes("luck-card"))
   )
     throw new Error("Invalid match operation composition");
+  const owner = createMatchStartup(
+    {
+      ...registry,
+      version: `${options.registryVersion}:startup-global`,
+      skills: registry.skills.filter(
+        (s) => s.id === "game-rule-game-start" || globalIds.includes(s.id),
+      ),
+    },
+    registry,
+    options.startup.hasPlayerStartup,
+  );
 
   function compatible(state: HegemonyMatch) {
     if (
@@ -147,11 +197,11 @@ export function createHegemonyMatch(options: MatchRules) {
       state.rulesVersion !== version.rulesVersion ||
       state.contentVersion !== version.contentVersion ||
       state.registryVersion !== version.registryVersion ||
-      !["setup", "room"].includes(state.phase) ||
-      (state.phase === "room" &&
-        state.scheduler.registryVersion !== version.registryVersion)
+      !["setup", "room"].includes(state.phase)
     )
       throw new Error("Incompatible Hegemony match");
+    if (JSON.stringify(state.startupGlobals) !== JSON.stringify(globalIds))
+      throw new Error("Incompatible match startup classification");
     if (
       !state.startupSettings ||
       state.startupSettings.image !== settings.image ||
@@ -162,9 +212,11 @@ export function createHegemonyMatch(options: MatchRules) {
       throw new Error("Incompatible match startup settings");
     if (
       (state.phase === "room" && ("setup" in state || "deck" in state)) ||
-      (state.phase === "setup" && ("room" in state || "scheduler" in state))
+      (state.phase === "setup" &&
+        ("room" in state || "scheduler" in state || "startup" in state))
     )
       throw new Error("Conflicting match authority");
+    if (state.phase === "room") owner.validate(state);
   }
   function create(
     config: Omit<HegemonySetupOptions, "generals"> & MatchDeck,
@@ -205,29 +257,34 @@ export function createHegemonyMatch(options: MatchRules) {
       const room = createMatchRoom(next.setup, content, next.deck);
       const scheduler = createTriggerScheduler(
         room.seatOrder,
-        version.registryVersion,
+        `${version.registryVersion}:startup-global`,
       );
-      if (
-        !dispatchTriggerEvent(
-          scheduler,
-          room,
-          registry,
-          { name: "GameStart", target: null, data: null },
-          room.currentPlayer,
-        )
-      )
-        throw new Error("Cannot dispatch match startup");
-      return { ...structuredClone(version), phase: "room", room, scheduler };
+      const prepared: HegemonyMatch = {
+        ...structuredClone(version),
+        phase: "room",
+        room,
+        scheduler,
+        startup: { stage: "winner", waiting: false },
+      };
+      owner.advance(prepared);
+      return prepared;
     }
     if (
       command.kind !== "answer" ||
       next.room.gameResult !== null ||
-      !resumeTriggerPrompt(next.scheduler, next.room, registry, actor, {
-        id: command.id,
-        choice: command.choice,
-      })
+      !resumeTriggerPrompt(
+        next.scheduler,
+        next.room,
+        owner.registry(next.startup),
+        actor,
+        {
+          id: command.id,
+          choice: command.choice,
+        },
+      )
     )
       return null;
+    owner.advance(next);
     return next;
   }
   function view(state: HegemonyMatch, viewer: string | null) {
@@ -254,7 +311,7 @@ export function createHegemonyMatch(options: MatchRules) {
           ? "finished"
           : state.scheduler.interruption
             ? "interrupted"
-            : state.scheduler.frames.length
+            : state.startup.stage !== "complete"
               ? "starting"
               : "prepared",
       result: room.gameResult,
@@ -356,6 +413,7 @@ export function createHegemonyMatch(options: MatchRules) {
       )
         throw new Error("Invalid match card inventory");
       room.startupNotices = room.startupNotices.map(matchStartupNotice);
+      owner.advance(value);
     }
     return structuredClone(value);
   }

@@ -3,14 +3,21 @@ import {
   createHegemonyMatch,
   type HegemonyMatch,
   type MatchContent,
+  type HegemonyRoom,
 } from "../../src/game/hegemony/match";
 import { createDamageDoneOperation } from "../../src/game/hegemony/damage-rule";
 import { createLuckCardOperation } from "../../src/game/hegemony/luck-cards";
 import { createLuckTransferOperation } from "../../src/game/hegemony/luck-transfer";
+import { createShowGeneralOperation } from "../../src/game/hegemony/general";
+import { createCareeristOperation } from "../../src/game/hegemony/careerist";
+import { hasShownGeneral } from "../../src/game/hegemony/general-identity";
+import { createFillHandCardsOperation } from "../../src/game/hegemony/fill-hand";
+import { createRecoveryOperation } from "../../src/game/hegemony/recovery";
 
 function fixture(
   count = 2,
   configure?: (rules: Parameters<typeof createHegemonyMatch>[0]) => void,
+  globalSkills?: string[],
 ) {
   const players = Array.from({ length: count }, (_, i) => String(i));
   const content: MatchContent = {
@@ -45,9 +52,71 @@ function fixture(
       },
       visibleSkills: () => [],
       hasLordSkill: () => false,
+      globalSkills: [],
+      hasPlayerStartup: () => false,
+      winner: {
+        showGeneral: (target, slot) => ({
+          name: "show-general",
+          data: {
+            target,
+            head: slot === "head",
+            triggerEvent: false,
+            sendLog: false,
+            ignoreRule: true,
+          },
+        }),
+        careerist: () => ({ name: "careerist-rule", data: null }),
+      },
     },
   };
   configure?.(rules);
+  // These synthetic hooks are global unless the fixture explicitly classifies them.
+  rules.startup.globalSkills =
+    globalSkills ?? (rules.skills ?? []).map((s) => s.id);
+  rules.operations = [
+    createShowGeneralOperation<HegemonyRoom>({
+      canShow: () => true,
+      preshow: (target, head, enabled) => ({
+        name: "internal-general-hook",
+        data: { kind: "preshow", target, head, enabled },
+      }),
+      change: () => ({ name: "internal-general-hook", data: null }),
+      skills: () => ({ name: "internal-general-hook", data: null }),
+      notify: () => ({ name: "internal-general-hook", data: null }),
+      filter: () => ({ name: "internal-general-hook", data: null }),
+    }),
+    createCareeristOperation<HegemonyRoom>({
+      hasShown: hasShownGeneral,
+      showHead: (target) => ({
+        name: "show-general",
+        data: {
+          target,
+          head: true,
+          triggerEvent: false,
+          sendLog: true,
+          ignoreRule: true,
+        },
+      }),
+    }),
+    createFillHandCardsOperation<HegemonyRoom>({
+      draw: (target, count, reason) => ({
+        name: "draw-cards",
+        data: { players: [target], counts: [count], reason },
+      }),
+    }),
+    createRecoveryOperation<HegemonyRoom>(),
+    ...((rules.operations ?? []).some(
+      (op) => op.name === "internal-general-hook",
+    )
+      ? []
+      : [
+          {
+            name: "internal-general-hook",
+            run: () => ({ kind: "return" as const, value: null }),
+          },
+        ]),
+    ...(rules.operations ?? []),
+  ];
   const module = createHegemonyMatch(rules);
   const state = module.create({
     offers: Object.fromEntries(
@@ -72,7 +141,415 @@ function chooseAll(f: ReturnType<typeof fixture>): HegemonyMatch {
   return state;
 }
 
+/** Trusted serialized native-condition fixture; winner/reveal execution itself stays real. */
+function beforeWinner(f: ReturnType<typeof fixture>) {
+  const ready = chooseAll(f);
+  if (ready.phase !== "room") throw new Error("Expected Room");
+  const saved = structuredClone(ready);
+  saved.startup = { stage: "winner", waiting: false };
+  saved.scheduler.registryVersion = `${saved.registryVersion}:startup-global`;
+  saved.scheduler.completion = null;
+  saved.scheduler.operationCompletion = null;
+  saved.room.startupNotices = [];
+  saved.room.pileRandom.state = 1;
+  for (const [key, zone] of Object.entries(saved.room.cardZones))
+    zone.cards = key === "draw" ? f.content.cards.map((c) => c.id) : [];
+  return saved;
+}
+
 describe("internal Quốc Chiến match authority", () => {
+  it("rechecks player startup eligibility after global skills change current skill ownership", () => {
+    const f = fixture(
+        3,
+        (rules) => {
+          rules.startup.hasPlayerStartup = (room, actor) =>
+            room.acquiredSkills[actor].head.includes("player-track");
+          rules.skills = [
+            {
+              id: "global-giver",
+              events: ["GameStart"],
+              priority: 10,
+              rule: true,
+              effect: ({ game }) => {
+                game.acquiredSkills["1"].head.push("player-track");
+                return { kind: "done", value: false };
+              },
+            },
+            {
+              id: "player-track",
+              events: ["GameStart"],
+              priority: 9,
+              rule: true,
+              effect: ({ event, operationChild }) =>
+                operationChild
+                  ? { kind: "done", value: false }
+                  : {
+                      kind: "operation",
+                      operation: {
+                        name: "match-start-notice",
+                        data: {
+                          kind: "delay",
+                          duration:
+                            event.target === null
+                              ? 999
+                              : 20 + Number(event.target),
+                        },
+                      },
+                      continuation: true,
+                    },
+            },
+            {
+              id: "player-record",
+              events: ["GameStart"],
+              priority: 9,
+              record: ({ game, event }) => {
+                game.playerMarks["0"][
+                  event.target === null
+                    ? "unexpectedGlobalRecord"
+                    : "playerRecord"
+                ] = 1;
+              },
+              triggerable: () => [],
+              effect: () => ({ kind: "done", value: false }),
+            },
+          ];
+        },
+        ["global-giver"],
+      ),
+      ready = chooseAll(f),
+      view = f.module.view(ready, "0");
+    expect(
+      view.notices?.filter((n) => n.kind === "delay").map((n) => n.duration),
+    ).toEqual([3000, 21]);
+    expect(view.marks).not.toHaveProperty("unexpectedGlobalRecord");
+    expect(view.marks).toHaveProperty("playerRecord", 1);
+  });
+  it("restores consecutive per-player startup prompts without resetting IDs or replaying costs", () => {
+    const f = fixture(
+      2,
+      (rules) => {
+        rules.startup.hasPlayerStartup = () => true;
+        rules.skills = [
+          {
+            id: "private-player-start",
+            events: ["GameStart"],
+            priority: 10,
+            rule: true,
+            effect: ({ game, event, continuation }) => {
+              if (event.target === null)
+                throw new Error("Player-only skill ran globally");
+              if (continuation === null) {
+                game.playerMarks[event.target].startupVisits =
+                  (game.playerMarks[event.target].startupVisits ?? 0) + 1;
+                return {
+                  kind: "prompt",
+                  actor: event.target,
+                  choices: ["continue"],
+                  canCancel: false,
+                  continuation: true,
+                };
+              }
+              return { kind: "done", value: false };
+            },
+          },
+        ];
+      },
+      [],
+    );
+    let pending = chooseAll(f);
+    const seen = new Set<string>();
+    let nextId = 0;
+    for (const actor of ["0", "1"]) {
+      pending = f.module.restore(JSON.stringify(pending));
+      if (pending.phase !== "room") throw new Error("Expected startup");
+      expect(pending.scheduler.registryVersion).toBe(
+        `${pending.registryVersion}:startup-full`,
+      );
+      expect(pending.scheduler.nextId).toBeGreaterThan(nextId);
+      nextId = pending.scheduler.nextId;
+      const view = f.module.view(pending, actor),
+        other = actor === "0" ? "1" : "0";
+      expect(f.module.view(pending, other).prompt).toBeNull();
+      if (!view.prompt) throw new Error("Expected player-start prompt");
+      expect(seen.has(view.prompt.id)).toBe(false);
+      seen.add(view.prompt.id);
+      const answer = {
+        kind: "answer",
+        id: view.prompt.id,
+        choice: view.prompt.choices[0],
+      } as const;
+      expect(f.module.apply(pending, other, answer)).toBeNull();
+      expect(
+        f.module.apply(pending, actor, { ...answer, choice: "unoffered" }),
+      ).toBeNull();
+      const accepted = f.module.apply(pending, actor, answer);
+      if (!accepted) throw new Error("Expected startup continuation");
+      expect(f.module.apply(accepted, actor, answer)).toBeNull();
+      pending = accepted;
+    }
+    expect(f.module.view(pending, "0")).toMatchObject({
+      stage: "prepared",
+      hand: [0, 1, 2, 3],
+      marks: { startupVisits: 1 },
+    });
+    expect(f.module.view(pending, "1")).toMatchObject({
+      hand: [4, 5, 6, 7],
+      marks: { startupVisits: 1 },
+    });
+    expect(
+      f.module.view(f.module.restore(JSON.stringify(pending)), "0"),
+    ).toEqual(f.module.view(pending, "0"));
+  });
+  it("uses real initial winner/reveal/game-over from a saved native condition without dealing", () => {
+    const f = fixture(),
+      saved = beforeWinner(f);
+    saved.room.alive["1"] = false;
+    saved.room.hp["1"] = 0;
+    saved.room.livingPlayers = ["0"];
+    const ended = f.module.restore(JSON.stringify(saved)),
+      view = f.module.view(ended, null);
+    expect(view).toMatchObject({
+      stage: "finished",
+      result: "0",
+      players: {
+        "0": {
+          head: { id: "0-head", shown: true },
+          deputy: { id: "0-deputy", shown: true },
+          handCount: 0,
+        },
+        "1": { handCount: 0 },
+      },
+    });
+    if (ended.phase !== "room") throw new Error("Expected terminal Room");
+    expect(ended.room.cardZones.draw.cards).toEqual(
+      f.content.cards.map((c) => c.id),
+    );
+    expect(ended.room.startupNotices).toEqual([]);
+    expect(
+      f.module.view(f.module.restore(JSON.stringify(ended)), null),
+    ).toEqual(view);
+  });
+  it("resumes actual winner reveal prompts under the global registry without running GameStart", () => {
+    const f = fixture(2, (rules) => {
+        rules.operations = [
+          {
+            name: "internal-general-hook",
+            run: ({ operation, continuation }) => {
+              const data = operation.data;
+              if (
+                !data ||
+                typeof data !== "object" ||
+                Array.isArray(data) ||
+                data.kind !== "preshow"
+              )
+                return { kind: "return", value: null };
+              if (continuation === null)
+                return {
+                  kind: "prompt",
+                  actor: String(data.target),
+                  choices: ["allow"],
+                  canCancel: false,
+                  continuation: true,
+                };
+              return { kind: "return", value: null };
+            },
+          },
+        ];
+      }),
+      saved = beforeWinner(f);
+    saved.room.alive["1"] = false;
+    saved.room.hp["1"] = 0;
+    saved.room.livingPlayers = ["0"];
+    let current = f.module.restore(JSON.stringify(saved));
+    const ids = new Set<string>();
+    for (let slot = 0; slot < 2; slot++) {
+      current = f.module.restore(JSON.stringify(current));
+      if (current.phase !== "room")
+        throw new Error("Expected winner continuation");
+      expect(current.startup.stage).toBe("winner");
+      expect(current.scheduler.registryVersion).toBe(
+        `${current.registryVersion}:startup-global`,
+      );
+      expect(current.scheduler.nextId).toBeGreaterThan(saved.scheduler.nextId);
+      const view = f.module.view(current, "0");
+      expect(view.stage).toBe("starting");
+      expect(view.hand).toEqual([]);
+      expect(f.module.view(current, "1").prompt).toBeNull();
+      if (!view.prompt) throw new Error("Expected native reveal prompt");
+      expect(ids.has(view.prompt.id)).toBe(false);
+      ids.add(view.prompt.id);
+      const next = f.module.apply(current, "0", {
+        kind: "answer",
+        id: view.prompt.id,
+        choice: view.prompt.choices[0],
+      });
+      if (!next) throw new Error("Expected winner reveal continuation");
+      current = next;
+    }
+    expect(f.module.view(current, null)).toMatchObject({
+      stage: "finished",
+      result: "0",
+      notices: [],
+    });
+  });
+  it("rejects missing or duplicate global skill identities before creating a match", () => {
+    expect(() => fixture(2, undefined, ["unregistered"])).toThrow(
+      "classification",
+    );
+    expect(() =>
+      fixture(
+        2,
+        (rules) => {
+          rules.skills = [
+            {
+              id: "global-test",
+              events: ["GameStart"],
+              priority: 1,
+              rule: true,
+              effect: () => ({ kind: "done", value: false }),
+            },
+          ];
+        },
+        ["global-test", "global-test"],
+      ),
+    ).toThrow("classification");
+  });
+  it("runs the actual careerist child when deciding a fully revealed faction winner", () => {
+    const f = fixture(),
+      saved = beforeWinner(f);
+    for (const actor of f.players) {
+      saved.room.identities[actor].headShown = true;
+      saved.room.identities[actor].deputyShown = true;
+      saved.room.displayedGenerals[actor] = {
+        head: `${actor}-head`,
+        deputy: `${actor}-deputy`,
+      };
+    }
+    const ended = f.module.restore(JSON.stringify(saved));
+    expect(f.module.view(ended, "0")).toMatchObject({
+      stage: "finished",
+      result: "0+1",
+      hand: [],
+    });
+    expect(f.module.view(ended, "1").hand).toEqual([]);
+  });
+  it("rejects old schema, classification drift and a cursor inconsistent with its active root", () => {
+    const f = fixture(2, (rules) => {
+        rules.skills = [
+          {
+            id: "global-hold",
+            events: ["GameStart"],
+            priority: 10,
+            rule: true,
+            effect: ({ continuation }) =>
+              continuation === null
+                ? {
+                    kind: "prompt",
+                    actor: "0",
+                    choices: ["continue"],
+                    canCancel: false,
+                    continuation: true,
+                  }
+                : { kind: "done", value: false },
+          },
+        ];
+      }),
+      pending = chooseAll(f);
+    expect(() =>
+      f.module.restore(
+        JSON.stringify({ ...pending, schemaVersion: "hegemony-match-v1" }),
+      ),
+    ).toThrow("Incompatible");
+    expect(() =>
+      f.module.restore(JSON.stringify({ ...pending, startupGlobals: [] })),
+    ).toThrow("classification");
+    if (pending.phase !== "room") throw new Error("Expected pending startup");
+    const forged = structuredClone(pending);
+    forged.startup = { stage: "players", index: 0, waiting: true };
+    forged.scheduler.registryVersion = `${forged.registryVersion}:startup-full`;
+    expect(() => f.module.restore(JSON.stringify(forged))).toThrow("root");
+  });
+  it("activates player-only startup after global dealing in native seat order", () => {
+    const f = fixture(
+      2,
+      (rules) => {
+        rules.startup.hasPlayerStartup = () => true;
+        rules.skills = [
+          {
+            id: "global-track",
+            events: ["GameStart"],
+            priority: 10,
+            rule: true,
+            effect: ({ event, operationChild }) =>
+              event.target !== null || operationChild
+                ? { kind: "done", value: false }
+                : {
+                    kind: "operation",
+                    operation: {
+                      name: "match-start-notice",
+                      data: { kind: "delay", duration: 10 },
+                    },
+                    continuation: true,
+                  },
+          },
+          {
+            id: "player-track",
+            events: ["GameStart"],
+            priority: 9,
+            rule: true,
+            effect: ({ event, operationChild }) =>
+              operationChild
+                ? { kind: "done", value: false }
+                : {
+                    kind: "operation",
+                    operation: {
+                      name: "match-start-notice",
+                      data: {
+                        kind: "delay",
+                        duration:
+                          event.target === null
+                            ? 999
+                            : 20 + Number(event.target),
+                      },
+                    },
+                    continuation: true,
+                  },
+          },
+        ];
+      },
+      ["global-track"],
+    );
+    const ready = chooseAll(f),
+      view = f.module.view(ready, "0");
+    expect(view.stage).toBe("prepared");
+    expect(
+      view.notices?.filter((n) => n.kind === "delay").map((n) => n.duration),
+    ).toEqual([10, 3000, 20, 21]);
+    expect(view.hand).toEqual([0, 1, 2, 3]);
+    expect(f.module.view(ready, "1").hand).toEqual([4, 5, 6, 7]);
+    if (ready.phase !== "room") throw new Error("Expected prepared Room");
+    const checkpoint = structuredClone(ready);
+    checkpoint.startup = { stage: "players", index: 1, waiting: true };
+    const resumed = f.module.restore(JSON.stringify(checkpoint));
+    expect(f.module.view(resumed, "0")).toEqual(view);
+    if (resumed.phase !== "room") throw new Error("Expected Room");
+    expect(resumed.scheduler.nextId).toBe(ready.scheduler.nextId);
+  });
+  it("consumes an already completed global root before switching tables without redealing", () => {
+    const f = fixture(),
+      ready = chooseAll(f);
+    if (ready.phase !== "room") throw new Error("Expected prepared Room");
+    const checkpoint = structuredClone(ready);
+    checkpoint.startup = { stage: "global", waiting: true };
+    checkpoint.scheduler.registryVersion = `${checkpoint.registryVersion}:startup-global`;
+    const restored = f.module.restore(JSON.stringify(checkpoint));
+    expect(f.module.view(restored, "0")).toEqual(f.module.view(ready, "0"));
+    if (restored.phase !== "room") throw new Error("Expected prepared Room");
+    expect(restored.scheduler.nextId).toBe(ready.scheduler.nextId);
+    expect(restored.scheduler.registryVersion).toBe(
+      `${restored.registryVersion}:startup-full`,
+    );
+  });
   it.each(["replace", "keep"])(
     "resumes real luck (%s) through an explicit collection adapter",
     (decision) => {
@@ -431,6 +908,12 @@ describe("internal Quốc Chiến match authority", () => {
       result: null,
       hand: [],
     });
+    expect(
+      stopped.module.view(
+        stopped.module.restore(JSON.stringify(interrupted)),
+        "0",
+      ),
+    ).toEqual(stopped.module.view(interrupted, "0"));
     expect(
       stopped.module.apply(interrupted, "0", {
         kind: "answer",
