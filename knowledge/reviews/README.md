@@ -2,6 +2,7 @@
 
 These reports preserve particular source snapshots, adapters and executed checks. Read [current engine scope](../engine/overview.md) and the [roadmap](../roadmap/README.md) for present implementation boundaries. Earlier “next” statements and totals are historical.
 
+- [M1.2: native startup owner and two static trigger registries](2026-10-28-hegemony-m12-startup-owner.md)
 - [M1.1: one authoritative match, setup handoff and global startup](2026-10-27-hegemony-m1-match-authority.md)
 - [M0.3/M0.4: ArcheryAttack and distinct MethodResponse](2026-10-27-hegemony-m0-method-response.md)
 - [M0.3/M0.4: explicit Leave and permanent bot ownership](2026-10-26-hegemony-m0-permanent-bot.md)

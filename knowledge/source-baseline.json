@@ -2,13 +2,13 @@
   "version": 1,
   "game": {
     "repository": "https://github.com/chuongphong12/Sanguosha-vn.git",
-    "commit": "1e705eff4ca1252f0cf771615d5847820a9c8fd3",
-    "availability": "Published internal M1.1 and independent M0 prototypes on codex/hegemony-m0-prototypes; production registration unchanged"
+    "commit": "4cad85771d797f1d960e2faf1f6dcfdb6ac032a4",
+    "availability": "Published internal M1.2 startup owner and independent M0 prototypes on codex/hegemony-m0-prototypes; production registration unchanged"
   },
   "native": {
     "repository": "https://github.com/TamQuocSat-LangKhach/QSanguosha-QuocChien.git",
     "commit": "ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f",
     "release": "2.3.43-beta2"
   },
-  "scope": "Game 1e705eff4ca1252f0cf771615d5847820a9c8fd3 adds internal M1.1 create/apply/view/restore: paired setup is consumed into one normalized Room, actual global GameStart/draw/movement and configured luck run through the scheduler, private views are allowlisted and JSON continuation binds schema/rules/content/registry plus startup settings. Initial HP/identity/marks include native hidden-lord and companion facts. Global startup/dealing is tested for 2–10 seats; accepted/declined luck is tested through a two-seat adapter. Synthetic content, package predicates, ordered initial deck and collection/presentation timing remain explicit authorities. Prepared is not a complete match: initial winner/per-player RoomThread startup, full phase/turn/unwind, full content/bots/media, network/store wiring and production cutover remain open. The independent two-seat M0 response-v4 experiment and its service clocks/Leave/local file+SQL proofs remain at their own checkpoints; no new hosted/storage/browser/full-match acceptance is claimed by M1.1. Earlier normalized kernel bytes and native ce4e62b pin are unchanged. M0 investigations/measurement/decision gates remain open despite the separately approved internal M1.1 work. Production still registers Standard2013. PR33 collects integration evidence; green CI/preview does not enable the target mode."
+  "scope": "Game 4cad85771d797f1d960e2faf1f6dcfdb6ac032a4 extends internal M1.1 authority with M1.2 initial-winner/global/eligible-player startup, two static registries and idle-only transition retaining scheduler IDs. Actual winner uses relation/reveal/careerist/game-over composition. Schema-v2 seals cursor/settings/global classification and supports validated idle/completed-root continuation; v1 is incompatible. Current profile/content/package eligibility and ordered initial deck remain explicit authorities. Startup/dealing tests cover 2–10 seats; luck uses a two-seat collection adapter; terminal winner conditions use trusted serialized fixtures, not a normal complete match or new recruitment prompt. Prepared is not playable: full phases/turns/native cleanup, complete content/media/bots, session/UI/network/store wiring, hosted recovery/load and production cutover remain open. Independent M0 response-v4/clock-v3 and file/local-SQL receipts retain their own checkpoints; no new network/browser/SQL/provider/full-match/native runtime differential is claimed by M1.2. Generic scheduler, normalized kernel, production registration and dependencies are unchanged. M0 gates remain open. PR33 is draft; green CI/preview alone does not enable Quốc Chiến."
 }
