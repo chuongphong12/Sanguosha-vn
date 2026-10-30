@@ -40,8 +40,12 @@ These are bounded normalized compositions, not full matches, complete package en
 
 ## Later phase lifecycle slice
 
-[M1.3.3a phase lifecycle](phase-lifecycle.md) adds native sequence/change/execute/skip/insert/query as a separate library slice. It reuses current Room.playerPhases and the existing scheduler. At the M1.3.3a source input, GameRule cleanup was pending; its later implementation is linked below; turns/recovery/bodies and match v3 remain M1.3.4–5. Current application profiles and production registration are unchanged. Historical evidence above retains its named revision.
+[M1.3.3a phase lifecycle](phase-lifecycle.md) adds native sequence/change/execute/skip/insert/query as a separate library slice. It reuses current Room.playerPhases and the existing scheduler. At the M1.3.3a source input, GameRule cleanup was pending; its later implementation is linked below; remaining phase bodies and match v3 remain M1.3.4b–5. Current application profiles and production registration are unchanged. Historical evidence above retains its named revision.
 
 ## Later complete phase library checkpoint
 
-[M1.3.3b cleanup](phase-cleanup.md) now completes the library phase checkpoint together with [lifecycle](phase-lifecycle.md). It adds real typed/history/limitation/skill/ImperialOrder effects, with declared metadata/filter/request/presentation adapters. Current application and production profiles remain unchanged; actual turn/recovery/body ownership and match v3 remain M1.3.4–5. Earlier evidence retains its named source revision.
+[M1.3.3b cleanup](phase-cleanup.md) now completes the library phase checkpoint together with [lifecycle](phase-lifecycle.md). It adds real typed/history/limitation/skill/ImperialOrder effects, with declared metadata/filter/request/presentation adapters. Current application and production profiles remain unchanged; remaining phase-body/aggregate-match ownership remains M1.3.4b–5. Earlier evidence retains its named source revision.
+
+## Later turn-root slice
+
+[M1.3.4a turn roots](turn-order.md) now provide TurnStart, normal/extra/round progression and explicit recovery after trusted unwind. Remaining phase bodies are M1.3.4b; aggregate v3 pumping/classification/restore/projection are M1.3.5. Current application/production profiles remain unchanged. Earlier evidence retains its named revision.

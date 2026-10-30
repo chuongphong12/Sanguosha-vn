@@ -1205,6 +1205,102 @@
       "checked_on": "2026-10-30",
       "author": null,
       "business_owner": null
+    },
+    {
+      "id": "web.m134a.turn-start.33f27aa",
+      "kind": "primary_code",
+      "repository": "https://github.com/chuongphong12/Sanguosha-vn",
+      "revision": "33f27aa1da6d74d8d50acb7ba1dabdefcbe9f554",
+      "path": "src/game/hegemony/turn-start.ts",
+      "url": "https://github.com/chuongphong12/Sanguosha-vn/blob/33f27aa1da6d74d8d50acb7ba1dabdefcbe9f554/src/game/hegemony/turn-start.ts",
+      "locator": "TurnStart, turnOver and optional BattleRoyal operations",
+      "checked_on": "2026-10-30",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "web.m134a.turn-order.33f27aa",
+      "kind": "primary_code",
+      "repository": "https://github.com/chuongphong12/Sanguosha-vn",
+      "revision": "33f27aa1da6d74d8d50acb7ba1dabdefcbe9f554",
+      "path": "src/game/hegemony/turn-order.ts",
+      "url": "https://github.com/chuongphong12/Sanguosha-vn/blob/33f27aa1da6d74d8d50acb7ba1dabdefcbe9f554/src/game/hegemony/turn-order.ts",
+      "locator": "Bounded normal/extra steps, round cleanup and explicit recovery root",
+      "checked_on": "2026-10-30",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "web.m134a.tests.33f27aa",
+      "kind": "test_code",
+      "repository": "https://github.com/chuongphong12/Sanguosha-vn",
+      "revision": "33f27aa1da6d74d8d50acb7ba1dabdefcbe9f554",
+      "path": "tests/hegemony/turns.test.ts",
+      "url": "https://github.com/chuongphong12/Sanguosha-vn/blob/33f27aa1da6d74d8d50acb7ba1dabdefcbe9f554/tests/hegemony/turns.test.ts",
+      "locator": "Public dispatch/resume/unwind assertions and real phase/Draw composition",
+      "checked_on": "2026-10-30",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "native.m134a.turn-rule.ce4e62b",
+      "kind": "primary_code",
+      "repository": "https://github.com/TamQuocSat-LangKhach/QSanguosha-QuocChien",
+      "revision": "ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f",
+      "path": "src/server/gamerule.cpp",
+      "url": "https://github.com/TamQuocSat-LangKhach/QSanguosha-QuocChien/blob/ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f/src/server/gamerule.cpp#L332-L394",
+      "locator": "GameRule TurnStart effect and guards",
+      "checked_on": "2026-10-30",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "native.m134a.thread.ce4e62b",
+      "kind": "primary_code",
+      "repository": "https://github.com/TamQuocSat-LangKhach/QSanguosha-QuocChien",
+      "revision": "ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f",
+      "path": "src/server/roomthread.cpp",
+      "url": "https://github.com/TamQuocSat-LangKhach/QSanguosha-QuocChien/blob/ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f/src/server/roomthread.cpp#L112-L191",
+      "locator": "Normal/extra turns and TurnBroken recovery",
+      "checked_on": "2026-10-30",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "native.m134a.flip.ce4e62b",
+      "kind": "primary_code",
+      "repository": "https://github.com/TamQuocSat-LangKhach/QSanguosha-QuocChien",
+      "revision": "ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f",
+      "path": "src/server/serverplayer.cpp",
+      "url": "https://github.com/TamQuocSat-LangKhach/QSanguosha-QuocChien/blob/ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f/src/server/serverplayer.cpp#L1037-L1050",
+      "locator": "Face-up property/log then TurnedOver event",
+      "checked_on": "2026-10-30",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "native.m134a.room.ce4e62b",
+      "kind": "primary_code",
+      "repository": "https://github.com/TamQuocSat-LangKhach/QSanguosha-QuocChien",
+      "revision": "ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f",
+      "path": "src/server/room.cpp",
+      "url": "https://github.com/TamQuocSat-LangKhach/QSanguosha-QuocChien/blob/ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f/src/server/room.cpp#L450-L468",
+      "locator": "BattleRoyal450-468; alive list146-149/225-228; findPlayer2583-2603",
+      "checked_on": "2026-10-30",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "native.m134a.next.ce4e62b",
+      "kind": "primary_code",
+      "repository": "https://github.com/TamQuocSat-LangKhach/QSanguosha-QuocChien",
+      "revision": "ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f",
+      "path": "src/core/player.cpp",
+      "url": "https://github.com/TamQuocSat-LangKhach/QSanguosha-QuocChien/blob/ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f/src/core/player.cpp#L2272-L2305",
+      "locator": "getNext and getNextAlive removed/dead policy",
+      "checked_on": "2026-10-30",
+      "author": null,
+      "business_owner": null
     }
   ],
   "pages": [
@@ -1408,6 +1504,26 @@
         "native.m133b.player-fields.ce4e62b",
         "native.m133b.imperial.ce4e62b",
         "native.m133b.force-discard.ce4e62b"
+      ]
+    },
+    {
+      "path": "engine/turn-order.md",
+      "status": "supported",
+      "reviewed_on": "2026-10-30",
+      "review_scope": "M1.3.4a library TurnStart/normal/extra/round/recovery roots; phase bodies and aggregate match ownership remain pending",
+      "applies_to": {
+        "game_commit": "33f27aa1da6d74d8d50acb7ba1dabdefcbe9f554",
+        "native_commit": "ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f"
+      },
+      "source_ids": [
+        "web.m134a.turn-start.33f27aa",
+        "web.m134a.turn-order.33f27aa",
+        "web.m134a.tests.33f27aa",
+        "native.m134a.turn-rule.ce4e62b",
+        "native.m134a.thread.ce4e62b",
+        "native.m134a.flip.ce4e62b",
+        "native.m134a.room.ce4e62b",
+        "native.m134a.next.ce4e62b"
       ]
     }
   ],
@@ -2384,6 +2500,78 @@
         "native.m133b.force-discard.ce4e62b"
       ],
       "scope": "Phase cleanup source semantics/assertions; checkpoint executions and production enablement remain distinct."
+    },
+    {
+      "subject": "page:engine/turn-order.md",
+      "predicate": "derived_from",
+      "object": "source:web.m134a.turn-start.33f27aa",
+      "evidence": [
+        "web.m134a.turn-start.33f27aa"
+      ],
+      "scope": "Revision-scoped library semantics/assertions; executions, native runtime parity and production enablement remain distinct."
+    },
+    {
+      "subject": "page:engine/turn-order.md",
+      "predicate": "derived_from",
+      "object": "source:web.m134a.turn-order.33f27aa",
+      "evidence": [
+        "web.m134a.turn-order.33f27aa"
+      ],
+      "scope": "Revision-scoped library semantics/assertions; executions, native runtime parity and production enablement remain distinct."
+    },
+    {
+      "subject": "page:engine/turn-order.md",
+      "predicate": "derived_from",
+      "object": "source:web.m134a.tests.33f27aa",
+      "evidence": [
+        "web.m134a.tests.33f27aa"
+      ],
+      "scope": "Revision-scoped library semantics/assertions; executions, native runtime parity and production enablement remain distinct."
+    },
+    {
+      "subject": "page:engine/turn-order.md",
+      "predicate": "derived_from",
+      "object": "source:native.m134a.turn-rule.ce4e62b",
+      "evidence": [
+        "native.m134a.turn-rule.ce4e62b"
+      ],
+      "scope": "Revision-scoped library semantics/assertions; executions, native runtime parity and production enablement remain distinct."
+    },
+    {
+      "subject": "page:engine/turn-order.md",
+      "predicate": "derived_from",
+      "object": "source:native.m134a.thread.ce4e62b",
+      "evidence": [
+        "native.m134a.thread.ce4e62b"
+      ],
+      "scope": "Revision-scoped library semantics/assertions; executions, native runtime parity and production enablement remain distinct."
+    },
+    {
+      "subject": "page:engine/turn-order.md",
+      "predicate": "derived_from",
+      "object": "source:native.m134a.flip.ce4e62b",
+      "evidence": [
+        "native.m134a.flip.ce4e62b"
+      ],
+      "scope": "Revision-scoped library semantics/assertions; executions, native runtime parity and production enablement remain distinct."
+    },
+    {
+      "subject": "page:engine/turn-order.md",
+      "predicate": "derived_from",
+      "object": "source:native.m134a.room.ce4e62b",
+      "evidence": [
+        "native.m134a.room.ce4e62b"
+      ],
+      "scope": "Revision-scoped library semantics/assertions; executions, native runtime parity and production enablement remain distinct."
+    },
+    {
+      "subject": "page:engine/turn-order.md",
+      "predicate": "derived_from",
+      "object": "source:native.m134a.next.ce4e62b",
+      "evidence": [
+        "native.m134a.next.ce4e62b"
+      ],
+      "scope": "Revision-scoped library semantics/assertions; executions, native runtime parity and production enablement remain distinct."
     }
   ]
 }
