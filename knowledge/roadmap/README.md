@@ -18,6 +18,8 @@ Current response-family evidence: [MethodResponse through fixture ArcheryAttack]
 
 Internal integration progress: [match authority](../engine/match-authority.md) consumes setup into one Room; [M1.2 startup ownership](../engine/startup-owner.md) now composes initial winner/global/eligible-player startup using two static registries. The [checkpoint](../reviews/2026-10-28-hegemony-m12-startup-owner.md) records actual checks and remaining full phase/turn/native-cleanup work. These explicitly authorized internal slices run alongside open M0; neither M0/M1 nor production enablement is complete.
 
-Current internal dependency: [Scheduler unwind/yield](../engine/scheduler-unwind.md) and [M1.3.2 real core catches](../engine/core-interruption-cleanup.md) are complete at their checkpoints; [accepted B scope](../specs/hegemony-turn-unwind.md) retains three following checkpoints for phase cleanup, turns/recovery/bodies and match v3. Current M0/M1.2 consumers have not opted in. This does not close release gates.
+Current internal dependency: [Scheduler unwind/yield](../engine/scheduler-unwind.md) and [M1.3.2 real core catches](../engine/core-interruption-cleanup.md) are complete at their checkpoints; [accepted B scope](../specs/hegemony-turn-unwind.md) now has completed phase lifecycle/cleanup as checkpoint3; two following checkpoints remain for turns/recovery/bodies and match v3. Current M0/M1.2 consumers have not opted in. This does not close release gates.
 
-The later [M1.3.3a phase lifecycle](../engine/phase-lifecycle.md) is validated internally; M1.3.3 remains open for actual GameRule cleanup before normal turns/recovery or match v3 can advance. No release gate is closed by this library slice.
+The later [M1.3.3a phase lifecycle](../engine/phase-lifecycle.md) was validated separately; M1.3.3b now completes its required GameRule cleanup before the later normal-turn/recovery and match-v3 checkpoints. No release gate is closed by this library slice.
+
+[M1.3.3b cleanup](../engine/phase-cleanup.md) now completes M1.3.3 as a library checkpoint. Next is M1.3.4 actual turns/recovery/core bodies, then M1.3.5 match v3; full release gates are unchanged.

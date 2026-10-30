@@ -2,6 +2,7 @@
 
 These reports preserve particular source snapshots, adapters and executed checks. Read [current engine scope](../engine/overview.md) and the [roadmap](../roadmap/README.md) for present implementation boundaries. Earlier “next” statements and totals are historical.
 
+- [M1.3.3b: GameRule phase cleanup](2026-10-30-hegemony-m133b-phase-cleanup.md)
 - [M1.3.3a: phase lifecycle slice](2026-10-30-hegemony-m133a-phase-lifecycle.md)
 - [M1.3.2: actual protected core catches](2026-10-28-hegemony-m132-core-unwind.md)
 - [M1.3.1: opt-in unwind interpreter and cooperative yield](2026-10-28-hegemony-m131-scheduler-unwind.md)

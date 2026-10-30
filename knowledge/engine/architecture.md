@@ -38,7 +38,7 @@ The scheduler validates responder, prompt ID, frame identity, offered choices an
 
 Part 4aa adds the [Room wrapper and authoritative staged request gateway](room-use-and-admission.md), with trusted authentication context kept separate from public replies. Internal operations and raw scheduler resume are private; the deployed authentication/network binding remains pending.
 
-Completed child operations and eager mutations are not globally rolled back when a later invariant fails. Default application profiles still freeze frames. [Opt-in unwind/yield](scheduler-unwind.md) now has [actual protected core catches](core-interruption-cleanup.md), including a separate original Engine flag ledger and persisted physical sweep. Phase/turn ownership and enabled match integration remain subsequent checkpoints before interrupted-match parity can be claimed. An event's consumed return is interpreted by its caller; it is not automatically a whole-game cancellation.
+Completed child operations and eager mutations are not globally rolled back when a later invariant fails. Default application profiles still freeze frames. [Opt-in unwind/yield](scheduler-unwind.md) now has [actual protected core catches](core-interruption-cleanup.md), including a separate original Engine flag ledger and persisted physical sweep. Normal-turn ownership and enabled match integration remain subsequent checkpoints before interrupted-match parity can be claimed. An event's consumed return is interpreted by its caller; it is not automatically a whole-game cancellation.
 
 ## Privacy and UI boundary
 
@@ -54,4 +54,8 @@ Test totals and graph metrics belong to revision-labelled checkpoints, not durab
 
 ## Later phase lifecycle slice
 
-[M1.3.3a phase lifecycle](phase-lifecycle.md) adds native sequence/change/execute/skip/insert/query as a separate library slice. It reuses current Room.playerPhases and the existing scheduler. Actual GameRule cleanup is still required within M1.3.3; turns/recovery/bodies and match v3 remain M1.3.4–5. Current application profiles and production registration are unchanged. Historical evidence above retains its named revision.
+[M1.3.3a phase lifecycle](phase-lifecycle.md) adds native sequence/change/execute/skip/insert/query as a separate library slice. It reuses current Room.playerPhases and the existing scheduler. At the M1.3.3a source input, GameRule cleanup was pending; its later implementation is linked below; turns/recovery/bodies and match v3 remain M1.3.4–5. Current application profiles and production registration are unchanged. Historical evidence above retains its named revision.
+
+## Later complete phase library checkpoint
+
+[M1.3.3b cleanup](phase-cleanup.md) now completes the library phase checkpoint together with [lifecycle](phase-lifecycle.md). It adds real typed/history/limitation/skill/ImperialOrder effects, with declared metadata/filter/request/presentation adapters. Current application and production profiles remain unchanged; actual turn/recovery/body ownership and match v3 remain M1.3.4–5. Earlier evidence retains its named source revision.

@@ -10,7 +10,7 @@ Current application experiment: the [local session and Slash/Jink contract](engi
 
 A separate [internal match authority](engine/match-authority.md) consumes paired setup into one Room. [M1.2 startup ownership](engine/startup-owner.md) now runs the initial winner check, global startup and eligible per-player startup using two static tables. Prepared is still not a playable turn or production game. The [M1.1 checkpoint](reviews/2026-10-27-hegemony-m1-match-authority.md) and [M1.2 checkpoint](reviews/2026-10-28-hegemony-m12-startup-owner.md) retain revision-specific evidence; M0 and full phase/turn gates remain open.
 
-The accepted [M1.3 B route](specs/hegemony-turn-unwind.md) now includes the [scheduler infrastructure](engine/scheduler-unwind.md) and [actual protected core catches](engine/core-interruption-cleanup.md). The [M1.3.2 checkpoint](reviews/2026-10-28-hegemony-m132-core-unwind.md) records102 new tests and source review corrections. The [M1.3.3a phase lifecycle](engine/phase-lifecycle.md) is now a separate validated library slice. Current match/M0 profiles still freeze; actual GameRule cleanup remains inside M1.3.3, then turns/recovery and match v3 remain M1.3.4–5.
+The accepted [M1.3 B route](specs/hegemony-turn-unwind.md) now includes the [scheduler infrastructure](engine/scheduler-unwind.md) and [actual protected core catches](engine/core-interruption-cleanup.md). The [M1.3.2 checkpoint](reviews/2026-10-28-hegemony-m132-core-unwind.md) records102 new tests and source review corrections. The [phase lifecycle](engine/phase-lifecycle.md) and [M1.3.3b GameRule cleanup](engine/phase-cleanup.md) now complete M1.3.3 as a library checkpoint. Current match/M0 profiles still freeze; actual turns/recovery/bodies and match v3 remain M1.3.4–5.
 
 ## Find the relevant contract
 
@@ -23,6 +23,7 @@ The accepted [M1.3 B route](specs/hegemony-turn-unwind.md) now includes the [sch
 | Native startup/table transition | [Startup owner](engine/startup-owner.md), [accepted M1.2 scope](specs/hegemony-startup-owner.md) |
 | Setup, hidden information and faction    | [Setup and privacy](engine/setup-and-privacy.md), [general lifecycle and relations](engine/generals-and-relations.md)                                           |
 | Opt-in unwind and cooperative work | [Scheduler cleanup interface](engine/scheduler-unwind.md), [accepted five-checkpoint design](specs/hegemony-turn-unwind.md) |
+| GameRule cleanup, typed state, temporary skills and ImperialOrder | [Cleanup contract](engine/phase-cleanup.md) |
 | Phase sequence, skip/insert and direct change | [Phase lifecycle](engine/phase-lifecycle.md) |
 | Protected damage/CardUsed/Room interruption | [Core cleanup contract](engine/core-interruption-cleanup.md) |
 | Trigger order and persistence            | [Scheduler](engine/scheduler.md)                                                                                                                                |
