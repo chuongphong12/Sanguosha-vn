@@ -1,6 +1,6 @@
 # GameRule phase cleanup and ImperialOrder
 
-Inspected [game 652056e30eafd4faa4198e34d86fc9d33adec0c4](https://github.com/chuongphong12/Sanguosha-vn/blob/652056e30eafd4faa4198e34d86fc9d33adec0c4/src/game/hegemony/phase-cleanup.ts) and the pinned native sources below. M1.3.3b completes the cleanup library half of [accepted checkpoint M1.3.3](../specs/hegemony-turn-unwind.md); [M1.3.3a lifecycle](phase-lifecycle.md) retains its own source revision. The [checkpoint](../reviews/2026-10-30-hegemony-m133b-phase-cleanup.md) records executed checks and reviews. This does not enable the new profile in M1.2/M0/production or implement the M1.3.4 turn owner/M1.3.5 match v3.
+Inspected [game 652056e30eafd4faa4198e34d86fc9d33adec0c4](https://github.com/chuongphong12/Sanguosha-vn/blob/652056e30eafd4faa4198e34d86fc9d33adec0c4/src/game/hegemony/phase-cleanup.ts) and the pinned native sources below. M1.3.3b completes the cleanup library half of [accepted checkpoint M1.3.3](../specs/hegemony-turn-unwind.md); [M1.3.3a lifecycle](phase-lifecycle.md) retains its own source revision. The [checkpoint](../reviews/2026-10-30-hegemony-m133b-phase-cleanup.md) records executed checks and reviews. This does not enable the new profile in M1.2/M0/production or implement M1.3.5 match v3. The later [M1.3.4a turn roots](turn-order.md) consume this cleanup at their separately pinned revision; remaining core phase bodies are M1.3.4b.
 
 ## Authorities and seams
 

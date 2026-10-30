@@ -29,12 +29,16 @@ The bound does not preempt synchronous package callbacks or promise wall-clock l
 
 [New test source](https://github.com/chuongphong12/Sanguosha-vn/blob/32d3e5f68b9d07af9ab6e1cb3f1291939094edd8/tests/hegemony/scheduler-unwind.test.ts) contains 17 cases: default freeze and receiver compatibility, independent normal/cleanup continuations, actor-private prompt/JSON continuation, stale receipt fencing, nested re-interruption, distinct completion, budgets1/5/unbounded, and rejected malformed cursor/handler configuration. Tests cross public dispatch/unwind/continue/resume seams with trace handlers. The [checkpoint](../reviews/2026-10-28-hegemony-m131-scheduler-unwind.md) records actual executions, findings, byte checks and graph limits.
 
-M1.3.2 now implements [actual protected damage, CardUsed and Room-use cleanup](core-interruption-cleanup.md), including movement/CardFinished/RNG and native catch scopes at its own checkpoint. [Phase cleanup](phase-cleanup.md) now completes M1.3.3 as a library checkpoint; complete bodies, normal/extra turns, recovery owner and match v3 remain M1.3.4–5. Production still registers Standard2013; this library capability does not enable Quốc Chiến or retire legacy saves.
+M1.3.2 now implements [actual protected damage, CardUsed and Room-use cleanup](core-interruption-cleanup.md), including movement/CardFinished/RNG and native catch scopes at its own checkpoint. [Phase cleanup](phase-cleanup.md) now completes M1.3.3 as a library checkpoint; complete bodies and aggregate match v3 remain M1.3.4b–5. Production still registers Standard2013; this library capability does not enable Quốc Chiến or retire legacy saves.
 
 ## Later phase lifecycle slice
 
-[M1.3.3a phase lifecycle](phase-lifecycle.md) adds native sequence/change/execute/skip/insert/query as a separate library slice. It reuses current Room.playerPhases and the existing scheduler. At the M1.3.3a source input, GameRule cleanup was pending; its later implementation is linked below; turns/recovery/bodies and match v3 remain M1.3.4–5. Current application profiles and production registration are unchanged. Historical evidence above retains its named revision.
+[M1.3.3a phase lifecycle](phase-lifecycle.md) adds native sequence/change/execute/skip/insert/query as a separate library slice. It reuses current Room.playerPhases and the existing scheduler. At the M1.3.3a source input, GameRule cleanup was pending; its later implementation is linked below; remaining phase bodies and match v3 remain M1.3.4b–5. Current application profiles and production registration are unchanged. Historical evidence above retains its named revision.
 
 ## Later complete phase library checkpoint
 
-[M1.3.3b cleanup](phase-cleanup.md) now completes the library phase checkpoint together with [lifecycle](phase-lifecycle.md). It adds real typed/history/limitation/skill/ImperialOrder effects, with declared metadata/filter/request/presentation adapters. Current application and production profiles remain unchanged; actual turn/recovery/body ownership and match v3 remain M1.3.4–5. Earlier evidence retains its named source revision.
+[M1.3.3b cleanup](phase-cleanup.md) now completes the library phase checkpoint together with [lifecycle](phase-lifecycle.md). It adds real typed/history/limitation/skill/ImperialOrder effects, with declared metadata/filter/request/presentation adapters. Current application and production profiles remain unchanged; remaining phase-body/aggregate-match ownership remains M1.3.4b–5. Earlier evidence retains its named source revision.
+
+## Later turn-root slice
+
+[M1.3.4a turn roots](turn-order.md) now provide TurnStart, normal/extra/round progression and explicit recovery after trusted unwind. Remaining phase bodies are M1.3.4b; aggregate v3 pumping/classification/restore/projection are M1.3.5. Current application/production profiles remain unchanged. Earlier evidence retains its named revision.
