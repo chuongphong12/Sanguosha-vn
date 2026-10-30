@@ -1025,6 +1025,42 @@
       "checked_on": "2026-10-28",
       "author": null,
       "business_owner": null
+    },
+    {
+      "id": "web.m133a.owner.e55e15b",
+      "kind": "primary_code",
+      "repository": "https://github.com/chuongphong12/Sanguosha-vn",
+      "revision": "e55e15b37b90fa764de21cd2c94b2e488030d6d8",
+      "path": "src/game/hegemony/phases.ts",
+      "url": "https://github.com/chuongphong12/Sanguosha-vn/blob/e55e15b37b90fa764de21cd2c94b2e488030d6d8/src/game/hegemony/phases.ts",
+      "locator": "M1.3.3a phase owner definitions or dispatch/resume/helper assertions; execution receipt is separate",
+      "checked_on": "2026-10-30",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "web.m133a.tests.e55e15b",
+      "kind": "test_code",
+      "repository": "https://github.com/chuongphong12/Sanguosha-vn",
+      "revision": "e55e15b37b90fa764de21cd2c94b2e488030d6d8",
+      "path": "tests/hegemony/phases.test.ts",
+      "url": "https://github.com/chuongphong12/Sanguosha-vn/blob/e55e15b37b90fa764de21cd2c94b2e488030d6d8/tests/hegemony/phases.test.ts",
+      "locator": "M1.3.3a phase owner definitions or dispatch/resume/helper assertions; execution receipt is separate",
+      "checked_on": "2026-10-30",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "native.m133a.phases.ce4e62b",
+      "kind": "primary_code",
+      "repository": "https://github.com/TamQuocSat-LangKhach/QSanguosha-QuocChien",
+      "revision": "ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f",
+      "path": "src/server/serverplayer.cpp",
+      "url": "https://github.com/TamQuocSat-LangKhach/QSanguosha-QuocChien/blob/ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f/src/server/serverplayer.cpp#L1051-L1210",
+      "locator": "changePhase/play/executePhaseEvent/skip/insertPhase/isSkipped1051–1210",
+      "checked_on": "2026-10-30",
+      "author": null,
+      "business_owner": null
     }
   ],
   "pages": [
@@ -1190,6 +1226,21 @@
       ],
       "reviewed_on": "2026-10-28",
       "review_scope": "M1.3.2 bounded actual library cleanup with fixture authorities; no enabled full match or native runtime claim"
+    },
+    {
+      "path": "engine/phase-lifecycle.md",
+      "status": "supported",
+      "reviewed_on": "2026-10-30",
+      "review_scope": "M1.3.3a phase lifecycle only; GameRule cleanup and enabled match remain pending",
+      "applies_to": {
+        "game_commit": "e55e15b37b90fa764de21cd2c94b2e488030d6d8",
+        "native_commit": "ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f"
+      },
+      "source_ids": [
+        "web.m133a.owner.e55e15b",
+        "web.m133a.tests.e55e15b",
+        "native.m133a.phases.ce4e62b"
+      ]
     }
   ],
   "relations": [
@@ -2030,6 +2081,33 @@
         "native.m132.wrappedcard.ce4e62b"
       ],
       "scope": "Protected core catch source semantics/assertions; checkpoint executions distinct from source code and production enablement."
+    },
+    {
+      "subject": "page:engine/phase-lifecycle.md",
+      "predicate": "derived_from",
+      "object": "source:web.m133a.owner.e55e15b",
+      "evidence": [
+        "web.m133a.owner.e55e15b"
+      ],
+      "scope": "Source-scoped phase lifecycle and assertion boundaries; reported executions and enabled production remain separate."
+    },
+    {
+      "subject": "page:engine/phase-lifecycle.md",
+      "predicate": "derived_from",
+      "object": "source:web.m133a.tests.e55e15b",
+      "evidence": [
+        "web.m133a.tests.e55e15b"
+      ],
+      "scope": "Source-scoped phase lifecycle and assertion boundaries; reported executions and enabled production remain separate."
+    },
+    {
+      "subject": "page:engine/phase-lifecycle.md",
+      "predicate": "derived_from",
+      "object": "source:native.m133a.phases.ce4e62b",
+      "evidence": [
+        "native.m133a.phases.ce4e62b"
+      ],
+      "scope": "Source-scoped phase lifecycle and assertion boundaries; reported executions and enabled production remain separate."
     }
   ]
 }

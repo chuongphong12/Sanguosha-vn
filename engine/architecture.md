@@ -51,3 +51,7 @@ Future UI and bots must consume authoritative legal choices and player-specific 
 The [port plan](../plans/hegemony-port.md) tracks work remaining after the normalized foundation. Production registration requires a complete playable slice, deterministic command/response and phase integration, operation cleanup, an explicit enabled-content manifest, player projection, local/online/bot/UI consumers and match-level validation. Remove legacy registration and Identity code only after the replacement passes those gates. Do not reinterpret old Standard matches or saved states as Quốc Chiến.
 
 Test totals and graph metrics belong to revision-labelled checkpoints, not durable architecture. Source-derived fixtures establish only their tested contracts. Native runtime differential testing requires running the pinned reference implementation; unit or legacy browser tests cannot substitute for that evidence.
+
+## Later phase lifecycle slice
+
+[M1.3.3a phase lifecycle](phase-lifecycle.md) adds native sequence/change/execute/skip/insert/query as a separate library slice. It reuses current Room.playerPhases and the existing scheduler. Actual GameRule cleanup is still required within M1.3.3; turns/recovery/bodies and match v3 remain M1.3.4–5. Current application profiles and production registration are unchanged. Historical evidence above retains its named revision.

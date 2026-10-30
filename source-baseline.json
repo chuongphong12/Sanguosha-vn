@@ -2,13 +2,13 @@
   "version": 1,
   "game": {
     "repository": "https://github.com/chuongphong12/Sanguosha-vn.git",
-    "commit": "9024429ba89e7a21b090734d51a2d042e85d7928",
-    "availability": "Published M1.3.2 protected library catches; current M1.2/M0/production profiles remain unchanged"
+    "commit": "e55e15b37b90fa764de21cd2c94b2e488030d6d8",
+    "availability": "Published M1.3.3a phase lifecycle library slice; GameRule cleanup/application integration remain pending"
   },
   "native": {
     "repository": "https://github.com/TamQuocSat-LangKhach/QSanguosha-QuocChien.git",
     "commit": "ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f",
     "release": "2.3.43-beta2"
   },
-  "scope": "Game 9024429ba89e7a21b090734d51a2d042e85d7928 adds protected damage/CardUsed/Room-use catches and102 public-seam tests on the M1.3.1 scheduler. Actual child compositions and injected boundary fixtures are distinguished;2,318/94 check/build and reviews certify this checkpoint only. Default application profiles freeze; phases/GameRule cleanup, turns/recovery/bodies and match v3 remain M1.3.3–5. Production remains Standard2013 and all M0/content/media/competitive bot/room/provider/load/cutover gates remain open. No full match or native-runtime differential is claimed."
+  "scope": "Game e55e15b37b90fa764de21cd2c94b2e488030d6d8 adds only phases.ts and46 public-seam phase tests.2,364/95 full check/build and two source reviews certify this lifecycle slice, not complete M1.3.3. Default M1.2/M0 profiles and Standard2013 production remain unchanged. Real GameRule cleanup, turns/recovery/bodies and match v3 remain required, alongside all M0/content/bots/media/rooms/provider/load/cutover gates. Trace boundary cases are distinct from the real bounded Draw composition; no full-match/native-runtime proof is claimed."
 }
