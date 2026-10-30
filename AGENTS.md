@@ -1,5 +1,15 @@
 # Agent Instructions
 
+## Current game knowledge
+
+For rules, state/action contracts, privacy, architecture or port status, read
+[knowledge/README.md](knowledge/README.md) and its relevant subsystem first.
+Before relying on it, run `npm run docs:verify`; the lock pins this game revision's
+snapshot. Use [source authority](knowledge/rules/source-authority.md) to distinguish
+native rules, implemented contracts, fixtures and pending production integration.
+Follow the [knowledge update workflow](knowledge/README.md#updating-knowledge-with-the-game)
+when source behavior changes. Installed skills and tracker configuration stay here.
+
 This project uses a specialized set of agent skills to ensure high code quality, maintainability, and correctness. Whenever you receive a prompt to write, review, or modify code, you MUST follow these guidelines.
 
 ## Default Skill Set

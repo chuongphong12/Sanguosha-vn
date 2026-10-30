@@ -1,0 +1,2577 @@
+{
+  "version": 1,
+  "coverage": {
+    "status": "pilot",
+    "description": "Scoped GameStart guard/order, local session/Slash/Jink fixture composition and maintenance-pattern references. Initial knowledge_base_commit identifies the GameStart pilot input; later inputs are journaled. Other pages retain pinned citations and are not certified by this registry.",
+    "knowledge_base_commit": "c471bbe0e020be55750691365e54a3cf911b715a"
+  },
+  "sources": [
+    {
+      "id": "native.gamerule.game-start",
+      "kind": "primary_code",
+      "repository": "https://github.com/TamQuocSat-LangKhach/QSanguosha-QuocChien",
+      "revision": "ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f",
+      "path": "src/server/gamerule.cpp",
+      "url": "https://github.com/TamQuocSat-LangKhach/QSanguosha-QuocChien/blob/ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f/src/server/gamerule.cpp#L148-L328",
+      "locator": "GameRule::triggerable/getPriority and the global GameStart branch",
+      "checked_on": "2026-10-24",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "web.game-start",
+      "kind": "primary_code",
+      "repository": "https://github.com/chuongphong12/Sanguosha-vn",
+      "revision": "17c61c710e236637e9ed9829a4893babb6401b06",
+      "path": "src/game/hegemony/game-start.ts",
+      "url": "https://github.com/chuongphong12/Sanguosha-vn/blob/17c61c710e236637e9ed9829a4893babb6401b06/src/game/hegemony/game-start.ts#L13-L320",
+      "locator": "createGameStartOperation and createGameStartRule",
+      "checked_on": "2026-10-24",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "web.game-start.tests",
+      "kind": "test_code",
+      "repository": "https://github.com/chuongphong12/Sanguosha-vn",
+      "revision": "17c61c710e236637e9ed9829a4893babb6401b06",
+      "path": "tests/hegemony/game-start.test.ts",
+      "url": "https://github.com/chuongphong12/Sanguosha-vn/blob/17c61c710e236637e9ed9829a4893babb6401b06/tests/hegemony/game-start.test.ts",
+      "locator": "Public GameStart guard, ordering, custom-scenario and JSON-resume assertions",
+      "checked_on": "2026-10-24",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "knowledge.game-start.research",
+      "kind": "analysis",
+      "repository": "https://github.com/chuongphong12/Sanguosha-vn-knowledge",
+      "revision": "c471bbe0e020be55750691365e54a3cf911b715a",
+      "path": "research/2026-10-22-game-start.md",
+      "url": "https://github.com/chuongphong12/Sanguosha-vn-knowledge/blob/c471bbe0e020be55750691365e54a3cf911b715a/research/2026-10-22-game-start.md#L1-L22",
+      "locator": "Native investigation; its web baseline predates implementation",
+      "checked_on": "2026-10-24",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "knowledge.game-start.review",
+      "kind": "review",
+      "repository": "https://github.com/chuongphong12/Sanguosha-vn-knowledge",
+      "revision": "c471bbe0e020be55750691365e54a3cf911b715a",
+      "path": "reviews/2026-10-22-hegemony-part4ae.md",
+      "url": "https://github.com/chuongphong12/Sanguosha-vn-knowledge/blob/c471bbe0e020be55750691365e54a3cf911b715a/reviews/2026-10-22-hegemony-part4ae.md#L1-L45",
+      "locator": "Revision-scoped reported delivery and test evidence; not re-executed during this ingest",
+      "checked_on": "2026-10-24",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "knowledge.rules-authority",
+      "kind": "analysis",
+      "repository": "https://github.com/chuongphong12/Sanguosha-vn-knowledge",
+      "revision": "c471bbe0e020be55750691365e54a3cf911b715a",
+      "path": "adr/0002-hegemony-knowledge-authority.md",
+      "url": "https://github.com/chuongphong12/Sanguosha-vn-knowledge/blob/c471bbe0e020be55750691365e54a3cf911b715a/adr/0002-hegemony-knowledge-authority.md#L1-L3",
+      "locator": "Recorded decision selecting one Hegemony-first current knowledge base",
+      "checked_on": "2026-10-24",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "pattern.karpathy",
+      "kind": "pattern",
+      "repository": "https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f",
+      "revision": "ac46de1ad27f92b28ac95459c782c07f6b8c964a",
+      "path": "llm-wiki.md",
+      "url": "https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f/ac46de1ad27f92b28ac95459c782c07f6b8c964a",
+      "locator": "Architecture; Operations; Indexing and logging; Note",
+      "checked_on": "2026-10-24",
+      "author": "karpathy",
+      "business_owner": null
+    },
+    {
+      "id": "pattern.rohit.v2",
+      "kind": "pattern",
+      "repository": "https://gist.github.com/rohitg00/2067ab416f7bbe447c1977edaaa681e2",
+      "revision": "266b02033a9adca0cd896bd39465c7a67a72fdb0",
+      "path": "llm-wiki.md",
+      "url": "https://gist.github.com/rohitg00/2067ab416f7bbe447c1977edaaa681e2/266b02033a9adca0cd896bd39465c7a67a72fdb0",
+      "locator": "Supersession; typed relationships; schema; modular implementation",
+      "checked_on": "2026-10-24",
+      "author": "rohitg00",
+      "business_owner": null
+    },
+    {
+      "id": "web.m0.engine.bc3ceb9",
+      "kind": "primary_code",
+      "repository": "https://github.com/chuongphong12/Sanguosha-vn",
+      "revision": "bc3ceb996054cf6fc42f0204f553bf279e13899b",
+      "path": "server/prototypes/hegemony-m0/engine.ts",
+      "url": "https://github.com/chuongphong12/Sanguosha-vn/blob/bc3ceb996054cf6fc42f0204f553bf279e13899b/server/prototypes/hegemony-m0/engine.ts",
+      "locator": "Versioned fixture setup, actorObservation and staged Master-compatible command move",
+      "checked_on": "2026-10-26",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "web.m0.battle.bc3ceb9",
+      "kind": "primary_code",
+      "repository": "https://github.com/chuongphong12/Sanguosha-vn",
+      "revision": "bc3ceb996054cf6fc42f0204f553bf279e13899b",
+      "path": "server/prototypes/hegemony-m0/battle.ts",
+      "url": "https://github.com/chuongphong12/Sanguosha-vn/blob/bc3ceb996054cf6fc42f0204f553bf279e13899b/server/prototypes/hegemony-m0/battle.ts",
+      "locator": "Existing Play admission/Room/Slash/MethodUse/Jink/damage composition and bounded physical adapters",
+      "checked_on": "2026-10-26",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "web.m0.session.bc3ceb9",
+      "kind": "primary_code",
+      "repository": "https://github.com/chuongphong12/Sanguosha-vn",
+      "revision": "bc3ceb996054cf6fc42f0204f553bf279e13899b",
+      "path": "server/prototypes/hegemony-m0/session.ts",
+      "url": "https://github.com/chuongphong12/Sanguosha-vn/blob/bc3ceb996054cf6fc42f0204f553bf279e13899b/server/prototypes/hegemony-m0/session.ts",
+      "locator": "Authentication, serial command/commit, payload-bound receipt, controller and leave authority",
+      "checked_on": "2026-10-26",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "web.m0.transport.bc3ceb9",
+      "kind": "primary_code",
+      "repository": "https://github.com/chuongphong12/Sanguosha-vn",
+      "revision": "bc3ceb996054cf6fc42f0204f553bf279e13899b",
+      "path": "server/prototypes/hegemony-m0/transport.ts",
+      "url": "https://github.com/chuongphong12/Sanguosha-vn/blob/bc3ceb996054cf6fc42f0204f553bf279e13899b/server/prototypes/hegemony-m0/transport.ts",
+      "locator": "Socket-bound requests, staged actor publication and explicit room return",
+      "checked_on": "2026-10-26",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "web.m0.bot.bc3ceb9",
+      "kind": "primary_code",
+      "repository": "https://github.com/chuongphong12/Sanguosha-vn",
+      "revision": "bc3ceb996054cf6fc42f0204f553bf279e13899b",
+      "path": "server/prototypes/hegemony-m0/bot.ts",
+      "url": "https://github.com/chuongphong12/Sanguosha-vn/blob/bc3ceb996054cf6fc42f0204f553bf279e13899b/server/prototypes/hegemony-m0/bot.ts",
+      "locator": "Pure actor-observation choice and versioned per-seat memory; no automatic bot worker",
+      "checked_on": "2026-10-26",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "web.m0.prompt-tests.bc3ceb9",
+      "kind": "test_code",
+      "repository": "https://github.com/chuongphong12/Sanguosha-vn",
+      "revision": "bc3ceb996054cf6fc42f0204f553bf279e13899b",
+      "path": "tests/prototypes/m0-prompt.test.ts",
+      "url": "https://github.com/chuongphong12/Sanguosha-vn/blob/bc3ceb996054cf6fc42f0204f553bf279e13899b/tests/prototypes/m0-prompt.test.ts",
+      "locator": "Public socket assertions for Jink/use/decline, privacy, persistence failure, races and process kills; execution is separately reported",
+      "checked_on": "2026-10-26",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "web.m0.browser-proof.bc3ceb9",
+      "kind": "test_code",
+      "repository": "https://github.com/chuongphong12/Sanguosha-vn",
+      "revision": "bc3ceb996054cf6fc42f0204f553bf279e13899b",
+      "path": "server/prototypes/hegemony-m0/browser-proof.ts",
+      "url": "https://github.com/chuongphong12/Sanguosha-vn/blob/bc3ceb996054cf6fc42f0204f553bf279e13899b/server/prototypes/hegemony-m0/browser-proof.ts",
+      "locator": "Chromium driver assertions for real prompt/refresh/privacy/control; execution is separately reported",
+      "checked_on": "2026-10-26",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "knowledge.m0.pending-jink.0204d2a",
+      "kind": "review",
+      "repository": "https://github.com/chuongphong12/Sanguosha-vn-knowledge",
+      "revision": "0204d2a3feb1cdebf549aa9400862018a10a060a",
+      "path": "reviews/2026-10-23-hegemony-m0-pending-jink.md",
+      "url": "https://github.com/chuongphong12/Sanguosha-vn-knowledge/blob/0204d2a3feb1cdebf549aa9400862018a10a060a/reviews/2026-10-23-hegemony-m0-pending-jink.md",
+      "locator": "Reported validation, exact reviewed blobs, retained CRITICAL graph result and prototype limits; not a new test execution",
+      "checked_on": "2026-10-26",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "knowledge.m0.release.0204d2a",
+      "kind": "analysis",
+      "repository": "https://github.com/chuongphong12/Sanguosha-vn-knowledge",
+      "revision": "0204d2a3feb1cdebf549aa9400862018a10a060a",
+      "path": "plans/hegemony-release.md",
+      "url": "https://github.com/chuongphong12/Sanguosha-vn-knowledge/blob/0204d2a3feb1cdebf549aa9400862018a10a060a/plans/hegemony-release.md",
+      "locator": "Recorded accepted release destination/M0 constraints and dependencies, not implementation acceptance",
+      "checked_on": "2026-10-26",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "web.production.server.bc3ceb9",
+      "kind": "primary_code",
+      "repository": "https://github.com/chuongphong12/Sanguosha-vn",
+      "revision": "bc3ceb996054cf6fc42f0204f553bf279e13899b",
+      "path": "server/server.ts",
+      "url": "https://github.com/chuongphong12/Sanguosha-vn/blob/bc3ceb996054cf6fc42f0204f553bf279e13899b/server/server.ts",
+      "locator": "Production server still registers TqsGame, separate from prototype server",
+      "checked_on": "2026-10-26",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "web.production.client.bc3ceb9",
+      "kind": "primary_code",
+      "repository": "https://github.com/chuongphong12/Sanguosha-vn",
+      "revision": "bc3ceb996054cf6fc42f0204f553bf279e13899b",
+      "path": "src/client/MatchClient.ts",
+      "url": "https://github.com/chuongphong12/Sanguosha-vn/blob/bc3ceb996054cf6fc42f0204f553bf279e13899b/src/client/MatchClient.ts",
+      "locator": "Production local/remote clients continue to use TqsGame",
+      "checked_on": "2026-10-26",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "web.production.game.bc3ceb9",
+      "kind": "primary_code",
+      "repository": "https://github.com/chuongphong12/Sanguosha-vn",
+      "revision": "bc3ceb996054cf6fc42f0204f553bf279e13899b",
+      "path": "src/game/TqsGame.ts",
+      "url": "https://github.com/chuongphong12/Sanguosha-vn/blob/bc3ceb996054cf6fc42f0204f553bf279e13899b/src/game/TqsGame.ts",
+      "locator": "Legacy tam-quoc-sat-standard-2013 identity and production game composition",
+      "checked_on": "2026-10-26",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "web.m0.engine.fbe60f6",
+      "kind": "primary_code",
+      "repository": "https://github.com/chuongphong12/Sanguosha-vn",
+      "revision": "fbe60f6b911956d2b432840f0cfe8970218acd35",
+      "path": "server/prototypes/hegemony-m0/engine.ts",
+      "url": "https://github.com/chuongphong12/Sanguosha-vn/blob/fbe60f6b911956d2b432840f0cfe8970218acd35/server/prototypes/hegemony-m0/engine.ts",
+      "locator": "clock-v3 identity and unchanged bounded fixture",
+      "checked_on": "2026-10-26",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "web.m0.session.fbe60f6",
+      "kind": "primary_code",
+      "repository": "https://github.com/chuongphong12/Sanguosha-vn",
+      "revision": "fbe60f6b911956d2b432840f0cfe8970218acd35",
+      "path": "server/prototypes/hegemony-m0/session.ts",
+      "url": "https://github.com/chuongphong12/Sanguosha-vn/blob/fbe60f6b911956d2b432840f0cfe8970218acd35/server/prototypes/hegemony-m0/session.ts",
+      "locator": "serviceTime/commit/pulse/update, command execution, recovery, takeover and projection",
+      "checked_on": "2026-10-26",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "web.m0.deadlines.fbe60f6",
+      "kind": "primary_code",
+      "repository": "https://github.com/chuongphong12/Sanguosha-vn",
+      "revision": "fbe60f6b911956d2b432840f0cfe8970218acd35",
+      "path": "server/prototypes/hegemony-m0/deadlines.ts",
+      "url": "https://github.com/chuongphong12/Sanguosha-vn/blob/fbe60f6b911956d2b432840f0cfe8970218acd35/server/prototypes/hegemony-m0/deadlines.ts",
+      "locator": "trusted ServiceClock and independent deadline synchronization",
+      "checked_on": "2026-10-26",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "web.m0.transport.fbe60f6",
+      "kind": "primary_code",
+      "repository": "https://github.com/chuongphong12/Sanguosha-vn",
+      "revision": "fbe60f6b911956d2b432840f0cfe8970218acd35",
+      "path": "server/prototypes/hegemony-m0/transport.ts",
+      "url": "https://github.com/chuongphong12/Sanguosha-vn/blob/fbe60f6b911956d2b432840f0cfe8970218acd35/server/prototypes/hegemony-m0/transport.ts",
+      "locator": "scheduled commit publication and socket-bound actor views",
+      "checked_on": "2026-10-26",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "web.m0.bot.fbe60f6",
+      "kind": "primary_code",
+      "repository": "https://github.com/chuongphong12/Sanguosha-vn",
+      "revision": "fbe60f6b911956d2b432840f0cfe8970218acd35",
+      "path": "server/prototypes/hegemony-m0/bot.ts",
+      "url": "https://github.com/chuongphong12/Sanguosha-vn/blob/fbe60f6b911956d2b432840f0cfe8970218acd35/server/prototypes/hegemony-m0/bot.ts",
+      "locator": "actor-only deterministic policy and versioned memory",
+      "checked_on": "2026-10-26",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "web.m0.deadline-tests.fbe60f6",
+      "kind": "test_code",
+      "repository": "https://github.com/chuongphong12/Sanguosha-vn",
+      "revision": "fbe60f6b911956d2b432840f0cfe8970218acd35",
+      "path": "tests/prototypes/m0-deadline.test.ts",
+      "url": "https://github.com/chuongphong12/Sanguosha-vn/blob/fbe60f6b911956d2b432840f0cfe8970218acd35/tests/prototypes/m0-deadline.test.ts",
+      "locator": "ten public-session and transport deadline/recovery/failure/race cases",
+      "checked_on": "2026-10-26",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "web.m0.prompt-tests.fbe60f6",
+      "kind": "test_code",
+      "repository": "https://github.com/chuongphong12/Sanguosha-vn",
+      "revision": "fbe60f6b911956d2b432840f0cfe8970218acd35",
+      "path": "tests/prototypes/m0-prompt.test.ts",
+      "url": "https://github.com/chuongphong12/Sanguosha-vn/blob/fbe60f6b911956d2b432840f0cfe8970218acd35/tests/prototypes/m0-prompt.test.ts",
+      "locator": "actual process-kill/restart cases and committed prompt remainder",
+      "checked_on": "2026-10-26",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "web.m0.browser-proof.fbe60f6",
+      "kind": "test_code",
+      "repository": "https://github.com/chuongphong12/Sanguosha-vn",
+      "revision": "fbe60f6b911956d2b432840f0cfe8970218acd35",
+      "path": "server/prototypes/hegemony-m0/browser-proof.ts",
+      "url": "https://github.com/chuongphong12/Sanguosha-vn/blob/fbe60f6b911956d2b432840f0cfe8970218acd35/server/prototypes/hegemony-m0/browser-proof.ts",
+      "locator": "real Chromium prompt/refresh/privacy and default OS heartbeat publication",
+      "checked_on": "2026-10-26",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "web.m0.session.816191d",
+      "kind": "primary_code",
+      "repository": "https://github.com/chuongphong12/Sanguosha-vn",
+      "revision": "816191df12e6b9b5849b727104afd4a350d58ca9",
+      "path": "server/prototypes/hegemony-m0/session.ts",
+      "url": "https://github.com/chuongphong12/Sanguosha-vn/blob/816191df12e6b9b5849b727104afd4a350d58ca9/server/prototypes/hegemony-m0/session.ts",
+      "locator": "SessionStore selection, commit and serial authority guard",
+      "checked_on": "2026-10-26",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "web.m0.storage.816191d",
+      "kind": "primary_code",
+      "repository": "https://github.com/chuongphong12/Sanguosha-vn",
+      "revision": "816191df12e6b9b5849b727104afd4a350d58ca9",
+      "path": "server/prototypes/hegemony-m0/storage.ts",
+      "url": "https://github.com/chuongphong12/Sanguosha-vn/blob/816191df12e6b9b5849b727104afd4a350d58ca9/server/prototypes/hegemony-m0/storage.ts",
+      "locator": "SessionStore interface and default file writer lifecycle",
+      "checked_on": "2026-10-26",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "web.m0.postgres.816191d",
+      "kind": "primary_code",
+      "repository": "https://github.com/chuongphong12/Sanguosha-vn",
+      "revision": "816191df12e6b9b5849b727104afd4a350d58ca9",
+      "path": "server/prototypes/hegemony-m0/postgres.ts",
+      "url": "https://github.com/chuongphong12/Sanguosha-vn/blob/816191df12e6b9b5849b727104afd4a350d58ca9/server/prototypes/hegemony-m0/postgres.ts",
+      "locator": "direct Client/advisory ownership, document CAS and restart-required fencing",
+      "checked_on": "2026-10-26",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "web.m0.transport.816191d",
+      "kind": "primary_code",
+      "repository": "https://github.com/chuongphong12/Sanguosha-vn",
+      "revision": "816191df12e6b9b5849b727104afd4a350d58ca9",
+      "path": "server/prototypes/hegemony-m0/transport.ts",
+      "url": "https://github.com/chuongphong12/Sanguosha-vn/blob/816191df12e6b9b5849b727104afd4a350d58ca9/server/prototypes/hegemony-m0/transport.ts",
+      "locator": "server-only store factory and actual socket session boundary",
+      "checked_on": "2026-10-26",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "web.m0.sql-proof.816191d",
+      "kind": "test_code",
+      "repository": "https://github.com/chuongphong12/Sanguosha-vn",
+      "revision": "816191df12e6b9b5849b727104afd4a350d58ca9",
+      "path": "tests/prototypes/m0-postgres.proof.ts",
+      "url": "https://github.com/chuongphong12/Sanguosha-vn/blob/816191df12e6b9b5849b727104afd4a350d58ca9/tests/prototypes/m0-postgres.proof.ts",
+      "locator": "five real PostgreSQL/socket process/fault/recovery cases",
+      "checked_on": "2026-10-26",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "web.m0.storage-tests.816191d",
+      "kind": "test_code",
+      "repository": "https://github.com/chuongphong12/Sanguosha-vn",
+      "revision": "816191df12e6b9b5849b727104afd4a350d58ca9",
+      "path": "tests/prototypes/m0-storage.test.ts",
+      "url": "https://github.com/chuongphong12/Sanguosha-vn/blob/816191df12e6b9b5849b727104afd4a350d58ca9/tests/prototypes/m0-storage.test.ts",
+      "locator": "selected store failure rejects without local fallback",
+      "checked_on": "2026-10-26",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "web.m0.sql-runner.816191d",
+      "kind": "primary_code",
+      "repository": "https://github.com/chuongphong12/Sanguosha-vn",
+      "revision": "816191df12e6b9b5849b727104afd4a350d58ca9",
+      "path": "scripts/prototype-postgres.mjs",
+      "url": "https://github.com/chuongphong12/Sanguosha-vn/blob/816191df12e6b9b5849b727104afd4a350d58ca9/scripts/prototype-postgres.mjs",
+      "locator": "pinned image and isolated loopback container ownership/cleanup",
+      "checked_on": "2026-10-26",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "web.m0.session.b00ab43",
+      "kind": "primary_code",
+      "repository": "https://github.com/chuongphong12/Sanguosha-vn",
+      "revision": "b00ab435c1c37e982f675a80070c2b5d449a6a78",
+      "path": "server/prototypes/hegemony-m0/session.ts",
+      "url": "https://github.com/chuongphong12/Sanguosha-vn/blob/b00ab435c1c37e982f675a80070c2b5d449a6a78/server/prototypes/hegemony-m0/session.ts",
+      "locator": "nullable Member credential, leave and human-only synchronize; existing worker/persistence unchanged",
+      "checked_on": "2026-10-26",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "web.m0.leave-tests.b00ab43",
+      "kind": "test_code",
+      "repository": "https://github.com/chuongphong12/Sanguosha-vn",
+      "revision": "b00ab435c1c37e982f675a80070c2b5d449a6a78",
+      "path": "tests/prototypes/m0-leave.test.ts",
+      "url": "https://github.com/chuongphong12/Sanguosha-vn/blob/b00ab435c1c37e982f675a80070c2b5d449a6a78/tests/prototypes/m0-leave.test.ts",
+      "locator": "seven session scenarios for takeover, revoked tabs, Play/Jink, recovery, grace and answer/Leave ordering",
+      "checked_on": "2026-10-26",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "web.m0.prompt-tests.b00ab43",
+      "kind": "test_code",
+      "repository": "https://github.com/chuongphong12/Sanguosha-vn",
+      "revision": "b00ab435c1c37e982f675a80070c2b5d449a6a78",
+      "path": "tests/prototypes/m0-prompt.test.ts",
+      "url": "https://github.com/chuongphong12/Sanguosha-vn/blob/b00ab435c1c37e982f675a80070c2b5d449a6a78/tests/prototypes/m0-prompt.test.ts",
+      "locator": "actual Socket.IO failed file Leave retains human rights and prompt",
+      "checked_on": "2026-10-26",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "web.m0.sql-proof.b00ab43",
+      "kind": "test_code",
+      "repository": "https://github.com/chuongphong12/Sanguosha-vn",
+      "revision": "b00ab435c1c37e982f675a80070c2b5d449a6a78",
+      "path": "tests/prototypes/m0-postgres.proof.ts",
+      "url": "https://github.com/chuongphong12/Sanguosha-vn/blob/b00ab435c1c37e982f675a80070c2b5d449a6a78/tests/prototypes/m0-postgres.proof.ts",
+      "locator": "seven SQL cases including permanent handoff SIGKILL/recovery and failed Leave authority restore",
+      "checked_on": "2026-10-26",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "web.m0.engine.3c835ce",
+      "kind": "primary_code",
+      "repository": "https://github.com/chuongphong12/Sanguosha-vn",
+      "revision": "3c835ce7a4ebdf89e1754d150a3dc31040977e58",
+      "path": "server/prototypes/hegemony-m0/engine.ts",
+      "url": "https://github.com/chuongphong12/Sanguosha-vn/blob/3c835ce7a4ebdf89e1754d150a3dc31040977e58/server/prototypes/hegemony-m0/engine.ts",
+      "locator": "response-v4, physical metadata/resources, play offers and actor-only projection",
+      "checked_on": "2026-10-27",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "web.m0.battle.3c835ce",
+      "kind": "primary_code",
+      "repository": "https://github.com/chuongphong12/Sanguosha-vn",
+      "revision": "3c835ce7a4ebdf89e1754d150a3dc31040977e58",
+      "path": "server/prototypes/hegemony-m0/battle.ts",
+      "url": "https://github.com/chuongphong12/Sanguosha-vn/blob/3c835ce7a4ebdf89e1754d150a3dc31040977e58/server/prototypes/hegemony-m0/battle.ts",
+      "locator": "separate MethodUse/MethodResponse, AOE admission/effects, prompt projection and fixture authorities",
+      "checked_on": "2026-10-27",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "web.m0.archery.3c835ce",
+      "kind": "primary_code",
+      "repository": "https://github.com/chuongphong12/Sanguosha-vn",
+      "revision": "3c835ce7a4ebdf89e1754d150a3dc31040977e58",
+      "path": "server/prototypes/hegemony-m0/archery.ts",
+      "url": "https://github.com/chuongphong12/Sanguosha-vn/blob/3c835ce7a4ebdf89e1754d150a3dc31040977e58/server/prototypes/hegemony-m0/archery.ts",
+      "locator": "AOE target expansion and ArcheryAttack response/damage owner",
+      "checked_on": "2026-10-27",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "web.m0.prompt-tests.3c835ce",
+      "kind": "test_code",
+      "repository": "https://github.com/chuongphong12/Sanguosha-vn",
+      "revision": "3c835ce7a4ebdf89e1754d150a3dc31040977e58",
+      "path": "tests/prototypes/m0-prompt.test.ts",
+      "url": "https://github.com/chuongphong12/Sanguosha-vn/blob/3c835ce7a4ebdf89e1754d150a3dc31040977e58/tests/prototypes/m0-prompt.test.ts",
+      "locator": "actual socket MethodResponse effect/privacy/admission/failed-write scenarios",
+      "checked_on": "2026-10-27",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "web.m0.deadline-tests.3c835ce",
+      "kind": "test_code",
+      "repository": "https://github.com/chuongphong12/Sanguosha-vn",
+      "revision": "3c835ce7a4ebdf89e1754d150a3dc31040977e58",
+      "path": "tests/prototypes/m0-deadline.test.ts",
+      "url": "https://github.com/chuongphong12/Sanguosha-vn/blob/3c835ce7a4ebdf89e1754d150a3dc31040977e58/tests/prototypes/m0-deadline.test.ts",
+      "locator": "deadline and permanent bot through MethodResponse/restart/MethodUse",
+      "checked_on": "2026-10-27",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "web.m0.sql-proof.3c835ce",
+      "kind": "test_code",
+      "repository": "https://github.com/chuongphong12/Sanguosha-vn",
+      "revision": "3c835ce7a4ebdf89e1754d150a3dc31040977e58",
+      "path": "tests/prototypes/m0-postgres.proof.ts",
+      "url": "https://github.com/chuongphong12/Sanguosha-vn/blob/3c835ce7a4ebdf89e1754d150a3dc31040977e58/tests/prototypes/m0-postgres.proof.ts",
+      "locator": "eight SQL cases including MethodResponse pending/commit-before-ACK recovery",
+      "checked_on": "2026-10-27",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "web.m0.storage-tests.3c835ce",
+      "kind": "test_code",
+      "repository": "https://github.com/chuongphong12/Sanguosha-vn",
+      "revision": "3c835ce7a4ebdf89e1754d150a3dc31040977e58",
+      "path": "tests/prototypes/m0-storage.test.ts",
+      "url": "https://github.com/chuongphong12/Sanguosha-vn/blob/3c835ce7a4ebdf89e1754d150a3dc31040977e58/tests/prototypes/m0-storage.test.ts",
+      "locator": "old clock-v3 save rejection",
+      "checked_on": "2026-10-27",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "web.m0.browser-proof.3c835ce",
+      "kind": "test_code",
+      "repository": "https://github.com/chuongphong12/Sanguosha-vn",
+      "revision": "3c835ce7a4ebdf89e1754d150a3dc31040977e58",
+      "path": "server/prototypes/hegemony-m0/browser-proof.ts",
+      "url": "https://github.com/chuongphong12/Sanguosha-vn/blob/3c835ce7a4ebdf89e1754d150a3dc31040977e58/server/prototypes/hegemony-m0/browser-proof.ts",
+      "locator": "actual MethodResponse controls, privacy, refresh and Archery after Slash",
+      "checked_on": "2026-10-27",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "web.m0.demo.3c835ce",
+      "kind": "primary_code",
+      "repository": "https://github.com/chuongphong12/Sanguosha-vn",
+      "revision": "3c835ce7a4ebdf89e1754d150a3dc31040977e58",
+      "path": "server/prototypes/hegemony-m0/demo.html",
+      "url": "https://github.com/chuongphong12/Sanguosha-vn/blob/3c835ce7a4ebdf89e1754d150a3dc31040977e58/server/prototypes/hegemony-m0/demo.html",
+      "locator": "Chơi bài and generated owner-only prompt controls",
+      "checked_on": "2026-10-27",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "native.m0.aoe.ce4e62b",
+      "kind": "primary_code",
+      "repository": "https://github.com/TamQuocSat-LangKhach/QSanguosha-QuocChien",
+      "revision": "ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f",
+      "path": "src/package/standard.cpp",
+      "url": "https://github.com/TamQuocSat-LangKhach/QSanguosha-QuocChien/blob/ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f/src/package/standard.cpp",
+      "locator": "AOE availability and onUse target expansion, 208-255",
+      "checked_on": "2026-10-27",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "native.m0.archery.ce4e62b",
+      "kind": "primary_code",
+      "repository": "https://github.com/TamQuocSat-LangKhach/QSanguosha-QuocChien",
+      "revision": "ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f",
+      "path": "src/package/standard-tricks.cpp",
+      "url": "https://github.com/TamQuocSat-LangKhach/QSanguosha-QuocChien/blob/ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f/src/package/standard-tricks.cpp",
+      "locator": "ArcheryAttack::onEffect MethodResponse and normal damage, 140-159",
+      "checked_on": "2026-10-27",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "native.m0.damage-card.ce4e62b",
+      "kind": "primary_code",
+      "repository": "https://github.com/TamQuocSat-LangKhach/QSanguosha-QuocChien",
+      "revision": "ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f",
+      "path": "src/core/structs.cpp",
+      "url": "https://github.com/TamQuocSat-LangKhach/QSanguosha-QuocChien/blob/ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f/src/core/structs.cpp",
+      "locator": "card DamageStruct constructor defaults/getReason, 132-160",
+      "checked_on": "2026-10-27",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "native.m0.response-room.ce4e62b",
+      "kind": "primary_code",
+      "repository": "https://github.com/TamQuocSat-LangKhach/QSanguosha-QuocChien",
+      "revision": "ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f",
+      "path": "src/server/room.cpp",
+      "url": "https://github.com/TamQuocSat-LangKhach/QSanguosha-QuocChien/blob/ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f/src/server/room.cpp",
+      "locator": "MethodResponse branch 1801-1847 and discard prepend 5277",
+      "checked_on": "2026-10-27",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "native.m0.damage-defaults.ce4e62b",
+      "kind": "primary_code",
+      "repository": "https://github.com/TamQuocSat-LangKhach/QSanguosha-QuocChien",
+      "revision": "ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f",
+      "path": "src/core/structs.h",
+      "url": "https://github.com/TamQuocSat-LangKhach/QSanguosha-QuocChien/blob/ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f/src/core/structs.h",
+      "locator": "DamageStruct card constructor default damage 1 and Normal nature, 44-46",
+      "checked_on": "2026-10-27",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "web.m1.match.1e705ef",
+      "kind": "primary_code",
+      "repository": "https://github.com/chuongphong12/Sanguosha-vn",
+      "revision": "1e705eff4ca1252f0cf771615d5847820a9c8fd3",
+      "path": "src/game/hegemony/match.ts",
+      "url": "https://github.com/chuongphong12/Sanguosha-vn/blob/1e705eff4ca1252f0cf771615d5847820a9c8fd3/src/game/hegemony/match.ts",
+      "locator": "create/apply/view/restore, startup composition, metadata and settings binding",
+      "checked_on": "2026-10-27",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "web.m1.room.1e705ef",
+      "kind": "primary_code",
+      "repository": "https://github.com/chuongphong12/Sanguosha-vn",
+      "revision": "1e705eff4ca1252f0cf771615d5847820a9c8fd3",
+      "path": "src/game/hegemony/match-room.ts",
+      "url": "https://github.com/chuongphong12/Sanguosha-vn/blob/1e705eff4ca1252f0cf771615d5847820a9c8fd3/src/game/hegemony/match-room.ts",
+      "locator": "setup-to-Room mapping, HP/identity/marks, content/deck inputs",
+      "checked_on": "2026-10-27",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "web.m1.notice.1e705ef",
+      "kind": "primary_code",
+      "repository": "https://github.com/chuongphong12/Sanguosha-vn",
+      "revision": "1e705eff4ca1252f0cf771615d5847820a9c8fd3",
+      "path": "src/game/hegemony/match-notice.ts",
+      "url": "https://github.com/chuongphong12/Sanguosha-vn/blob/1e705eff4ca1252f0cf771615d5847820a9c8fd3/src/game/hegemony/match-notice.ts",
+      "locator": "strict startup presentation field allowlist",
+      "checked_on": "2026-10-27",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "web.m1.tests.1e705ef",
+      "kind": "test_code",
+      "repository": "https://github.com/chuongphong12/Sanguosha-vn",
+      "revision": "1e705eff4ca1252f0cf771615d5847820a9c8fd3",
+      "path": "tests/hegemony/match.test.ts",
+      "url": "https://github.com/chuongphong12/Sanguosha-vn/blob/1e705eff4ca1252f0cf771615d5847820a9c8fd3/tests/hegemony/match.test.ts",
+      "locator": "21 public match/projection/JSON and actual kernel composition assertions",
+      "checked_on": "2026-10-27",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "web.production.server.1e705ef",
+      "kind": "primary_code",
+      "repository": "https://github.com/chuongphong12/Sanguosha-vn",
+      "revision": "1e705eff4ca1252f0cf771615d5847820a9c8fd3",
+      "path": "server/server.ts",
+      "url": "https://github.com/chuongphong12/Sanguosha-vn/blob/1e705eff4ca1252f0cf771615d5847820a9c8fd3/server/server.ts",
+      "locator": "unchanged production TqsGame registration",
+      "checked_on": "2026-10-27",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "web.production.client.1e705ef",
+      "kind": "primary_code",
+      "repository": "https://github.com/chuongphong12/Sanguosha-vn",
+      "revision": "1e705eff4ca1252f0cf771615d5847820a9c8fd3",
+      "path": "src/client/MatchClient.ts",
+      "url": "https://github.com/chuongphong12/Sanguosha-vn/blob/1e705eff4ca1252f0cf771615d5847820a9c8fd3/src/client/MatchClient.ts",
+      "locator": "unchanged local/remote game selection",
+      "checked_on": "2026-10-27",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "web.production.game.1e705ef",
+      "kind": "primary_code",
+      "repository": "https://github.com/chuongphong12/Sanguosha-vn",
+      "revision": "1e705eff4ca1252f0cf771615d5847820a9c8fd3",
+      "path": "src/game/TqsGame.ts",
+      "url": "https://github.com/chuongphong12/Sanguosha-vn/blob/1e705eff4ca1252f0cf771615d5847820a9c8fd3/src/game/TqsGame.ts",
+      "locator": "legacy Standard2013 production game identity",
+      "checked_on": "2026-10-27",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "native.m1.room-start.ce4e62b",
+      "kind": "primary_code",
+      "repository": "https://github.com/TamQuocSat-LangKhach/QSanguosha-QuocChien",
+      "revision": "ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f",
+      "path": "src/server/room.cpp",
+      "url": "https://github.com/TamQuocSat-LangKhach/QSanguosha-QuocChien/blob/ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f/src/server/room.cpp",
+      "locator": "chooseGenerals3694–3795; startGame4724+",
+      "checked_on": "2026-10-27",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "native.m1.companion.ce4e62b",
+      "kind": "primary_code",
+      "repository": "https://github.com/TamQuocSat-LangKhach/QSanguosha-QuocChien",
+      "revision": "ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f",
+      "path": "src/core/general.cpp",
+      "url": "https://github.com/TamQuocSat-LangKhach/QSanguosha-QuocChien/blob/ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f/src/core/general.cpp",
+      "locator": "General::isCompanionWith375+ and constructor/kingdom metadata",
+      "checked_on": "2026-10-27",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "native.m1.lord.ce4e62b",
+      "kind": "primary_code",
+      "repository": "https://github.com/TamQuocSat-LangKhach/QSanguosha-QuocChien",
+      "revision": "ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f",
+      "path": "src/core/player.cpp",
+      "url": "https://github.com/TamQuocSat-LangKhach/QSanguosha-QuocChien/blob/ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f/src/core/player.cpp",
+      "locator": "isLord488–490 and getLord1795–1807",
+      "checked_on": "2026-10-27",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "native.m1.placeholder.ce4e62b",
+      "kind": "primary_code",
+      "repository": "https://github.com/TamQuocSat-LangKhach/QSanguosha-QuocChien",
+      "revision": "ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f",
+      "path": "src/package/standard-package.cpp",
+      "url": "https://github.com/TamQuocSat-LangKhach/QSanguosha-QuocChien/blob/ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f/src/package/standard-package.cpp",
+      "locator": "hidden anjiang definitions838–840",
+      "checked_on": "2026-10-27",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "native.m1.room-thread.ce4e62b",
+      "kind": "primary_code",
+      "repository": "https://github.com/TamQuocSat-LangKhach/QSanguosha-QuocChien",
+      "revision": "ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f",
+      "path": "src/server/roomthread.cpp",
+      "url": "https://github.com/TamQuocSat-LangKhach/QSanguosha-QuocChien/blob/ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f/src/server/roomthread.cpp",
+      "locator": "constructTriggerTable/addPlayerSkills/run174+; unimplemented complete startup/turn owner",
+      "checked_on": "2026-10-27",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "web.m12.match.4cad857",
+      "kind": "primary_code",
+      "repository": "https://github.com/chuongphong12/Sanguosha-vn",
+      "revision": "4cad85771d797f1d960e2faf1f6dcfdb6ac032a4",
+      "path": "src/game/hegemony/match.ts",
+      "url": "https://github.com/chuongphong12/Sanguosha-vn/blob/4cad85771d797f1d960e2faf1f6dcfdb6ac032a4/src/game/hegemony/match.ts",
+      "locator": "createHegemonyMatch: schema-v2, actual winner relations, two registries, startup application and restore",
+      "checked_on": "2026-10-28",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "web.m12.owner.4cad857",
+      "kind": "primary_code",
+      "repository": "https://github.com/chuongphong12/Sanguosha-vn",
+      "revision": "4cad85771d797f1d960e2faf1f6dcfdb6ac032a4",
+      "path": "src/game/hegemony/match-startup.ts",
+      "url": "https://github.com/chuongphong12/Sanguosha-vn/blob/4cad85771d797f1d960e2faf1f6dcfdb6ac032a4/src/game/hegemony/match-startup.ts",
+      "locator": "createMatchStartup: stage/root validation, idle switch and continuation",
+      "checked_on": "2026-10-28",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "web.m12.tests.4cad857",
+      "kind": "test_code",
+      "repository": "https://github.com/chuongphong12/Sanguosha-vn",
+      "revision": "4cad85771d797f1d960e2faf1f6dcfdb6ac032a4",
+      "path": "tests/hegemony/match.test.ts",
+      "url": "https://github.com/chuongphong12/Sanguosha-vn/blob/4cad85771d797f1d960e2faf1f6dcfdb6ac032a4/tests/hegemony/match.test.ts",
+      "locator": "30 match cases including injected native-condition fixtures; assertions are distinct from execution receipts",
+      "checked_on": "2026-10-28",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "web.m12.winner.4cad857",
+      "kind": "primary_code",
+      "repository": "https://github.com/chuongphong12/Sanguosha-vn",
+      "revision": "4cad85771d797f1d960e2faf1f6dcfdb6ac032a4",
+      "path": "src/game/hegemony/victory.ts",
+      "url": "https://github.com/chuongphong12/Sanguosha-vn/blob/4cad85771d797f1d960e2faf1f6dcfdb6ac032a4/src/game/hegemony/victory.ts",
+      "locator": "Existing createGetWinnerOperation and createGameOverOperation composed by M1.2",
+      "checked_on": "2026-10-28",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "web.m12.relations.4cad857",
+      "kind": "primary_code",
+      "repository": "https://github.com/chuongphong12/Sanguosha-vn",
+      "revision": "4cad85771d797f1d960e2faf1f6dcfdb6ac032a4",
+      "path": "src/game/hegemony/general-relations.ts",
+      "url": "https://github.com/chuongphong12/Sanguosha-vn/blob/4cad85771d797f1d960e2faf1f6dcfdb6ac032a4/src/game/hegemony/general-relations.ts",
+      "locator": "Actual friend/prediction and include-dead lord helpers",
+      "checked_on": "2026-10-28",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "web.m12.general.4cad857",
+      "kind": "primary_code",
+      "repository": "https://github.com/chuongphong12/Sanguosha-vn",
+      "revision": "4cad85771d797f1d960e2faf1f6dcfdb6ac032a4",
+      "path": "src/game/hegemony/general.ts",
+      "url": "https://github.com/chuongphong12/Sanguosha-vn/blob/4cad85771d797f1d960e2faf1f6dcfdb6ac032a4/src/game/hegemony/general.ts",
+      "locator": "Existing show-general operation; package/filter/UI boundary adapters remain explicit",
+      "checked_on": "2026-10-28",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "web.m12.careerist.4cad857",
+      "kind": "primary_code",
+      "repository": "https://github.com/chuongphong12/Sanguosha-vn",
+      "revision": "4cad85771d797f1d960e2faf1f6dcfdb6ac032a4",
+      "path": "src/game/hegemony/careerist.ts",
+      "url": "https://github.com/chuongphong12/Sanguosha-vn/blob/4cad85771d797f1d960e2faf1f6dcfdb6ac032a4/src/game/hegemony/careerist.ts",
+      "locator": "Existing careerist-rule operation; M1.2 fixtures cover the no-recruitment branch",
+      "checked_on": "2026-10-28",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "native.m12.roomthread.ce4e62b",
+      "kind": "primary_code",
+      "repository": "https://github.com/TamQuocSat-LangKhach/QSanguosha-QuocChien",
+      "revision": "ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f",
+      "path": "src/server/roomthread.cpp",
+      "url": "https://github.com/TamQuocSat-LangKhach/QSanguosha-QuocChien/blob/ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f/src/server/roomthread.cpp",
+      "locator": "RoomThread::run/constructTriggerTable/addPlayerSkills: initial winner, global then conditional player startup; turns follow",
+      "checked_on": "2026-10-28",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "native.m12.winner.ce4e62b",
+      "kind": "primary_code",
+      "repository": "https://github.com/TamQuocSat-LangKhach/QSanguosha-QuocChien",
+      "revision": "ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f",
+      "path": "src/server/gamerule.cpp",
+      "url": "https://github.com/TamQuocSat-LangKhach/QSanguosha-QuocChien/blob/ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f/src/server/gamerule.cpp",
+      "locator": "GameRule::getWinner lines1058–1151: actual reveal, relationships, dead-lord and careerist behavior",
+      "checked_on": "2026-10-28",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "web.m131.scheduler.32d3e5f",
+      "kind": "primary_code",
+      "repository": "https://github.com/chuongphong12/Sanguosha-vn",
+      "revision": "32d3e5f68b9d07af9ab6e1cb3f1291939094edd8",
+      "path": "src/game/hegemony/scheduler.ts",
+      "locator": "Opt-in unwind/cleanup handlers, distinct completion, monotonic interruption IDs and cooperative yield/continue; default profiles freeze",
+      "url": "https://github.com/chuongphong12/Sanguosha-vn/blob/32d3e5f68b9d07af9ab6e1cb3f1291939094edd8/src/game/hegemony/scheduler.ts",
+      "checked_on": "2026-10-28",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "web.m131.tests.32d3e5f",
+      "kind": "test_code",
+      "repository": "https://github.com/chuongphong12/Sanguosha-vn",
+      "revision": "32d3e5f68b9d07af9ab6e1cb3f1291939094edd8",
+      "path": "tests/hegemony/scheduler-unwind.test.ts",
+      "locator": "17 trace-handler public-seam cases; assertions are distinct from checkpoint executions and native core catch implementations",
+      "url": "https://github.com/chuongphong12/Sanguosha-vn/blob/32d3e5f68b9d07af9ab6e1cb3f1291939094edd8/tests/hegemony/scheduler-unwind.test.ts",
+      "checked_on": "2026-10-28",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "native.m131.trigger-catch.ce4e62b",
+      "kind": "primary_code",
+      "repository": "https://github.com/TamQuocSat-LangKhach/QSanguosha-QuocChien",
+      "revision": "ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f",
+      "path": "src/server/roomthread.cpp",
+      "locator": "Lines652–667: native event-stack departure on a rethrown TriggerEvent; not the complete per-operation native catch contract",
+      "url": "https://github.com/TamQuocSat-LangKhach/QSanguosha-QuocChien/blob/ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f/src/server/roomthread.cpp",
+      "checked_on": "2026-10-28",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "web.m132.damage.9024429",
+      "kind": "primary_code",
+      "repository": "https://github.com/chuongphong12/Sanguosha-vn",
+      "revision": "9024429ba89e7a21b090734d51a2d042e85d7928",
+      "path": "src/game/hegemony/damage.ts",
+      "url": "https://github.com/chuongphong12/Sanguosha-vn/blob/9024429ba89e7a21b090734d51a2d042e85d7928/src/game/hegemony/damage.ts",
+      "locator": "M1.3.2 protected core catch definition or public-seam assertions; execution receipt is separate",
+      "checked_on": "2026-10-28",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "web.m132.card-used.9024429",
+      "kind": "primary_code",
+      "repository": "https://github.com/chuongphong12/Sanguosha-vn",
+      "revision": "9024429ba89e7a21b090734d51a2d042e85d7928",
+      "path": "src/game/hegemony/card-used.ts",
+      "url": "https://github.com/chuongphong12/Sanguosha-vn/blob/9024429ba89e7a21b090734d51a2d042e85d7928/src/game/hegemony/card-used.ts",
+      "locator": "M1.3.2 protected core catch definition or public-seam assertions; execution receipt is separate",
+      "checked_on": "2026-10-28",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "web.m132.room-use.9024429",
+      "kind": "primary_code",
+      "repository": "https://github.com/chuongphong12/Sanguosha-vn",
+      "revision": "9024429ba89e7a21b090734d51a2d042e85d7928",
+      "path": "src/game/hegemony/room-use-card.ts",
+      "url": "https://github.com/chuongphong12/Sanguosha-vn/blob/9024429ba89e7a21b090734d51a2d042e85d7928/src/game/hegemony/room-use-card.ts",
+      "locator": "M1.3.2 protected core catch definition or public-seam assertions; execution receipt is separate",
+      "checked_on": "2026-10-28",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "web.m132.tests.9024429",
+      "kind": "test_code",
+      "repository": "https://github.com/chuongphong12/Sanguosha-vn",
+      "revision": "9024429ba89e7a21b090734d51a2d042e85d7928",
+      "path": "tests/hegemony/core-unwind.test.ts",
+      "url": "https://github.com/chuongphong12/Sanguosha-vn/blob/9024429ba89e7a21b090734d51a2d042e85d7928/tests/hegemony/core-unwind.test.ts",
+      "locator": "M1.3.2 protected core catch definition or public-seam assertions; execution receipt is separate",
+      "checked_on": "2026-10-28",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "native.m132.room.ce4e62b",
+      "kind": "primary_code",
+      "repository": "https://github.com/TamQuocSat-LangKhach/QSanguosha-QuocChien",
+      "revision": "ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f",
+      "path": "src/server/room.cpp",
+      "url": "https://github.com/TamQuocSat-LangKhach/QSanguosha-QuocChien/blob/ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f/src/server/room.cpp#L4269-L4303",
+      "locator": "Room use catch; also inspected damage4490–4573, table selection6620–6645, player/card flag setters2240–2248/2450+",
+      "checked_on": "2026-10-28",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "native.m132.gamerule.ce4e62b",
+      "kind": "primary_code",
+      "repository": "https://github.com/TamQuocSat-LangKhach/QSanguosha-QuocChien",
+      "revision": "ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f",
+      "path": "src/server/gamerule.cpp",
+      "url": "https://github.com/TamQuocSat-LangKhach/QSanguosha-QuocChien/blob/ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f/src/server/gamerule.cpp#L562-L611",
+      "locator": "CardUsed protected local and unconditional Jink catch",
+      "checked_on": "2026-10-28",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "native.m132.engine.ce4e62b",
+      "kind": "primary_code",
+      "repository": "https://github.com/TamQuocSat-LangKhach/QSanguosha-QuocChien",
+      "revision": "ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f",
+      "path": "src/core/engine.cpp",
+      "url": "https://github.com/TamQuocSat-LangKhach/QSanguosha-QuocChien/blob/ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f/src/core/engine.cpp#L961-L999",
+      "locator": "Engine flag reset/filter/shuffle; current wrapper getCard547–579",
+      "checked_on": "2026-10-28",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "native.m132.wrappedcard.ce4e62b",
+      "kind": "primary_code",
+      "repository": "https://github.com/TamQuocSat-LangKhach/QSanguosha-QuocChien",
+      "revision": "ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f",
+      "path": "src/core/wrappedcard.cpp",
+      "url": "https://github.com/TamQuocSat-LangKhach/QSanguosha-QuocChien/blob/ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f/src/core/wrappedcard.cpp#L71-L77",
+      "locator": "Wrapped flag mutation sets modified",
+      "checked_on": "2026-10-28",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "web.m133a.owner.e55e15b",
+      "kind": "primary_code",
+      "repository": "https://github.com/chuongphong12/Sanguosha-vn",
+      "revision": "e55e15b37b90fa764de21cd2c94b2e488030d6d8",
+      "path": "src/game/hegemony/phases.ts",
+      "url": "https://github.com/chuongphong12/Sanguosha-vn/blob/e55e15b37b90fa764de21cd2c94b2e488030d6d8/src/game/hegemony/phases.ts",
+      "locator": "M1.3.3a phase owner definitions or dispatch/resume/helper assertions; execution receipt is separate",
+      "checked_on": "2026-10-30",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "web.m133a.tests.e55e15b",
+      "kind": "test_code",
+      "repository": "https://github.com/chuongphong12/Sanguosha-vn",
+      "revision": "e55e15b37b90fa764de21cd2c94b2e488030d6d8",
+      "path": "tests/hegemony/phases.test.ts",
+      "url": "https://github.com/chuongphong12/Sanguosha-vn/blob/e55e15b37b90fa764de21cd2c94b2e488030d6d8/tests/hegemony/phases.test.ts",
+      "locator": "M1.3.3a phase owner definitions or dispatch/resume/helper assertions; execution receipt is separate",
+      "checked_on": "2026-10-30",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "native.m133a.phases.ce4e62b",
+      "kind": "primary_code",
+      "repository": "https://github.com/TamQuocSat-LangKhach/QSanguosha-QuocChien",
+      "revision": "ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f",
+      "path": "src/server/serverplayer.cpp",
+      "url": "https://github.com/TamQuocSat-LangKhach/QSanguosha-QuocChien/blob/ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f/src/server/serverplayer.cpp#L1051-L1210",
+      "locator": "changePhase/play/executePhaseEvent/skip/insertPhase/isSkipped1051–1210",
+      "checked_on": "2026-10-30",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "web.m133b.phase-state.652056e",
+      "kind": "primary_code",
+      "repository": "https://github.com/chuongphong12/Sanguosha-vn",
+      "revision": "652056e30eafd4faa4198e34d86fc9d33adec0c4",
+      "path": "src/game/hegemony/phase-state.ts",
+      "url": "https://github.com/chuongphong12/Sanguosha-vn/blob/652056e30eafd4faa4198e34d86fc9d33adec0c4/src/game/hegemony/phase-state.ts",
+      "locator": "M1.3.3b definitions or public-seam assertions; reported execution is separate",
+      "checked_on": "2026-10-30",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "web.m133b.phase-cleanup.652056e",
+      "kind": "primary_code",
+      "repository": "https://github.com/chuongphong12/Sanguosha-vn",
+      "revision": "652056e30eafd4faa4198e34d86fc9d33adec0c4",
+      "path": "src/game/hegemony/phase-cleanup.ts",
+      "url": "https://github.com/chuongphong12/Sanguosha-vn/blob/652056e30eafd4faa4198e34d86fc9d33adec0c4/src/game/hegemony/phase-cleanup.ts",
+      "locator": "M1.3.3b definitions or public-seam assertions; reported execution is separate",
+      "checked_on": "2026-10-30",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "web.m133b.room-skills.652056e",
+      "kind": "primary_code",
+      "repository": "https://github.com/chuongphong12/Sanguosha-vn",
+      "revision": "652056e30eafd4faa4198e34d86fc9d33adec0c4",
+      "path": "src/game/hegemony/room-skills.ts",
+      "url": "https://github.com/chuongphong12/Sanguosha-vn/blob/652056e30eafd4faa4198e34d86fc9d33adec0c4/src/game/hegemony/room-skills.ts",
+      "locator": "M1.3.3b definitions or public-seam assertions; reported execution is separate",
+      "checked_on": "2026-10-30",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "web.m133b.imperial-order.652056e",
+      "kind": "primary_code",
+      "repository": "https://github.com/chuongphong12/Sanguosha-vn",
+      "revision": "652056e30eafd4faa4198e34d86fc9d33adec0c4",
+      "path": "src/game/hegemony/imperial-order.ts",
+      "url": "https://github.com/chuongphong12/Sanguosha-vn/blob/652056e30eafd4faa4198e34d86fc9d33adec0c4/src/game/hegemony/imperial-order.ts",
+      "locator": "M1.3.3b definitions or public-seam assertions; reported execution is separate",
+      "checked_on": "2026-10-30",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "web.m133b.hp-loss.652056e",
+      "kind": "primary_code",
+      "repository": "https://github.com/chuongphong12/Sanguosha-vn",
+      "revision": "652056e30eafd4faa4198e34d86fc9d33adec0c4",
+      "path": "src/game/hegemony/hp-loss.ts",
+      "url": "https://github.com/chuongphong12/Sanguosha-vn/blob/652056e30eafd4faa4198e34d86fc9d33adec0c4/src/game/hegemony/hp-loss.ts",
+      "locator": "M1.3.3b definitions or public-seam assertions; reported execution is separate",
+      "checked_on": "2026-10-30",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "web.m133b.tests.652056e",
+      "kind": "test_code",
+      "repository": "https://github.com/chuongphong12/Sanguosha-vn",
+      "revision": "652056e30eafd4faa4198e34d86fc9d33adec0c4",
+      "path": "tests/hegemony/phase-cleanup.test.ts",
+      "url": "https://github.com/chuongphong12/Sanguosha-vn/blob/652056e30eafd4faa4198e34d86fc9d33adec0c4/tests/hegemony/phase-cleanup.test.ts",
+      "locator": "M1.3.3b definitions or public-seam assertions; reported execution is separate",
+      "checked_on": "2026-10-30",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "native.m133b.gamerule.ce4e62b",
+      "kind": "primary_code",
+      "repository": "https://github.com/TamQuocSat-LangKhach/QSanguosha-QuocChien",
+      "revision": "ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f",
+      "path": "src/server/gamerule.cpp",
+      "url": "https://github.com/TamQuocSat-LangKhach/QSanguosha-QuocChien/blob/ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f/src/server/gamerule.cpp#L392-L521",
+      "locator": "Phase cleanup392–521 and skill events629–658",
+      "checked_on": "2026-10-30",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "native.m133b.room.ce4e62b",
+      "kind": "primary_code",
+      "repository": "https://github.com/TamQuocSat-LangKhach/QSanguosha-QuocChien",
+      "revision": "ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f",
+      "path": "src/server/room.cpp",
+      "url": "https://github.com/TamQuocSat-LangKhach/QSanguosha-QuocChien/blob/ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f/src/server/room.cpp#L678-L760",
+      "locator": "Batchskills678–760, setProperty2250+, typedmarks2362–2380, HP-loss4311–4346",
+      "checked_on": "2026-10-30",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "native.m133b.player.ce4e62b",
+      "kind": "primary_code",
+      "repository": "https://github.com/TamQuocSat-LangKhach/QSanguosha-QuocChien",
+      "revision": "ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f",
+      "path": "src/core/player.cpp",
+      "url": "https://github.com/TamQuocSat-LangKhach/QSanguosha-QuocChien/blob/ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f/src/core/player.cpp#L1522-L1567",
+      "locator": "Owned visible/equipment list1522–1567 and limitations1730–1781",
+      "checked_on": "2026-10-30",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "native.m133b.player-fields.ce4e62b",
+      "kind": "primary_code",
+      "repository": "https://github.com/TamQuocSat-LangKhach/QSanguosha-QuocChien",
+      "revision": "ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f",
+      "path": "src/core/player.h",
+      "url": "https://github.com/TamQuocSat-LangKhach/QSanguosha-QuocChien/blob/ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f/src/core/player.h#L425-L444",
+      "locator": "QMap numeric/int/string marks and skill maps; exact declarations inspected",
+      "checked_on": "2026-10-30",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "native.m133b.imperial.ce4e62b",
+      "kind": "primary_code",
+      "repository": "https://github.com/TamQuocSat-LangKhach/QSanguosha-QuocChien",
+      "revision": "ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f",
+      "path": "src/package/strategic-advantage.cpp",
+      "url": "https://github.com/TamQuocSat-LangKhach/QSanguosha-QuocChien/blob/ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f/src/package/strategic-advantage.cpp#L1193-L1233",
+      "locator": "ImperialOrder onEffect",
+      "checked_on": "2026-10-30",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "native.m133b.force-discard.ce4e62b",
+      "kind": "primary_code",
+      "repository": "https://github.com/TamQuocSat-LangKhach/QSanguosha-QuocChien",
+      "revision": "ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f",
+      "path": "src/server/serverplayer.cpp",
+      "url": "https://github.com/TamQuocSat-LangKhach/QSanguosha-QuocChien/blob/ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f/src/server/serverplayer.cpp#L262-L283",
+      "locator": "Matching candidate pool shuffle before limitations",
+      "checked_on": "2026-10-30",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "web.m134a.turn-start.33f27aa",
+      "kind": "primary_code",
+      "repository": "https://github.com/chuongphong12/Sanguosha-vn",
+      "revision": "33f27aa1da6d74d8d50acb7ba1dabdefcbe9f554",
+      "path": "src/game/hegemony/turn-start.ts",
+      "url": "https://github.com/chuongphong12/Sanguosha-vn/blob/33f27aa1da6d74d8d50acb7ba1dabdefcbe9f554/src/game/hegemony/turn-start.ts",
+      "locator": "TurnStart, turnOver and optional BattleRoyal operations",
+      "checked_on": "2026-10-30",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "web.m134a.turn-order.33f27aa",
+      "kind": "primary_code",
+      "repository": "https://github.com/chuongphong12/Sanguosha-vn",
+      "revision": "33f27aa1da6d74d8d50acb7ba1dabdefcbe9f554",
+      "path": "src/game/hegemony/turn-order.ts",
+      "url": "https://github.com/chuongphong12/Sanguosha-vn/blob/33f27aa1da6d74d8d50acb7ba1dabdefcbe9f554/src/game/hegemony/turn-order.ts",
+      "locator": "Bounded normal/extra steps, round cleanup and explicit recovery root",
+      "checked_on": "2026-10-30",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "web.m134a.tests.33f27aa",
+      "kind": "test_code",
+      "repository": "https://github.com/chuongphong12/Sanguosha-vn",
+      "revision": "33f27aa1da6d74d8d50acb7ba1dabdefcbe9f554",
+      "path": "tests/hegemony/turns.test.ts",
+      "url": "https://github.com/chuongphong12/Sanguosha-vn/blob/33f27aa1da6d74d8d50acb7ba1dabdefcbe9f554/tests/hegemony/turns.test.ts",
+      "locator": "Public dispatch/resume/unwind assertions and real phase/Draw composition",
+      "checked_on": "2026-10-30",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "native.m134a.turn-rule.ce4e62b",
+      "kind": "primary_code",
+      "repository": "https://github.com/TamQuocSat-LangKhach/QSanguosha-QuocChien",
+      "revision": "ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f",
+      "path": "src/server/gamerule.cpp",
+      "url": "https://github.com/TamQuocSat-LangKhach/QSanguosha-QuocChien/blob/ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f/src/server/gamerule.cpp#L332-L394",
+      "locator": "GameRule TurnStart effect and guards",
+      "checked_on": "2026-10-30",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "native.m134a.thread.ce4e62b",
+      "kind": "primary_code",
+      "repository": "https://github.com/TamQuocSat-LangKhach/QSanguosha-QuocChien",
+      "revision": "ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f",
+      "path": "src/server/roomthread.cpp",
+      "url": "https://github.com/TamQuocSat-LangKhach/QSanguosha-QuocChien/blob/ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f/src/server/roomthread.cpp#L112-L191",
+      "locator": "Normal/extra turns and TurnBroken recovery",
+      "checked_on": "2026-10-30",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "native.m134a.flip.ce4e62b",
+      "kind": "primary_code",
+      "repository": "https://github.com/TamQuocSat-LangKhach/QSanguosha-QuocChien",
+      "revision": "ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f",
+      "path": "src/server/serverplayer.cpp",
+      "url": "https://github.com/TamQuocSat-LangKhach/QSanguosha-QuocChien/blob/ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f/src/server/serverplayer.cpp#L1037-L1050",
+      "locator": "Face-up property/log then TurnedOver event",
+      "checked_on": "2026-10-30",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "native.m134a.room.ce4e62b",
+      "kind": "primary_code",
+      "repository": "https://github.com/TamQuocSat-LangKhach/QSanguosha-QuocChien",
+      "revision": "ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f",
+      "path": "src/server/room.cpp",
+      "url": "https://github.com/TamQuocSat-LangKhach/QSanguosha-QuocChien/blob/ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f/src/server/room.cpp#L450-L468",
+      "locator": "BattleRoyal450-468; alive list146-149/225-228; findPlayer2583-2603",
+      "checked_on": "2026-10-30",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "native.m134a.next.ce4e62b",
+      "kind": "primary_code",
+      "repository": "https://github.com/TamQuocSat-LangKhach/QSanguosha-QuocChien",
+      "revision": "ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f",
+      "path": "src/core/player.cpp",
+      "url": "https://github.com/TamQuocSat-LangKhach/QSanguosha-QuocChien/blob/ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f/src/core/player.cpp#L2272-L2305",
+      "locator": "getNext and getNextAlive removed/dead policy",
+      "checked_on": "2026-10-30",
+      "author": null,
+      "business_owner": null
+    }
+  ],
+  "pages": [
+    {
+      "path": "engine/game-start.md",
+      "status": "supported",
+      "reviewed_on": "2026-10-24",
+      "review_scope": "Source inspection of global guard/order and citation mapping. Historical test results are attributed, not re-executed; full gameplay and all page claims were not revalidated.",
+      "applies_to": {
+        "game_commit": "17c61c710e236637e9ed9829a4893babb6401b06",
+        "native_commit": "ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f"
+      },
+      "source_ids": [
+        "native.gamerule.game-start",
+        "web.game-start",
+        "web.game-start.tests",
+        "knowledge.game-start.research",
+        "knowledge.game-start.review"
+      ]
+    },
+    {
+      "path": "engine/prototype-session.md",
+      "status": "supported",
+      "reviewed_on": "2026-10-27",
+      "review_scope": "Two-seat synthetic response-v4 session: distinct Slash/MethodUse and fixture ArcheryAttack/MethodResponse, owner prompts, existing clocks/bot/Leave and file/local-SQL composition, with explicit fixture/Nullification/save-version limitations; not full-game/provider certification.",
+      "applies_to": {
+        "game_commit": "3c835ce7a4ebdf89e1754d150a3dc31040977e58",
+        "native_commit": "ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f"
+      },
+      "source_ids": [
+        "web.m0.engine.bc3ceb9",
+        "web.m0.battle.bc3ceb9",
+        "web.m0.session.bc3ceb9",
+        "web.m0.transport.bc3ceb9",
+        "web.m0.bot.bc3ceb9",
+        "web.m0.prompt-tests.bc3ceb9",
+        "web.m0.browser-proof.bc3ceb9",
+        "knowledge.m0.pending-jink.0204d2a",
+        "knowledge.m0.release.0204d2a",
+        "web.production.server.bc3ceb9",
+        "web.production.client.bc3ceb9",
+        "web.production.game.bc3ceb9",
+        "web.m0.engine.fbe60f6",
+        "web.m0.session.fbe60f6",
+        "web.m0.deadlines.fbe60f6",
+        "web.m0.transport.fbe60f6",
+        "web.m0.bot.fbe60f6",
+        "web.m0.deadline-tests.fbe60f6",
+        "web.m0.prompt-tests.fbe60f6",
+        "web.m0.browser-proof.fbe60f6",
+        "web.m0.session.816191d",
+        "web.m0.storage.816191d",
+        "web.m0.postgres.816191d",
+        "web.m0.transport.816191d",
+        "web.m0.sql-proof.816191d",
+        "web.m0.storage-tests.816191d",
+        "web.m0.sql-runner.816191d",
+        "web.m0.session.b00ab43",
+        "web.m0.leave-tests.b00ab43",
+        "web.m0.prompt-tests.b00ab43",
+        "web.m0.sql-proof.b00ab43",
+        "web.m0.engine.3c835ce",
+        "web.m0.battle.3c835ce",
+        "web.m0.archery.3c835ce",
+        "web.m0.prompt-tests.3c835ce",
+        "web.m0.deadline-tests.3c835ce",
+        "web.m0.sql-proof.3c835ce",
+        "web.m0.storage-tests.3c835ce",
+        "web.m0.browser-proof.3c835ce",
+        "web.m0.demo.3c835ce",
+        "native.m0.aoe.ce4e62b",
+        "native.m0.archery.ce4e62b",
+        "native.m0.damage-card.ce4e62b",
+        "native.m0.response-room.ce4e62b",
+        "native.m0.damage-defaults.ce4e62b"
+      ]
+    },
+    {
+      "path": "engine/match-authority.md",
+      "status": "supported",
+      "reviewed_on": "2026-10-28",
+      "review_scope": "Internal M1.1 authority plus M1.2 initial-winner/global/eligible-player startup, static table/cursor/root/configuration compatibility and trusted JSON continuation. Supplied profile/content/package/presentation authorities remain explicit; no full turn, native cleanup, session/production or native-runtime certification.",
+      "applies_to": {
+        "game_commit": "4cad85771d797f1d960e2faf1f6dcfdb6ac032a4",
+        "native_commit": "ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f"
+      },
+      "source_ids": [
+        "web.m1.match.1e705ef",
+        "web.m1.room.1e705ef",
+        "web.m1.notice.1e705ef",
+        "web.m1.tests.1e705ef",
+        "web.production.server.1e705ef",
+        "web.production.client.1e705ef",
+        "web.production.game.1e705ef",
+        "native.m1.room-start.ce4e62b",
+        "native.m1.companion.ce4e62b",
+        "native.m1.lord.ce4e62b",
+        "native.m1.placeholder.ce4e62b",
+        "native.m1.room-thread.ce4e62b",
+        "web.m12.match.4cad857",
+        "web.m12.owner.4cad857",
+        "web.m12.tests.4cad857",
+        "web.m12.winner.4cad857",
+        "web.m12.relations.4cad857",
+        "web.m12.general.4cad857",
+        "web.m12.careerist.4cad857",
+        "native.m12.roomthread.ce4e62b",
+        "native.m12.winner.ce4e62b"
+      ]
+    },
+    {
+      "path": "engine/startup-owner.md",
+      "status": "supported",
+      "reviewed_on": "2026-10-28",
+      "review_scope": "Bounded M1.2 static-registry startup ownership and persistence. Tests use synthetic profiles and injected winner conditions; not full native manifest/turn/session/runtime certification.",
+      "applies_to": {
+        "game_commit": "4cad85771d797f1d960e2faf1f6dcfdb6ac032a4",
+        "native_commit": "ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f"
+      },
+      "source_ids": [
+        "web.m12.match.4cad857",
+        "web.m12.owner.4cad857",
+        "web.m12.tests.4cad857",
+        "web.m12.winner.4cad857",
+        "web.m12.relations.4cad857",
+        "web.m12.general.4cad857",
+        "web.m12.careerist.4cad857",
+        "native.m12.roomthread.ce4e62b",
+        "native.m12.winner.ce4e62b"
+      ]
+    },
+    {
+      "path": "engine/scheduler-unwind.md",
+      "status": "supported",
+      "reviewed_on": "2026-10-28",
+      "review_scope": "M1.3.1 opt-in interpreter continuation and cooperative bound, with trace fixtures. Actual native catch bodies, normal-turn/game integration and runtime parity remain unimplemented.",
+      "applies_to": {
+        "game_commit": "32d3e5f68b9d07af9ab6e1cb3f1291939094edd8",
+        "native_commit": "ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f"
+      },
+      "source_ids": [
+        "web.m131.scheduler.32d3e5f",
+        "web.m131.tests.32d3e5f",
+        "native.m131.trigger-catch.ce4e62b"
+      ]
+    },
+    {
+      "path": "engine/core-interruption-cleanup.md",
+      "status": "supported",
+      "applies_to": {
+        "game_commit": "9024429ba89e7a21b090734d51a2d042e85d7928",
+        "native_commit": "ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f"
+      },
+      "source_ids": [
+        "web.m132.damage.9024429",
+        "web.m132.card-used.9024429",
+        "web.m132.room-use.9024429",
+        "web.m132.tests.9024429",
+        "native.m132.room.ce4e62b",
+        "native.m132.gamerule.ce4e62b",
+        "native.m132.engine.ce4e62b",
+        "native.m132.wrappedcard.ce4e62b"
+      ],
+      "reviewed_on": "2026-10-28",
+      "review_scope": "M1.3.2 bounded actual library cleanup with fixture authorities; no enabled full match or native runtime claim"
+    },
+    {
+      "path": "engine/phase-lifecycle.md",
+      "status": "supported",
+      "reviewed_on": "2026-10-30",
+      "review_scope": "M1.3.3a phase lifecycle only; GameRule cleanup and enabled match remain pending",
+      "applies_to": {
+        "game_commit": "e55e15b37b90fa764de21cd2c94b2e488030d6d8",
+        "native_commit": "ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f"
+      },
+      "source_ids": [
+        "web.m133a.owner.e55e15b",
+        "web.m133a.tests.e55e15b",
+        "native.m133a.phases.ce4e62b"
+      ]
+    },
+    {
+      "path": "engine/phase-cleanup.md",
+      "status": "supported",
+      "reviewed_on": "2026-10-30",
+      "review_scope": "M1.3.3b bounded actual library cleanup; adapters/full-turn/application integration remain explicit",
+      "applies_to": {
+        "game_commit": "652056e30eafd4faa4198e34d86fc9d33adec0c4",
+        "native_commit": "ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f"
+      },
+      "source_ids": [
+        "web.m133b.phase-state.652056e",
+        "web.m133b.phase-cleanup.652056e",
+        "web.m133b.room-skills.652056e",
+        "web.m133b.imperial-order.652056e",
+        "web.m133b.hp-loss.652056e",
+        "web.m133b.tests.652056e",
+        "native.m133b.gamerule.ce4e62b",
+        "native.m133b.room.ce4e62b",
+        "native.m133b.player.ce4e62b",
+        "native.m133b.player-fields.ce4e62b",
+        "native.m133b.imperial.ce4e62b",
+        "native.m133b.force-discard.ce4e62b"
+      ]
+    },
+    {
+      "path": "engine/turn-order.md",
+      "status": "supported",
+      "reviewed_on": "2026-10-30",
+      "review_scope": "M1.3.4a library TurnStart/normal/extra/round/recovery roots; phase bodies and aggregate match ownership remain pending",
+      "applies_to": {
+        "game_commit": "33f27aa1da6d74d8d50acb7ba1dabdefcbe9f554",
+        "native_commit": "ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f"
+      },
+      "source_ids": [
+        "web.m134a.turn-start.33f27aa",
+        "web.m134a.turn-order.33f27aa",
+        "web.m134a.tests.33f27aa",
+        "native.m134a.turn-rule.ce4e62b",
+        "native.m134a.thread.ce4e62b",
+        "native.m134a.flip.ce4e62b",
+        "native.m134a.room.ce4e62b",
+        "native.m134a.next.ce4e62b"
+      ]
+    }
+  ],
+  "relations": [
+    {
+      "subject": "page:engine/game-start.md",
+      "predicate": "derived_from",
+      "object": "source:native.gamerule.game-start",
+      "evidence": [
+        "native.gamerule.game-start"
+      ],
+      "scope": "Global GameStart guard/order and its documented implementation or historical review scope; source roles remain distinct."
+    },
+    {
+      "subject": "page:engine/game-start.md",
+      "predicate": "derived_from",
+      "object": "source:web.game-start",
+      "evidence": [
+        "web.game-start"
+      ],
+      "scope": "Global GameStart guard/order and its documented implementation or historical review scope; source roles remain distinct."
+    },
+    {
+      "subject": "page:engine/game-start.md",
+      "predicate": "derived_from",
+      "object": "source:web.game-start.tests",
+      "evidence": [
+        "web.game-start.tests"
+      ],
+      "scope": "Global GameStart guard/order and its documented implementation or historical review scope; source roles remain distinct."
+    },
+    {
+      "subject": "page:engine/game-start.md",
+      "predicate": "derived_from",
+      "object": "source:knowledge.game-start.research",
+      "evidence": [
+        "knowledge.game-start.research"
+      ],
+      "scope": "Global GameStart guard/order and its documented implementation or historical review scope; source roles remain distinct."
+    },
+    {
+      "subject": "page:engine/game-start.md",
+      "predicate": "derived_from",
+      "object": "source:knowledge.game-start.review",
+      "evidence": [
+        "knowledge.game-start.review"
+      ],
+      "scope": "Global GameStart guard/order and its documented implementation or historical review scope; source roles remain distinct."
+    },
+    {
+      "subject": "source:web.game-start",
+      "predicate": "implements",
+      "object": "source:native.gamerule.game-start",
+      "evidence": [
+        "web.game-start",
+        "native.gamerule.game-start"
+      ],
+      "scope": "Normalized global GameStart guard/order at the pinned inputs, with explicit delivery/catalogue adapters; not full RoomThread or native runtime parity."
+    },
+    {
+      "subject": "page:engine/game-start.md",
+      "predicate": "decided_by",
+      "object": "page:adr/0002-hegemony-knowledge-authority.md",
+      "evidence": [
+        "knowledge.rules-authority"
+      ],
+      "scope": "Selection of the Hegemony rules authority, not the original business rationale for each startup step."
+    },
+    {
+      "subject": "page:engine/prototype-session.md",
+      "predicate": "derived_from",
+      "object": "source:web.m0.engine.bc3ceb9",
+      "evidence": [
+        "web.m0.engine.bc3ceb9"
+      ],
+      "scope": "Bounded local session/Slash/Jink composition or unchanged production registration at the pinned source. Primary code, test assertions, reported execution and accepted plan have distinct roles; not independent confirmations of full gameplay."
+    },
+    {
+      "subject": "page:engine/prototype-session.md",
+      "predicate": "derived_from",
+      "object": "source:web.m0.battle.bc3ceb9",
+      "evidence": [
+        "web.m0.battle.bc3ceb9"
+      ],
+      "scope": "Bounded local session/Slash/Jink composition or unchanged production registration at the pinned source. Primary code, test assertions, reported execution and accepted plan have distinct roles; not independent confirmations of full gameplay."
+    },
+    {
+      "subject": "page:engine/prototype-session.md",
+      "predicate": "derived_from",
+      "object": "source:web.m0.session.bc3ceb9",
+      "evidence": [
+        "web.m0.session.bc3ceb9"
+      ],
+      "scope": "Bounded local session/Slash/Jink composition or unchanged production registration at the pinned source. Primary code, test assertions, reported execution and accepted plan have distinct roles; not independent confirmations of full gameplay."
+    },
+    {
+      "subject": "page:engine/prototype-session.md",
+      "predicate": "derived_from",
+      "object": "source:web.m0.transport.bc3ceb9",
+      "evidence": [
+        "web.m0.transport.bc3ceb9"
+      ],
+      "scope": "Bounded local session/Slash/Jink composition or unchanged production registration at the pinned source. Primary code, test assertions, reported execution and accepted plan have distinct roles; not independent confirmations of full gameplay."
+    },
+    {
+      "subject": "page:engine/prototype-session.md",
+      "predicate": "derived_from",
+      "object": "source:web.m0.bot.bc3ceb9",
+      "evidence": [
+        "web.m0.bot.bc3ceb9"
+      ],
+      "scope": "Bounded local session/Slash/Jink composition or unchanged production registration at the pinned source. Primary code, test assertions, reported execution and accepted plan have distinct roles; not independent confirmations of full gameplay."
+    },
+    {
+      "subject": "page:engine/prototype-session.md",
+      "predicate": "derived_from",
+      "object": "source:web.m0.prompt-tests.bc3ceb9",
+      "evidence": [
+        "web.m0.prompt-tests.bc3ceb9"
+      ],
+      "scope": "Bounded local session/Slash/Jink composition or unchanged production registration at the pinned source. Primary code, test assertions, reported execution and accepted plan have distinct roles; not independent confirmations of full gameplay."
+    },
+    {
+      "subject": "page:engine/prototype-session.md",
+      "predicate": "derived_from",
+      "object": "source:web.m0.browser-proof.bc3ceb9",
+      "evidence": [
+        "web.m0.browser-proof.bc3ceb9"
+      ],
+      "scope": "Bounded local session/Slash/Jink composition or unchanged production registration at the pinned source. Primary code, test assertions, reported execution and accepted plan have distinct roles; not independent confirmations of full gameplay."
+    },
+    {
+      "subject": "page:engine/prototype-session.md",
+      "predicate": "derived_from",
+      "object": "source:knowledge.m0.pending-jink.0204d2a",
+      "evidence": [
+        "knowledge.m0.pending-jink.0204d2a"
+      ],
+      "scope": "Bounded local session/Slash/Jink composition or unchanged production registration at the pinned source. Primary code, test assertions, reported execution and accepted plan have distinct roles; not independent confirmations of full gameplay."
+    },
+    {
+      "subject": "page:engine/prototype-session.md",
+      "predicate": "derived_from",
+      "object": "source:knowledge.m0.release.0204d2a",
+      "evidence": [
+        "knowledge.m0.release.0204d2a"
+      ],
+      "scope": "Bounded local session/Slash/Jink composition or unchanged production registration at the pinned source. Primary code, test assertions, reported execution and accepted plan have distinct roles; not independent confirmations of full gameplay."
+    },
+    {
+      "subject": "page:engine/prototype-session.md",
+      "predicate": "derived_from",
+      "object": "source:web.production.server.bc3ceb9",
+      "evidence": [
+        "web.production.server.bc3ceb9"
+      ],
+      "scope": "Bounded local session/Slash/Jink composition or unchanged production registration at the pinned source. Primary code, test assertions, reported execution and accepted plan have distinct roles; not independent confirmations of full gameplay."
+    },
+    {
+      "subject": "page:engine/prototype-session.md",
+      "predicate": "derived_from",
+      "object": "source:web.production.client.bc3ceb9",
+      "evidence": [
+        "web.production.client.bc3ceb9"
+      ],
+      "scope": "Bounded local session/Slash/Jink composition or unchanged production registration at the pinned source. Primary code, test assertions, reported execution and accepted plan have distinct roles; not independent confirmations of full gameplay."
+    },
+    {
+      "subject": "page:engine/prototype-session.md",
+      "predicate": "derived_from",
+      "object": "source:web.production.game.bc3ceb9",
+      "evidence": [
+        "web.production.game.bc3ceb9"
+      ],
+      "scope": "Bounded local session/Slash/Jink composition or unchanged production registration at the pinned source. Primary code, test assertions, reported execution and accepted plan have distinct roles; not independent confirmations of full gameplay."
+    },
+    {
+      "subject": "page:engine/prototype-session.md",
+      "predicate": "derived_from",
+      "object": "source:web.m0.engine.fbe60f6",
+      "evidence": [
+        "web.m0.engine.fbe60f6"
+      ],
+      "scope": "Local clock-v3 session/Slash/Jink fixture and service-time deadlines; code and test assertions are distinct from execution receipts and complete production behavior."
+    },
+    {
+      "subject": "page:engine/prototype-session.md",
+      "predicate": "derived_from",
+      "object": "source:web.m0.session.fbe60f6",
+      "evidence": [
+        "web.m0.session.fbe60f6"
+      ],
+      "scope": "Local clock-v3 session/Slash/Jink fixture and service-time deadlines; code and test assertions are distinct from execution receipts and complete production behavior."
+    },
+    {
+      "subject": "page:engine/prototype-session.md",
+      "predicate": "derived_from",
+      "object": "source:web.m0.deadlines.fbe60f6",
+      "evidence": [
+        "web.m0.deadlines.fbe60f6"
+      ],
+      "scope": "Local clock-v3 session/Slash/Jink fixture and service-time deadlines; code and test assertions are distinct from execution receipts and complete production behavior."
+    },
+    {
+      "subject": "page:engine/prototype-session.md",
+      "predicate": "derived_from",
+      "object": "source:web.m0.transport.fbe60f6",
+      "evidence": [
+        "web.m0.transport.fbe60f6"
+      ],
+      "scope": "Local clock-v3 session/Slash/Jink fixture and service-time deadlines; code and test assertions are distinct from execution receipts and complete production behavior."
+    },
+    {
+      "subject": "page:engine/prototype-session.md",
+      "predicate": "derived_from",
+      "object": "source:web.m0.bot.fbe60f6",
+      "evidence": [
+        "web.m0.bot.fbe60f6"
+      ],
+      "scope": "Local clock-v3 session/Slash/Jink fixture and service-time deadlines; code and test assertions are distinct from execution receipts and complete production behavior."
+    },
+    {
+      "subject": "page:engine/prototype-session.md",
+      "predicate": "derived_from",
+      "object": "source:web.m0.deadline-tests.fbe60f6",
+      "evidence": [
+        "web.m0.deadline-tests.fbe60f6"
+      ],
+      "scope": "Local clock-v3 session/Slash/Jink fixture and service-time deadlines; code and test assertions are distinct from execution receipts and complete production behavior."
+    },
+    {
+      "subject": "page:engine/prototype-session.md",
+      "predicate": "derived_from",
+      "object": "source:web.m0.prompt-tests.fbe60f6",
+      "evidence": [
+        "web.m0.prompt-tests.fbe60f6"
+      ],
+      "scope": "Local clock-v3 session/Slash/Jink fixture and service-time deadlines; code and test assertions are distinct from execution receipts and complete production behavior."
+    },
+    {
+      "subject": "page:engine/prototype-session.md",
+      "predicate": "derived_from",
+      "object": "source:web.m0.browser-proof.fbe60f6",
+      "evidence": [
+        "web.m0.browser-proof.fbe60f6"
+      ],
+      "scope": "Local clock-v3 session/Slash/Jink fixture and service-time deadlines; code and test assertions are distinct from execution receipts and complete production behavior."
+    },
+    {
+      "subject": "page:engine/prototype-session.md",
+      "predicate": "derived_from",
+      "object": "source:web.m0.session.816191d",
+      "evidence": [
+        "web.m0.session.816191d"
+      ],
+      "scope": "Optional separate local PostgreSQL persistence/recovery within the two-seat synthetic session; code/assertions do not establish hosted-provider or full-game acceptance."
+    },
+    {
+      "subject": "page:engine/prototype-session.md",
+      "predicate": "derived_from",
+      "object": "source:web.m0.storage.816191d",
+      "evidence": [
+        "web.m0.storage.816191d"
+      ],
+      "scope": "Optional separate local PostgreSQL persistence/recovery within the two-seat synthetic session; code/assertions do not establish hosted-provider or full-game acceptance."
+    },
+    {
+      "subject": "page:engine/prototype-session.md",
+      "predicate": "derived_from",
+      "object": "source:web.m0.postgres.816191d",
+      "evidence": [
+        "web.m0.postgres.816191d"
+      ],
+      "scope": "Optional separate local PostgreSQL persistence/recovery within the two-seat synthetic session; code/assertions do not establish hosted-provider or full-game acceptance."
+    },
+    {
+      "subject": "page:engine/prototype-session.md",
+      "predicate": "derived_from",
+      "object": "source:web.m0.transport.816191d",
+      "evidence": [
+        "web.m0.transport.816191d"
+      ],
+      "scope": "Optional separate local PostgreSQL persistence/recovery within the two-seat synthetic session; code/assertions do not establish hosted-provider or full-game acceptance."
+    },
+    {
+      "subject": "page:engine/prototype-session.md",
+      "predicate": "derived_from",
+      "object": "source:web.m0.sql-proof.816191d",
+      "evidence": [
+        "web.m0.sql-proof.816191d"
+      ],
+      "scope": "Optional separate local PostgreSQL persistence/recovery within the two-seat synthetic session; code/assertions do not establish hosted-provider or full-game acceptance."
+    },
+    {
+      "subject": "page:engine/prototype-session.md",
+      "predicate": "derived_from",
+      "object": "source:web.m0.storage-tests.816191d",
+      "evidence": [
+        "web.m0.storage-tests.816191d"
+      ],
+      "scope": "Optional separate local PostgreSQL persistence/recovery within the two-seat synthetic session; code/assertions do not establish hosted-provider or full-game acceptance."
+    },
+    {
+      "subject": "page:engine/prototype-session.md",
+      "predicate": "derived_from",
+      "object": "source:web.m0.sql-runner.816191d",
+      "evidence": [
+        "web.m0.sql-runner.816191d"
+      ],
+      "scope": "Optional separate local PostgreSQL persistence/recovery within the two-seat synthetic session; code/assertions do not establish hosted-provider or full-game acceptance."
+    },
+    {
+      "subject": "page:engine/prototype-session.md",
+      "predicate": "derived_from",
+      "object": "source:web.m0.session.b00ab43",
+      "evidence": [
+        "web.m0.session.b00ab43"
+      ],
+      "scope": "Permanent explicit-Leave bot membership and existing supported requests in the isolated two-seat fixture; not full-turn, full-content or production multi-seat certification."
+    },
+    {
+      "subject": "page:engine/prototype-session.md",
+      "predicate": "derived_from",
+      "object": "source:web.m0.leave-tests.b00ab43",
+      "evidence": [
+        "web.m0.leave-tests.b00ab43"
+      ],
+      "scope": "Permanent explicit-Leave bot membership and existing supported requests in the isolated two-seat fixture; not full-turn, full-content or production multi-seat certification."
+    },
+    {
+      "subject": "page:engine/prototype-session.md",
+      "predicate": "derived_from",
+      "object": "source:web.m0.prompt-tests.b00ab43",
+      "evidence": [
+        "web.m0.prompt-tests.b00ab43"
+      ],
+      "scope": "Permanent explicit-Leave bot membership and existing supported requests in the isolated two-seat fixture; not full-turn, full-content or production multi-seat certification."
+    },
+    {
+      "subject": "page:engine/prototype-session.md",
+      "predicate": "derived_from",
+      "object": "source:web.m0.sql-proof.b00ab43",
+      "evidence": [
+        "web.m0.sql-proof.b00ab43"
+      ],
+      "scope": "Permanent explicit-Leave bot membership and existing supported requests in the isolated two-seat fixture; not full-turn, full-content or production multi-seat certification."
+    },
+    {
+      "subject": "page:engine/prototype-session.md",
+      "predicate": "derived_from",
+      "object": "source:web.m0.engine.3c835ce",
+      "evidence": [
+        "web.m0.engine.3c835ce"
+      ],
+      "scope": "Bounded physical ArcheryAttack/MethodResponse in the two-seat session; native contract, code assertions and execution receipts remain distinct; no full package/native runtime certification."
+    },
+    {
+      "subject": "page:engine/prototype-session.md",
+      "predicate": "derived_from",
+      "object": "source:web.m0.battle.3c835ce",
+      "evidence": [
+        "web.m0.battle.3c835ce"
+      ],
+      "scope": "Bounded physical ArcheryAttack/MethodResponse in the two-seat session; native contract, code assertions and execution receipts remain distinct; no full package/native runtime certification."
+    },
+    {
+      "subject": "page:engine/prototype-session.md",
+      "predicate": "derived_from",
+      "object": "source:web.m0.archery.3c835ce",
+      "evidence": [
+        "web.m0.archery.3c835ce"
+      ],
+      "scope": "Bounded physical ArcheryAttack/MethodResponse in the two-seat session; native contract, code assertions and execution receipts remain distinct; no full package/native runtime certification."
+    },
+    {
+      "subject": "page:engine/prototype-session.md",
+      "predicate": "derived_from",
+      "object": "source:web.m0.prompt-tests.3c835ce",
+      "evidence": [
+        "web.m0.prompt-tests.3c835ce"
+      ],
+      "scope": "Bounded physical ArcheryAttack/MethodResponse in the two-seat session; native contract, code assertions and execution receipts remain distinct; no full package/native runtime certification."
+    },
+    {
+      "subject": "page:engine/prototype-session.md",
+      "predicate": "derived_from",
+      "object": "source:web.m0.deadline-tests.3c835ce",
+      "evidence": [
+        "web.m0.deadline-tests.3c835ce"
+      ],
+      "scope": "Bounded physical ArcheryAttack/MethodResponse in the two-seat session; native contract, code assertions and execution receipts remain distinct; no full package/native runtime certification."
+    },
+    {
+      "subject": "page:engine/prototype-session.md",
+      "predicate": "derived_from",
+      "object": "source:web.m0.sql-proof.3c835ce",
+      "evidence": [
+        "web.m0.sql-proof.3c835ce"
+      ],
+      "scope": "Bounded physical ArcheryAttack/MethodResponse in the two-seat session; native contract, code assertions and execution receipts remain distinct; no full package/native runtime certification."
+    },
+    {
+      "subject": "page:engine/prototype-session.md",
+      "predicate": "derived_from",
+      "object": "source:web.m0.storage-tests.3c835ce",
+      "evidence": [
+        "web.m0.storage-tests.3c835ce"
+      ],
+      "scope": "Bounded physical ArcheryAttack/MethodResponse in the two-seat session; native contract, code assertions and execution receipts remain distinct; no full package/native runtime certification."
+    },
+    {
+      "subject": "page:engine/prototype-session.md",
+      "predicate": "derived_from",
+      "object": "source:web.m0.browser-proof.3c835ce",
+      "evidence": [
+        "web.m0.browser-proof.3c835ce"
+      ],
+      "scope": "Bounded physical ArcheryAttack/MethodResponse in the two-seat session; native contract, code assertions and execution receipts remain distinct; no full package/native runtime certification."
+    },
+    {
+      "subject": "page:engine/prototype-session.md",
+      "predicate": "derived_from",
+      "object": "source:web.m0.demo.3c835ce",
+      "evidence": [
+        "web.m0.demo.3c835ce"
+      ],
+      "scope": "Bounded physical ArcheryAttack/MethodResponse in the two-seat session; native contract, code assertions and execution receipts remain distinct; no full package/native runtime certification."
+    },
+    {
+      "subject": "page:engine/prototype-session.md",
+      "predicate": "derived_from",
+      "object": "source:native.m0.aoe.ce4e62b",
+      "evidence": [
+        "native.m0.aoe.ce4e62b"
+      ],
+      "scope": "Bounded physical ArcheryAttack/MethodResponse in the two-seat session; native contract, code assertions and execution receipts remain distinct; no full package/native runtime certification."
+    },
+    {
+      "subject": "page:engine/prototype-session.md",
+      "predicate": "derived_from",
+      "object": "source:native.m0.archery.ce4e62b",
+      "evidence": [
+        "native.m0.archery.ce4e62b"
+      ],
+      "scope": "Bounded physical ArcheryAttack/MethodResponse in the two-seat session; native contract, code assertions and execution receipts remain distinct; no full package/native runtime certification."
+    },
+    {
+      "subject": "page:engine/prototype-session.md",
+      "predicate": "derived_from",
+      "object": "source:native.m0.damage-card.ce4e62b",
+      "evidence": [
+        "native.m0.damage-card.ce4e62b"
+      ],
+      "scope": "Bounded physical ArcheryAttack/MethodResponse in the two-seat session; native contract, code assertions and execution receipts remain distinct; no full package/native runtime certification."
+    },
+    {
+      "subject": "page:engine/prototype-session.md",
+      "predicate": "derived_from",
+      "object": "source:native.m0.response-room.ce4e62b",
+      "evidence": [
+        "native.m0.response-room.ce4e62b"
+      ],
+      "scope": "Bounded physical ArcheryAttack/MethodResponse in the two-seat session; native contract, code assertions and execution receipts remain distinct; no full package/native runtime certification."
+    },
+    {
+      "subject": "page:engine/prototype-session.md",
+      "predicate": "derived_from",
+      "object": "source:native.m0.damage-defaults.ce4e62b",
+      "evidence": [
+        "native.m0.damage-defaults.ce4e62b"
+      ],
+      "scope": "Default damage and nature for the bounded ArcheryAttack caller; declaration defaults are distinct from constructor initialization."
+    },
+    {
+      "subject": "page:engine/match-authority.md",
+      "predicate": "derived_from",
+      "object": "source:web.m1.match.1e705ef",
+      "evidence": [
+        "web.m1.match.1e705ef"
+      ],
+      "scope": "Bounded M1.1 implementation/assertions/native mapping or unchanged production-registration evidence; source roles are distinct, not complete release certification."
+    },
+    {
+      "subject": "page:engine/match-authority.md",
+      "predicate": "derived_from",
+      "object": "source:web.m1.room.1e705ef",
+      "evidence": [
+        "web.m1.room.1e705ef"
+      ],
+      "scope": "Bounded M1.1 implementation/assertions/native mapping or unchanged production-registration evidence; source roles are distinct, not complete release certification."
+    },
+    {
+      "subject": "page:engine/match-authority.md",
+      "predicate": "derived_from",
+      "object": "source:web.m1.notice.1e705ef",
+      "evidence": [
+        "web.m1.notice.1e705ef"
+      ],
+      "scope": "Bounded M1.1 implementation/assertions/native mapping or unchanged production-registration evidence; source roles are distinct, not complete release certification."
+    },
+    {
+      "subject": "page:engine/match-authority.md",
+      "predicate": "derived_from",
+      "object": "source:web.m1.tests.1e705ef",
+      "evidence": [
+        "web.m1.tests.1e705ef"
+      ],
+      "scope": "Bounded M1.1 implementation/assertions/native mapping or unchanged production-registration evidence; source roles are distinct, not complete release certification."
+    },
+    {
+      "subject": "page:engine/match-authority.md",
+      "predicate": "derived_from",
+      "object": "source:web.production.server.1e705ef",
+      "evidence": [
+        "web.production.server.1e705ef"
+      ],
+      "scope": "Bounded M1.1 implementation/assertions/native mapping or unchanged production-registration evidence; source roles are distinct, not complete release certification."
+    },
+    {
+      "subject": "page:engine/match-authority.md",
+      "predicate": "derived_from",
+      "object": "source:web.production.client.1e705ef",
+      "evidence": [
+        "web.production.client.1e705ef"
+      ],
+      "scope": "Bounded M1.1 implementation/assertions/native mapping or unchanged production-registration evidence; source roles are distinct, not complete release certification."
+    },
+    {
+      "subject": "page:engine/match-authority.md",
+      "predicate": "derived_from",
+      "object": "source:web.production.game.1e705ef",
+      "evidence": [
+        "web.production.game.1e705ef"
+      ],
+      "scope": "Bounded M1.1 implementation/assertions/native mapping or unchanged production-registration evidence; source roles are distinct, not complete release certification."
+    },
+    {
+      "subject": "page:engine/match-authority.md",
+      "predicate": "derived_from",
+      "object": "source:native.m1.room-start.ce4e62b",
+      "evidence": [
+        "native.m1.room-start.ce4e62b"
+      ],
+      "scope": "Bounded M1.1 implementation/assertions/native mapping or unchanged production-registration evidence; source roles are distinct, not complete release certification."
+    },
+    {
+      "subject": "page:engine/match-authority.md",
+      "predicate": "derived_from",
+      "object": "source:native.m1.companion.ce4e62b",
+      "evidence": [
+        "native.m1.companion.ce4e62b"
+      ],
+      "scope": "Bounded M1.1 implementation/assertions/native mapping or unchanged production-registration evidence; source roles are distinct, not complete release certification."
+    },
+    {
+      "subject": "page:engine/match-authority.md",
+      "predicate": "derived_from",
+      "object": "source:native.m1.lord.ce4e62b",
+      "evidence": [
+        "native.m1.lord.ce4e62b"
+      ],
+      "scope": "Bounded M1.1 implementation/assertions/native mapping or unchanged production-registration evidence; source roles are distinct, not complete release certification."
+    },
+    {
+      "subject": "page:engine/match-authority.md",
+      "predicate": "derived_from",
+      "object": "source:native.m1.placeholder.ce4e62b",
+      "evidence": [
+        "native.m1.placeholder.ce4e62b"
+      ],
+      "scope": "Bounded M1.1 implementation/assertions/native mapping or unchanged production-registration evidence; source roles are distinct, not complete release certification."
+    },
+    {
+      "subject": "page:engine/match-authority.md",
+      "predicate": "derived_from",
+      "object": "source:native.m1.room-thread.ce4e62b",
+      "evidence": [
+        "native.m1.room-thread.ce4e62b"
+      ],
+      "scope": "Bounded M1.1 implementation/assertions/native mapping or unchanged production-registration evidence; source roles are distinct, not complete release certification."
+    },
+    {
+      "subject": "page:engine/match-authority.md",
+      "predicate": "derived_from",
+      "object": "source:web.m12.match.4cad857",
+      "evidence": [
+        "web.m12.match.4cad857"
+      ],
+      "scope": "M1.2 supplied-profile startup composition and trusted persistence; primary definitions, assertion source and checkpoint executions have distinct roles. No full-match or native runtime certification."
+    },
+    {
+      "subject": "page:engine/match-authority.md",
+      "predicate": "derived_from",
+      "object": "source:web.m12.owner.4cad857",
+      "evidence": [
+        "web.m12.owner.4cad857"
+      ],
+      "scope": "M1.2 supplied-profile startup composition and trusted persistence; primary definitions, assertion source and checkpoint executions have distinct roles. No full-match or native runtime certification."
+    },
+    {
+      "subject": "page:engine/match-authority.md",
+      "predicate": "derived_from",
+      "object": "source:web.m12.tests.4cad857",
+      "evidence": [
+        "web.m12.tests.4cad857"
+      ],
+      "scope": "M1.2 supplied-profile startup composition and trusted persistence; primary definitions, assertion source and checkpoint executions have distinct roles. No full-match or native runtime certification."
+    },
+    {
+      "subject": "page:engine/match-authority.md",
+      "predicate": "derived_from",
+      "object": "source:web.m12.winner.4cad857",
+      "evidence": [
+        "web.m12.winner.4cad857"
+      ],
+      "scope": "M1.2 supplied-profile startup composition and trusted persistence; primary definitions, assertion source and checkpoint executions have distinct roles. No full-match or native runtime certification."
+    },
+    {
+      "subject": "page:engine/match-authority.md",
+      "predicate": "derived_from",
+      "object": "source:web.m12.relations.4cad857",
+      "evidence": [
+        "web.m12.relations.4cad857"
+      ],
+      "scope": "M1.2 supplied-profile startup composition and trusted persistence; primary definitions, assertion source and checkpoint executions have distinct roles. No full-match or native runtime certification."
+    },
+    {
+      "subject": "page:engine/match-authority.md",
+      "predicate": "derived_from",
+      "object": "source:web.m12.general.4cad857",
+      "evidence": [
+        "web.m12.general.4cad857"
+      ],
+      "scope": "M1.2 supplied-profile startup composition and trusted persistence; primary definitions, assertion source and checkpoint executions have distinct roles. No full-match or native runtime certification."
+    },
+    {
+      "subject": "page:engine/match-authority.md",
+      "predicate": "derived_from",
+      "object": "source:web.m12.careerist.4cad857",
+      "evidence": [
+        "web.m12.careerist.4cad857"
+      ],
+      "scope": "M1.2 supplied-profile startup composition and trusted persistence; primary definitions, assertion source and checkpoint executions have distinct roles. No full-match or native runtime certification."
+    },
+    {
+      "subject": "page:engine/match-authority.md",
+      "predicate": "derived_from",
+      "object": "source:native.m12.roomthread.ce4e62b",
+      "evidence": [
+        "native.m12.roomthread.ce4e62b"
+      ],
+      "scope": "M1.2 supplied-profile startup composition and trusted persistence; primary definitions, assertion source and checkpoint executions have distinct roles. No full-match or native runtime certification."
+    },
+    {
+      "subject": "page:engine/match-authority.md",
+      "predicate": "derived_from",
+      "object": "source:native.m12.winner.ce4e62b",
+      "evidence": [
+        "native.m12.winner.ce4e62b"
+      ],
+      "scope": "M1.2 supplied-profile startup composition and trusted persistence; primary definitions, assertion source and checkpoint executions have distinct roles. No full-match or native runtime certification."
+    },
+    {
+      "subject": "page:engine/startup-owner.md",
+      "predicate": "derived_from",
+      "object": "source:web.m12.match.4cad857",
+      "evidence": [
+        "web.m12.match.4cad857"
+      ],
+      "scope": "M1.2 supplied-profile startup composition and trusted persistence; primary definitions, assertion source and checkpoint executions have distinct roles. No full-match or native runtime certification."
+    },
+    {
+      "subject": "page:engine/startup-owner.md",
+      "predicate": "derived_from",
+      "object": "source:web.m12.owner.4cad857",
+      "evidence": [
+        "web.m12.owner.4cad857"
+      ],
+      "scope": "M1.2 supplied-profile startup composition and trusted persistence; primary definitions, assertion source and checkpoint executions have distinct roles. No full-match or native runtime certification."
+    },
+    {
+      "subject": "page:engine/startup-owner.md",
+      "predicate": "derived_from",
+      "object": "source:web.m12.tests.4cad857",
+      "evidence": [
+        "web.m12.tests.4cad857"
+      ],
+      "scope": "M1.2 supplied-profile startup composition and trusted persistence; primary definitions, assertion source and checkpoint executions have distinct roles. No full-match or native runtime certification."
+    },
+    {
+      "subject": "page:engine/startup-owner.md",
+      "predicate": "derived_from",
+      "object": "source:web.m12.winner.4cad857",
+      "evidence": [
+        "web.m12.winner.4cad857"
+      ],
+      "scope": "M1.2 supplied-profile startup composition and trusted persistence; primary definitions, assertion source and checkpoint executions have distinct roles. No full-match or native runtime certification."
+    },
+    {
+      "subject": "page:engine/startup-owner.md",
+      "predicate": "derived_from",
+      "object": "source:web.m12.relations.4cad857",
+      "evidence": [
+        "web.m12.relations.4cad857"
+      ],
+      "scope": "M1.2 supplied-profile startup composition and trusted persistence; primary definitions, assertion source and checkpoint executions have distinct roles. No full-match or native runtime certification."
+    },
+    {
+      "subject": "page:engine/startup-owner.md",
+      "predicate": "derived_from",
+      "object": "source:web.m12.general.4cad857",
+      "evidence": [
+        "web.m12.general.4cad857"
+      ],
+      "scope": "M1.2 supplied-profile startup composition and trusted persistence; primary definitions, assertion source and checkpoint executions have distinct roles. No full-match or native runtime certification."
+    },
+    {
+      "subject": "page:engine/startup-owner.md",
+      "predicate": "derived_from",
+      "object": "source:web.m12.careerist.4cad857",
+      "evidence": [
+        "web.m12.careerist.4cad857"
+      ],
+      "scope": "M1.2 supplied-profile startup composition and trusted persistence; primary definitions, assertion source and checkpoint executions have distinct roles. No full-match or native runtime certification."
+    },
+    {
+      "subject": "page:engine/startup-owner.md",
+      "predicate": "derived_from",
+      "object": "source:native.m12.roomthread.ce4e62b",
+      "evidence": [
+        "native.m12.roomthread.ce4e62b"
+      ],
+      "scope": "M1.2 supplied-profile startup composition and trusted persistence; primary definitions, assertion source and checkpoint executions have distinct roles. No full-match or native runtime certification."
+    },
+    {
+      "subject": "page:engine/startup-owner.md",
+      "predicate": "derived_from",
+      "object": "source:native.m12.winner.ce4e62b",
+      "evidence": [
+        "native.m12.winner.ce4e62b"
+      ],
+      "scope": "M1.2 supplied-profile startup composition and trusted persistence; primary definitions, assertion source and checkpoint executions have distinct roles. No full-match or native runtime certification."
+    },
+    {
+      "subject": "page:engine/scheduler-unwind.md",
+      "predicate": "derived_from",
+      "object": "source:web.m131.scheduler.32d3e5f",
+      "evidence": [
+        "web.m131.scheduler.32d3e5f"
+      ],
+      "scope": "Bounded opt-in interpreter interface; source assertions, executions and native semantic inspiration remain distinct, not full catch/game certification."
+    },
+    {
+      "subject": "page:engine/scheduler-unwind.md",
+      "predicate": "derived_from",
+      "object": "source:web.m131.tests.32d3e5f",
+      "evidence": [
+        "web.m131.tests.32d3e5f"
+      ],
+      "scope": "Bounded opt-in interpreter interface; source assertions, executions and native semantic inspiration remain distinct, not full catch/game certification."
+    },
+    {
+      "subject": "page:engine/scheduler-unwind.md",
+      "predicate": "derived_from",
+      "object": "source:native.m131.trigger-catch.ce4e62b",
+      "evidence": [
+        "native.m131.trigger-catch.ce4e62b"
+      ],
+      "scope": "Bounded opt-in interpreter interface; source assertions, executions and native semantic inspiration remain distinct, not full catch/game certification."
+    },
+    {
+      "subject": "page:engine/core-interruption-cleanup.md",
+      "predicate": "derived_from",
+      "object": "source:web.m132.damage.9024429",
+      "evidence": [
+        "web.m132.damage.9024429"
+      ],
+      "scope": "Protected core catch source semantics/assertions; checkpoint executions distinct from source code and production enablement."
+    },
+    {
+      "subject": "page:engine/core-interruption-cleanup.md",
+      "predicate": "derived_from",
+      "object": "source:web.m132.card-used.9024429",
+      "evidence": [
+        "web.m132.card-used.9024429"
+      ],
+      "scope": "Protected core catch source semantics/assertions; checkpoint executions distinct from source code and production enablement."
+    },
+    {
+      "subject": "page:engine/core-interruption-cleanup.md",
+      "predicate": "derived_from",
+      "object": "source:web.m132.room-use.9024429",
+      "evidence": [
+        "web.m132.room-use.9024429"
+      ],
+      "scope": "Protected core catch source semantics/assertions; checkpoint executions distinct from source code and production enablement."
+    },
+    {
+      "subject": "page:engine/core-interruption-cleanup.md",
+      "predicate": "derived_from",
+      "object": "source:web.m132.tests.9024429",
+      "evidence": [
+        "web.m132.tests.9024429"
+      ],
+      "scope": "Protected core catch source semantics/assertions; checkpoint executions distinct from source code and production enablement."
+    },
+    {
+      "subject": "page:engine/core-interruption-cleanup.md",
+      "predicate": "derived_from",
+      "object": "source:native.m132.room.ce4e62b",
+      "evidence": [
+        "native.m132.room.ce4e62b"
+      ],
+      "scope": "Protected core catch source semantics/assertions; checkpoint executions distinct from source code and production enablement."
+    },
+    {
+      "subject": "page:engine/core-interruption-cleanup.md",
+      "predicate": "derived_from",
+      "object": "source:native.m132.gamerule.ce4e62b",
+      "evidence": [
+        "native.m132.gamerule.ce4e62b"
+      ],
+      "scope": "Protected core catch source semantics/assertions; checkpoint executions distinct from source code and production enablement."
+    },
+    {
+      "subject": "page:engine/core-interruption-cleanup.md",
+      "predicate": "derived_from",
+      "object": "source:native.m132.engine.ce4e62b",
+      "evidence": [
+        "native.m132.engine.ce4e62b"
+      ],
+      "scope": "Protected core catch source semantics/assertions; checkpoint executions distinct from source code and production enablement."
+    },
+    {
+      "subject": "page:engine/core-interruption-cleanup.md",
+      "predicate": "derived_from",
+      "object": "source:native.m132.wrappedcard.ce4e62b",
+      "evidence": [
+        "native.m132.wrappedcard.ce4e62b"
+      ],
+      "scope": "Protected core catch source semantics/assertions; checkpoint executions distinct from source code and production enablement."
+    },
+    {
+      "subject": "page:engine/phase-lifecycle.md",
+      "predicate": "derived_from",
+      "object": "source:web.m133a.owner.e55e15b",
+      "evidence": [
+        "web.m133a.owner.e55e15b"
+      ],
+      "scope": "Source-scoped phase lifecycle and assertion boundaries; reported executions and enabled production remain separate."
+    },
+    {
+      "subject": "page:engine/phase-lifecycle.md",
+      "predicate": "derived_from",
+      "object": "source:web.m133a.tests.e55e15b",
+      "evidence": [
+        "web.m133a.tests.e55e15b"
+      ],
+      "scope": "Source-scoped phase lifecycle and assertion boundaries; reported executions and enabled production remain separate."
+    },
+    {
+      "subject": "page:engine/phase-lifecycle.md",
+      "predicate": "derived_from",
+      "object": "source:native.m133a.phases.ce4e62b",
+      "evidence": [
+        "native.m133a.phases.ce4e62b"
+      ],
+      "scope": "Source-scoped phase lifecycle and assertion boundaries; reported executions and enabled production remain separate."
+    },
+    {
+      "subject": "page:engine/phase-cleanup.md",
+      "predicate": "derived_from",
+      "object": "source:web.m133b.phase-state.652056e",
+      "evidence": [
+        "web.m133b.phase-state.652056e"
+      ],
+      "scope": "Phase cleanup source semantics/assertions; checkpoint executions and production enablement remain distinct."
+    },
+    {
+      "subject": "page:engine/phase-cleanup.md",
+      "predicate": "derived_from",
+      "object": "source:web.m133b.phase-cleanup.652056e",
+      "evidence": [
+        "web.m133b.phase-cleanup.652056e"
+      ],
+      "scope": "Phase cleanup source semantics/assertions; checkpoint executions and production enablement remain distinct."
+    },
+    {
+      "subject": "page:engine/phase-cleanup.md",
+      "predicate": "derived_from",
+      "object": "source:web.m133b.room-skills.652056e",
+      "evidence": [
+        "web.m133b.room-skills.652056e"
+      ],
+      "scope": "Phase cleanup source semantics/assertions; checkpoint executions and production enablement remain distinct."
+    },
+    {
+      "subject": "page:engine/phase-cleanup.md",
+      "predicate": "derived_from",
+      "object": "source:web.m133b.imperial-order.652056e",
+      "evidence": [
+        "web.m133b.imperial-order.652056e"
+      ],
+      "scope": "Phase cleanup source semantics/assertions; checkpoint executions and production enablement remain distinct."
+    },
+    {
+      "subject": "page:engine/phase-cleanup.md",
+      "predicate": "derived_from",
+      "object": "source:web.m133b.hp-loss.652056e",
+      "evidence": [
+        "web.m133b.hp-loss.652056e"
+      ],
+      "scope": "Phase cleanup source semantics/assertions; checkpoint executions and production enablement remain distinct."
+    },
+    {
+      "subject": "page:engine/phase-cleanup.md",
+      "predicate": "derived_from",
+      "object": "source:web.m133b.tests.652056e",
+      "evidence": [
+        "web.m133b.tests.652056e"
+      ],
+      "scope": "Phase cleanup source semantics/assertions; checkpoint executions and production enablement remain distinct."
+    },
+    {
+      "subject": "page:engine/phase-cleanup.md",
+      "predicate": "derived_from",
+      "object": "source:native.m133b.gamerule.ce4e62b",
+      "evidence": [
+        "native.m133b.gamerule.ce4e62b"
+      ],
+      "scope": "Phase cleanup source semantics/assertions; checkpoint executions and production enablement remain distinct."
+    },
+    {
+      "subject": "page:engine/phase-cleanup.md",
+      "predicate": "derived_from",
+      "object": "source:native.m133b.room.ce4e62b",
+      "evidence": [
+        "native.m133b.room.ce4e62b"
+      ],
+      "scope": "Phase cleanup source semantics/assertions; checkpoint executions and production enablement remain distinct."
+    },
+    {
+      "subject": "page:engine/phase-cleanup.md",
+      "predicate": "derived_from",
+      "object": "source:native.m133b.player.ce4e62b",
+      "evidence": [
+        "native.m133b.player.ce4e62b"
+      ],
+      "scope": "Phase cleanup source semantics/assertions; checkpoint executions and production enablement remain distinct."
+    },
+    {
+      "subject": "page:engine/phase-cleanup.md",
+      "predicate": "derived_from",
+      "object": "source:native.m133b.player-fields.ce4e62b",
+      "evidence": [
+        "native.m133b.player-fields.ce4e62b"
+      ],
+      "scope": "Phase cleanup source semantics/assertions; checkpoint executions and production enablement remain distinct."
+    },
+    {
+      "subject": "page:engine/phase-cleanup.md",
+      "predicate": "derived_from",
+      "object": "source:native.m133b.imperial.ce4e62b",
+      "evidence": [
+        "native.m133b.imperial.ce4e62b"
+      ],
+      "scope": "Phase cleanup source semantics/assertions; checkpoint executions and production enablement remain distinct."
+    },
+    {
+      "subject": "page:engine/phase-cleanup.md",
+      "predicate": "derived_from",
+      "object": "source:native.m133b.force-discard.ce4e62b",
+      "evidence": [
+        "native.m133b.force-discard.ce4e62b"
+      ],
+      "scope": "Phase cleanup source semantics/assertions; checkpoint executions and production enablement remain distinct."
+    },
+    {
+      "subject": "page:engine/turn-order.md",
+      "predicate": "derived_from",
+      "object": "source:web.m134a.turn-start.33f27aa",
+      "evidence": [
+        "web.m134a.turn-start.33f27aa"
+      ],
+      "scope": "Revision-scoped library semantics/assertions; executions, native runtime parity and production enablement remain distinct."
+    },
+    {
+      "subject": "page:engine/turn-order.md",
+      "predicate": "derived_from",
+      "object": "source:web.m134a.turn-order.33f27aa",
+      "evidence": [
+        "web.m134a.turn-order.33f27aa"
+      ],
+      "scope": "Revision-scoped library semantics/assertions; executions, native runtime parity and production enablement remain distinct."
+    },
+    {
+      "subject": "page:engine/turn-order.md",
+      "predicate": "derived_from",
+      "object": "source:web.m134a.tests.33f27aa",
+      "evidence": [
+        "web.m134a.tests.33f27aa"
+      ],
+      "scope": "Revision-scoped library semantics/assertions; executions, native runtime parity and production enablement remain distinct."
+    },
+    {
+      "subject": "page:engine/turn-order.md",
+      "predicate": "derived_from",
+      "object": "source:native.m134a.turn-rule.ce4e62b",
+      "evidence": [
+        "native.m134a.turn-rule.ce4e62b"
+      ],
+      "scope": "Revision-scoped library semantics/assertions; executions, native runtime parity and production enablement remain distinct."
+    },
+    {
+      "subject": "page:engine/turn-order.md",
+      "predicate": "derived_from",
+      "object": "source:native.m134a.thread.ce4e62b",
+      "evidence": [
+        "native.m134a.thread.ce4e62b"
+      ],
+      "scope": "Revision-scoped library semantics/assertions; executions, native runtime parity and production enablement remain distinct."
+    },
+    {
+      "subject": "page:engine/turn-order.md",
+      "predicate": "derived_from",
+      "object": "source:native.m134a.flip.ce4e62b",
+      "evidence": [
+        "native.m134a.flip.ce4e62b"
+      ],
+      "scope": "Revision-scoped library semantics/assertions; executions, native runtime parity and production enablement remain distinct."
+    },
+    {
+      "subject": "page:engine/turn-order.md",
+      "predicate": "derived_from",
+      "object": "source:native.m134a.room.ce4e62b",
+      "evidence": [
+        "native.m134a.room.ce4e62b"
+      ],
+      "scope": "Revision-scoped library semantics/assertions; executions, native runtime parity and production enablement remain distinct."
+    },
+    {
+      "subject": "page:engine/turn-order.md",
+      "predicate": "derived_from",
+      "object": "source:native.m134a.next.ce4e62b",
+      "evidence": [
+        "native.m134a.next.ce4e62b"
+      ],
+      "scope": "Revision-scoped library semantics/assertions; executions, native runtime parity and production enablement remain distinct."
+    }
+  ]
+}

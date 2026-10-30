@@ -1,0 +1,14 @@
+{
+  "version": 1,
+  "game": {
+    "repository": "https://github.com/chuongphong12/Sanguosha-vn.git",
+    "commit": "33f27aa1da6d74d8d50acb7ba1dabdefcbe9f554",
+    "availability": "Published M1.3.4a turn-root library; remaining phase bodies and aggregate match/production integration pending"
+  },
+  "native": {
+    "repository": "https://github.com/TamQuocSat-LangKhach/QSanguosha-QuocChien.git",
+    "commit": "ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f",
+    "release": "2.3.43-beta2"
+  },
+  "scope": "Game 33f27aa1da6d74d8d50acb7ba1dabdefcbe9f554 adds two library modules and36 public dispatch/resume/unwind tests.2,448/97 check/build and two source reviews establish this scoped checkpoint. TurnStart/optional BattleRoyal/normal/extra/round/recovery roots compose actual existing phases/Draw/cleanup, not all Proceeding bodies, match v3 or a playable production game. Existing kernels/applications/M0/dependencies remain unchanged. Full release gates stay open; native runtime/provider/full-match proof is absent."
+}

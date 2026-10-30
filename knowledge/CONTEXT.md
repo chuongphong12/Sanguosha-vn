@@ -1,0 +1,137 @@
+# Quốc Chiến domain
+
+Language for the paired-general faction game and its private identity rules. These terms distinguish a player's actual generals, visible identity and alliances.
+
+## Generals and visibility
+
+**Head general**:
+The primary general occupying a player's first general slot, with its own adjusted contribution to paired maximum HP.
+_Avoid_: Main identity role
+
+**Deputy general**:
+The secondary general occupying a player's second general slot, distinct from an absent second slot.
+_Avoid_: Second player
+
+**Actual general**:
+The real general assigned to a slot, including while that slot remains hidden.
+_Avoid_: Displayed general
+
+**Displayed general**:
+The general identity currently represented by a slot; `anjiang` represents a present hidden slot, while an empty deputy represents no second general.
+_Avoid_: Actual general
+
+**Shown identity**:
+A player's identity recognized by the game's visibility rules, which can include scenario identity independently of public slot faces.
+_Avoid_: Both generals revealed
+
+**Seeming kingdom**:
+The faction or careerist group identity used by the game's seeming-identity rules, empty for a player without a shown identity.
+_Avoid_: Initial kingdom
+
+**Initial kingdom**:
+The privately selected kingdom associated with the original compatible general pair.
+_Avoid_: Current alliance
+
+## Factions and alliances
+
+**Faction**:
+A kingdom-based side whose membership follows the game's reveal, lord and majority rules.
+_Avoid_: Standard 2013 role
+
+**Plain careerist**:
+An independent careerist identity without a named recruited group; two plain careerists do not become allies merely by sharing this identity.
+_Avoid_: Careerist faction
+
+**Careerist group**:
+A named alliance established around a revealed careerist leader through recruitment.
+_Avoid_: Plain careerist
+
+**Friendship**:
+The game's current alliance relation between two players, including self and the distinctions between faction, plain careerist and recruited group.
+_Avoid_: Same printed kingdom
+
+**Friendship prediction**:
+A directional rule for whether a hidden actor would join the shown target's side under the game's hidden-faction and lord conditions.
+_Avoid_: Current friendship
+
+**Lord general**:
+A general with the native lord property; actual hidden lord, displayed lord and the game's lord lookup are distinct views of that fact.
+_Avoid_: Standard 2013 lord role
+
+## Cards, HP and rewards
+
+**Physical card**:
+A concrete card with an ID and one physical location, distinct from a virtual card or its current wrapped face.
+_Avoid_: Card reference
+
+**Wrapped card**:
+The mutable face, flags and tags associated with a physical card while preserving that physical card's identity.
+_Avoid_: New physical card
+
+**Judgment**:
+A rule procedure that evaluates a judgment card against a pattern for a particular player and reason.
+_Avoid_: Card use
+
+**Retrial**:
+Replacement of a judgment card through a retrial effect, with the old card discarded or exchanged according to that effect.
+_Avoid_: Restarting a turn
+
+**Judgment result**:
+The good or bad classification of a judgment card under its pattern and good-condition rule; a negative judgment effect uses the inverse classification.
+_Avoid_: Card color alone
+
+**Dying player**:
+A player undergoing the nonpositive-HP rescue procedure before the corresponding death decision.
+_Avoid_: Dead player
+
+**Reveal reward token**:
+A mark representing a distinct firstshow, companion, halfmaxhp or careerist reward entitlement, separate from spending or executing its effect.
+_Avoid_: Automatic draw bonus
+
+**First-show inspection**:
+A reward effect that privately lets its requester inspect a chosen hidden general slot without publicly revealing it.
+_Avoid_: Public general reveal
+
+## Rooms and participation
+
+**Room**:
+The shared place where people occupy seats and participate in a configured match, including its waiting and result states.
+_Avoid_: Network connection, account
+
+**Match**:
+One progression of the faction game from setup to its terminal result, associated with a room.
+_Avoid_: Room membership
+
+**Human participant**:
+A person who occupies a room seat and has not left or lost the right to return. A disconnected or defeated participant is not automatically a departed participant.
+_Avoid_: Connected socket, living general
+
+**Bot-controlled seat**:
+A seat whose current game decisions are made by a bot, whether it is a permanent bot seat or a temporarily controlled human seat.
+_Avoid_: Human participant keeping the room alive
+
+**Room invitation**:
+The shared means of reaching a room and joining an available seat, without granting another participant's seat rights.
+_Avoid_: Seat recovery secret
+
+**Seat return**:
+A participant reclaiming the seat they already occupy during an allowed return window.
+_Avoid_: Joining any occupied seat
+
+**Explicit leave**:
+A participant deliberately ending their room membership through the room's leave action.
+_Avoid_: Defeat, refresh, transient disconnection
+
+**Transient disconnection**:
+A loss of communication during which the participant's right to return has not yet expired.
+_Avoid_: Explicit leave, room deletion
+
+## Visibility and release
+
+**Actor view**:
+The game information a particular seat is permitted to know, combining that seat's private information with information legitimately observed by it.
+_Avoid_: Global state, shared bot knowledge
+
+**Small-group trial**:
+The first release stage evaluated with an organized small group before wider promotion. It describes the testing audience and does not imply an access-controlled website.
+_Avoid_: Restricted room-creation permission, partial-content demo
