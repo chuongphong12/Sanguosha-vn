@@ -2,13 +2,13 @@
   "version": 1,
   "game": {
     "repository": "https://github.com/chuongphong12/Sanguosha-vn.git",
-    "commit": "e55e15b37b90fa764de21cd2c94b2e488030d6d8",
-    "availability": "Published M1.3.3a phase lifecycle library slice; GameRule cleanup/application integration remain pending"
+    "commit": "652056e30eafd4faa4198e34d86fc9d33adec0c4",
+    "availability": "Published M1.3.3b cleanup library; actual turn/match/production integration remain pending"
   },
   "native": {
     "repository": "https://github.com/TamQuocSat-LangKhach/QSanguosha-QuocChien.git",
     "commit": "ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f",
     "release": "2.3.43-beta2"
   },
-  "scope": "Game e55e15b37b90fa764de21cd2c94b2e488030d6d8 adds only phases.ts and46 public-seam phase tests.2,364/95 full check/build and two source reviews certify this lifecycle slice, not complete M1.3.3. Default M1.2/M0 profiles and Standard2013 production remain unchanged. Real GameRule cleanup, turns/recovery/bodies and match v3 remain required, alongside all M0/content/bots/media/rooms/provider/load/cutover gates. Trace boundary cases are distinct from the real bounded Draw composition; no full-match/native-runtime proof is claimed."
+  "scope": "Game 652056e30eafd4faa4198e34d86fc9d33adec0c4 adds five cleanup/skill/ImperialOrder/HP-loss modules and48 public-seam tests.2,412/96 check/build and two source reviews certify this library checkpoint. Together with M1.3.3a it completes M1.3.3, not turns/recovery/bodies or match v3. Existing applications/Standard2013 production/dependencies are unchanged; all M0/content/bot/media/room/provider/load/cutover gates remain open. Package/filter/request/presentation adapters and bounded fixture versus actual child compositions remain explicit; no full-match/native-runtime proof."
 }

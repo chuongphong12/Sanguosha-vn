@@ -40,4 +40,8 @@ These are bounded normalized compositions, not full matches, complete package en
 
 ## Later phase lifecycle slice
 
-[M1.3.3a phase lifecycle](phase-lifecycle.md) adds native sequence/change/execute/skip/insert/query as a separate library slice. It reuses current Room.playerPhases and the existing scheduler. Actual GameRule cleanup is still required within M1.3.3; turns/recovery/bodies and match v3 remain M1.3.4–5. Current application profiles and production registration are unchanged. Historical evidence above retains its named revision.
+[M1.3.3a phase lifecycle](phase-lifecycle.md) adds native sequence/change/execute/skip/insert/query as a separate library slice. It reuses current Room.playerPhases and the existing scheduler. At the M1.3.3a source input, GameRule cleanup was pending; its later implementation is linked below; turns/recovery/bodies and match v3 remain M1.3.4–5. Current application profiles and production registration are unchanged. Historical evidence above retains its named revision.
+
+## Later complete phase library checkpoint
+
+[M1.3.3b cleanup](phase-cleanup.md) now completes the library phase checkpoint together with [lifecycle](phase-lifecycle.md). It adds real typed/history/limitation/skill/ImperialOrder effects, with declared metadata/filter/request/presentation adapters. Current application and production profiles remain unchanged; actual turn/recovery/body ownership and match v3 remain M1.3.4–5. Earlier evidence retains its named source revision.

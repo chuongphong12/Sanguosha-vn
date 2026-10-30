@@ -1061,6 +1061,150 @@
       "checked_on": "2026-10-30",
       "author": null,
       "business_owner": null
+    },
+    {
+      "id": "web.m133b.phase-state.652056e",
+      "kind": "primary_code",
+      "repository": "https://github.com/chuongphong12/Sanguosha-vn",
+      "revision": "652056e30eafd4faa4198e34d86fc9d33adec0c4",
+      "path": "src/game/hegemony/phase-state.ts",
+      "url": "https://github.com/chuongphong12/Sanguosha-vn/blob/652056e30eafd4faa4198e34d86fc9d33adec0c4/src/game/hegemony/phase-state.ts",
+      "locator": "M1.3.3b definitions or public-seam assertions; reported execution is separate",
+      "checked_on": "2026-10-30",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "web.m133b.phase-cleanup.652056e",
+      "kind": "primary_code",
+      "repository": "https://github.com/chuongphong12/Sanguosha-vn",
+      "revision": "652056e30eafd4faa4198e34d86fc9d33adec0c4",
+      "path": "src/game/hegemony/phase-cleanup.ts",
+      "url": "https://github.com/chuongphong12/Sanguosha-vn/blob/652056e30eafd4faa4198e34d86fc9d33adec0c4/src/game/hegemony/phase-cleanup.ts",
+      "locator": "M1.3.3b definitions or public-seam assertions; reported execution is separate",
+      "checked_on": "2026-10-30",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "web.m133b.room-skills.652056e",
+      "kind": "primary_code",
+      "repository": "https://github.com/chuongphong12/Sanguosha-vn",
+      "revision": "652056e30eafd4faa4198e34d86fc9d33adec0c4",
+      "path": "src/game/hegemony/room-skills.ts",
+      "url": "https://github.com/chuongphong12/Sanguosha-vn/blob/652056e30eafd4faa4198e34d86fc9d33adec0c4/src/game/hegemony/room-skills.ts",
+      "locator": "M1.3.3b definitions or public-seam assertions; reported execution is separate",
+      "checked_on": "2026-10-30",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "web.m133b.imperial-order.652056e",
+      "kind": "primary_code",
+      "repository": "https://github.com/chuongphong12/Sanguosha-vn",
+      "revision": "652056e30eafd4faa4198e34d86fc9d33adec0c4",
+      "path": "src/game/hegemony/imperial-order.ts",
+      "url": "https://github.com/chuongphong12/Sanguosha-vn/blob/652056e30eafd4faa4198e34d86fc9d33adec0c4/src/game/hegemony/imperial-order.ts",
+      "locator": "M1.3.3b definitions or public-seam assertions; reported execution is separate",
+      "checked_on": "2026-10-30",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "web.m133b.hp-loss.652056e",
+      "kind": "primary_code",
+      "repository": "https://github.com/chuongphong12/Sanguosha-vn",
+      "revision": "652056e30eafd4faa4198e34d86fc9d33adec0c4",
+      "path": "src/game/hegemony/hp-loss.ts",
+      "url": "https://github.com/chuongphong12/Sanguosha-vn/blob/652056e30eafd4faa4198e34d86fc9d33adec0c4/src/game/hegemony/hp-loss.ts",
+      "locator": "M1.3.3b definitions or public-seam assertions; reported execution is separate",
+      "checked_on": "2026-10-30",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "web.m133b.tests.652056e",
+      "kind": "test_code",
+      "repository": "https://github.com/chuongphong12/Sanguosha-vn",
+      "revision": "652056e30eafd4faa4198e34d86fc9d33adec0c4",
+      "path": "tests/hegemony/phase-cleanup.test.ts",
+      "url": "https://github.com/chuongphong12/Sanguosha-vn/blob/652056e30eafd4faa4198e34d86fc9d33adec0c4/tests/hegemony/phase-cleanup.test.ts",
+      "locator": "M1.3.3b definitions or public-seam assertions; reported execution is separate",
+      "checked_on": "2026-10-30",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "native.m133b.gamerule.ce4e62b",
+      "kind": "primary_code",
+      "repository": "https://github.com/TamQuocSat-LangKhach/QSanguosha-QuocChien",
+      "revision": "ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f",
+      "path": "src/server/gamerule.cpp",
+      "url": "https://github.com/TamQuocSat-LangKhach/QSanguosha-QuocChien/blob/ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f/src/server/gamerule.cpp#L392-L521",
+      "locator": "Phase cleanup392–521 and skill events629–658",
+      "checked_on": "2026-10-30",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "native.m133b.room.ce4e62b",
+      "kind": "primary_code",
+      "repository": "https://github.com/TamQuocSat-LangKhach/QSanguosha-QuocChien",
+      "revision": "ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f",
+      "path": "src/server/room.cpp",
+      "url": "https://github.com/TamQuocSat-LangKhach/QSanguosha-QuocChien/blob/ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f/src/server/room.cpp#L678-L760",
+      "locator": "Batchskills678–760, setProperty2250+, typedmarks2362–2380, HP-loss4311–4346",
+      "checked_on": "2026-10-30",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "native.m133b.player.ce4e62b",
+      "kind": "primary_code",
+      "repository": "https://github.com/TamQuocSat-LangKhach/QSanguosha-QuocChien",
+      "revision": "ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f",
+      "path": "src/core/player.cpp",
+      "url": "https://github.com/TamQuocSat-LangKhach/QSanguosha-QuocChien/blob/ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f/src/core/player.cpp#L1522-L1567",
+      "locator": "Owned visible/equipment list1522–1567 and limitations1730–1781",
+      "checked_on": "2026-10-30",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "native.m133b.player-fields.ce4e62b",
+      "kind": "primary_code",
+      "repository": "https://github.com/TamQuocSat-LangKhach/QSanguosha-QuocChien",
+      "revision": "ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f",
+      "path": "src/core/player.h",
+      "url": "https://github.com/TamQuocSat-LangKhach/QSanguosha-QuocChien/blob/ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f/src/core/player.h#L425-L444",
+      "locator": "QMap numeric/int/string marks and skill maps; exact declarations inspected",
+      "checked_on": "2026-10-30",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "native.m133b.imperial.ce4e62b",
+      "kind": "primary_code",
+      "repository": "https://github.com/TamQuocSat-LangKhach/QSanguosha-QuocChien",
+      "revision": "ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f",
+      "path": "src/package/strategic-advantage.cpp",
+      "url": "https://github.com/TamQuocSat-LangKhach/QSanguosha-QuocChien/blob/ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f/src/package/strategic-advantage.cpp#L1193-L1233",
+      "locator": "ImperialOrder onEffect",
+      "checked_on": "2026-10-30",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "native.m133b.force-discard.ce4e62b",
+      "kind": "primary_code",
+      "repository": "https://github.com/TamQuocSat-LangKhach/QSanguosha-QuocChien",
+      "revision": "ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f",
+      "path": "src/server/serverplayer.cpp",
+      "url": "https://github.com/TamQuocSat-LangKhach/QSanguosha-QuocChien/blob/ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f/src/server/serverplayer.cpp#L262-L283",
+      "locator": "Matching candidate pool shuffle before limitations",
+      "checked_on": "2026-10-30",
+      "author": null,
+      "business_owner": null
     }
   ],
   "pages": [
@@ -1240,6 +1384,30 @@
         "web.m133a.owner.e55e15b",
         "web.m133a.tests.e55e15b",
         "native.m133a.phases.ce4e62b"
+      ]
+    },
+    {
+      "path": "engine/phase-cleanup.md",
+      "status": "supported",
+      "reviewed_on": "2026-10-30",
+      "review_scope": "M1.3.3b bounded actual library cleanup; adapters/full-turn/application integration remain explicit",
+      "applies_to": {
+        "game_commit": "652056e30eafd4faa4198e34d86fc9d33adec0c4",
+        "native_commit": "ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f"
+      },
+      "source_ids": [
+        "web.m133b.phase-state.652056e",
+        "web.m133b.phase-cleanup.652056e",
+        "web.m133b.room-skills.652056e",
+        "web.m133b.imperial-order.652056e",
+        "web.m133b.hp-loss.652056e",
+        "web.m133b.tests.652056e",
+        "native.m133b.gamerule.ce4e62b",
+        "native.m133b.room.ce4e62b",
+        "native.m133b.player.ce4e62b",
+        "native.m133b.player-fields.ce4e62b",
+        "native.m133b.imperial.ce4e62b",
+        "native.m133b.force-discard.ce4e62b"
       ]
     }
   ],
@@ -2108,6 +2276,114 @@
         "native.m133a.phases.ce4e62b"
       ],
       "scope": "Source-scoped phase lifecycle and assertion boundaries; reported executions and enabled production remain separate."
+    },
+    {
+      "subject": "page:engine/phase-cleanup.md",
+      "predicate": "derived_from",
+      "object": "source:web.m133b.phase-state.652056e",
+      "evidence": [
+        "web.m133b.phase-state.652056e"
+      ],
+      "scope": "Phase cleanup source semantics/assertions; checkpoint executions and production enablement remain distinct."
+    },
+    {
+      "subject": "page:engine/phase-cleanup.md",
+      "predicate": "derived_from",
+      "object": "source:web.m133b.phase-cleanup.652056e",
+      "evidence": [
+        "web.m133b.phase-cleanup.652056e"
+      ],
+      "scope": "Phase cleanup source semantics/assertions; checkpoint executions and production enablement remain distinct."
+    },
+    {
+      "subject": "page:engine/phase-cleanup.md",
+      "predicate": "derived_from",
+      "object": "source:web.m133b.room-skills.652056e",
+      "evidence": [
+        "web.m133b.room-skills.652056e"
+      ],
+      "scope": "Phase cleanup source semantics/assertions; checkpoint executions and production enablement remain distinct."
+    },
+    {
+      "subject": "page:engine/phase-cleanup.md",
+      "predicate": "derived_from",
+      "object": "source:web.m133b.imperial-order.652056e",
+      "evidence": [
+        "web.m133b.imperial-order.652056e"
+      ],
+      "scope": "Phase cleanup source semantics/assertions; checkpoint executions and production enablement remain distinct."
+    },
+    {
+      "subject": "page:engine/phase-cleanup.md",
+      "predicate": "derived_from",
+      "object": "source:web.m133b.hp-loss.652056e",
+      "evidence": [
+        "web.m133b.hp-loss.652056e"
+      ],
+      "scope": "Phase cleanup source semantics/assertions; checkpoint executions and production enablement remain distinct."
+    },
+    {
+      "subject": "page:engine/phase-cleanup.md",
+      "predicate": "derived_from",
+      "object": "source:web.m133b.tests.652056e",
+      "evidence": [
+        "web.m133b.tests.652056e"
+      ],
+      "scope": "Phase cleanup source semantics/assertions; checkpoint executions and production enablement remain distinct."
+    },
+    {
+      "subject": "page:engine/phase-cleanup.md",
+      "predicate": "derived_from",
+      "object": "source:native.m133b.gamerule.ce4e62b",
+      "evidence": [
+        "native.m133b.gamerule.ce4e62b"
+      ],
+      "scope": "Phase cleanup source semantics/assertions; checkpoint executions and production enablement remain distinct."
+    },
+    {
+      "subject": "page:engine/phase-cleanup.md",
+      "predicate": "derived_from",
+      "object": "source:native.m133b.room.ce4e62b",
+      "evidence": [
+        "native.m133b.room.ce4e62b"
+      ],
+      "scope": "Phase cleanup source semantics/assertions; checkpoint executions and production enablement remain distinct."
+    },
+    {
+      "subject": "page:engine/phase-cleanup.md",
+      "predicate": "derived_from",
+      "object": "source:native.m133b.player.ce4e62b",
+      "evidence": [
+        "native.m133b.player.ce4e62b"
+      ],
+      "scope": "Phase cleanup source semantics/assertions; checkpoint executions and production enablement remain distinct."
+    },
+    {
+      "subject": "page:engine/phase-cleanup.md",
+      "predicate": "derived_from",
+      "object": "source:native.m133b.player-fields.ce4e62b",
+      "evidence": [
+        "native.m133b.player-fields.ce4e62b"
+      ],
+      "scope": "Phase cleanup source semantics/assertions; checkpoint executions and production enablement remain distinct."
+    },
+    {
+      "subject": "page:engine/phase-cleanup.md",
+      "predicate": "derived_from",
+      "object": "source:native.m133b.imperial.ce4e62b",
+      "evidence": [
+        "native.m133b.imperial.ce4e62b"
+      ],
+      "scope": "Phase cleanup source semantics/assertions; checkpoint executions and production enablement remain distinct."
+    },
+    {
+      "subject": "page:engine/phase-cleanup.md",
+      "predicate": "derived_from",
+      "object": "source:native.m133b.force-discard.ce4e62b",
+      "evidence": [
+        "native.m133b.force-discard.ce4e62b"
+      ],
+      "scope": "Phase cleanup source semantics/assertions; checkpoint executions and production enablement remain distinct."
     }
   ]
 }
