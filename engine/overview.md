@@ -61,3 +61,7 @@ Evidence: external adapter interfaces across the modules above; absence of battl
 ## Later turn-root slice
 
 [M1.3.4a turn roots](turn-order.md) now provide TurnStart, normal/extra/round progression and explicit recovery after trusted unwind. Remaining phase bodies are M1.3.4b; aggregate v3 pumping/classification/restore/projection are M1.3.5. Current application/production profiles remain unchanged. Earlier evidence retains its named revision.
+
+## Later RoundStart/Judge slice
+
+[M1.3.4b.1 phase bodies](phase-bodies.md) now add a single Proceeding bridge plus RoundStart reveal and captured Judge resolution. Draw is delegated once; Play/Discard remain required missing operations in this slice. Aggregate match v3 and release gates remain open; earlier evidence retains its named revision.
