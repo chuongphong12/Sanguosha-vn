@@ -23,3 +23,5 @@ Current internal dependency: [Scheduler unwind/yield](../engine/scheduler-unwind
 The later [M1.3.3a phase lifecycle](../engine/phase-lifecycle.md) was validated separately; M1.3.3b now completes its required GameRule cleanup before the later normal-turn/recovery and match-v3 checkpoints. No release gate is closed by this library slice.
 
 [M1.3.3b cleanup](../engine/phase-cleanup.md) now completes M1.3.3 as a library checkpoint. [M1.3.4a turn roots](../engine/turn-order.md) now implement the bounded turn/recovery library; next is M1.3.4b remaining core bodies, then M1.3.5 match v3; full release gates are unchanged.
+
+[M1.3.4b.1 RoundStart/Judge](../engine/phase-bodies.md) now implements the first core-body slice and a single Proceeding bridge; remaining Play/Discard and M1.3.5 aggregate match ownership still block complete M1.3.4/M1.3.5 acceptance. No release scope is reduced.

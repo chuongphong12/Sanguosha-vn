@@ -27,3 +27,7 @@ These native phase methods add no catch hooks: TurnBroken/StageChange/GameFinish
 [46 new tests](https://github.com/chuongphong12/Sanguosha-vn/blob/e55e15b37b90fa764de21cd2c94b2e488030d6d8/tests/hegemony/phases.test.ts) cover default/custom/repeated/rewritten/skipped phases, direct-change distinctions, consumed Start/Skipping, death, live phase/index changes, seven JSON/prompt/yield boundaries, malformed admission and three interruption reasons. Boundary tests supply trace free-chain/notice/listener fixtures. A separate actual Draw composition uses existing DrawNCards/draw/movement/RNG/free-chain operations and draws two real cards without recycling; it does not enable all phase bodies or packages.
 
 Current M1.2/M0/production profiles remain unchanged. M1.3.3b now implements [actual GameRule cleanup](phase-cleanup.md) with shared authoritative marks, card limitations and skills, plus no-treasure ImperialOrder effects. Remaining M1.3.4b core bodies and M1.3.5 match v3 must still follow. Full content, bot/media/rooms/provider/load/cutover gates remain open.
+
+## Later RoundStart/Judge slice
+
+[M1.3.4b.1 phase bodies](phase-bodies.md) now add a single Proceeding bridge plus RoundStart reveal and captured Judge resolution. Draw is delegated once; Play/Discard remain required missing operations in this slice. Aggregate match v3 and release gates remain open; earlier evidence retains its named revision.

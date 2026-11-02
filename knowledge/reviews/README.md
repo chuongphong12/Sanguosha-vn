@@ -47,3 +47,5 @@ These reports preserve particular source snapshots, adapters and executed checks
 Original game paths and blob identities are recorded in the [migration manifest](../research/migration-manifest.json). Machine-local links have been normalized to pinned native references or labelled game paths; original evidence remains recoverable from game history. No new native runtime differential or full-match E2E result is implied by moving these records.
 
 - [2026-10-30 M1.3.4a — TurnStart/order/recovery roots](2026-10-30-hegemony-m134a-turn-order.md): bounded library execution; remaining phase bodies and aggregate match ownership pending.
+
+- [2026-11-02 M1.3.4b.1 — RoundStart/Judge bodies](2026-11-02-hegemony-m134b1-phase-bodies.md): real callers/children with explicit package boundaries; Play/Discard/match integration pending.

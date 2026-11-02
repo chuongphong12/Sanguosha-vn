@@ -1301,6 +1301,102 @@
       "checked_on": "2026-10-30",
       "author": null,
       "business_owner": null
+    },
+    {
+      "id": "web.m134b1.body.2c39ca6",
+      "kind": "primary_code",
+      "repository": "https://github.com/chuongphong12/Sanguosha-vn",
+      "revision": "2c39ca61f3ede09e86f45e764d4f3a7b414f83f4",
+      "path": "src/game/hegemony/phase-bodies.ts",
+      "url": "https://github.com/chuongphong12/Sanguosha-vn/blob/2c39ca61f3ede09e86f45e764d4f3a7b414f83f4/src/game/hegemony/phase-bodies.ts",
+      "locator": "Single Proceeding bridge, RoundStart caller and captured Judge loop",
+      "checked_on": "2026-11-02",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "web.m134b1.show.2c39ca6",
+      "kind": "primary_code",
+      "repository": "https://github.com/chuongphong12/Sanguosha-vn",
+      "revision": "2c39ca61f3ede09e86f45e764d4f3a7b414f83f4",
+      "path": "src/game/hegemony/ask-general-show.ts",
+      "url": "https://github.com/chuongphong12/Sanguosha-vn/blob/2c39ca61f3ede09e86f45e764d4f3a7b414f83f4/src/game/hegemony/ask-general-show.ts",
+      "locator": "RoundStart reveal request, choices and conversion handoff",
+      "checked_on": "2026-11-02",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "web.m134b1.tests.2c39ca6",
+      "kind": "test_code",
+      "repository": "https://github.com/chuongphong12/Sanguosha-vn",
+      "revision": "2c39ca61f3ede09e86f45e764d4f3a7b414f83f4",
+      "path": "tests/hegemony/phase-bodies.test.ts",
+      "url": "https://github.com/chuongphong12/Sanguosha-vn/blob/2c39ca61f3ede09e86f45e764d4f3a7b414f83f4/tests/hegemony/phase-bodies.test.ts",
+      "locator": "Public dispatch/resume/unwind assertions and real child composition",
+      "checked_on": "2026-11-02",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "native.m134b1.body.ce4e62b",
+      "kind": "primary_code",
+      "repository": "https://github.com/TamQuocSat-LangKhach/QSanguosha-QuocChien",
+      "revision": "ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f",
+      "path": "src/server/gamerule.cpp",
+      "url": "https://github.com/TamQuocSat-LangKhach/QSanguosha-QuocChien/blob/ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f/src/server/gamerule.cpp#L159-L269",
+      "locator": "Core phase bodies and effect guard",
+      "checked_on": "2026-11-02",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "native.m134b1.show.ce4e62b",
+      "kind": "primary_code",
+      "repository": "https://github.com/TamQuocSat-LangKhach/QSanguosha-QuocChien",
+      "revision": "ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f",
+      "path": "src/server/serverplayer.cpp",
+      "url": "https://github.com/TamQuocSat-LangKhach/QSanguosha-QuocChien/blob/ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f/src/server/serverplayer.cpp#L2163-L2230",
+      "locator": "askForGeneralShow",
+      "checked_on": "2026-11-02",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "native.m134b1.defaults.ce4e62b",
+      "kind": "primary_code",
+      "repository": "https://github.com/TamQuocSat-LangKhach/QSanguosha-QuocChien",
+      "revision": "ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f",
+      "path": "src/server/serverplayer.h",
+      "url": "https://github.com/TamQuocSat-LangKhach/QSanguosha-QuocChien/blob/ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f/src/server/serverplayer.h#L238",
+      "locator": "showGeneral default ignore_rule=true",
+      "checked_on": "2026-11-02",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "native.m134b1.choice.ce4e62b",
+      "kind": "primary_code",
+      "repository": "https://github.com/TamQuocSat-LangKhach/QSanguosha-QuocChien",
+      "revision": "ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f",
+      "path": "src/server/room.cpp",
+      "url": "https://github.com/TamQuocSat-LangKhach/QSanguosha-QuocChien/blob/ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f/src/server/room.cpp#L1128-L1177",
+      "locator": "Room askForChoice saved answer versus ChoiceMade",
+      "checked_on": "2026-11-02",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "native.m134b1.shown.ce4e62b",
+      "kind": "primary_code",
+      "repository": "https://github.com/TamQuocSat-LangKhach/QSanguosha-QuocChien",
+      "revision": "ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f",
+      "path": "src/core/player.cpp",
+      "url": "https://github.com/TamQuocSat-LangKhach/QSanguosha-QuocChien/blob/ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f/src/core/player.cpp#L2096-L2114",
+      "locator": "Raw shown flags versus all-shown missing-deputy guard",
+      "checked_on": "2026-11-02",
+      "author": null,
+      "business_owner": null
     }
   ],
   "pages": [
@@ -1524,6 +1620,26 @@
         "native.m134a.flip.ce4e62b",
         "native.m134a.room.ce4e62b",
         "native.m134a.next.ce4e62b"
+      ]
+    },
+    {
+      "path": "engine/phase-bodies.md",
+      "status": "supported",
+      "reviewed_on": "2026-11-02",
+      "review_scope": "M1.3.4b.1 library RoundStart/Judge and single Proceeding bridge; explicit package/lord/presentation adapters and pending Play/Discard/match integration",
+      "applies_to": {
+        "game_commit": "2c39ca61f3ede09e86f45e764d4f3a7b414f83f4",
+        "native_commit": "ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f"
+      },
+      "source_ids": [
+        "web.m134b1.body.2c39ca6",
+        "web.m134b1.show.2c39ca6",
+        "web.m134b1.tests.2c39ca6",
+        "native.m134b1.body.ce4e62b",
+        "native.m134b1.show.ce4e62b",
+        "native.m134b1.defaults.ce4e62b",
+        "native.m134b1.choice.ce4e62b",
+        "native.m134b1.shown.ce4e62b"
       ]
     }
   ],
@@ -2572,6 +2688,78 @@
         "native.m134a.next.ce4e62b"
       ],
       "scope": "Revision-scoped library semantics/assertions; executions, native runtime parity and production enablement remain distinct."
+    },
+    {
+      "subject": "page:engine/phase-bodies.md",
+      "predicate": "derived_from",
+      "object": "source:web.m134b1.body.2c39ca6",
+      "evidence": [
+        "web.m134b1.body.2c39ca6"
+      ],
+      "scope": "Revision-scoped caller and request semantics/assertions; executions and enabled content/native runtime remain distinct."
+    },
+    {
+      "subject": "page:engine/phase-bodies.md",
+      "predicate": "derived_from",
+      "object": "source:web.m134b1.show.2c39ca6",
+      "evidence": [
+        "web.m134b1.show.2c39ca6"
+      ],
+      "scope": "Revision-scoped caller and request semantics/assertions; executions and enabled content/native runtime remain distinct."
+    },
+    {
+      "subject": "page:engine/phase-bodies.md",
+      "predicate": "derived_from",
+      "object": "source:web.m134b1.tests.2c39ca6",
+      "evidence": [
+        "web.m134b1.tests.2c39ca6"
+      ],
+      "scope": "Revision-scoped caller and request semantics/assertions; executions and enabled content/native runtime remain distinct."
+    },
+    {
+      "subject": "page:engine/phase-bodies.md",
+      "predicate": "derived_from",
+      "object": "source:native.m134b1.body.ce4e62b",
+      "evidence": [
+        "native.m134b1.body.ce4e62b"
+      ],
+      "scope": "Revision-scoped caller and request semantics/assertions; executions and enabled content/native runtime remain distinct."
+    },
+    {
+      "subject": "page:engine/phase-bodies.md",
+      "predicate": "derived_from",
+      "object": "source:native.m134b1.show.ce4e62b",
+      "evidence": [
+        "native.m134b1.show.ce4e62b"
+      ],
+      "scope": "Revision-scoped caller and request semantics/assertions; executions and enabled content/native runtime remain distinct."
+    },
+    {
+      "subject": "page:engine/phase-bodies.md",
+      "predicate": "derived_from",
+      "object": "source:native.m134b1.defaults.ce4e62b",
+      "evidence": [
+        "native.m134b1.defaults.ce4e62b"
+      ],
+      "scope": "Revision-scoped caller and request semantics/assertions; executions and enabled content/native runtime remain distinct."
+    },
+    {
+      "subject": "page:engine/phase-bodies.md",
+      "predicate": "derived_from",
+      "object": "source:native.m134b1.choice.ce4e62b",
+      "evidence": [
+        "native.m134b1.choice.ce4e62b"
+      ],
+      "scope": "Revision-scoped caller and request semantics/assertions; executions and enabled content/native runtime remain distinct."
+    },
+    {
+      "subject": "page:engine/phase-bodies.md",
+      "predicate": "derived_from",
+      "object": "source:native.m134b1.shown.ce4e62b",
+      "evidence": [
+        "native.m134b1.shown.ce4e62b"
+      ],
+      "scope": "Revision-scoped caller and request semantics/assertions; executions and enabled content/native runtime remain distinct."
     }
   ]
 }
