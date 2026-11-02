@@ -23,7 +23,6 @@ import {
   continueTriggerWork,
   unwindTriggerInterruption,
   type TriggerRegistry,
-  type TriggerData,
 } from "../../src/game/hegemony/scheduler";
 
 function setup() {
