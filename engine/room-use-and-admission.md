@@ -45,3 +45,7 @@ At this page's original 4aa input, native exception unwind was excluded: turn-br
 ## Later protected interruption ownership
 
 The [M1.3.2 core cleanup contract](core-interruption-cleanup.md) adds source-scoped opt-in catches at its named revision. Its native protected regions, cleanup continuations, original Engine flags and physical/RNG sweep are distinct from normal completion or default freeze behavior described above. Existing application profiles have not opted in; this does not establish full-turn/production readiness.
+
+## Later enclosing Play owner
+
+At [game1f5a99747619dd78f2f5ed15906c13df4747b798](https://github.com/chuongphong12/Sanguosha-vn/blob/1f5a99747619dd78f2f5ed15906c13df4747b798/src/game/hegemony/card-command.ts), the optional request returnOnRoomFailure boolean is valid only for Play. True returns private rejected on Room false; absent/false preserves the internal retry described above. The [Play owner](play-phase.md) opts in so both used and rejected attempts drain actual free-chain before a fresh activation. Existing authentication/offer/target revalidation and default response-use behavior remain unchanged. This policy does not enable a complete package or production turn.

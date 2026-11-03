@@ -2,13 +2,13 @@
   "version": 1,
   "game": {
     "repository": "https://github.com/chuongphong12/Sanguosha-vn.git",
-    "commit": "2c39ca61f3ede09e86f45e764d4f3a7b414f83f4",
-    "availability": "Published M1.3.4b.1 RoundStart/Judge library; Play/Discard and aggregate match/production integration pending"
+    "commit": "1f5a99747619dd78f2f5ed15906c13df4747b798",
+    "availability": "Published M1.3.4b.2 Play library; Discard and aggregate match/production integration pending"
   },
   "native": {
     "repository": "https://github.com/TamQuocSat-LangKhach/QSanguosha-QuocChien.git",
     "commit": "ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f",
     "release": "2.3.43-beta2"
   },
-  "scope": "Game 2c39ca61f3ede09e86f45e764d4f3a7b414f83f4 adds two library modules and38 public-seam tests for a single Proceeding bridge, RoundStart general-show request and captured Judge resolution.2,486/98 final check/build and two source axes0 unresolved findings establish this library slice after a native default-parameter RED fix. Real children remain distinct from package/presentation/lord-conversion adapters. Existing kernels/profiles/production/M0/dependencies unchanged; full M134/M135/release gates remain open. No native runtime or complete match proof."
+  "scope": "Game 1f5a99747619dd78f2f5ed15906c13df4747b798 adds resumable Play activation, optional Play-only rejected Room completion,22 Play and6 admission tests. Final check2514/99, typecheck/build and two source review axes0 establish this library slice. Actual phase/admission/Room/card-use/movement/free-chain remain distinct from package/context/surrender/presentation fixtures. Existing defaults/profile/M0/production/dependencies unchanged; Discard/M135/full-match/release gates remain open. No native runtime proof."
 }

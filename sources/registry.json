@@ -1397,6 +1397,90 @@
       "checked_on": "2026-11-02",
       "author": null,
       "business_owner": null
+    },
+    {
+      "id": "web.m134b2.play.1f5a997",
+      "kind": "primary_code",
+      "repository": "https://github.com/chuongphong12/Sanguosha-vn",
+      "revision": "1f5a99747619dd78f2f5ed15906c13df4747b798",
+      "path": "src/game/hegemony/play-phase.ts",
+      "url": "https://github.com/chuongphong12/Sanguosha-vn/blob/1f5a99747619dd78f2f5ed15906c13df4747b798/src/game/hegemony/play-phase.ts",
+      "locator": "createPlayPhaseOperation and private activation cursor",
+      "checked_on": "2026-11-03",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "web.m134b2.admission.1f5a997",
+      "kind": "primary_code",
+      "repository": "https://github.com/chuongphong12/Sanguosha-vn",
+      "revision": "1f5a99747619dd78f2f5ed15906c13df4747b798",
+      "path": "src/game/hegemony/card-command.ts",
+      "url": "https://github.com/chuongphong12/Sanguosha-vn/blob/1f5a99747619dd78f2f5ed15906c13df4747b798/src/game/hegemony/card-command.ts",
+      "locator": "Play-only returnOnRoomFailure option and unchanged default retry",
+      "checked_on": "2026-11-03",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "web.m134b2.play-tests.1f5a997",
+      "kind": "test_code",
+      "repository": "https://github.com/chuongphong12/Sanguosha-vn",
+      "revision": "1f5a99747619dd78f2f5ed15906c13df4747b798",
+      "path": "tests/hegemony/play-phase.test.ts",
+      "url": "https://github.com/chuongphong12/Sanguosha-vn/blob/1f5a99747619dd78f2f5ed15906c13df4747b798/tests/hegemony/play-phase.test.ts",
+      "locator": "22 public-seam Play tests; package/surrender/notification fixtures explicit",
+      "checked_on": "2026-11-03",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "web.m134b2.admission-tests.1f5a997",
+      "kind": "test_code",
+      "repository": "https://github.com/chuongphong12/Sanguosha-vn",
+      "revision": "1f5a99747619dd78f2f5ed15906c13df4747b798",
+      "path": "tests/hegemony/card-command.test.ts",
+      "url": "https://github.com/chuongphong12/Sanguosha-vn/blob/1f5a99747619dd78f2f5ed15906c13df4747b798/tests/hegemony/card-command.test.ts",
+      "locator": "6 new admission option/default/validation regressions; previous tests preserved",
+      "checked_on": "2026-11-03",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "native.m134b2.play.ce4e62b",
+      "kind": "primary_code",
+      "repository": "https://github.com/TamQuocSat-LangKhach/QSanguosha-QuocChien",
+      "revision": "ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f",
+      "path": "src/server/gamerule.cpp",
+      "url": "https://github.com/TamQuocSat-LangKhach/QSanguosha-QuocChien/blob/ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f/src/server/gamerule.cpp#L208-L223",
+      "locator": "GameRule Play alive/activate/use/freeChain loop",
+      "checked_on": "2026-11-03",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "native.m134b2.activate.ce4e62b",
+      "kind": "primary_code",
+      "repository": "https://github.com/TamQuocSat-LangKhach/QSanguosha-QuocChien",
+      "revision": "ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f",
+      "path": "src/server/room.cpp",
+      "url": "https://github.com/TamQuocSat-LangKhach/QSanguosha-QuocChien/blob/ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f/src/server/room.cpp#L6155-L6228",
+      "locator": "Room::activate surrender/flag/phase/history/PlayCard/ChoiceMade order",
+      "checked_on": "2026-11-03",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "native.m134b2.history.ce4e62b",
+      "kind": "primary_code",
+      "repository": "https://github.com/TamQuocSat-LangKhach/QSanguosha-QuocChien",
+      "revision": "ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f",
+      "path": "src/server/room.cpp",
+      "url": "https://github.com/TamQuocSat-LangKhach/QSanguosha-QuocChien/blob/ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f/src/server/room.cpp#L2179-L2197",
+      "locator": "Room::addPlayerHistory null actor broadcasts without actor ledger mutation",
+      "checked_on": "2026-11-03",
+      "author": null,
+      "business_owner": null
     }
   ],
   "pages": [
@@ -1640,6 +1724,25 @@
         "native.m134b1.defaults.ce4e62b",
         "native.m134b1.choice.ce4e62b",
         "native.m134b1.shown.ce4e62b"
+      ]
+    },
+    {
+      "path": "engine/play-phase.md",
+      "status": "supported",
+      "reviewed_on": "2026-11-03",
+      "review_scope": "M1.3.4b.2 library Play activation using actual admission/Room/free-chain with explicit package/surrender/notification adapters; Discard/match-v3/production pending",
+      "applies_to": {
+        "game_commit": "1f5a99747619dd78f2f5ed15906c13df4747b798",
+        "native_commit": "ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f"
+      },
+      "source_ids": [
+        "web.m134b2.play.1f5a997",
+        "web.m134b2.admission.1f5a997",
+        "web.m134b2.play-tests.1f5a997",
+        "web.m134b2.admission-tests.1f5a997",
+        "native.m134b2.play.ce4e62b",
+        "native.m134b2.activate.ce4e62b",
+        "native.m134b2.history.ce4e62b"
       ]
     }
   ],
@@ -2760,6 +2863,69 @@
         "native.m134b1.shown.ce4e62b"
       ],
       "scope": "Revision-scoped caller and request semantics/assertions; executions and enabled content/native runtime remain distinct."
+    },
+    {
+      "subject": "page:engine/play-phase.md",
+      "predicate": "derived_from",
+      "object": "source:web.m134b2.play.1f5a997",
+      "evidence": [
+        "web.m134b2.play.1f5a997"
+      ],
+      "scope": "Revision-scoped library activation and admission semantics/tests; executions and enabled production/package/native runtime remain distinct."
+    },
+    {
+      "subject": "page:engine/play-phase.md",
+      "predicate": "derived_from",
+      "object": "source:web.m134b2.admission.1f5a997",
+      "evidence": [
+        "web.m134b2.admission.1f5a997"
+      ],
+      "scope": "Revision-scoped library activation and admission semantics/tests; executions and enabled production/package/native runtime remain distinct."
+    },
+    {
+      "subject": "page:engine/play-phase.md",
+      "predicate": "derived_from",
+      "object": "source:web.m134b2.play-tests.1f5a997",
+      "evidence": [
+        "web.m134b2.play-tests.1f5a997"
+      ],
+      "scope": "Revision-scoped library activation and admission semantics/tests; executions and enabled production/package/native runtime remain distinct."
+    },
+    {
+      "subject": "page:engine/play-phase.md",
+      "predicate": "derived_from",
+      "object": "source:web.m134b2.admission-tests.1f5a997",
+      "evidence": [
+        "web.m134b2.admission-tests.1f5a997"
+      ],
+      "scope": "Revision-scoped library activation and admission semantics/tests; executions and enabled production/package/native runtime remain distinct."
+    },
+    {
+      "subject": "page:engine/play-phase.md",
+      "predicate": "derived_from",
+      "object": "source:native.m134b2.play.ce4e62b",
+      "evidence": [
+        "native.m134b2.play.ce4e62b"
+      ],
+      "scope": "Revision-scoped library activation and admission semantics/tests; executions and enabled production/package/native runtime remain distinct."
+    },
+    {
+      "subject": "page:engine/play-phase.md",
+      "predicate": "derived_from",
+      "object": "source:native.m134b2.activate.ce4e62b",
+      "evidence": [
+        "native.m134b2.activate.ce4e62b"
+      ],
+      "scope": "Revision-scoped library activation and admission semantics/tests; executions and enabled production/package/native runtime remain distinct."
+    },
+    {
+      "subject": "page:engine/play-phase.md",
+      "predicate": "derived_from",
+      "object": "source:native.m134b2.history.ce4e62b",
+      "evidence": [
+        "native.m134b2.history.ce4e62b"
+      ],
+      "scope": "Revision-scoped library activation and admission semantics/tests; executions and enabled production/package/native runtime remain distinct."
     }
   ]
 }

@@ -67,3 +67,7 @@ Test totals and graph metrics belong to revision-labelled checkpoints, not durab
 ## Later RoundStart/Judge slice
 
 [M1.3.4b.1 phase bodies](phase-bodies.md) now add a single Proceeding bridge plus RoundStart reveal and captured Judge resolution. Draw is delegated once; Play/Discard remain required missing operations in this slice. Aggregate match v3 and release gates remain open; earlier evidence retains its named revision.
+
+## M1.3.4b.2 Play library
+
+[Play phase](play-phase.md) now owns repeated activation and drains actual free-chain after used/rejected Room attempts. Its optional admission policy defaults off for existing consumers. This new body is not registered in application/M0/production profiles. Discard and aggregate match-v3 remain required before claiming complete internal gameplay.
