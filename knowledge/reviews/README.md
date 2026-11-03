@@ -49,3 +49,5 @@ Original game paths and blob identities are recorded in the [migration manifest]
 - [2026-10-30 M1.3.4a — TurnStart/order/recovery roots](2026-10-30-hegemony-m134a-turn-order.md): bounded library execution; remaining phase bodies and aggregate match ownership pending.
 
 - [2026-11-02 M1.3.4b.1 — RoundStart/Judge bodies](2026-11-02-hegemony-m134b1-phase-bodies.md): real callers/children with explicit package boundaries; Play/Discard/match integration pending.
+
+- [2026-11-03 M1.3.4b.2 — Play phase](2026-11-03-hegemony-m134b2-play-phase.md): actual admission/Room/movement/free-chain, explicit package/surrender/notification adapters; Discard/match-v3 pending.

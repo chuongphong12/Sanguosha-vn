@@ -65,3 +65,7 @@ Evidence: external adapter interfaces across the modules above; absence of battl
 ## Later RoundStart/Judge slice
 
 [M1.3.4b.1 phase bodies](phase-bodies.md) now add a single Proceeding bridge plus RoundStart reveal and captured Judge resolution. Draw is delegated once; Play/Discard remain required missing operations in this slice. Aggregate match v3 and release gates remain open; earlier evidence retains its named revision.
+
+## Later Play slice
+
+[M1.3.4b.2 Play](play-phase.md) adds the activation loop using actual admission/Room/free-chain and a Play-only Room-failure completion policy. Discard and aggregate match-v3 remain pending. Earlier checkpoint statements retain their inspected revisions; production remains unchanged.
