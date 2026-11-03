@@ -192,6 +192,101 @@ function setup(overrides: Partial<CardCommandRules<Game>> = {}) {
   return { game, rules, scheduler, admission };
 }
 describe("authoritative card command admission", () => {
+  it.each([undefined, false])(
+    "preserves the existing Room-false retry when returnOnRoomFailure is %s",
+    (returnOnRoomFailure) => {
+      const { game, rules, scheduler, admission } = setup();
+      rules.operations![2] = {
+        name: "validate-fixture",
+        run: () => ({ kind: "return", value: null }),
+      };
+      const data = request();
+      if (returnOnRoomFailure !== undefined)
+        data.returnOnRoomFailure = returnOnRoomFailure;
+      expect(
+        dispatchTriggerOperation(
+          scheduler,
+          game,
+          rules,
+          { name: "card-use-request", data },
+          "a",
+        ),
+      ).toBe(true);
+      for (const label of ["Bài thử nghiệm", "Xác nhận"]) {
+        const view = admission.view(scheduler, session("a"))!;
+        expect(
+          admission.submit(scheduler, game, rules, session("a"), {
+            id: view.id,
+            choice: view.choices.find((c) => c.label === label)!.id,
+          }),
+        ).toBe(true);
+      }
+      expect(admission.view(scheduler, session("a"))!.choices[0].label).toBe(
+        "Bài thử nghiệm",
+      );
+      expect(scheduler.operationCompletion).toBeNull();
+      expect(game.cardZones.hand.cards).toEqual([1]);
+    },
+  );
+  it.each([
+    { reason: "play", returnOnRoomFailure: "yes" },
+    { reason: "play", returnOnRoomFailure: null },
+    { reason: "response-use", returnOnRoomFailure: true },
+  ])(
+    "rejects an invalid Room-failure option $reason/$returnOnRoomFailure before mutation",
+    (extra) => {
+      const { game, rules, scheduler } = setup();
+      const before = structuredClone({ game, scheduler });
+      expect(() =>
+        dispatchTriggerOperation(
+          scheduler,
+          game,
+          rules,
+          { name: "card-use-request", data: { ...request(), ...extra } },
+          "a",
+        ),
+      ).toThrow("Invalid card-use request");
+      expect({ game, scheduler }).toEqual(before);
+    },
+  );
+  it("returns a rejected attempt to an enclosing Play loop without retrying internally", () => {
+    const { game, rules, scheduler, admission } = setup();
+    rules.operations![2] = {
+      name: "validate-fixture",
+      run: ({ game }) => {
+        game.trace.push("eager-reveal");
+        return { kind: "return", value: null };
+      },
+    };
+    expect(
+      dispatchTriggerOperation(
+        scheduler,
+        game,
+        rules,
+        {
+          name: "card-use-request",
+          data: { ...request(), returnOnRoomFailure: true },
+        },
+        "a",
+      ),
+    ).toBe(true);
+    for (const label of ["Bài thử nghiệm", "Xác nhận"]) {
+      const view = admission.view(scheduler, session("a"))!;
+      expect(
+        admission.submit(scheduler, game, rules, session("a"), {
+          id: view.id,
+          choice: view.choices.find((c) => c.label === label)!.id,
+        }),
+      ).toBe(true);
+    }
+    expect(scheduler.operationCompletion?.value).toEqual({
+      status: "rejected",
+    });
+    expect(admission.view(scheduler, session("a"))).toBeNull();
+    expect(game.trace).toEqual(["eager-reveal"]);
+    expect(game.cardZones.hand.cards).toEqual([1]);
+    expect(game.playerHistory.a).toEqual({});
+  });
   it.each(["pending choice", "ChoiceMade"])(
     "accepts the same offer when keys reorder during %s across JSON restore",
     (when) => {

@@ -18,6 +18,8 @@ export type CardUseRequest = {
   method: string;
   addHistory: boolean;
   canCancel: boolean;
+  /** Let an enclosing Play loop drain free-chain after a rejected Room attempt. */
+  returnOnRoomFailure?: boolean;
 };
 export type CardCommandOffer = {
   id: string;
@@ -101,6 +103,9 @@ function readRequest(game: CardCommandGame, value: unknown): CardUseRequest {
     ) ||
     typeof data.addHistory !== "boolean" ||
     typeof data.canCancel !== "boolean" ||
+    (data.returnOnRoomFailure !== undefined &&
+      (typeof data.returnOnRoomFailure !== "boolean" ||
+        data.reason !== "play")) ||
     data.method === "response"
   )
     throw new Error("Invalid card-use request");
@@ -315,6 +320,8 @@ export function createCardCommandAdmission<G extends CardCommandGame, Auth>(
       if (cursor.stage === "used") {
         if (operationChild?.value === true)
           return { kind: "return", value: { status: "used" } };
+        if (cursor.request.returnOnRoomFailure)
+          return { kind: "return", value: { status: "rejected" } };
         cursor.stage = "choose";
         cursor.selected = null;
         cursor.targets = [];
