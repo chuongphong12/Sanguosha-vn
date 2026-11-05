@@ -2,13 +2,13 @@
   "version": 1,
   "game": {
     "repository": "https://github.com/chuongphong12/Sanguosha-vn.git",
-    "commit": "1f5a99747619dd78f2f5ed15906c13df4747b798",
-    "availability": "Published M1.3.4b.2 Play library; Discard and aggregate match/production integration pending"
+    "commit": "d173185cdddd31bab7c16a79158e43020387c6d3",
+    "availability": "Published M1.3.4b.3 Discard library; composed turns and match-v3/production integration pending"
   },
   "native": {
     "repository": "https://github.com/TamQuocSat-LangKhach/QSanguosha-QuocChien.git",
     "commit": "ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f",
     "release": "2.3.43-beta2"
   },
-  "scope": "Game 1f5a99747619dd78f2f5ed15906c13df4747b798 adds resumable Play activation, optional Play-only rejected Room completion,22 Play and6 admission tests. Final check2514/99, typecheck/build and two source review axes0 establish this library slice. Actual phase/admission/Room/card-use/movement/free-chain remain distinct from package/context/surrender/presentation fixtures. Existing defaults/profile/M0/production/dependencies unchanged; Discard/M135/full-match/release gates remain open. No native runtime proof."
+  "scope": "Game d173185cdddd31bab7c16a79158e43020387c6d3 adds Discard token and mandatory hand-selection library operations with actual reward-token-cost/movement. Final check2546/101, typecheck/build and two source review axes0 establish the reviewed slice. Maximum/Jilei/auth/choice/focus/notification authorities and sole Room writer remain explicit; existing production/M0/profiles unchanged. No full-match/native-runtime/release proof."
 }

@@ -2,7 +2,7 @@
   "version": 1,
   "coverage": {
     "status": "pilot",
-    "description": "Scoped GameStart guard/order, local session/Slash/Jink fixture composition and maintenance-pattern references. Initial knowledge_base_commit identifies the GameStart pilot input; later inputs are journaled. Other pages retain pinned citations and are not certified by this registry.",
+    "description": "The initial pilot covered GameStart and maintenance references; later scoped page records include local session, match/startup, scheduler, phase and turn contracts. Consult each page record for its exact scope. Initial knowledge_base_commit identifies the GameStart pilot input; later inputs are journaled. Unregistered pages retain pinned citations and are not certified by this registry.",
     "knowledge_base_commit": "c471bbe0e020be55750691365e54a3cf911b715a"
   },
   "sources": [
@@ -1481,6 +1481,126 @@
       "checked_on": "2026-11-03",
       "author": null,
       "business_owner": null
+    },
+    {
+      "id": "web.m134b3.phase.d173185",
+      "kind": "primary_code",
+      "repository": "https://github.com/chuongphong12/Sanguosha-vn",
+      "revision": "d173185cdddd31bab7c16a79158e43020387c6d3",
+      "path": "src/game/hegemony/discard-phase.ts",
+      "url": "https://github.com/chuongphong12/Sanguosha-vn/blob/d173185cdddd31bab7c16a79158e43020387c6d3/src/game/hegemony/discard-phase.ts",
+      "locator": "Discard token order, current max and mark notifications",
+      "checked_on": "2026-11-03",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "web.m134b3.selection.d173185",
+      "kind": "primary_code",
+      "repository": "https://github.com/chuongphong12/Sanguosha-vn",
+      "revision": "d173185cdddd31bab7c16a79158e43020387c6d3",
+      "path": "src/game/hegemony/rule-discard.ts",
+      "url": "https://github.com/chuongphong12/Sanguosha-vn/blob/d173185cdddd31bab7c16a79158e43020387c6d3/src/game/hegemony/rule-discard.ts",
+      "locator": "Mandatory hand discard, private choice, trusted timeout and source fence",
+      "checked_on": "2026-11-03",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "web.m134b3.phase-tests.d173185",
+      "kind": "test_code",
+      "repository": "https://github.com/chuongphong12/Sanguosha-vn",
+      "revision": "d173185cdddd31bab7c16a79158e43020387c6d3",
+      "path": "tests/hegemony/discard-phase.test.ts",
+      "url": "https://github.com/chuongphong12/Sanguosha-vn/blob/d173185cdddd31bab7c16a79158e43020387c6d3/tests/hegemony/discard-phase.test.ts",
+      "locator": "Discard phase public-seam tests and explicit fixtures",
+      "checked_on": "2026-11-03",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "web.m134b3.selection-tests.d173185",
+      "kind": "test_code",
+      "repository": "https://github.com/chuongphong12/Sanguosha-vn",
+      "revision": "d173185cdddd31bab7c16a79158e43020387c6d3",
+      "path": "tests/hegemony/rule-discard.test.ts",
+      "url": "https://github.com/chuongphong12/Sanguosha-vn/blob/d173185cdddd31bab7c16a79158e43020387c6d3/tests/hegemony/rule-discard.test.ts",
+      "locator": "Mandatory selection, RNG, privacy, reset and injected-state tests",
+      "checked_on": "2026-11-03",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "native.m134b3.gamerule.ce4e62b",
+      "kind": "primary_code",
+      "repository": "https://github.com/TamQuocSat-LangKhach/QSanguosha-QuocChien",
+      "revision": "ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f",
+      "path": "src/server/gamerule.cpp",
+      "url": "https://github.com/TamQuocSat-LangKhach/QSanguosha-QuocChien/blob/ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f/src/server/gamerule.cpp#L221-L254",
+      "locator": "GameRule Discard token order and final hand excess",
+      "checked_on": "2026-11-03",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "native.m134b3.discard.ce4e62b",
+      "kind": "primary_code",
+      "repository": "https://github.com/TamQuocSat-LangKhach/QSanguosha-QuocChien",
+      "revision": "ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f",
+      "path": "src/server/room.cpp",
+      "url": "https://github.com/TamQuocSat-LangKhach/QSanguosha-QuocChien/blob/ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f/src/server/room.cpp#L6387-L6510",
+      "locator": "Room::askForDiscard mandatory hand branch, fallback and ChoiceMade",
+      "checked_on": "2026-11-03",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "native.m134b3.force.ce4e62b",
+      "kind": "primary_code",
+      "repository": "https://github.com/TamQuocSat-LangKhach/QSanguosha-QuocChien",
+      "revision": "ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f",
+      "path": "src/server/serverplayer.cpp",
+      "url": "https://github.com/TamQuocSat-LangKhach/QSanguosha-QuocChien/blob/ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f/src/server/serverplayer.cpp#L241-L260",
+      "locator": "forceToDiscard shuffles candidates before filtering jilei",
+      "checked_on": "2026-11-03",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "native.m134b3.choice.ce4e62b",
+      "kind": "primary_code",
+      "repository": "https://github.com/TamQuocSat-LangKhach/QSanguosha-QuocChien",
+      "revision": "ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f",
+      "path": "src/server/room.cpp",
+      "url": "https://github.com/TamQuocSat-LangKhach/QSanguosha-QuocChien/blob/ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f/src/server/room.cpp#L1128-L1177",
+      "locator": "askForChoice normalization and ChoiceMade",
+      "checked_on": "2026-11-03",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "native.m134b3.mark.ce4e62b",
+      "kind": "primary_code",
+      "repository": "https://github.com/TamQuocSat-LangKhach/QSanguosha-QuocChien",
+      "revision": "ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f",
+      "path": "src/server/room.cpp",
+      "url": "https://github.com/TamQuocSat-LangKhach/QSanguosha-QuocChien/blob/ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f/src/server/room.cpp",
+      "locator": "set/add/remove mark and public notification",
+      "checked_on": "2026-11-03",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "native.m134b3.maxcards.ce4e62b",
+      "kind": "primary_code",
+      "repository": "https://github.com/TamQuocSat-LangKhach/QSanguosha-QuocChien",
+      "revision": "ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f",
+      "path": "src/core/player.cpp",
+      "url": "https://github.com/TamQuocSat-LangKhach/QSanguosha-QuocChien/blob/ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f/src/core/player.cpp",
+      "locator": "Player::getMaxCards fixed and extra package modifiers",
+      "checked_on": "2026-11-03",
+      "author": null,
+      "business_owner": null
     }
   ],
   "pages": [
@@ -1743,6 +1863,28 @@
         "native.m134b2.play.ce4e62b",
         "native.m134b2.activate.ce4e62b",
         "native.m134b2.history.ce4e62b"
+      ]
+    },
+    {
+      "path": "engine/discard-phase.md",
+      "status": "supported",
+      "reviewed_on": "2026-11-03",
+      "review_scope": "M1.3.4b.3 Discard library, actual token cost and movement with explicit package/choice/auth/focus/clock authorities; composed match-v3 and sole writer pending",
+      "applies_to": {
+        "game_commit": "d173185cdddd31bab7c16a79158e43020387c6d3",
+        "native_commit": "ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f"
+      },
+      "source_ids": [
+        "web.m134b3.phase.d173185",
+        "web.m134b3.selection.d173185",
+        "web.m134b3.phase-tests.d173185",
+        "web.m134b3.selection-tests.d173185",
+        "native.m134b3.gamerule.ce4e62b",
+        "native.m134b3.discard.ce4e62b",
+        "native.m134b3.force.ce4e62b",
+        "native.m134b3.choice.ce4e62b",
+        "native.m134b3.mark.ce4e62b",
+        "native.m134b3.maxcards.ce4e62b"
       ]
     }
   ],
@@ -2926,6 +3068,96 @@
         "native.m134b2.history.ce4e62b"
       ],
       "scope": "Revision-scoped library activation and admission semantics/tests; executions and enabled production/package/native runtime remain distinct."
+    },
+    {
+      "subject": "page:engine/discard-phase.md",
+      "predicate": "derived_from",
+      "object": "source:web.m134b3.phase.d173185",
+      "evidence": [
+        "web.m134b3.phase.d173185"
+      ],
+      "scope": "Revision-scoped Discard library contract and source/test evidence; fixtures and enabled production/native runtime remain distinct."
+    },
+    {
+      "subject": "page:engine/discard-phase.md",
+      "predicate": "derived_from",
+      "object": "source:web.m134b3.selection.d173185",
+      "evidence": [
+        "web.m134b3.selection.d173185"
+      ],
+      "scope": "Revision-scoped Discard library contract and source/test evidence; fixtures and enabled production/native runtime remain distinct."
+    },
+    {
+      "subject": "page:engine/discard-phase.md",
+      "predicate": "derived_from",
+      "object": "source:web.m134b3.phase-tests.d173185",
+      "evidence": [
+        "web.m134b3.phase-tests.d173185"
+      ],
+      "scope": "Revision-scoped Discard library contract and source/test evidence; fixtures and enabled production/native runtime remain distinct."
+    },
+    {
+      "subject": "page:engine/discard-phase.md",
+      "predicate": "derived_from",
+      "object": "source:web.m134b3.selection-tests.d173185",
+      "evidence": [
+        "web.m134b3.selection-tests.d173185"
+      ],
+      "scope": "Revision-scoped Discard library contract and source/test evidence; fixtures and enabled production/native runtime remain distinct."
+    },
+    {
+      "subject": "page:engine/discard-phase.md",
+      "predicate": "derived_from",
+      "object": "source:native.m134b3.gamerule.ce4e62b",
+      "evidence": [
+        "native.m134b3.gamerule.ce4e62b"
+      ],
+      "scope": "Revision-scoped Discard library contract and source/test evidence; fixtures and enabled production/native runtime remain distinct."
+    },
+    {
+      "subject": "page:engine/discard-phase.md",
+      "predicate": "derived_from",
+      "object": "source:native.m134b3.discard.ce4e62b",
+      "evidence": [
+        "native.m134b3.discard.ce4e62b"
+      ],
+      "scope": "Revision-scoped Discard library contract and source/test evidence; fixtures and enabled production/native runtime remain distinct."
+    },
+    {
+      "subject": "page:engine/discard-phase.md",
+      "predicate": "derived_from",
+      "object": "source:native.m134b3.force.ce4e62b",
+      "evidence": [
+        "native.m134b3.force.ce4e62b"
+      ],
+      "scope": "Revision-scoped Discard library contract and source/test evidence; fixtures and enabled production/native runtime remain distinct."
+    },
+    {
+      "subject": "page:engine/discard-phase.md",
+      "predicate": "derived_from",
+      "object": "source:native.m134b3.choice.ce4e62b",
+      "evidence": [
+        "native.m134b3.choice.ce4e62b"
+      ],
+      "scope": "Revision-scoped Discard library contract and source/test evidence; fixtures and enabled production/native runtime remain distinct."
+    },
+    {
+      "subject": "page:engine/discard-phase.md",
+      "predicate": "derived_from",
+      "object": "source:native.m134b3.mark.ce4e62b",
+      "evidence": [
+        "native.m134b3.mark.ce4e62b"
+      ],
+      "scope": "Revision-scoped Discard library contract and source/test evidence; fixtures and enabled production/native runtime remain distinct."
+    },
+    {
+      "subject": "page:engine/discard-phase.md",
+      "predicate": "derived_from",
+      "object": "source:native.m134b3.maxcards.ce4e62b",
+      "evidence": [
+        "native.m134b3.maxcards.ce4e62b"
+      ],
+      "scope": "Revision-scoped Discard library contract and source/test evidence; fixtures and enabled production/native runtime remain distinct."
     }
   ]
 }
