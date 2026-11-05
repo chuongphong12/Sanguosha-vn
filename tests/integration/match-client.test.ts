@@ -10,10 +10,12 @@ afterEach(() => {
   match = undefined;
 });
 
-describe("local hot-seat match", () => {
+const seeds = ["integration-0", "integration-11"];
+describe.each(seeds)("local hot-seat match (%s)", (seed) => {
   it("selects generals through four filtered clients and starts the match", async () => {
     match = new MatchClient({
       numPlayers: 4,
+      seed,
       matchID: `integration-${Date.now()}`,
     });
     await expect.poll(() => match!.state).not.toBeNull();
@@ -95,13 +97,12 @@ describe("local hot-seat match", () => {
       await expect.poll(() => match!.state!.G.prompt?.id ?? null).toBe(null);
     }
     expect(match.state!.G.turn.step).toBe("play");
-    const nextDrawAmount = GENERALS_BY_ID[
-      match.state!.G.players[nextPlayerID].generalID!
-    ].skillIDs.includes("ying-zi")
-      ? 3
-      : 2;
-    expect(match.state!.G.players[nextPlayerID].hand).toHaveLength(
-      4 + nextDrawAmount,
-    );
+    expect(
+      GENERALS_BY_ID[
+        match.state!.G.players[nextPlayerID].generalID!
+      ].skillIDs.includes("ying-zi"),
+    ).toBe(seed === "integration-11");
+    // Every optional draw skill was declined above, including Ying Zi.
+    expect(match.state!.G.players[nextPlayerID].hand).toHaveLength(6);
   });
 });

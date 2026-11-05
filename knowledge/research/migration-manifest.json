@@ -1,0 +1,307 @@
+{
+  "version": 1,
+  "gameBaseline": "4b19fddcb6547066de0db0ae078c0db7642877ba",
+  "documents": [
+    {
+      "source": "AGENTS.md",
+      "originalBlob": "8acbf86bd4851d4d46616cae73fc16839fd3b144",
+      "action": "retain-bootstrap",
+      "targets": [
+        "game:AGENTS.md"
+      ],
+      "reason": "Operational entry point or skill tracker/lifecycle configuration; update affected navigation."
+    },
+    {
+      "source": "ARCHITECTURE.md",
+      "originalBlob": "9fbf66873884eb84afa281614109ebc12fef4000",
+      "action": "curate-and-point",
+      "targets": [
+        "engine/architecture.md",
+        "game:ARCHITECTURE.md"
+      ],
+      "reason": "Retain verified stack and rewrite current Hegemony integration boundary; root becomes a pointer."
+    },
+    {
+      "source": "CLAUDE.md",
+      "originalBlob": "6a88b8558316c5da5133d2bbd9e380efa3db4f6e",
+      "action": "retain-bootstrap",
+      "targets": [
+        "game:CLAUDE.md"
+      ],
+      "reason": "Operational entry point or skill tracker/lifecycle configuration; update affected navigation."
+    },
+    {
+      "source": "HANDOFF-UI.md",
+      "originalBlob": "23e7497615a2b9ab18b1101a6b6f1e795b208ec1",
+      "action": "exclude-obsolete",
+      "targets": [
+        "research/architecture-and-provenance-assessment.md"
+      ],
+      "reason": "Standard 2013/session-era claims are not current Hegemony authority. Revalidated shared principles are rewritten; original report remains in game history."
+    },
+    {
+      "source": "HANDOFF.md",
+      "originalBlob": "3a440e7c7a5255ceb7160e86c18ef02b98fbcf61",
+      "action": "exclude-obsolete",
+      "targets": [
+        "research/architecture-and-provenance-assessment.md"
+      ],
+      "reason": "Standard 2013/session-era claims are not current Hegemony authority. Revalidated shared principles are rewritten; original report remains in game history."
+    },
+    {
+      "source": "README.md",
+      "originalBlob": "3b604d8367571f108179b9216f2c39bb79afff05",
+      "action": "retain-bootstrap",
+      "targets": [
+        "game:README.md"
+      ],
+      "reason": "Operational entry point or skill tracker/lifecycle configuration; update affected navigation."
+    },
+    {
+      "source": "SKILL_CONFORMANCE.md",
+      "originalBlob": "6042beeea5bb6bcfb895d0f1b5235bae31a992df",
+      "action": "exclude-obsolete",
+      "targets": [
+        "research/architecture-and-provenance-assessment.md"
+      ],
+      "reason": "Standard 2013/session-era claims are not current Hegemony authority. Revalidated shared principles are rewritten; original report remains in game history."
+    },
+    {
+      "source": "docs/agents/domain.md",
+      "originalBlob": "2a25dd613d49768d9b11832b1a48ddf0f4b512bf",
+      "action": "retain-bootstrap",
+      "targets": [
+        "game:docs/agents/domain.md"
+      ],
+      "reason": "Operational entry point or skill tracker/lifecycle configuration; update affected navigation."
+    },
+    {
+      "source": "docs/agents/issue-tracker.md",
+      "originalBlob": "14c425e0846235805f5b15851c469c09cfc5dfcf",
+      "action": "retain-bootstrap",
+      "targets": [
+        "game:docs/agents/issue-tracker.md"
+      ],
+      "reason": "Operational entry point or skill tracker/lifecycle configuration; update affected navigation."
+    },
+    {
+      "source": "docs/agents/lifecycle.md",
+      "originalBlob": "0afb6fdf9e158511427def89425d6c4c221d704f",
+      "action": "retain-bootstrap",
+      "targets": [
+        "game:docs/agents/lifecycle.md"
+      ],
+      "reason": "Operational entry point or skill tracker/lifecycle configuration; update affected navigation."
+    },
+    {
+      "source": "docs/agents/triage-labels.md",
+      "originalBlob": "10ec294c108bf493f82f890f7cc5c6035e7aa12d",
+      "action": "retain-bootstrap",
+      "targets": [
+        "game:docs/agents/triage-labels.md"
+      ],
+      "reason": "Operational entry point or skill tracker/lifecycle configuration; update affected navigation."
+    },
+    {
+      "source": "docs/assets/provenance.md",
+      "originalBlob": "219793fd470dedf5374bdac1397ab9d910fdd4af",
+      "action": "curate",
+      "targets": [
+        "assets/provenance.md"
+      ],
+      "reason": "Revalidated build inputs and explicit unresolved provenance replace unsupported blanket rights claims."
+    },
+    {
+      "source": "docs/knowledge/hegemony-engine.md",
+      "originalBlob": "e93c43e9edc63a5a405c3b2dd0166200f707e58a",
+      "action": "curate",
+      "targets": [
+        "engine/overview.md",
+        "rules/source-authority.md",
+        "reviews/early-engine-checkpoints.md"
+      ],
+      "reason": "Split current contracts by subsystem; keep old checkpoint evidence historical, remove stale forward-looking statements from normative knowledge."
+    },
+    {
+      "source": "docs/plans/2026-10-07-hegemony-engine-implementation.md",
+      "originalBlob": "5734948c099f3dfb734539aeaa3d713ee5753aa6",
+      "action": "curate",
+      "targets": [
+        "plans/hegemony-port.md",
+        "roadmap/README.md"
+      ],
+      "reason": "Concise current dependencies replace accumulated session progress and duplicated checkpoint totals."
+    },
+    {
+      "source": "docs/reviews/2026-09-16-gemini-revalidation.md",
+      "originalBlob": "8f20b38be19b4bc1d798d29f2db9a53a2aa32ab5",
+      "action": "exclude-obsolete",
+      "targets": [
+        "research/architecture-and-provenance-assessment.md"
+      ],
+      "reason": "Standard 2013/session-era claims are not current Hegemony authority. Revalidated shared principles are rewritten; original report remains in game history."
+    },
+    {
+      "source": "docs/reviews/2026-10-06-e2e-validation.md",
+      "originalBlob": "1aa015b07c51eefcb99374b78b42874e0e650c8d",
+      "action": "exclude-obsolete",
+      "targets": [
+        "research/architecture-and-provenance-assessment.md"
+      ],
+      "reason": "Standard 2013/session-era claims are not current Hegemony authority. Revalidated shared principles are rewritten; original report remains in game history."
+    },
+    {
+      "source": "docs/reviews/2026-10-06-engine-validation.md",
+      "originalBlob": "b14631b1ded9520967b730e30ee715ac58d6f7e8",
+      "action": "exclude-obsolete",
+      "targets": [
+        "research/architecture-and-provenance-assessment.md"
+      ],
+      "reason": "Standard 2013/session-era claims are not current Hegemony authority. Revalidated shared principles are rewritten; original report remains in game history."
+    },
+    {
+      "source": "docs/reviews/2026-10-06-rules-primary-sources.md",
+      "originalBlob": "578cddcbb080065a1af8ad0524af4efeb947927e",
+      "action": "exclude-obsolete",
+      "targets": [
+        "research/architecture-and-provenance-assessment.md"
+      ],
+      "reason": "Standard 2013/session-era claims are not current Hegemony authority. Revalidated shared principles are rewritten; original report remains in game history."
+    },
+    {
+      "source": "docs/reviews/2026-10-06-spec-audit.md",
+      "originalBlob": "c2f9ecd820100b4c45d69c60a04977573d9c3474",
+      "action": "exclude-obsolete",
+      "targets": [
+        "research/architecture-and-provenance-assessment.md"
+      ],
+      "reason": "Standard 2013/session-era claims are not current Hegemony authority. Revalidated shared principles are rewritten; original report remains in game history."
+    },
+    {
+      "source": "docs/reviews/2026-10-06-standard-rules-audit.md",
+      "originalBlob": "dedc7d6d30121bed73e1081d8ac09303d500cffe",
+      "action": "exclude-obsolete",
+      "targets": [
+        "research/architecture-and-provenance-assessment.md"
+      ],
+      "reason": "Standard 2013/session-era claims are not current Hegemony authority. Revalidated shared principles are rewritten; original report remains in game history."
+    },
+    {
+      "source": "docs/reviews/2026-10-06-standards-audit.md",
+      "originalBlob": "b101ccaab7072f9f00fcf6d2b7ba7f6fc84bdd61",
+      "action": "exclude-obsolete",
+      "targets": [
+        "research/architecture-and-provenance-assessment.md"
+      ],
+      "reason": "Standard 2013/session-era claims are not current Hegemony authority. Revalidated shared principles are rewritten; original report remains in game history."
+    },
+    {
+      "source": "docs/reviews/2026-10-07-hegemony-engine-replacement-analysis.md",
+      "originalBlob": "0b546c8a8ec534bf7fedf97bbd9088dcc480e330",
+      "action": "preserve-revision-evidence",
+      "targets": [
+        "reviews/2026-10-07-hegemony-engine-replacement-analysis.md"
+      ],
+      "reason": "Revision-specific research/checkpoint; original scope and results retained, not current runtime certification."
+    },
+    {
+      "source": "docs/reviews/2026-10-07-hegemony-foundation-review.md",
+      "originalBlob": "4cf31529fb924dc3a74def43770bdcfb2e898a94",
+      "action": "preserve-revision-evidence",
+      "targets": [
+        "reviews/2026-10-07-hegemony-foundation-review.md"
+      ],
+      "reason": "Revision-specific research/checkpoint; original scope and results retained, not current runtime certification."
+    },
+    {
+      "source": "docs/reviews/2026-10-13-hegemony-part4p.md",
+      "originalBlob": "6ba1e415d94829cc6e7e5a3949b2f7dc3e867ba2",
+      "action": "preserve-revision-evidence",
+      "targets": [
+        "reviews/2026-10-13-hegemony-part4p.md"
+      ],
+      "reason": "Revision-specific research/checkpoint; original scope and results retained, not current runtime certification."
+    },
+    {
+      "source": "docs/reviews/2026-10-13-hegemony-part4q.md",
+      "originalBlob": "905341e4c801e5c8740af84012bd9ccdf019362b",
+      "action": "preserve-revision-evidence",
+      "targets": [
+        "reviews/2026-10-13-hegemony-part4q.md"
+      ],
+      "reason": "Revision-specific research/checkpoint; original scope and results retained, not current runtime certification."
+    },
+    {
+      "source": "docs/reviews/2026-10-13-hegemony-part4r.md",
+      "originalBlob": "6fabdeae6377c38d72337957d078567ebef11e64",
+      "action": "preserve-revision-evidence",
+      "targets": [
+        "reviews/2026-10-13-hegemony-part4r.md"
+      ],
+      "reason": "Revision-specific research/checkpoint; original scope and results retained, not current runtime certification."
+    },
+    {
+      "source": "docs/reviews/2026-10-14-hegemony-part4s.md",
+      "originalBlob": "94e8564ddaffe85b890b53927cc2d4dad612b2e6",
+      "action": "preserve-revision-evidence",
+      "targets": [
+        "reviews/2026-10-14-hegemony-part4s.md"
+      ],
+      "reason": "Revision-specific research/checkpoint; original scope and results retained, not current runtime certification."
+    },
+    {
+      "source": "docs/reviews/2026-10-14-hegemony-part4t.md",
+      "originalBlob": "b34fa73636da149df2ad808a13080a889bb97937",
+      "action": "preserve-revision-evidence",
+      "targets": [
+        "reviews/2026-10-14-hegemony-part4t.md"
+      ],
+      "reason": "Revision-specific research/checkpoint; original scope and results retained, not current runtime certification."
+    },
+    {
+      "source": "docs/reviews/2026-10-14-hegemony-part4u.md",
+      "originalBlob": "50511e120ba5ee19ffb19a5f51d5bbe5904f2cc4",
+      "action": "preserve-revision-evidence",
+      "targets": [
+        "reviews/2026-10-14-hegemony-part4u.md"
+      ],
+      "reason": "Revision-specific research/checkpoint; original scope and results retained, not current runtime certification."
+    },
+    {
+      "source": "docs/reviews/2026-10-14-hegemony-part4v.md",
+      "originalBlob": "87d216839aedbbae771777ad1c26ac5533cc1518",
+      "action": "preserve-revision-evidence",
+      "targets": [
+        "reviews/2026-10-14-hegemony-part4v.md"
+      ],
+      "reason": "Revision-specific research/checkpoint; original scope and results retained, not current runtime certification."
+    },
+    {
+      "source": "docs/reviews/2026-10-14-hegemony-part4w.md",
+      "originalBlob": "5d4fcd3329a88ab5f91a926cd0cdf7385efc9488",
+      "action": "preserve-revision-evidence",
+      "targets": [
+        "reviews/2026-10-14-hegemony-part4w.md"
+      ],
+      "reason": "Revision-specific research/checkpoint; original scope and results retained, not current runtime certification."
+    },
+    {
+      "source": "docs/reviews/2026-10-15-hegemony-part4x.md",
+      "originalBlob": "63574373e551750886d778c9875ba1dad3305e39",
+      "action": "preserve-revision-evidence",
+      "targets": [
+        "reviews/2026-10-15-hegemony-part4x.md"
+      ],
+      "reason": "Revision-specific research/checkpoint; original scope and results retained, not current runtime certification."
+    },
+    {
+      "source": "docs/superpowers/specs/2026-10-07-hegemony-engine-design.md",
+      "originalBlob": "01e589e03bc3c24c0c3c20002f498c27d719cf4d",
+      "action": "preserve-design-baseline",
+      "targets": [
+        "specs/hegemony-engine-baseline.md"
+      ],
+      "reason": "Accepted initial architecture and complete-core gates remain relevant; historical implementation status is not current roadmap."
+    }
+  ]
+}

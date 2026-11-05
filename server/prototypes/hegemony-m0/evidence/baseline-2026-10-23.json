@@ -1,0 +1,74 @@
+{
+  "scope": "LOCAL throwaway baseline; chooser-only tactical fixtures; real engine execution only draw",
+  "policyVersion": "PROTOTYPE-native-keep-values-v1",
+  "native": "ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f",
+  "content": "fixture8card-draw-v1",
+  "seed": 17,
+  "host": {
+    "node": "v22.19.0",
+    "platform": "win32",
+    "arch": "x64",
+    "cpu": "Intel(R) Core(TM) Ultra 7 155H"
+  },
+  "tactics": [
+    {
+      "name": "keep-Peach",
+      "expected": "slash"
+    },
+    {
+      "name": "plain-Jink",
+      "expected": "jink"
+    },
+    {
+      "name": "self-rescue",
+      "expected": "wine"
+    },
+    {
+      "name": "decline-unneeded-Nullification",
+      "expected": "no"
+    },
+    {
+      "name": "public-enemy-target",
+      "expected": "weak"
+    }
+  ],
+  "chooser": {
+    "decisions": 50000,
+    "elapsedMs": 38.5086,
+    "cpu": {
+      "user": 31000,
+      "system": 0
+    },
+    "rssBytes": 75427840
+  },
+  "real": [
+    {
+      "revision": 1,
+      "elapsedMs": 11.264200000000017,
+      "handCount": 1
+    },
+    {
+      "revision": 2,
+      "elapsedMs": 6.194999999999993,
+      "handCount": 2
+    },
+    {
+      "revision": 3,
+      "elapsedMs": 6.093900000000019,
+      "handCount": 3
+    },
+    {
+      "revision": 4,
+      "elapsedMs": 5.701999999999998,
+      "handCount": 4
+    }
+  ],
+  "notMeasured": [
+    "competitive strength",
+    "full content",
+    "remote store/recovery",
+    "5x10 load",
+    "worker isolation",
+    "Lua runtime performance"
+  ]
+}
