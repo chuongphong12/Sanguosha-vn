@@ -1601,6 +1601,18 @@
       "checked_on": "2026-11-03",
       "author": null,
       "business_owner": null
+    },
+    {
+      "id": "web.m134c.composed-tests.796e8ed",
+      "kind": "primary_code",
+      "repository": "https://github.com/chuongphong12/Sanguosha-vn",
+      "revision": "796e8ed33e9c3f58050114bbc09b68fa25c406dc",
+      "path": "tests/hegemony/composed-turn.test.ts",
+      "url": "https://github.com/chuongphong12/Sanguosha-vn/blob/796e8ed33e9c3f58050114bbc09b68fa25c406dc/tests/hegemony/composed-turn.test.ts",
+      "locator": "13 bounded composition tests and explicit synthetic package fixture",
+      "checked_on": "2026-11-05",
+      "author": null,
+      "business_owner": null
     }
   ],
   "pages": [
@@ -1885,6 +1897,19 @@
         "native.m134b3.choice.ce4e62b",
         "native.m134b3.mark.ce4e62b",
         "native.m134b3.maxcards.ce4e62b"
+      ]
+    },
+    {
+      "path": "engine/composed-turn.md",
+      "status": "supported",
+      "reviewed_on": "2026-11-05",
+      "review_scope": "M1.3.4c three-seat test-only composition; synthetic Test/package/choice/auth policies; no production profile, real Slash/rescue/winner or complete match proof",
+      "applies_to": {
+        "game_commit": "796e8ed33e9c3f58050114bbc09b68fa25c406dc",
+        "native_commit": "ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f"
+      },
+      "source_ids": [
+        "web.m134c.composed-tests.796e8ed"
       ]
     }
   ],
@@ -3158,6 +3183,15 @@
         "native.m134b3.maxcards.ce4e62b"
       ],
       "scope": "Revision-scoped Discard library contract and source/test evidence; fixtures and enabled production/native runtime remain distinct."
+    },
+    {
+      "subject": "page:engine/composed-turn.md",
+      "predicate": "derived_from",
+      "object": "source:web.m134c.composed-tests.796e8ed",
+      "evidence": [
+        "web.m134c.composed-tests.796e8ed"
+      ],
+      "scope": "Three-seat test-only composed-turn evidence; synthetic package/decision/auth policies and unenabled production remain distinct."
     }
   ]
 }

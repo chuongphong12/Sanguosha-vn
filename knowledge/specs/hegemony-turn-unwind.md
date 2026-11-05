@@ -154,3 +154,7 @@ Spec self-review completed: checked source boundaries, interruption reason/owner
 ## 12. Completion and remaining release gates
 
 B is complete only when all five checkpoints have real implementation/evidence and reviewed/pinned knowledge. An internal minimal-profile full match is a required integration proof, not the complete product. M0 manifest/bot/provider/load/decision work, all agreed content with package-specific catches, competitive actor-only bots and experienced-human testing, complete art/audio/provenance, desktop private rooms2–10, real session/store/UI and hosted recovery/load, production retirement/cutover/rollback remain required. No main merge/deploy is authorized by this design decision alone.
+
+## Later M1.3.4c evidence
+
+[Bounded composition](../engine/composed-turn.md) and its [checkpoint](../reviews/2026-11-05-hegemony-m134c-composed-turn.md) add a three-seat test-only normal-turn registry across core phase bodies. This does not amend the accepted scope or certify all of checkpoint4, match-v3, damage/rescue/winner or release gates.

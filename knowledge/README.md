@@ -75,3 +75,7 @@ Offline verification checks the lock against the committed snapshot and rejects 
 Sync stops on dirty tracked files, local subtree additions, malformed locks, missing commits or mismatched trees. It preserves local work and leaves conflicts for deliberate resolution; it never force-resets files. Ordinary game build/test consumes tracked files and does not fetch this repository. To contribute, edit this repository and reimport a reviewed commit rather than editing the game subtree in isolation.
 
 Publication of a knowledge revision does not establish publication of the corresponding game revision or successful remote CI. Check the named revisions and their actual delivery evidence.
+
+## Latest bounded integration evidence
+
+[M1.3.4c composed core turn](engine/composed-turn.md) now joins the library phase bodies in one three-seat test registry with JSON/yield, extra-turn and explicit recovery evidence. Existing production/M0/M1.2 profiles remain unchanged. Full application/match-v3 and release acceptance remain pending.
