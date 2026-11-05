@@ -150,3 +150,17 @@ Mechanical lint passed132 Markdown pages/756 relative file links/3 anchors,590 p
 [Source CI41959474706](https://github.com/chuongphong12/Sanguosha-vn/actions/runs/41959474706) passed both jobs at head796e8ed33e9c3f58050114bbc09b68fa25c406dc, synthetic merge9d360f2 into main3cb751449afcd98748a4cebcc54fd5414e5fbce9. It ran2559/102 with0 lint errors/42 old warnings and verified preceding knowledge779f963 offline/upstream. Later imported-head CI is separate.
 
 Canonical Standards0/Spec0 reviewed the13-file draft at f8e1ede4b3641bbbde9349d3898cb5c6c3d4a4ba; this receipt-only delta is reviewed separately before publication. Clean graph returned no affected process steps to inspect; that empty result is not proof of no dependency. Global caps and pre-edit UNKNOWN remain unresolved.
+
+## [2026-11-05] ingest | M1.3.5a trusted turn owner
+
+- Input knowledge 18bac319cffc7964297a7b0ee3c4cf7a22d23206, game 46025ce4653373ecbe3f796bd96093a56c0ee358 against 9235157e2c9ae64d73fe9cc679f8ee9f6cbec605, native ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f. Added [owner contract](engine/match-turn.md)/[checkpoint](reviews/2026-11-05-hegemony-m135a-turn-owner.md), affected current metadata/navigation and four immutable sources/one page/four relations. Preserve previous source identities/page applicability/relations.
+- Baseline79/79; finalfocused40/40; bounded local fullcheck2586/103/typecheck with42 old warnings. Build passed before only a final unused fixture import removal. Two source axes0 at c8c3f21e after explicit scheduler-rejection RED/GREEN. Failed default-worker timeouts under concurrent workload are recorded separately, not hidden as success.
+- The owner is internal and existing application profiles remain unchanged. Graph candidates/property-link ambiguity and extraction caps are explicit. Canonical lint/reviews/source/import CI remain separate actual publication gates.
+
+## Final pre-publication receipts
+
+Mechanical lint passed134 Markdown pages/772 relative file links/3 heading anchors,594 pinned citations/522 line locators/164 local Git objects;0 errors. Registry totals138 sources/14 scoped pages/146 relations preserve all134 previous sources/13 page records/142 relations exactly. These are reference/scope checks, not semantic or native-runtime certification.
+
+[Source CI41966055210](https://github.com/chuongphong12/Sanguosha-vn/actions/runs/41966055210) passed both jobs with its default check configuration at head46025ce4653373ecbe3f796bd96093a56c0ee358, synthetic merge2ef0f84 into main3cb751449afcd98748a4cebcc54fd5414e5fbce9. It ran2586/103 with0 lint errors/42 prior warnings and verified preceding knowledge18bac319 offline/upstream. Imported-head CI remains a later separate check.
+
+Canonical full review at tree5ac45788443cba90b7b228eb44ed4bb212852ce7 found one Standards wording error and0 Spec findings. The contract now states explicitly that Room cleanup applies to TurnBroken/StageChange and GameFinished skips it. The correction at tree13c5f44fe3ae75d6a08e891e44a9e277f0858d85 and this receipt-only delta are reviewed before publication; future integration success is not inferred.

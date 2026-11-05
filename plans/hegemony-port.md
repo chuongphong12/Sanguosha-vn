@@ -73,3 +73,7 @@ The later [M1.3.3a phase lifecycle](../engine/phase-lifecycle.md) was validated 
 ## M1.3.4c update
 
 [Bounded composed turns](../engine/composed-turn.md) pass in a test-only three-seat synthetic package profile. No existing application/production profile changed; M1.3.5 and the broader accepted content/session/bot/media/load/cutover gates remain open.
+
+## M1.3.5a progress
+
+[Trusted turn owner](../engine/match-turn.md) adds bounded pumping and explicit native unwind classification without changing existing application profiles. Next is v3 handoff/save/routing/projection, followed by actual minimal-profile setup-to-terminal for2–10 seats. This does not reduce accepted scope or close M1.3.5/release gates.

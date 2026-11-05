@@ -64,3 +64,5 @@ The pilot has no established replacement or business-owner assignment, so it con
 Choose one source/topic, use the ingest workflow, and update its affected pages and journal together. Keep the JSON small and readable. This is a source/relationship catalog, not a claim database, code graph, search index or access-control implementation. CodeGraph/GitNexus remain the tools for matching-revision code dependencies; typed knowledge links connect contracts to decisions and business material.
 
 M1.3.4c adds one immutable composed-turn test source and one scoped [composition page](../engine/composed-turn.md); its applicability is three-seat test integration, not production behavior.
+
+M1.3.5a registers four immutable owner/test/extracted-fixture sources and the scoped [turn-owner page](../engine/match-turn.md). It does not certify a v3 application save or a normally created complete match.

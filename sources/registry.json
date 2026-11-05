@@ -1613,6 +1613,54 @@
       "checked_on": "2026-11-05",
       "author": null,
       "business_owner": null
+    },
+    {
+      "id": "web.m135a.owner.46025ce",
+      "kind": "primary_code",
+      "repository": "https://github.com/chuongphong12/Sanguosha-vn",
+      "revision": "46025ce4653373ecbe3f796bd96093a56c0ee358",
+      "path": "src/game/hegemony/match-turn.ts",
+      "url": "https://github.com/chuongphong12/Sanguosha-vn/blob/46025ce4653373ecbe3f796bd96093a56c0ee358/src/game/hegemony/match-turn.ts",
+      "locator": "createMatchTurn validate/advance trusted owner",
+      "checked_on": "2026-11-05",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "web.m135a.owner-tests.46025ce",
+      "kind": "primary_code",
+      "repository": "https://github.com/chuongphong12/Sanguosha-vn",
+      "revision": "46025ce4653373ecbe3f796bd96093a56c0ee358",
+      "path": "tests/hegemony/match-turn.test.ts",
+      "url": "https://github.com/chuongphong12/Sanguosha-vn/blob/46025ce4653373ecbe3f796bd96093a56c0ee358/tests/hegemony/match-turn.test.ts",
+      "locator": "27 owner tests including injected saved-condition rejection",
+      "checked_on": "2026-11-05",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "web.m135a.shared-fixture.46025ce",
+      "kind": "primary_code",
+      "repository": "https://github.com/chuongphong12/Sanguosha-vn",
+      "revision": "46025ce4653373ecbe3f796bd96093a56c0ee358",
+      "path": "tests/hegemony/composed-turn-support.ts",
+      "url": "https://github.com/chuongphong12/Sanguosha-vn/blob/46025ce4653373ecbe3f796bd96093a56c0ee358/tests/hegemony/composed-turn-support.ts",
+      "locator": "Extracted synthetic three-seat composition fixture",
+      "checked_on": "2026-11-05",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "web.m135a.composed-tests.46025ce",
+      "kind": "primary_code",
+      "repository": "https://github.com/chuongphong12/Sanguosha-vn",
+      "revision": "46025ce4653373ecbe3f796bd96093a56c0ee358",
+      "path": "tests/hegemony/composed-turn.test.ts",
+      "url": "https://github.com/chuongphong12/Sanguosha-vn/blob/46025ce4653373ecbe3f796bd96093a56c0ee358/tests/hegemony/composed-turn.test.ts",
+      "locator": "13 preserved composition test bodies",
+      "checked_on": "2026-11-05",
+      "author": null,
+      "business_owner": null
     }
   ],
   "pages": [
@@ -1910,6 +1958,22 @@
       },
       "source_ids": [
         "web.m134c.composed-tests.796e8ed"
+      ]
+    },
+    {
+      "path": "engine/match-turn.md",
+      "status": "supported",
+      "reviewed_on": "2026-11-05",
+      "review_scope": "M1.3.5a internal owner; real scheduler/Room cleanup with synthetic package/auth/decision adapters; v3 handoff/full save/routing/projection and full matches pending",
+      "applies_to": {
+        "game_commit": "46025ce4653373ecbe3f796bd96093a56c0ee358",
+        "native_commit": "ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f"
+      },
+      "source_ids": [
+        "web.m135a.owner.46025ce",
+        "web.m135a.owner-tests.46025ce",
+        "web.m135a.shared-fixture.46025ce",
+        "web.m135a.composed-tests.46025ce"
       ]
     }
   ],
@@ -3192,6 +3256,42 @@
         "web.m134c.composed-tests.796e8ed"
       ],
       "scope": "Three-seat test-only composed-turn evidence; synthetic package/decision/auth policies and unenabled production remain distinct."
+    },
+    {
+      "subject": "page:engine/match-turn.md",
+      "predicate": "derived_from",
+      "object": "source:web.m135a.owner.46025ce",
+      "evidence": [
+        "web.m135a.owner.46025ce"
+      ],
+      "scope": "Revision-scoped trusted turn-owner slice and tests; synthetic policies, injected save conditions and pending application/release gates remain explicit."
+    },
+    {
+      "subject": "page:engine/match-turn.md",
+      "predicate": "derived_from",
+      "object": "source:web.m135a.owner-tests.46025ce",
+      "evidence": [
+        "web.m135a.owner-tests.46025ce"
+      ],
+      "scope": "Revision-scoped trusted turn-owner slice and tests; synthetic policies, injected save conditions and pending application/release gates remain explicit."
+    },
+    {
+      "subject": "page:engine/match-turn.md",
+      "predicate": "derived_from",
+      "object": "source:web.m135a.shared-fixture.46025ce",
+      "evidence": [
+        "web.m135a.shared-fixture.46025ce"
+      ],
+      "scope": "Revision-scoped trusted turn-owner slice and tests; synthetic policies, injected save conditions and pending application/release gates remain explicit."
+    },
+    {
+      "subject": "page:engine/match-turn.md",
+      "predicate": "derived_from",
+      "object": "source:web.m135a.composed-tests.46025ce",
+      "evidence": [
+        "web.m135a.composed-tests.46025ce"
+      ],
+      "scope": "Revision-scoped trusted turn-owner slice and tests; synthetic policies, injected save conditions and pending application/release gates remain explicit."
     }
   ]
 }
