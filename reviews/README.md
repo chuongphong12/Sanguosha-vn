@@ -51,3 +51,5 @@ Original game paths and blob identities are recorded in the [migration manifest]
 - [2026-11-02 M1.3.4b.1 — RoundStart/Judge bodies](2026-11-02-hegemony-m134b1-phase-bodies.md): real callers/children with explicit package boundaries; Play/Discard/match integration pending.
 
 - [2026-11-03 M1.3.4b.2 — Play phase](2026-11-03-hegemony-m134b2-play-phase.md): actual admission/Room/movement/free-chain, explicit package/surrender/notification adapters; Discard/match-v3 pending.
+
+- [2026-11-03 M1.3.4b.3 — Discard phase](2026-11-03-hegemony-m134b3-discard-phase.md): real movement/token cost with explicit package, auth, choice, focus and notification authorities; full-match integration pending.

@@ -71,3 +71,7 @@ Test totals and graph metrics belong to revision-labelled checkpoints, not durab
 ## M1.3.4b.2 Play library
 
 [Play phase](play-phase.md) now owns repeated activation and drains actual free-chain after used/rejected Room attempts. Its optional admission policy defaults off for existing consumers. This new body is not registered in application/M0/production profiles. Discard and aggregate match-v3 remain required before claiming complete internal gameplay.
+
+## M1.3.4b.3 Discard library
+
+[Discard phase](discard-phase.md) adds a resumable body and actor-private rule-discard admission. Movement pins captured source zones, and a trusted, prompt-fenced timeout consumes the saved RNG. A sole application owner must serialize the Room while the scheduler is yielded; this body is not registered in existing profiles.

@@ -37,3 +37,7 @@ Private continuations retain captured choices/lord eligibility/accepted answers,
 ## Later Play slice
 
 [M1.3.4b.2](play-phase.md) now supplies the required play-phase operation at its own inspected revision. The preceding missing-Play statements describe this page's original M1.3.4b.1 input; Discard and aggregate match-v3 remain pending. No old profile is switched.
+
+## Later Discard slice
+
+[M1.3.4b.3](discard-phase.md) supplies the required discard-phase and mandatory hand-discard operations at its own inspected revision. Earlier missing-Discard statements refer to their historical inputs. The complete composed match and match-v3 owner are still pending.

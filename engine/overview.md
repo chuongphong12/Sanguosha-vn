@@ -69,3 +69,7 @@ Evidence: external adapter interfaces across the modules above; absence of battl
 ## Later Play slice
 
 [M1.3.4b.2 Play](play-phase.md) adds the activation loop using actual admission/Room/free-chain and a Play-only Room-failure completion policy. Discard and aggregate match-v3 remain pending. Earlier checkpoint statements retain their inspected revisions; production remains unchanged.
+
+## Later Discard slice
+
+[M1.3.4b.3](discard-phase.md) adds Discard token choices, authoritative mandatory hand selection and real movement. Package maximum/Jilei, choice/auth/notification and service-clock wiring remain authorities or adapters. Full turn/match-v3 and production remain pending.

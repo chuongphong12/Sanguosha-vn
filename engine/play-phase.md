@@ -29,3 +29,7 @@ Player replies use the actor-bound admission view/submit interface. Wrong actors
 | Phase execute/Proceeding, admission, Room, onUse, CardUsed/CardFinished, card-use, movement, free-chain/reveal reward | Context epoch, authentication, package catalogue/availability/target/material/validation/onUse/after/effect, pending-surrender handoff and notifications | Complete package policy/damage within this new composition, surrender transport/decision owner, service pause/timeout, match-v3 routing/restore, online/UI/production |
 
 The test card supplies an implied recipient and a trace/reveal-mark effect; it is not a ported package or damage proof. The surrender fixture only proves ordering/handoff, not full surrender behavior. No native executable, setup-to-terminal match, hosted provider, new browser or bot-policy benchmark was run. All broader [release gates](../plans/hegemony-release.md) stay open.
+
+## Later Discard slice
+
+[M1.3.4b.3](discard-phase.md) now supplies the Discard body at its own source revision; the opening pending statement describes the original Play checkpoint. Composition into a complete match and production remains pending.

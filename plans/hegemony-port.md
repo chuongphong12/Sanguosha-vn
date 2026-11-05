@@ -65,3 +65,7 @@ The later [M1.3.3a phase lifecycle](../engine/phase-lifecycle.md) was validated 
 ## Current Play checkpoint
 
 [M1.3.4b.2](../engine/play-phase.md) now adds the library activation loop and the optional rejected-attempt admission completion. [Checkpoint](../reviews/2026-11-03-hegemony-m134b2-play-phase.md) records28 new tests and source review/graph evidence. Next complete Discard, then M1.3.5 aggregate matches; no release scope is reduced.
+
+## Current Discard checkpoint
+
+[M1.3.4b.3](../engine/discard-phase.md) adds the library token and mandatory hand-discard body. [Checkpoint](../reviews/2026-11-03-hegemony-m134b3-discard-phase.md) records source/reviews/graph evidence. Next establish the composed turn and match-v3 owner; no release scope is reduced.
