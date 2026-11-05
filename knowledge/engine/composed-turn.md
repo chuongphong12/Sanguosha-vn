@@ -19,3 +19,7 @@ At the CardFinished interruption, the played material is already on table and th
 The initial incomplete composition failed for missing phase-proceeding after a separate missing-queue fixture correction; neither is reported as an existing engine defect. An assertion initially failed on a mistaken assumption that CardFinished had already discarded the material; actual source orders the final discard afterwards. That expectation was corrected, preserving native GameFinished behavior. A Standards review found the skipped-Play test also passed when Play merely declined; the test now asserts no Play Start/Proceeding. Deliberately omitting skipPhase fails the new assertion, then restoring it passes. This is sensitivity validation of new tests, not a production bug fix.
 
 The new composition is test-only. M1.3.5 must supply actual application ownership and an internally enabled minimal-profile setup-to-terminal scenario including real damage/rescue/winner where applicable. Full content,2–10-seat rooms, durable hosted sessions/recovery/load, competitive bots, media/provenance, UI and production cutover/rollback remain required. Main stays unmerged and PR33 stays draft.
+
+## Later M1.3.5a owner
+
+[Trusted turn ownership](match-turn.md) is implemented as a separate internal slice. It is not connected to the existing match-v2/startup/M0 profiles. Startup handoff, v3 save/answer/projection and complete setup-to-terminal gameplay remain required; earlier revision-scoped claims above retain their original scope.

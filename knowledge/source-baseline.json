@@ -2,13 +2,13 @@
   "version": 1,
   "game": {
     "repository": "https://github.com/chuongphong12/Sanguosha-vn.git",
-    "commit": "796e8ed33e9c3f58050114bbc09b68fa25c406dc",
-    "availability": "Published bounded composed-turn test proof; existing application/production unchanged, match-v3 pending"
+    "commit": "46025ce4653373ecbe3f796bd96093a56c0ee358",
+    "availability": "Published internal trusted turn-owner slice; existing application profiles unchanged, match-v3 handoff/routing/restore/projection pending"
   },
   "native": {
     "repository": "https://github.com/TamQuocSat-LangKhach/QSanguosha-QuocChien.git",
     "commit": "ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f",
     "release": "2.3.43-beta2"
   },
-  "scope": "Game 796e8ed33e9c3f58050114bbc09b68fa25c406dc adds13 composed-turn integration cases only. Existing kernels/profiles/dependencies unchanged. Finalcheck2559/102/typecheck and two review axes0 cover this bounded three-seat synthetic package fixture, not real Slash/rescue/winner or setup-to-terminal/release acceptance."
+  "scope": "Game 46025ce4653373ecbe3f796bd96093a56c0ee358 adds createMatchTurn and27 owner cases, reusing the preceding13 composition cases through an extracted fixture. Local bounded fullcheck2586/103/typecheck/build and two axes0 cover this internal slice, not setup-to-terminal, full aggregate restore, real combat winner or production acceptance."
 }

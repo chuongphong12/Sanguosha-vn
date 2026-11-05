@@ -27,3 +27,7 @@ The later [M1.3.3a phase lifecycle](../engine/phase-lifecycle.md) was validated 
 [M1.3.4b.1 RoundStart/Judge](../engine/phase-bodies.md) now implements the first core-body slice and a single Proceeding bridge; [M1.3.4b.2 Play](../engine/play-phase.md) now supplies activation/admission/Room/free-chain; [M1.3.4b.3 Discard](../engine/discard-phase.md) adds the remaining library body; full composed-turn proof and M1.3.5 aggregate match ownership still block complete acceptance. No release scope is reduced.
 
 [M1.3.4c bounded composed-turn proof](../engine/composed-turn.md) now exercises the library together in13 integration tests. It is not a complete match or full M1.3.4 acceptance across native packages; next is M1.3.5 aggregate ownership and real setup-to-terminal scenarios.
+
+## M1.3.5a progress
+
+[Trusted turn owner](../engine/match-turn.md) adds bounded pumping and explicit native unwind classification without changing existing application profiles. Next is v3 handoff/save/routing/projection, followed by actual minimal-profile setup-to-terminal for2–10 seats. This does not reduce accepted scope or close M1.3.5/release gates.

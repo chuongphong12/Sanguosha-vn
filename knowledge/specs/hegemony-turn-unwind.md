@@ -158,3 +158,7 @@ B is complete only when all five checkpoints have real implementation/evidence a
 ## Later M1.3.4c evidence
 
 [Bounded composition](../engine/composed-turn.md) and its [checkpoint](../reviews/2026-11-05-hegemony-m134c-composed-turn.md) add a three-seat test-only normal-turn registry across core phase bodies. This does not amend the accepted scope or certify all of checkpoint4, match-v3, damage/rescue/winner or release gates.
+
+## M1.3.5a progress
+
+[Trusted turn owner](../engine/match-turn.md) adds bounded pumping and explicit native unwind classification without changing existing application profiles. Next is v3 handoff/save/routing/projection, followed by actual minimal-profile setup-to-terminal for2–10 seats. This does not reduce accepted scope or close M1.3.5/release gates.

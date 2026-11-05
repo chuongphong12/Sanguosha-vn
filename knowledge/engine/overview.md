@@ -77,3 +77,7 @@ Evidence: external adapter interfaces across the modules above; absence of battl
 ## Later composed-turn proof
 
 [M1.3.4c](composed-turn.md) supplies13 tests joining existing turn/phase/admission/Room/movement/cleanup owners in one bounded test profile. It changes no production module. Match-v3, setup-to-terminal and all broader release gates remain pending.
+
+## Later M1.3.5a owner
+
+[Trusted turn ownership](match-turn.md) is implemented as a separate internal slice. It is not connected to the existing match-v2/startup/M0 profiles. Startup handoff, v3 save/answer/projection and complete setup-to-terminal gameplay remain required; earlier revision-scoped claims above retain their original scope.

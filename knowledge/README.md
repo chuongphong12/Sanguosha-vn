@@ -79,3 +79,7 @@ Publication of a knowledge revision does not establish publication of the corres
 ## Latest bounded integration evidence
 
 [M1.3.4c composed core turn](engine/composed-turn.md) now joins the library phase bodies in one three-seat test registry with JSON/yield, extra-turn and explicit recovery evidence. Existing production/M0/M1.2 profiles remain unchanged. Full application/match-v3 and release acceptance remain pending.
+
+## Latest internal turn-owner slice
+
+[M1.3.5a trusted owner](engine/match-turn.md) now pumps the tested turn roots, actual unwind and explicit recovery/fault/terminal classification. Existing match-v2 still stops at prepared. Public v3 handoff/answers/restore/projection and complete matches remain pending.

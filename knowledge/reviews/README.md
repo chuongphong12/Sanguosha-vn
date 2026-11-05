@@ -55,3 +55,5 @@ Original game paths and blob identities are recorded in the [migration manifest]
 - [2026-11-03 M1.3.4b.3 — Discard phase](2026-11-03-hegemony-m134b3-discard-phase.md): real movement/token cost with explicit package, auth, choice, focus and notification authorities; full-match integration pending.
 
 - [2026-11-05 M1.3.4c composed core turn](2026-11-05-hegemony-m134c-composed-turn.md):13 test-only integration cases; fullcheck2559/102; synthetic package and remaining match/release limits explicit.
+
+- [2026-11-05 M1.3.5a trusted turn owner](2026-11-05-hegemony-m135a-turn-owner.md):27 new tests; bounded local fullcheck2586/103; real cleanup/recovery with explicit synthetic and pending application boundaries.

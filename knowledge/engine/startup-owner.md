@@ -27,3 +27,7 @@ Prepared now means all eligible startup stages completed, rather than only globa
 [Match tests](https://github.com/chuongphong12/Sanguosha-vn/blob/4cad85771d797f1d960e2faf1f6dcfdb6ac032a4/tests/hegemony/match.test.ts) cover the public application seam with synthetic content and explicit package/presentation adapters. Actual startup/dealing for 2–10 seats remains covered; accepted/declined luck remains a two-seat collection test. New winner-condition cases inject trusted serialized native-condition fixtures through restore: they execute real winner/reveal/careerist/game-over children, but do not establish a normally created all-hidden 2–10-seat match reaching a terminal result. The careerist child takes its no-recruitment branch; no new recruitment-prompt coverage is claimed. General package/filter/UI hooks remain explicit fixture adapters, including the pre-show prompt hook.
 
 No production, M0 Socket.IO/store, hosted-provider, full-match or native runtime differential integration was added. The [release gates](../plans/hegemony-release.md) remain open.
+
+## Later M1.3.5a owner
+
+[Trusted turn ownership](match-turn.md) is implemented as a separate internal slice. It is not connected to the existing match-v2/startup/M0 profiles. Startup handoff, v3 save/answer/projection and complete setup-to-terminal gameplay remain required; earlier revision-scoped claims above retain their original scope.
