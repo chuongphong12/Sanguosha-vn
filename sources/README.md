@@ -62,3 +62,5 @@ The pilot has no established replacement or business-owner assignment, so it con
 ## Extending coverage
 
 Choose one source/topic, use the ingest workflow, and update its affected pages and journal together. Keep the JSON small and readable. This is a source/relationship catalog, not a claim database, code graph, search index or access-control implementation. CodeGraph/GitNexus remain the tools for matching-revision code dependencies; typed knowledge links connect contracts to decisions and business material.
+
+M1.3.4c adds one immutable composed-turn test source and one scoped [composition page](../engine/composed-turn.md); its applicability is three-seat test integration, not production behavior.

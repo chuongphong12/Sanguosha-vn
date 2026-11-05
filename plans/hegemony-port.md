@@ -69,3 +69,7 @@ The later [M1.3.3a phase lifecycle](../engine/phase-lifecycle.md) was validated 
 ## Current Discard checkpoint
 
 [M1.3.4b.3](../engine/discard-phase.md) adds the library token and mandatory hand-discard body. [Checkpoint](../reviews/2026-11-03-hegemony-m134b3-discard-phase.md) records source/reviews/graph evidence. Next establish the composed turn and match-v3 owner; no release scope is reduced.
+
+## M1.3.4c update
+
+[Bounded composed turns](../engine/composed-turn.md) pass in a test-only three-seat synthetic package profile. No existing application/production profile changed; M1.3.5 and the broader accepted content/session/bot/media/load/cutover gates remain open.

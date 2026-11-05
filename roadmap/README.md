@@ -25,3 +25,5 @@ The later [M1.3.3a phase lifecycle](../engine/phase-lifecycle.md) was validated 
 [M1.3.3b cleanup](../engine/phase-cleanup.md) now completes M1.3.3 as a library checkpoint. [M1.3.4a turn roots](../engine/turn-order.md) now implement the bounded turn/recovery library; next is M1.3.4b remaining core bodies, then M1.3.5 match v3; full release gates are unchanged.
 
 [M1.3.4b.1 RoundStart/Judge](../engine/phase-bodies.md) now implements the first core-body slice and a single Proceeding bridge; [M1.3.4b.2 Play](../engine/play-phase.md) now supplies activation/admission/Room/free-chain; [M1.3.4b.3 Discard](../engine/discard-phase.md) adds the remaining library body; full composed-turn proof and M1.3.5 aggregate match ownership still block complete acceptance. No release scope is reduced.
+
+[M1.3.4c bounded composed-turn proof](../engine/composed-turn.md) now exercises the library together in13 integration tests. It is not a complete match or full M1.3.4 acceptance across native packages; next is M1.3.5 aggregate ownership and real setup-to-terminal scenarios.

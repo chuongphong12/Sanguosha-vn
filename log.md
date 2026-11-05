@@ -136,3 +136,17 @@ Append entries for authorized ingest/lint work: date, operation, source IDs, aff
 Mechanical lint completed with130 Markdown pages,741 relative file links,3 heading anchors,589 pinned citations,522 line locators and159 local Git objects;0 errors. Registry totals133 sources/12 scoped pages/141 relations preserve all123 prior sources/11 page records/131 relations exactly. These checks establish reference existence and bounded scope, not semantic or native-runtime certification.
 
 Independent canonical Standards and Spec reviews found0 actionable findings after correcting the native forceToDiscard overload locator, review attribution and coverage metadata (reviewed metadata tree6226750d58391a949544bfbc136c122cee116479). This final receipt-only delta is reviewed before publication. Integration-head CI remains a later, separate check.
+
+## [2026-11-05] ingest | M1.3.4c bounded composed turn
+
+- Input knowledge 779f9633b93fe8bc87cf0fe527bd9155e3afee67, game 796e8ed33e9c3f58050114bbc09b68fa25c406dc compared with 438666e117db9e46483c7e78bf8ca4054d6e5a8b, unchanged native ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f. Added [composition contract](engine/composed-turn.md)/[checkpoint](reviews/2026-11-05-hegemony-m134c-composed-turn.md), affected navigation/current metadata and one immutable source/page/relation. Prior registry records remain unchanged.
+- Baseline109/109;13 new cases; final check2559/102/typecheck passed with42 old warnings. Build used unchanged production bytes before final test-only cleanup. Standards0/Spec0 after resolving skip-test sensitivity by mutation RED/GREEN. Graph incremental blank-ID result was rejected; clean rebuild/limits/hash evidence are recorded in the checkpoint.
+- No executable/application profile changed; synthetic package, three seats and one interruption site are explicit. Canonical lint/review and source/import CI receipts remain separate before publication. Main remains unmerged.
+
+## Final pre-publication receipts
+
+Mechanical lint passed132 Markdown pages/756 relative file links/3 anchors,590 pinned citations/522 line locators/160 local Git objects;0 errors. Registry134 sources/13 scoped pages/142 relations preserves all133 previous sources/12 page records/141 relations exactly. Reference/scope checks do not certify semantic correctness or native runtime.
+
+[Source CI41959474706](https://github.com/chuongphong12/Sanguosha-vn/actions/runs/41959474706) passed both jobs at head796e8ed33e9c3f58050114bbc09b68fa25c406dc, synthetic merge9d360f2 into main3cb751449afcd98748a4cebcc54fd5414e5fbce9. It ran2559/102 with0 lint errors/42 old warnings and verified preceding knowledge779f963 offline/upstream. Later imported-head CI is separate.
+
+Canonical Standards0/Spec0 reviewed the13-file draft at f8e1ede4b3641bbbde9349d3898cb5c6c3d4a4ba; this receipt-only delta is reviewed separately before publication. Clean graph returned no affected process steps to inspect; that empty result is not proof of no dependency. Global caps and pre-edit UNKNOWN remain unresolved.

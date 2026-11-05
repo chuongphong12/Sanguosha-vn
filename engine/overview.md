@@ -73,3 +73,7 @@ Evidence: external adapter interfaces across the modules above; absence of battl
 ## Later Discard slice
 
 [M1.3.4b.3](discard-phase.md) adds Discard token choices, authoritative mandatory hand selection and real movement. Package maximum/Jilei, choice/auth/notification and service-clock wiring remain authorities or adapters. Full turn/match-v3 and production remain pending.
+
+## Later composed-turn proof
+
+[M1.3.4c](composed-turn.md) supplies13 tests joining existing turn/phase/admission/Room/movement/cleanup owners in one bounded test profile. It changes no production module. Match-v3, setup-to-terminal and all broader release gates remain pending.
