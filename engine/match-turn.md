@@ -25,3 +25,7 @@ validate checks the owner cursor/table/seat-order/result, frame identities again
 The [shared three-seat package fixture](https://github.com/chuongphong12/Sanguosha-vn/blob/46025ce4653373ecbe3f796bd96093a56c0ee358/tests/hegemony/composed-turn-support.ts) was extracted from the preceding [13 composition tests](https://github.com/chuongphong12/Sanguosha-vn/blob/46025ce4653373ecbe3f796bd96093a56c0ee358/tests/hegemony/composed-turn.test.ts); their test bodies and moved fixture bodies are unchanged after export/line-ending normalization. Turn/phase/reveal/Draw/admission/Room/movement/token/cleanup are real. Test-card effects, metadata, auth, general/package decisions, notification acknowledgement and maximum/Jilei policies remain synthetic.
 
 Next: match-v3 setup/startup-to-battle handoff, battle registry/save identity, comprehensive aggregate restore, admission-aware answers, private projection and bounded continuation through the public application seam; then internally enabled2–10-seat setup-to-terminal with actual Slash/damage/rescue/winner. No M0 transport/store, real provider/load, competitive bot, browser/native runtime, full content/media or production cutover gate is closed.
+
+## Later M1.3.5b handoff
+
+[Trusted startup-to-battle handoff](match-handoff.md) now consumes an idle completed v2 startup candidate into the internal v3 battle branch on the same Room/scheduler. This does not wire the public application/API or replace its v2 restore/view. Full v3 save/routing/projection and complete-match/release acceptance remain required.

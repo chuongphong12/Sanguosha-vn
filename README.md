@@ -49,6 +49,8 @@ The accepted [M1.3 B route](specs/hegemony-turn-unwind.md) now includes the [sch
 | Historical verification                  | [Evidence index](reviews/README.md)                                                                                                                             |
 | Maintain or ingest knowledge             | [Agent schema](AGENTS.md), [source conventions](sources/README.md), [source registry](sources/registry.json), [maintenance journal](log.md) |
 | Historical repository design             | [Design investigation](research/knowledge-repository-design.md), [migration specification](specs/knowledge-migration.md) |
+| Startup-to-battle transition | [Trusted handoff](engine/match-handoff.md), [turn owner](engine/match-turn.md) |
+
 
 Code paths in code spans refer to the named game/native repository at the stated baseline. They are not relative links to files in this repository. Historical reports retain their original scope and source identities; their test totals do not certify a later revision.
 
@@ -83,3 +85,7 @@ Publication of a knowledge revision does not establish publication of the corres
 ## Latest internal turn-owner slice
 
 [M1.3.5a trusted owner](engine/match-turn.md) now pumps the tested turn roots, actual unwind and explicit recovery/fault/terminal classification. Existing match-v2 still stops at prepared. Public v3 handoff/answers/restore/projection and complete matches remain pending.
+
+## Latest internal handoff slice
+
+[M1.3.5b handoff](engine/match-handoff.md) now transfers a completed idle startup candidate into an internal v3 battle branch and validates first turns for2–10 seats. Existing public match-v2/production registration is unchanged; full v3 create/apply/view/restore, combat-to-terminal and release gates remain open.

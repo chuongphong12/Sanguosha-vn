@@ -1661,6 +1661,42 @@
       "checked_on": "2026-11-05",
       "author": null,
       "business_owner": null
+    },
+    {
+      "id": "web.m135b.handoff.1cf3b03",
+      "kind": "primary_code",
+      "repository": "https://github.com/chuongphong12/Sanguosha-vn",
+      "revision": "1cf3b03c53b54e4b74fc8bf85c52be884fccc122",
+      "path": "src/game/hegemony/match-handoff.ts",
+      "url": "https://github.com/chuongphong12/Sanguosha-vn/blob/1cf3b03c53b54e4b74fc8bf85c52be884fccc122/src/game/hegemony/match-handoff.ts",
+      "locator": "handoffMatchTurn preflight and same-authority transfer",
+      "checked_on": "2026-11-12",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "web.m135b.handoff-tests.1cf3b03",
+      "kind": "primary_code",
+      "repository": "https://github.com/chuongphong12/Sanguosha-vn",
+      "revision": "1cf3b03c53b54e4b74fc8bf85c52be884fccc122",
+      "path": "tests/hegemony/match-handoff.test.ts",
+      "url": "https://github.com/chuongphong12/Sanguosha-vn/blob/1cf3b03c53b54e4b74fc8bf85c52be884fccc122/tests/hegemony/match-handoff.test.ts",
+      "locator": "49 scoped handoff/first-turn/boundary cases with synthetic policies",
+      "checked_on": "2026-11-12",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "native.m135b.face-up.ce4e62b",
+      "kind": "primary_code",
+      "repository": "https://github.com/TamQuocSat-LangKhach/QSanguosha-QuocChien",
+      "revision": "ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f",
+      "path": "src/core/player.cpp",
+      "url": "https://github.com/TamQuocSat-LangKhach/QSanguosha-QuocChien/blob/ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f/src/core/player.cpp#L37",
+      "locator": "Player::Player face_up(true), line37",
+      "checked_on": "2026-11-12",
+      "author": null,
+      "business_owner": null
     }
   ],
   "pages": [
@@ -1974,6 +2010,21 @@
         "web.m135a.owner-tests.46025ce",
         "web.m135a.shared-fixture.46025ce",
         "web.m135a.composed-tests.46025ce"
+      ]
+    },
+    {
+      "path": "engine/match-handoff.md",
+      "status": "supported",
+      "reviewed_on": "2026-11-12",
+      "review_scope": "M1.3.5b trusted mutable-candidate handoff/internal v3 branch; actual setup and first-turn2–10 with explicit synthetic policies; public v3 save/routing/projection and complete match pending",
+      "applies_to": {
+        "game_commit": "1cf3b03c53b54e4b74fc8bf85c52be884fccc122",
+        "native_commit": "ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f"
+      },
+      "source_ids": [
+        "web.m135b.handoff.1cf3b03",
+        "web.m135b.handoff-tests.1cf3b03",
+        "native.m135b.face-up.ce4e62b"
       ]
     }
   ],
@@ -3292,6 +3343,33 @@
         "web.m135a.composed-tests.46025ce"
       ],
       "scope": "Revision-scoped trusted turn-owner slice and tests; synthetic policies, injected save conditions and pending application/release gates remain explicit."
+    },
+    {
+      "subject": "page:engine/match-handoff.md",
+      "predicate": "derived_from",
+      "object": "source:web.m135b.handoff.1cf3b03",
+      "evidence": [
+        "web.m135b.handoff.1cf3b03"
+      ],
+      "scope": "Revision-scoped internal startup handoff, tests and initial face-up default; synthetic conditions and pending public v3/release remain distinct."
+    },
+    {
+      "subject": "page:engine/match-handoff.md",
+      "predicate": "derived_from",
+      "object": "source:web.m135b.handoff-tests.1cf3b03",
+      "evidence": [
+        "web.m135b.handoff-tests.1cf3b03"
+      ],
+      "scope": "Revision-scoped internal startup handoff, tests and initial face-up default; synthetic conditions and pending public v3/release remain distinct."
+    },
+    {
+      "subject": "page:engine/match-handoff.md",
+      "predicate": "derived_from",
+      "object": "source:native.m135b.face-up.ce4e62b",
+      "evidence": [
+        "native.m135b.face-up.ce4e62b"
+      ],
+      "scope": "Revision-scoped internal startup handoff, tests and initial face-up default; synthetic conditions and pending public v3/release remain distinct."
     }
   ]
 }
