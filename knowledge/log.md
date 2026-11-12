@@ -164,3 +164,17 @@ Mechanical lint passed134 Markdown pages/772 relative file links/3 heading ancho
 [Source CI41966055210](https://github.com/chuongphong12/Sanguosha-vn/actions/runs/41966055210) passed both jobs with its default check configuration at head46025ce4653373ecbe3f796bd96093a56c0ee358, synthetic merge2ef0f84 into main3cb751449afcd98748a4cebcc54fd5414e5fbce9. It ran2586/103 with0 lint errors/42 prior warnings and verified preceding knowledge18bac319 offline/upstream. Imported-head CI remains a later separate check.
 
 Canonical full review at tree5ac45788443cba90b7b228eb44ed4bb212852ce7 found one Standards wording error and0 Spec findings. The contract now states explicitly that Room cleanup applies to TurnBroken/StageChange and GameFinished skips it. The correction at tree13c5f44fe3ae75d6a08e891e44a9e277f0858d85 and this receipt-only delta are reviewed before publication; future integration success is not inferred.
+
+## [2026-11-12] ingest | M1.3.5b trusted startup-to-battle handoff
+
+- Input knowledge 8906647032b254641add0e01d2d5bdc54e8cc3e0, inspected game 1cf3b03c53b54e4b74fc8bf85c52be884fccc122 against d20092745fa4e3e9e98440dbab1e173b8a2825c1, native ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f. Added [handoff contract](engine/match-handoff.md)/[checkpoint](reviews/2026-11-12-hegemony-m135b-handoff.md), affected current navigation/baseline and three immutable sources/one scoped page/three relations. All old registry records remain unchanged.
+- Baseline57/57; finalfocused106/106; full lint/typecheck/test maxWorkers2 passed2635/104 with42 old warnings; build passed. Source Standards0/Spec0 at fb4f5ead6dedfc0b2a392f00bd03bff6e9c33aa1. New-slice RED fixes, native constructor citation and graph hash/extraction limits are retained in the checkpoint.
+- One Room/scheduler handoff and internal v3 branch do not implement the public v3 controller/restore/projection, native full-match parity or production enablement. Source CI/canonical lint/reviews/import-head CI remain separate publication receipts.
+
+## Final pre-publication receipts
+
+Mechanical lint passed136 Markdown pages/790 relative file links/3 anchors,597 pinned citations/523 line locators/166 local Git objects;0 errors. Registry totals141 sources/15 scoped pages/149 relations preserve all138 previous sources/14 page records/146 relations exactly. These checks establish references and bounded scope, not semantic or native-runtime certification.
+
+[Source CI43172636883](https://github.com/chuongphong12/Sanguosha-vn/actions/runs/43172636883) passed both jobs at head1cf3b03c53b54e4b74fc8bf85c52be884fccc122, synthetic mergefd064ce into main3cb751449afcd98748a4cebcc54fd5414e5fbce9. Default CI ran2635/104 with0 lint errors/42 prior warnings and verified preceding knowledge8906647 offline/upstream. Imported-head CI remains separate.
+
+Independent canonical Standards0/Spec0 reviewed the15-file draft at treeea7e30761157d0aaaebd35418d85bd12cb1b9fe7. This receipt-only delta is reviewed before publishing; it does not assert later integration success.

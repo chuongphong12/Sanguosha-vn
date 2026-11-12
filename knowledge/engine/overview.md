@@ -81,3 +81,7 @@ Evidence: external adapter interfaces across the modules above; absence of battl
 ## Later M1.3.5a owner
 
 [Trusted turn ownership](match-turn.md) is implemented as a separate internal slice. It is not connected to the existing match-v2/startup/M0 profiles. Startup handoff, v3 save/answer/projection and complete setup-to-terminal gameplay remain required; earlier revision-scoped claims above retain their original scope.
+
+## Later M1.3.5b handoff
+
+[Trusted startup-to-battle handoff](match-handoff.md) now consumes an idle completed v2 startup candidate into the internal v3 battle branch on the same Room/scheduler. This does not wire the public application/API or replace its v2 restore/view. Full v3 save/routing/projection and complete-match/release acceptance remain required.

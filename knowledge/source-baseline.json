@@ -2,13 +2,13 @@
   "version": 1,
   "game": {
     "repository": "https://github.com/chuongphong12/Sanguosha-vn.git",
-    "commit": "46025ce4653373ecbe3f796bd96093a56c0ee358",
-    "availability": "Published internal trusted turn-owner slice; existing application profiles unchanged, match-v3 handoff/routing/restore/projection pending"
+    "commit": "1cf3b03c53b54e4b74fc8bf85c52be884fccc122",
+    "availability": "Published trusted startup-to-battle handoff; full public v3 controller/restore/projection and production remain pending"
   },
   "native": {
     "repository": "https://github.com/TamQuocSat-LangKhach/QSanguosha-QuocChien.git",
     "commit": "ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f",
     "release": "2.3.43-beta2"
   },
-  "scope": "Game 46025ce4653373ecbe3f796bd96093a56c0ee358 adds createMatchTurn and27 owner cases, reusing the preceding13 composition cases through an extracted fixture. Local bounded fullcheck2586/103/typecheck/build and two axes0 cover this internal slice, not setup-to-terminal, full aggregate restore, real combat winner or production acceptance."
+  "scope": "Game 1cf3b03c53b54e4b74fc8bf85c52be884fccc122 adds the trusted handoff and49 cases, including actual setup/startup/dealing/first-turn2–10-seat cases. Finalcheck2635/104/typecheck/build and two source review axes0 cover this internal branch. Existing kernels/profiles unchanged; no combat-to-terminal, complete untrusted v3 save, network/UI/provider or release proof."
 }

@@ -77,3 +77,7 @@ The later [M1.3.3a phase lifecycle](../engine/phase-lifecycle.md) was validated 
 ## M1.3.5a progress
 
 [Trusted turn owner](../engine/match-turn.md) adds bounded pumping and explicit native unwind classification without changing existing application profiles. Next is v3 handoff/save/routing/projection, followed by actual minimal-profile setup-to-terminal for2–10 seats. This does not reduce accepted scope or close M1.3.5/release gates.
+
+## M1.3.5b progress
+
+[Trusted handoff](../engine/match-handoff.md) now follows the turn-owner slice, with actual setup/dealing/first-turn cases for2–10 seats. It does not complete public v3 create/apply/view/restore, combat-to-terminal or release gates; the accepted scope is unchanged.

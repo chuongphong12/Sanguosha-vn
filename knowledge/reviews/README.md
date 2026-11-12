@@ -57,3 +57,5 @@ Original game paths and blob identities are recorded in the [migration manifest]
 - [2026-11-05 M1.3.4c composed core turn](2026-11-05-hegemony-m134c-composed-turn.md):13 test-only integration cases; fullcheck2559/102; synthetic package and remaining match/release limits explicit.
 
 - [2026-11-05 M1.3.5a trusted turn owner](2026-11-05-hegemony-m135a-turn-owner.md):27 new tests; bounded local fullcheck2586/103; real cleanup/recovery with explicit synthetic and pending application boundaries.
+
+- [2026-11-12 M1.3.5b startup-to-battle handoff](2026-11-12-hegemony-m135b-handoff.md):49 new cases, fullcheck2635/104; internal branch only, full v3/public play and release still pending.

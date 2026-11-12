@@ -66,3 +66,5 @@ Choose one source/topic, use the ingest workflow, and update its affected pages 
 M1.3.4c adds one immutable composed-turn test source and one scoped [composition page](../engine/composed-turn.md); its applicability is three-seat test integration, not production behavior.
 
 M1.3.5a registers four immutable owner/test/extracted-fixture sources and the scoped [turn-owner page](../engine/match-turn.md). It does not certify a v3 application save or a normally created complete match.
+
+M1.3.5b adds two immutable handoff source/test records and one native face-up default citation for the scoped [handoff contract](../engine/match-handoff.md). Internal continuation does not certify a complete public v3 save or match.
