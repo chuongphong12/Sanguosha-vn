@@ -1,0 +1,53 @@
+# Part 4ab.2: MethodResponse acquisition and CardResponded lifecycle
+
+Source/test commit `ea8c98cd13224d26207458e281a127a3ba221e6d`, reviewed against `9fec1e3dc4d4fcb9aac66f71413b189329bb68a0`. This continues the direct request family after 4ab.1 with the same full acquisition scope: CardAsked, shared provision, request/response-validation children and retry. The selected native authority remains `ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f`. See [research and acceptance cases](../research/2026-10-20-method-response.md), [current shared contract](../engine/direct-card-use.md) and the historical [4ab.1 checkpoint](2026-10-20-hegemony-part4ab1.md).
+
+## Result and adapter boundaries
+
+`createAskCardResponseOperation` registers `ask-card-response` in the existing `ask-card-use.ts` module. An internal owner shares acquisition without broadening the original public MethodUse API. Response-specific rules supply validateInResponseAfter instead of validateAfter. Both factories consume one room-wide provided slot and retain nested room reason/pattern state rather than restoring it.
+
+| Concern                 | Real implementation exercised                                                                                                                                 | Remaining adapter / limitation                                                                                                 |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| Acquisition             | Scheduler dispatch, CardAsked, nil/accepted ChoiceMade, provider precedence, continuing and native retry defaults                                             | Authenticated catalogue/ownership/pattern admission, human parse, AI normalization/delay/timeouts are trusted request adapters |
+| Conversion and identity | Raw selected versus validated reference, private metadata persistence and current-material lookup                                                             | Concrete package conversion and current descriptor/subcard authority use fixture adapters                                      |
+| Response envelope       | Pre-choice hand provenance, post-choice initial material snapshot, CardResponded payload/target, provision-sensitive cleanup and original response after-hook | Wrapped/log/owned-skill notifications, reveal/Huashen and native skill/position/general metadata use named fixture adapters    |
+| Movement                | Actual table and discard operations, BeforeCardsMove/CardsMoveOneTime observers and JSON restore                                                              | Fixture moveReason supplies normalized RESPONSE/actor/skill metadata; no complete native wire-reason certification             |
+| Caller composition      | Caller-owned operation requests Jink/Slash and reads nullable result through the real response operation                                                      | ArcheryAttack/Duel-shaped request/result fixtures, not actual ported package/damage handlers                                   |
+| Persistence             | Real scheduler prompt validation, operation/event children, repeated movement pauses and retained eager interruption state                                    | Native exception unwind and whole-match reconnect remain excluded                                                              |
+
+Response reason and payload fields are explicit: nullable m_who is the supplied recipient; responder is event target; m_isUse/m_isRetrial are false; m_data is original request data. Hand provenance is nonempty/all responder-owned hand materials before ChoiceMade, independently of payment IDs after ChoiceMade. Event rewrite/consumption cannot replace validated cleanup/return or the original raw after-hook. isProvision skips only final discard. This owner adds no use/history/finish events or MethodUse suppression/flag cleanup. Other listeners may implement their own behavior.
+
+## Executed validation
+
+- First public dispatch behavioral red: a temporary MethodUse forwarding implementation emitted PreCardUsed/CardUsed/CardFinished instead of CardResponded. The response branch made the assertion pass. A second red exposed isProvision=true discarding materials; the response-only cleanup guard passed its regression. Missing exports are not counted as behavioral red evidence.
+- Final focused suite: **87 tests**, including all **44 previous MethodUse cases** and **43 new MethodResponse cases**, exit 0. New coverage includes Jink/Slash request contracts, real movement reasons, nullable recipient/data, physical wrapped modified/unmodified references, zero/multiple/mixed/other-owner materials, pre-choice provenance versus post-choice payment, raw SkillCard conversion, mutable/consumed CardResponded, material taken by real child movement, provision, AI/human/provider distinctions, dead/null provision, retry option defaults, nested cross-method room state and invalid request rejection.
+- JSON pauses restore request, validation, notifications, reveal and after-hook children as well as CardAsked/ChoiceMade/CardResponded and actual BeforeCardsMove/CardsMoveOneTime events at table/discard boundaries. Wrong actor, registry mismatch, stale and replayed prompt responses cannot repeat work. All three scheduler interruption reasons retain paid table state and freeze the remainder; no invented native rollback/finish occurs.
+- Final `npm run check`: exit 0, **76 files / 1,870 tests**, typecheck passed, **42 inherited lint warnings / zero errors**. `npm run build`: exit 0. Only a test assertion was added after the successful build; runtime/build inputs were unchanged. Full check was rerun after that assertion.
+- Staged whitespace check passed. Exact tested/reviewed bytes match both indexes below. Canonical link validation and offline/upstream subtree verification accompany publication; the game lock records the concrete published knowledge SHA/tree.
+
+## Independent Standards and Spec reviews
+
+Standards: zero actionable documented-standard violations or baseline smells. Spec: one initial P2 evidence gap, missing observation of actual response movement metadata. A public-dispatch test now observes BeforeCardsMove and CardsMoveOneTime for both table and discard, checking literal response reason, actor and nonempty skill metadata. Re-review: zero remaining Spec findings. Both independent reviewers confirmed these final hashes:
+
+| File                                  | SHA256                                                             |
+| ------------------------------------- | ------------------------------------------------------------------ |
+| `src/game/hegemony/ask-card-use.ts`   | `932f76668ddee15d7b39fcd3761da2d9584d6589e6dcdb19340ec88e0d3eeb64` |
+| `tests/hegemony/ask-card-use.test.ts` | `da11f1ab800f8954468cc4943c240e83bf4982eb677e2b59533ad560ff3bc323` |
+
+## Graph checks and limits
+
+Exact pre-edit impacts of createAskCardUseOperation, its private readRequest and test setup were LOW with test callers included. The older source graph was one documentation-lock commit behind, so source-byte identity was checked before reliance. Shared scheduler/readers/movement implementations were left unchanged.
+
+GitNexus **1.6.12 force rebuild** succeeded: **297 files / 8,997 nodes / 23,199 edges / 222 clusters / 530 processes**. Both indexed file hashes equal tested bytes and independent CodeGraph hashes. Exact new response factory context resolves test setup; includeTests impact is LOW (one direct caller), use factory LOW (two), internal shared owner LOW (two). Provider, unchanged in this slice, has MEDIUM impact with five test references. Name-only readRequest impact was ambiguous/UNKNOWN across two modules; exact UID resolved the intended helper to LOW with two callers. No UNKNOWN verdict is treated as an all-clear. Factory defaults exclude tests, so explicit includeTests/context plus the independent affected-tests query establish the fixture-only consumers, not production integration.
+
+Staged detect_changes: **63 symbols / two files / two selected processes / MEDIUM**. Cumulative comparison from Part 4aa base `21d693e4c9c046b30085fc11a6a434d4d8bb3e31`: **754 symbols / 30 files / 34 selected processes / CRITICAL**. Responses were not partial/truncated. The two exact process IDs were inspected through STEP_IN_PROCESS: ask-card run → readResponse → readCardReference → isRecord, and ask-card run → readResponse → readExecutionCardUse. Process labels alone are ambiguous and initially selected a Slash trace, so exact IDs were used. These decoder traces are not an exhaustive extraction of response acquisition or its registered children; raw cumulative risk is retained rather than reclassified from test totals.
+
+Extraction omits **355 entry candidates / 1,255 callees**, cuts **19 walks**, leaves **13 cross-language property sites** unresolved and skips one oversized font. Those global limits remain even with nonpartial query responses. CodeGraph **1.6.0** independently reports **257 files / 3,179 nodes / 16,185 edges**, complete state, no pending changes/refs or worktree mismatch/reindex recommendation. It resolves response factory → setup → suite and identifies the affected test file. Final source review uses fixed hashes rather than trusting only index commit labels.
+
+Local receipts: Temp `tqs4ab2-check-final.log`, `tqs4ab2-build.log`, `tqs4ab2-gitnexus.log`, `tqs4ab2-codegraph.log`, `tqs4ab2-graphs.json` and `tqs4ab2-flow-detail.json`. Permanent source/tests, source pin and hashes above provide durable attribution; temporary logs are not game assets. Later documentation imports can alter graph document counts without altering these certified source bytes.
+
+## Delivery and next dependency
+
+Source/test commit is local on codex/hegemony-card-admission. Canonical knowledge is published before importing its pinned subtree; clone/old-checkout/return verification checks docs travel with game commits. No game push, PR/main merge, remote game CI or deployment is asserted here. Production still registers Standard2013.
+
+Next explicitly scope MethodNone/Discard and retrial, then SinglePeach → actual Room use(false). Native unwind, phase/turn composition, executable package/catalogue/dealing, application authentication/network/projection/UI/bots and complete-match conformance remain required. This completes the named normalized MethodResponse library scope, not playable Quốc Chiến or full native parity.

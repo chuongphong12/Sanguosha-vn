@@ -1,0 +1,52 @@
+# M0.3/M0.4 — First executable local tracer
+
+Date: 2026-10-23. Status: reviewed **partial prototype evidence**, not completed M0.3/M0.4 or production readiness. Q31 approved the M0.2 contract and starting these experiments; no additional user approval was required to execute this agreed slice.
+
+## Identities and capture
+
+- Source base: `dce1d0da3a6b1d1ae2cc3549fcdf1af854f340a8`. Prototype source: `7e1b5f23f313683f6363b08b9a3937367b949f7d`, branch `codex/hegemony-m0-prototypes`, captured outside main. Paths below refer to that game source.
+- Native authority remains `ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f`, 2.3.43-beta2; installed boardgame.io is 0.50.2. No existing engine, production registration, server route or UI route was modified.
+- Reviewed input: the [accepted session contract](../research/2026-10-22-m0-session-contract.md), [native bot policy sources](../research/2026-10-22-m0-bot-policy-sources.md) and [hosting options](../research/2026-10-22-m0-hosting-options.md). Research source hashes and official citations remain in those files.
+- The game branch adds an explicitly named prototype directory and tests, three task-runner commands and direct development dependencies for already-installed Socket.IO 4.8.3 packages. The lock change adds only those two importer entries; no dependency upgrade or lock-format migration is retained. Frozen lock installation with the CI's pnpm 11 passed; local pnpm 12 rewrote formatting, which was discarded.
+
+## What actually ran
+
+| Seam                                   | Actual authority                                                                                                                                                                          | Bounded substitute / remaining work                                                                                                                                                                            |
+| -------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Browser/client → authenticated command | Real loopback HTTP/Socket.IO; seat-bound socket, secret hash, revision, controller generation and actor-scoped intent receipt                                                             | Local fixture rooms, two seats; no production server/lobby/client adapter registration.                                                                                                                        |
+| Master → rules mutation                | Actual boardgame.io Master with staged storage, subscriber and transport; existing scheduler/drawCards/getNCards/drawCard/movement                                                        | Eight-card fixture. This is a drawing command, not production Play/card-use admission, complete package legality or full turn.                                                                                 |
+| Commit → accepted actor view           | Real local file write/fsync/rename; canonical state, metadata, member authority and receipt in one document; raw Master packets never released                                            | No durable event outbox, distributed coordinator, external SQL adapter or provider durability proof. No power-loss guarantee.                                                                                  |
+| Recovery                               | An actual child server process is killed after commit with its command ACK deliberately withheld; restart returns the receipt/current private state without re-execution                  | Same-machine storage only; live pending prompt, shuffle/RNG progression and saved deadline recovery remain unexecuted.                                                                                         |
+| Presence/control                       | Secondary read-only, explicit takeover, stale-controller rejection, last-online explicit Leave and rejected resurrection                                                                  | No grace/deadline clocks, automatic bot takeover, host management or complete mid-match bot lifecycle yet.                                                                                                     |
+| Actor-only bot                         | Pure observation/offers/versioned per-seat memory/seed. Native keep-value subset with worked tactical expectations. Four actual draw decisions pass through the same session command seam | Jink/rescue/Nullification/targets and other policy families are chooser fixtures only, not executed native effect chains. No shared raw Room input, but also no worker isolation or persisted live bot memory. |
+
+The fixture joins freeze at first drawing; this is not an implementation of paired-general setup. Callback functions for current socket liveness remain ephemeral and outside serialized state. The local writer lease detects a live/stale PID and is explicitly not a distributed lease.
+
+## Executed validation
+
+- Baseline: typecheck and **85 files / 2,125 tests** passed before prototype implementation. Red cases reproduced the missing session/policy behavior, secondary Leave and duplicate concurrent socket binding before their fixes.
+- Final `npm run check`: lint/typecheck plus **87 files / 2,138 tests** passed; lint retained existing repository warnings, with no new prototype warning. Dedicated prototype compilation covers the runner/benchmark/browser scripts omitted from the root compiler's include list.
+- Focused prototype suite: **13 tests** passed. It includes a real disk failure with no speculative publication, private views, duplicate intent, stale revision/controller, immediate deletion/rejected return, actual SIGKILL-before-ACK recovery and acquisition/disconnect/queued-Leave races.
+- `npm run prototype:m0:browser` passed with two isolated real Chromium contexts and a secondary same-seat tab: private hand/count views, real draw, read-only secondary, takeover fencing and refresh recovery.
+- `npm run build` passed. This builds the existing production client; it neither registers nor releases the prototype.
+- `server/prototypes/hegemony-m0/evidence/baseline-2026-10-23.json` records raw local policy timing/CPU/RSS and four staged-Master draw samples, with policy/native/content/seed/runtime identity. Its 50,000 choices repeatedly evaluate five small fixtures. They are not 50,000 matches, a strength result, a worker-memory budget or a five-room load result.
+
+## Graph evidence and limits
+
+Graph-first exploration/impact preceded editing. GitNexus initially lacked caller edges for dynamic factory references; CodeGraph and direct source/reference/hash checks identified actual scheduler/admission consumers. Existing kernel bytes were unchanged, so the experiments added consumers without rewriting those dependencies. Both indexes were refreshed for the prototype.
+
+Correction-specific GitNexus impact reported LOW for `createPrototype` (four consumers) and `startProofServer` (two). Staged-code analysis before adding its own graph receipt reported **CRITICAL**, 149 touched symbols and 87 affected flows. Of these, 54 matched a `version` property with an empty graph ID. Inspecting `DrawLog → OnStart` showed its legacy `WaitingRoomScene.onStart` also had an empty ID; it was not a dependency on the prototype's benchmark property. The raw summary is retained in `server/prototypes/hegemony-m0/evidence/graph-2026-10-23.json`, with that concrete identity collision, scoped impact and source checks; the full machine-local report remains a Temp receipt. The production `src/` and server entrypoint had no diff, no prototype imports were found there, and no prototype marker was found in built production JavaScript. These checks bound the experimental change; they do not turn the raw CRITICAL result into production clearance.
+
+Fresh GitNexus reported 10,607 nodes / 26,167 edges / 504 flows; CodeGraph reported complete with 3,637 nodes / 18,365 edges and no pending changes/refs. Process extraction is capped and reported dropped entry/callee candidates; missing flows are unresolved rather than evidence of no dependency. Installed dependency internals were inspected directly, not assumed indexed.
+
+## Separate review axes
+
+**Standards:** initial review found a read-only tab could Leave and concurrent socket binding could allocate multiple rooms. Controller/generation checks and binding reservation fixed the reproductions. A follow-up exposed a queued-Leave race: post-bind compensation alone could run too late. Trusted socket-liveness predicates are now checked inside serialized session authority, so disconnected pending acquisitions never preserve the room. An actual fsynced acquisition is paused while Leave queues behind it in the regression. Final follow-up: zero residual findings.
+
+**Spec:** initial findings covered the same Q26/Q28 violations, with the ghost-presence race rated P1. Review required the queued acquisition case rather than a test that waits for cleanup first. The corrected authority/transport and regression passed independent follow-up with zero residual findings. Both reviewers explicitly limit their conclusions to the local slice.
+
+## Current tracker and next work
+
+The [session contract ticket](https://github.com/chuongphong12/Sanguosha-vn/issues/28) is closed after Q31 approval. Keep [bot prototype](https://github.com/chuongphong12/Sanguosha-vn/issues/29) and [online/storage prototype](https://github.com/chuongphong12/Sanguosha-vn/issues/30) open. This checkpoint answers the first staged-Master/actor-view question locally; it does not satisfy all their acceptance criteria.
+
+Next integrate real pending decision/admission families and durable service-time deadline recovery, then execute meaningful bot choices through those operations and an actual external-store path. Hosting candidates are researched, not selected or provisioned; no account, billing or remote environment was inspected. No main merge, production deployment, full-manifest implementation, competitive-bot claim or capacity claim occurred.

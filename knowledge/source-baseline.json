@@ -1,0 +1,14 @@
+{
+  "version": 1,
+  "game": {
+    "repository": "https://github.com/chuongphong12/Sanguosha-vn.git",
+    "commit": "87df5894d23d854736fd51fb8fb5a4fe5fe95d7b",
+    "availability": "Published actual pile/game-over save-codec subset; complete profile/Room/public v3/full-match/production gates remain pending"
+  },
+  "native": {
+    "repository": "https://github.com/TamQuocSat-LangKhach/QSanguosha-QuocChien.git",
+    "commit": "ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f",
+    "release": "2.3.43-beta2"
+  },
+  "scope": "Game 87df5894d23d854736fd51fb8fb5a4fe5fe95d7b adds37 pile-codec cases and queued-child/precise-abandonment validation. Full2749/106/typecheck/build and both source reviews0 cover this subset. Live callbacks/interpreter remain unchanged; no complete profile/Room decoder, hand movement, combat-to-terminal or release proof."
+}
