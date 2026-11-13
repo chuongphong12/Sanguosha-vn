@@ -178,3 +178,9 @@ Mechanical lint passed136 Markdown pages/790 relative file links/3 anchors,597 p
 [Source CI43172636883](https://github.com/chuongphong12/Sanguosha-vn/actions/runs/43172636883) passed both jobs at head1cf3b03c53b54e4b74fc8bf85c52be884fccc122, synthetic mergefd064ce into main3cb751449afcd98748a4cebcc54fd5414e5fbce9. Default CI ran2635/104 with0 lint errors/42 prior warnings and verified preceding knowledge8906647 offline/upstream. Imported-head CI remains separate.
 
 Independent canonical Standards0/Spec0 reviewed the15-file draft at treeea7e30761157d0aaaebd35418d85bd12cb1b9fe7. This receipt-only delta is reviewed before publishing; it does not assert later integration success.
+
+## [2026-11-13] ingest | M1.3.5c.1 shared scheduler save codec
+
+- Input knowledge6b45f7f28f9e24a58d45721d0645a63719bc84ef; inspected game 9adedb305a364b00eb0e49564dc693058039e21e against c2d4e7eb5069bfcd3143ee736f6b88da9548adbd. User selected shared-scheduler B mechanism; [contract](engine/scheduler-save.md)/[checkpoint](reviews/2026-11-13-hegemony-m135c1-scheduler-save.md) record hooks, envelope checks, synthetic policies, review corrections and pending actual profile/Room/v3 work.
+- Final focused130/130, full2712/105/typecheck/build, lint42 prior warnings, source Standards0/Spec0 at455d57670cb9de476807c84a7e8a395a8a5b48cf. Three immutable sources/one page/three relations appended; old registry records preserved.
+- Canonical lint/reviews/import/remote CI are distinct delivery receipts; no core package/native full-match or release gate is closed.

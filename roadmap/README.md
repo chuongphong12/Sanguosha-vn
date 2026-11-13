@@ -35,3 +35,7 @@ The later [M1.3.3a phase lifecycle](../engine/phase-lifecycle.md) was validated 
 ## M1.3.5b progress
 
 [Trusted handoff](../engine/match-handoff.md) now follows the turn-owner slice, with actual setup/dealing/first-turn cases for2–10 seats. It does not complete public v3 create/apply/view/restore, combat-to-terminal or release gates; the accepted scope is unchanged.
+
+## M1.3.5c.1 progress
+
+The [shared scheduler save codec](../engine/scheduler-save.md) implements the first part of the [selected B mechanism](../specs/hegemony-match-v3-save.md). Complete actual profile codecs and aggregate decoding next, then public v3 and actual combat-to-terminal. No release scope is reduced.
