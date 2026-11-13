@@ -97,6 +97,12 @@ export interface OperationContext<G> {
   operationChild: OperationResult | null;
 }
 
+export interface FrameSaveContext {
+  child: Readonly<OperationFrame | TriggerFrame> | null;
+  /** Traversal will discard this frame; live cleanup descendants remain active. */
+  abandoning: boolean;
+}
+
 export interface OperationHandler<G> {
   name: string;
   /** Pure, opt-in saved input/cursor/cleanup validation; never executes work. */
@@ -105,6 +111,7 @@ export interface OperationHandler<G> {
     frame: Readonly<OperationFrame>,
     interruption: Readonly<TriggerInterruption> | null,
     prompt: Readonly<TriggerPrompt> | null,
+    state?: Readonly<FrameSaveContext>,
   ) => void;
   /** Pure validation of retained child/root results, independent of live preflight. */
   validateResult?: (
@@ -144,6 +151,7 @@ export interface TriggerSkill<G> {
     game: Readonly<G>,
     frame: Readonly<TriggerFrame>,
     prompt: Readonly<TriggerPrompt> | null,
+    state?: Readonly<FrameSaveContext>,
   ) => void;
   events: string[];
   priority: number | ((event: TriggerEvent) => number);

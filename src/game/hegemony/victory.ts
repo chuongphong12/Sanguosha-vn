@@ -104,6 +104,22 @@ export function createGameOverOperation<
 >(): OperationHandler<G> {
   return {
     name: "game-over",
+    validateSave: (_game, frame, _interruption, prompt, state) => {
+      if (
+        typeof frame.operation.data !== "string" ||
+        frame.continuation !== null ||
+        frame.answer !== null ||
+        frame.child !== null ||
+        frame.operationChild !== null ||
+        frame.cleanup ||
+        state?.child ||
+        prompt
+      )
+        throw new Error("Invalid saved game-over");
+    },
+    validateResult: () => {
+      throw new Error("Game-over cannot return a result");
+    },
     validate: (_, operation) => {
       if (typeof operation.data !== "string")
         throw new Error("Invalid game-over winner");

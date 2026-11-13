@@ -5,6 +5,9 @@ import type {
   OperationStep,
   TriggerData,
   TriggerOperation,
+  OperationFrame,
+  TriggerPrompt,
+  TriggerFrame,
 } from "./scheduler";
 
 export interface DrawPileGame extends CardResourceGame {
@@ -35,6 +38,54 @@ function batchInput(data: TriggerData) {
     updatePileNumber: data.updatePileNumber !== false,
   };
 }
+function savePileFrame(
+  game: DrawPileGame,
+  rules: DrawPileRules,
+  frame: Readonly<OperationFrame>,
+  prompt: Readonly<TriggerPrompt> | null,
+) {
+  piles(game, rules);
+  if (prompt || frame.cleanup || frame.answer !== null)
+    throw new Error("Invalid pile saved boundary");
+}
+function reservedIds(
+  game: DrawPileGame,
+  rules: DrawPileRules,
+  value: unknown,
+): number[] {
+  const reserved = piles(game, rules).reserved.cards;
+  if (
+    !Array.isArray(value) ||
+    new Set(value).size !== value.length ||
+    value.some(
+      (id) => !Number.isSafeInteger(id) || id < 0 || !reserved.includes(id),
+    )
+  )
+    throw new Error("Invalid reserved draw IDs");
+  return value;
+}
+function pileChild(
+  frame: Readonly<OperationFrame>,
+  child: Readonly<OperationFrame | TriggerFrame> | null | undefined,
+  expected: string | null | undefined,
+  abandoning: boolean,
+) {
+  if (
+    frame.child !== null ||
+    (expected !== null && !abandoning && !child && !frame.operationChild) ||
+    (expected === null && (child || frame.operationChild)) ||
+    (child &&
+      (child.kind !== "operation" ||
+        (expected !== undefined && child.operation.name !== expected))) ||
+    (frame.operationChild &&
+      expected !== undefined &&
+      frame.operationChild.operation.name !== expected)
+  )
+    throw new Error("Invalid saved pile child");
+  return child?.kind === "operation"
+    ? child.operation
+    : frame.operationChild?.operation;
+}
 export function createGetNCardsOperation<G extends DrawPileGame>(
   rules: DrawPileRules,
 ): OperationHandler<G> {
@@ -44,6 +95,70 @@ export function createGetNCardsOperation<G extends DrawPileGame>(
   };
   return {
     name: "get-n-cards",
+    validateSave: (game, frame, _interruption, prompt, state) => {
+      const child = state?.child;
+      savePileFrame(game, rules, frame, prompt);
+      const input = batchInput(frame.operation.data),
+        c = frame.continuation;
+      if (c === null) {
+        pileChild(frame, child, null, state?.abandoning === true);
+        return;
+      }
+      if (
+        typeof c !== "object" ||
+        Array.isArray(c) ||
+        typeof c.stage !== "string" ||
+        !["drawing", "drawn", "noticed", "terminal"].includes(c.stage) ||
+        c.count !== input.count ||
+        c.fromUp !== input.fromUp ||
+        c.updatePileNumber !== input.updatePileNumber ||
+        (c.stage === "noticed" && !input.updatePileNumber)
+      )
+        throw new Error("Invalid batch draw cursor");
+      const ids = reservedIds(game, rules, c.ids);
+      if (
+        ids.length > Math.max(0, input.count) ||
+        (c.stage === "noticed"
+          ? ids.length !== Math.max(0, input.count)
+          : c.stage === "drawn"
+            ? ids.length >= input.count
+            : ids.length !== 0)
+      )
+        throw new Error("Invalid batch draw progress");
+      if (c.stage === "terminal") {
+        const { draw, discard } = piles(game, rules);
+        if (input.count <= draw.cards.length + discard.cards.length)
+          throw new Error("Invalid batch exhaustion condition");
+      }
+      const next = pileChild(
+        frame,
+        child,
+        c.stage === "drawn"
+          ? "draw-card"
+          : c.stage === "drawing"
+            ? "swap-pile"
+            : c.stage === "terminal"
+              ? "game-over"
+              : undefined,
+        state?.abandoning === true,
+      );
+      if (
+        (c.stage === "drawn" && next && fromTop(next.data) !== c.fromUp) ||
+        (c.stage === "drawn" &&
+          frame.operationChild &&
+          ids.includes(Number(frame.operationChild.value))) ||
+        (c.stage === "terminal" && next && next.data !== ".")
+      )
+        throw new Error("Invalid batch draw child input");
+    },
+    validateResult: (game, result) => {
+      const input = batchInput(result.operation.data);
+      if (
+        reservedIds(game, rules, result.value).length !==
+        Math.max(0, input.count)
+      )
+        throw new Error("Invalid batch draw completion");
+    },
     validate: (game, operation) => {
       batchInput(operation.data);
       piles(game, rules);
@@ -138,6 +253,44 @@ export function createSwapPileOperation<G extends DrawPileGame>(
 ): OperationHandler<G> {
   return {
     name: "swap-pile",
+    validateSave: (game, frame, _interruption, prompt, state) => {
+      const child = state?.child;
+      savePileFrame(game, rules, frame, prompt);
+      readSlashInteger(roomTags(game).SwapPile, 0);
+      readSlashInteger(rules.swappingLimit, 5);
+      if (
+        ![null, 1, 2, "terminal"].includes(
+          frame.continuation as number | string | null,
+        )
+      )
+        throw new Error("Invalid swap-pile cursor");
+      if (frame.continuation === "terminal") {
+        const { draw, discard } = piles(game, rules);
+        const limit = readSlashInteger(
+          readSlashInteger(rules.swappingLimit, 5) + 1,
+        );
+        if (
+          (draw.cards.length || discard.cards.length) &&
+          !(limit > 0 && roomTags(game).SwapPile === limit)
+        )
+          throw new Error("Invalid swap terminal condition");
+      }
+      const next = pileChild(
+        frame,
+        child,
+        frame.continuation === null
+          ? null
+          : frame.continuation === "terminal"
+            ? "game-over"
+            : undefined,
+        state?.abandoning === true,
+      );
+      if (frame.continuation === "terminal" && next && next.data !== ".")
+        throw new Error("Invalid swap terminal child");
+    },
+    validateResult: (_game, result) => {
+      if (result.value !== null) throw new Error("Invalid swap-pile result");
+    },
     validate: (game) => {
       piles(game, rules);
       roomTags(game);
@@ -233,6 +386,40 @@ export function createDrawCardOperation<G extends DrawPileGame>(
 ): OperationHandler<G> {
   return {
     name: "draw-card",
+    validateSave: (game, frame, _interruption, prompt, state) => {
+      const child = state?.child;
+      savePileFrame(game, rules, frame, prompt);
+      fromTop(frame.operation.data);
+      if (![null, 1, 2].includes(frame.continuation as number | null))
+        throw new Error("Invalid draw-card cursor");
+      if (frame.continuation === 1) {
+        if (
+          frame.operationChild ||
+          (!state?.abandoning && !child && !frame.child) ||
+          (child && child.kind !== "event")
+        )
+          throw new Error("Invalid Fetch child");
+        const event =
+          child?.kind === "event" ? child.event : frame.child?.event;
+        if (
+          event &&
+          (event.name !== "FetchDrawPileCard" ||
+            event.target !== null ||
+            event.data !== null)
+        )
+          throw new Error("Invalid Fetch event");
+      } else
+        pileChild(
+          frame,
+          child,
+          frame.continuation === null ? null : "swap-pile",
+          state?.abandoning === true,
+        );
+    },
+    validateResult: (game, result) => {
+      fromTop(result.operation.data);
+      reservedIds(game, rules, [result.value]);
+    },
     validate: (game, operation) => {
       fromTop(operation.data);
       piles(game, rules);

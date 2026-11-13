@@ -388,7 +388,16 @@ export function createTriggerSaveCodec<G>(registry: TriggerRegistry<G>) {
           );
         } else
           requireSave(
-            frame.stage === "record" || frame.stage === "cost",
+            frame.stage === "record" ||
+              frame.stage === "cost" ||
+              (frame.stage === "effect" &&
+                frame.recorded &&
+                frame.continuation === null &&
+                frame.answer === null &&
+                frame.child === null &&
+                frame.operationChild === null &&
+                frame.consumed.length > 0 &&
+                band?.skills.includes(JSON.parse(frame.consumed.at(-1)!)[0])),
             "unselected stage",
           );
         if (!band)
@@ -538,7 +547,8 @@ export function createTriggerSaveCodec<G>(registry: TriggerRegistry<G>) {
       requireSave(
         saved.unwind.boundary === null
           ? saved.prompt === null
-          : cleaning.at(-1)?.id === saved.unwind.boundary,
+          : typeof saved.unwind.boundary === "string" &&
+              cleaning.at(-1)?.id === saved.unwind.boundary,
         "unwind boundary",
       );
     } else
@@ -587,7 +597,13 @@ export function createTriggerSaveCodec<G>(registry: TriggerRegistry<G>) {
     const checkResult = (r: OperationResult) =>
       profile.operations.find((op) => op.name === r.operation.name)!
         .validateResult!(structuredClone(game), structuredClone(r));
-    for (const frame of saved.frames) {
+    const cleanupIndex = saved.unwind?.boundary
+      ? saved.frames.findIndex((frame) => frame.id === saved.unwind!.boundary)
+      : -1;
+    for (const [index, frame] of saved.frames.entries()) {
+      const child = saved.frames[index + 1] ?? null;
+      const abandoning =
+        Boolean(saved.unwind) && (cleanupIndex < 0 || index < cleanupIndex);
       if (frame.child) checkEvent(frame.child.event);
       if (frame.operationChild) checkResult(frame.operationChild);
       if (frame.kind === "operation")
@@ -599,6 +615,7 @@ export function createTriggerSaveCodec<G>(registry: TriggerRegistry<G>) {
           frame.id === saved.prompt?.frameId
             ? structuredClone(saved.prompt)
             : null,
+          { child: structuredClone(child), abandoning },
         );
       else {
         checkEvent(frame.event);
@@ -609,6 +626,7 @@ export function createTriggerSaveCodec<G>(registry: TriggerRegistry<G>) {
             frame.id === saved.prompt?.frameId
               ? structuredClone(saved.prompt)
               : null,
+            { child: structuredClone(child), abandoning },
           );
       }
     }
