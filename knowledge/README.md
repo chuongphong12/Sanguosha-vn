@@ -89,3 +89,7 @@ Publication of a knowledge revision does not establish publication of the corres
 ## Latest internal handoff slice
 
 [M1.3.5b handoff](engine/match-handoff.md) now transfers a completed idle startup candidate into an internal v3 battle branch and validates first turns for2–10 seats. Existing public match-v2/production registration is unchanged; full v3 create/apply/view/restore, combat-to-terminal and release gates remain open.
+
+## Shared scheduler recovery prerequisite
+
+[M1.3.5c.1 shared save decoder](engine/scheduler-save.md) implements the first part of the [user-selected B recovery mechanism](specs/hegemony-match-v3-save.md). Actual profile codecs, Room decoding, public v3 and full-match/release acceptance remain pending.

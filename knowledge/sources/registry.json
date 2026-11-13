@@ -1697,6 +1697,42 @@
       "checked_on": "2026-11-12",
       "author": null,
       "business_owner": null
+    },
+    {
+      "id": "web.m135c1.contracts.9adedb3",
+      "kind": "primary_code",
+      "repository": "https://github.com/chuongphong12/Sanguosha-vn",
+      "revision": "9adedb305a364b00eb0e49564dc693058039e21e",
+      "path": "src/game/hegemony/scheduler.ts",
+      "url": "https://github.com/chuongphong12/Sanguosha-vn/blob/9adedb305a364b00eb0e49564dc693058039e21e/src/game/hegemony/scheduler.ts",
+      "locator": "Optional save/event/result hooks, exported frame contracts and unchanged pure actorChoices",
+      "checked_on": "2026-11-13",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "web.m135c1.decoder.9adedb3",
+      "kind": "primary_code",
+      "repository": "https://github.com/chuongphong12/Sanguosha-vn",
+      "revision": "9adedb305a364b00eb0e49564dc693058039e21e",
+      "path": "src/game/hegemony/scheduler-save.ts",
+      "url": "https://github.com/chuongphong12/Sanguosha-vn/blob/9adedb305a364b00eb0e49564dc693058039e21e/src/game/hegemony/scheduler-save.ts",
+      "locator": "Opt-in codec coverage, JSON/envelope/profile validation without execution",
+      "checked_on": "2026-11-13",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "web.m135c1.tests.9adedb3",
+      "kind": "test_code",
+      "repository": "https://github.com/chuongphong12/Sanguosha-vn",
+      "revision": "9adedb305a364b00eb0e49564dc693058039e21e",
+      "path": "tests/hegemony/scheduler-save.test.ts",
+      "url": "https://github.com/chuongphong12/Sanguosha-vn/blob/9adedb305a364b00eb0e49564dc693058039e21e/tests/hegemony/scheduler-save.test.ts",
+      "locator": "77 bounded decoder tests with actual scheduler and synthetic handlers",
+      "checked_on": "2026-11-13",
+      "author": null,
+      "business_owner": null
     }
   ],
   "pages": [
@@ -2025,6 +2061,21 @@
         "web.m135b.handoff.1cf3b03",
         "web.m135b.handoff-tests.1cf3b03",
         "native.m135b.face-up.ce4e62b"
+      ]
+    },
+    {
+      "path": "engine/scheduler-save.md",
+      "status": "supported",
+      "reviewed_on": "2026-11-13",
+      "review_scope": "M1.3.5c.1 adds shared opt-in scheduler save validation under the user-selected B design. Core profile codecs, aggregate Room validation, public match-v3 and full-match/release gates remain pending.",
+      "applies_to": {
+        "game_commit": "9adedb305a364b00eb0e49564dc693058039e21e",
+        "native_commit": "ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f"
+      },
+      "source_ids": [
+        "web.m135c1.contracts.9adedb3",
+        "web.m135c1.decoder.9adedb3",
+        "web.m135c1.tests.9adedb3"
       ]
     }
   ],
@@ -3370,6 +3421,33 @@
         "native.m135b.face-up.ce4e62b"
       ],
       "scope": "Revision-scoped internal startup handoff, tests and initial face-up default; synthetic conditions and pending public v3/release remain distinct."
+    },
+    {
+      "subject": "page:engine/scheduler-save.md",
+      "predicate": "derived_from",
+      "object": "source:web.m135c1.contracts.9adedb3",
+      "evidence": [
+        "web.m135c1.contracts.9adedb3"
+      ],
+      "scope": "M1.3.5c.1 adds shared opt-in scheduler save validation under the user-selected B design. Core profile codecs, aggregate Room validation, public match-v3 and full-match/release gates remain pending."
+    },
+    {
+      "subject": "page:engine/scheduler-save.md",
+      "predicate": "derived_from",
+      "object": "source:web.m135c1.decoder.9adedb3",
+      "evidence": [
+        "web.m135c1.decoder.9adedb3"
+      ],
+      "scope": "M1.3.5c.1 adds shared opt-in scheduler save validation under the user-selected B design. Core profile codecs, aggregate Room validation, public match-v3 and full-match/release gates remain pending."
+    },
+    {
+      "subject": "page:engine/scheduler-save.md",
+      "predicate": "derived_from",
+      "object": "source:web.m135c1.tests.9adedb3",
+      "evidence": [
+        "web.m135c1.tests.9adedb3"
+      ],
+      "scope": "M1.3.5c.1 adds shared opt-in scheduler save validation under the user-selected B design. Core profile codecs, aggregate Room validation, public match-v3 and full-match/release gates remain pending."
     }
   ]
 }

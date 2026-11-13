@@ -46,3 +46,7 @@ M1.3.2 now implements [actual protected damage, CardUsed and Room-use cleanup](c
 ## Later RoundStart/Judge slice
 
 [M1.3.4b.1 phase bodies](phase-bodies.md) now add a single Proceeding bridge plus RoundStart reveal and captured Judge resolution. Draw is delegated once; Play/Discard remain required missing operations in this slice. Aggregate match v3 and release gates remain open; earlier evidence retains its named revision.
+
+## Later shared save prerequisite
+
+The [M1.3.5c.1 decoder](scheduler-save.md) adds explicit shared saved-state hooks and opt-in scheduler-envelope checks. Existing runtime/profile behavior above retains its source scope. Full enabled-profile codecs, aggregate restore and public v3 integration remain pending.

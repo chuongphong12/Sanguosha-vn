@@ -85,3 +85,7 @@ Evidence: external adapter interfaces across the modules above; absence of battl
 ## Later M1.3.5b handoff
 
 [Trusted startup-to-battle handoff](match-handoff.md) now consumes an idle completed v2 startup candidate into the internal v3 battle branch on the same Room/scheduler. This does not wire the public application/API or replace its v2 restore/view. Full v3 save/routing/projection and complete-match/release acceptance remain required.
+
+## Later shared save prerequisite
+
+The [M1.3.5c.1 decoder](scheduler-save.md) adds explicit shared saved-state hooks and opt-in scheduler-envelope checks. Existing runtime/profile behavior above retains its source scope. Full enabled-profile codecs, aggregate restore and public v3 integration remain pending.
