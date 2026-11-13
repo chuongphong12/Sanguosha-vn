@@ -99,6 +99,18 @@ export interface OperationContext<G> {
 
 export interface OperationHandler<G> {
   name: string;
+  /** Pure, opt-in saved input/cursor/cleanup validation; never executes work. */
+  validateSave?: (
+    game: Readonly<G>,
+    frame: Readonly<OperationFrame>,
+    interruption: Readonly<TriggerInterruption> | null,
+    prompt: Readonly<TriggerPrompt> | null,
+  ) => void;
+  /** Pure validation of retained child/root results, independent of live preflight. */
+  validateResult?: (
+    game: Readonly<G>,
+    result: Readonly<OperationResult>,
+  ) => void;
   /** Pure preflight: reject malformed operations before allocating a frame. */
   validate?: (
     game: G,
@@ -127,6 +139,12 @@ export interface TriggerContext<G> {
 
 export interface TriggerSkill<G> {
   id: string;
+  /** Validate this skill's saved event/cursor, without record/triggerable/effect. */
+  validateSave?: (
+    game: Readonly<G>,
+    frame: Readonly<TriggerFrame>,
+    prompt: Readonly<TriggerPrompt> | null,
+  ) => void;
   events: string[];
   priority: number | ((event: TriggerEvent) => number);
   /** Game/scenario rules run with a null actor, after players in their band. */
@@ -140,6 +158,8 @@ export interface TriggerSkill<G> {
 
 export interface TriggerRegistry<G> {
   version: string;
+  /** Closed event-payload contract for the opt-in scheduler save decoder. */
+  validateEvent?: (game: Readonly<G>, event: Readonly<TriggerEvent>) => void;
   skills: TriggerSkill<G>[];
   operations?: OperationHandler<G>[];
   unwind?: boolean;
@@ -147,7 +167,7 @@ export interface TriggerRegistry<G> {
   stepBudget?: number;
 }
 
-interface TriggerFrame extends FrameContinuation {
+export interface TriggerFrame extends FrameContinuation {
   kind: "event";
   event: TriggerEvent;
   bands: { priority: number; skills: string[] }[];
@@ -162,7 +182,7 @@ interface TriggerFrame extends FrameContinuation {
   stage: TriggerStage;
 }
 
-interface OperationFrame extends FrameContinuation {
+export interface OperationFrame extends FrameContinuation {
   kind: "operation";
   operation: TriggerOperation;
   cleanup?: { normalContinuation: TriggerData };
@@ -482,7 +502,8 @@ function isForced(candidate: TriggerOccurrence): boolean {
   );
 }
 
-function actorChoices(frame: TriggerFrame): {
+/** Pure saved-candidate selection, shared by execution and opt-in save checks. */
+export function actorChoices(frame: TriggerFrame): {
   choices: Candidate[];
   canCancel: boolean;
 } {
