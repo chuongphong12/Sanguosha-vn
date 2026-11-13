@@ -70,3 +70,5 @@ M1.3.5a registers four immutable owner/test/extracted-fixture sources and the sc
 M1.3.5b adds two immutable handoff source/test records and one native face-up default citation for the scoped [handoff contract](../engine/match-handoff.md). Internal continuation does not certify a complete public v3 save or match.
 
 M1.3.5c.1 registers three immutable shared scheduler/decoder/test sources and one scoped [save-decoder page](../engine/scheduler-save.md). Handler presence is not semantic certification; actual profile/Room/public v3 integration remains pending.
+
+M1.3.5c.2a registers four implementation sources and one test_code source for the [actual pile recovery subset](../engine/pile-save.md), without certifying whole profile/Room or release parity.

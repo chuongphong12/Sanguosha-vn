@@ -2,13 +2,13 @@
   "version": 1,
   "game": {
     "repository": "https://github.com/chuongphong12/Sanguosha-vn.git",
-    "commit": "9adedb305a364b00eb0e49564dc693058039e21e",
-    "availability": "Published shared opt-in scheduler save codec; actual profile/Room/public v3/full-match/production gates remain pending"
+    "commit": "87df5894d23d854736fd51fb8fb5a4fe5fe95d7b",
+    "availability": "Published actual pile/game-over save-codec subset; complete profile/Room/public v3/full-match/production gates remain pending"
   },
   "native": {
     "repository": "https://github.com/TamQuocSat-LangKhach/QSanguosha-QuocChien.git",
     "commit": "ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f",
     "release": "2.3.43-beta2"
   },
-  "scope": "Game 9adedb305a364b00eb0e49564dc693058039e21e adds77 decoder cases, additive shared contracts and unchanged interpreter behavior except exporting a pure helper. Final2712/105/typecheck/build and two source-review axes0 cover this bounded prerequisite only. No core/package codecs, aggregate Room decoder, public v3 controller or playable release is claimed."
+  "scope": "Game 87df5894d23d854736fd51fb8fb5a4fe5fe95d7b adds37 pile-codec cases and queued-child/precise-abandonment validation. Full2749/106/typecheck/build and both source reviews0 cover this subset. Live callbacks/interpreter remain unchanged; no complete profile/Room decoder, hand movement, combat-to-terminal or release proof."
 }

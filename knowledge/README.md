@@ -93,3 +93,7 @@ Publication of a knowledge revision does not establish publication of the corres
 ## Shared scheduler recovery prerequisite
 
 [M1.3.5c.1 shared save decoder](engine/scheduler-save.md) implements the first part of the [user-selected B recovery mechanism](specs/hegemony-match-v3-save.md). Actual profile codecs, Room decoding, public v3 and full-match/release acceptance remain pending.
+
+## Actual pile recovery subset
+
+[M1.3.5c.2a](engine/pile-save.md) supplies four actual pile/game-over save codecs and queued-child/abandonment validation. Complete profile/Room decoding and public v3 remain pending.

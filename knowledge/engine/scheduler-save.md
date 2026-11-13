@@ -23,3 +23,7 @@ The application must validate Room, inventory/RNG/content/settings, seat binding
 [77 new tests](https://github.com/chuongphong12/Sanguosha-vn/blob/9adedb305a364b00eb0e49564dc693058039e21e/tests/hegemony/scheduler-save.test.ts) exercise real dispatch/resume/continue/unwind using explicit synthetic handlers. JSON checkpoints preserve a paid prompt without replay, trigger order/skill prompt/completion, and cleanup prompt/unwind completion at budgets 1/2/7/10000. Negative cases mutate saved envelope/cursor/result/prompt/order/stack/reason/policy state. Validator input isolation and profile capture are tested. They do not certify all native packages, actual Room persistence, network privacy or a full match.
 
 Next: actual enabled profile codecs and aggregate decoder; v3 create/apply/view/restore/trusted continuation and admission routing; actual setup-to-terminal for 2–10 seats; then the unchanged content/session/bot/media/provider/load/cutover gates. PR #33 stays draft.
+
+## Later actual pile recovery subset
+
+The [M1.3.5c.2a save contract](pile-save.md) adds four actual handler codecs and precise queued-child/abandonment checks at its own source revision. This does not complete draw-cards/movement/startup/battle profile or Room/public-v3 decoding; earlier revision-scoped claims above retain their scope.

@@ -1733,6 +1733,66 @@
       "checked_on": "2026-11-13",
       "author": null,
       "business_owner": null
+    },
+    {
+      "id": "web.m135c2a.pile.87df589",
+      "kind": "primary_code",
+      "repository": "https://github.com/chuongphong12/Sanguosha-vn",
+      "revision": "87df5894d23d854736fd51fb8fb5a4fe5fe95d7b",
+      "path": "src/game/hegemony/draw-pile.ts",
+      "url": "https://github.com/chuongphong12/Sanguosha-vn/blob/87df5894d23d854736fd51fb8fb5a4fe5fe95d7b/src/game/hegemony/draw-pile.ts",
+      "locator": "Actual draw-card/get-n-cards/swap-pile save and result codecs",
+      "checked_on": "2026-11-13",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "web.m135c2a.terminal.87df589",
+      "kind": "primary_code",
+      "repository": "https://github.com/chuongphong12/Sanguosha-vn",
+      "revision": "87df5894d23d854736fd51fb8fb5a4fe5fe95d7b",
+      "path": "src/game/hegemony/victory.ts",
+      "url": "https://github.com/chuongphong12/Sanguosha-vn/blob/87df5894d23d854736fd51fb8fb5a4fe5fe95d7b/src/game/hegemony/victory.ts",
+      "locator": "Actual game-over saved input/cursor/non-returning contract",
+      "checked_on": "2026-11-13",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "web.m135c2a.hooks.87df589",
+      "kind": "primary_code",
+      "repository": "https://github.com/chuongphong12/Sanguosha-vn",
+      "revision": "87df5894d23d854736fd51fb8fb5a4fe5fe95d7b",
+      "path": "src/game/hegemony/scheduler.ts",
+      "url": "https://github.com/chuongphong12/Sanguosha-vn/blob/87df5894d23d854736fd51fb8fb5a4fe5fe95d7b/src/game/hegemony/scheduler.ts",
+      "locator": "FrameSaveContext carries detached child and precise abandoning classification",
+      "checked_on": "2026-11-13",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "web.m135c2a.decoder.87df589",
+      "kind": "primary_code",
+      "repository": "https://github.com/chuongphong12/Sanguosha-vn",
+      "revision": "87df5894d23d854736fd51fb8fb5a4fe5fe95d7b",
+      "path": "src/game/hegemony/scheduler-save.ts",
+      "url": "https://github.com/chuongphong12/Sanguosha-vn/blob/87df5894d23d854736fd51fb8fb5a4fe5fe95d7b/src/game/hegemony/scheduler-save.ts",
+      "locator": "Queued-child context, effect-false checkpoint and unwind-boundary checks",
+      "checked_on": "2026-11-13",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "web.m135c2a.tests.87df589",
+      "kind": "test_code",
+      "repository": "https://github.com/chuongphong12/Sanguosha-vn",
+      "revision": "87df5894d23d854736fd51fb8fb5a4fe5fe95d7b",
+      "path": "tests/hegemony/pile-save.test.ts",
+      "url": "https://github.com/chuongphong12/Sanguosha-vn/blob/87df5894d23d854736fd51fb8fb5a4fe5fe95d7b/tests/hegemony/pile-save.test.ts",
+      "locator": "37 actual-operation save tests with explicit fixture notification/Fetch/cleanup handlers",
+      "checked_on": "2026-11-13",
+      "author": null,
+      "business_owner": null
     }
   ],
   "pages": [
@@ -2076,6 +2136,23 @@
         "web.m135c1.contracts.9adedb3",
         "web.m135c1.decoder.9adedb3",
         "web.m135c1.tests.9adedb3"
+      ]
+    },
+    {
+      "path": "engine/pile-save.md",
+      "status": "supported",
+      "reviewed_on": "2026-11-13",
+      "review_scope": "Four actual pile/terminal handler codecs and shared queued-child/abandonment checks; complete profile/Room/public v3 remains pending",
+      "applies_to": {
+        "game_commit": "87df5894d23d854736fd51fb8fb5a4fe5fe95d7b",
+        "native_commit": "ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f"
+      },
+      "source_ids": [
+        "web.m135c2a.pile.87df589",
+        "web.m135c2a.terminal.87df589",
+        "web.m135c2a.hooks.87df589",
+        "web.m135c2a.decoder.87df589",
+        "web.m135c2a.tests.87df589"
       ]
     }
   ],
@@ -3448,6 +3525,51 @@
         "web.m135c1.tests.9adedb3"
       ],
       "scope": "M1.3.5c.1 adds shared opt-in scheduler save validation under the user-selected B design. Core profile codecs, aggregate Room validation, public match-v3 and full-match/release gates remain pending."
+    },
+    {
+      "subject": "page:engine/pile-save.md",
+      "predicate": "derived_from",
+      "object": "source:web.m135c2a.pile.87df589",
+      "evidence": [
+        "web.m135c2a.pile.87df589"
+      ],
+      "scope": "Four actual pile/terminal handler codecs and shared queued-child/abandonment checks; complete profile/Room/public v3 remains pending"
+    },
+    {
+      "subject": "page:engine/pile-save.md",
+      "predicate": "derived_from",
+      "object": "source:web.m135c2a.terminal.87df589",
+      "evidence": [
+        "web.m135c2a.terminal.87df589"
+      ],
+      "scope": "Four actual pile/terminal handler codecs and shared queued-child/abandonment checks; complete profile/Room/public v3 remains pending"
+    },
+    {
+      "subject": "page:engine/pile-save.md",
+      "predicate": "derived_from",
+      "object": "source:web.m135c2a.hooks.87df589",
+      "evidence": [
+        "web.m135c2a.hooks.87df589"
+      ],
+      "scope": "Four actual pile/terminal handler codecs and shared queued-child/abandonment checks; complete profile/Room/public v3 remains pending"
+    },
+    {
+      "subject": "page:engine/pile-save.md",
+      "predicate": "derived_from",
+      "object": "source:web.m135c2a.decoder.87df589",
+      "evidence": [
+        "web.m135c2a.decoder.87df589"
+      ],
+      "scope": "Four actual pile/terminal handler codecs and shared queued-child/abandonment checks; complete profile/Room/public v3 remains pending"
+    },
+    {
+      "subject": "page:engine/pile-save.md",
+      "predicate": "derived_from",
+      "object": "source:web.m135c2a.tests.87df589",
+      "evidence": [
+        "web.m135c2a.tests.87df589"
+      ],
+      "scope": "Four actual pile/terminal handler codecs and shared queued-child/abandonment checks; complete profile/Room/public v3 remains pending"
     }
   ]
 }

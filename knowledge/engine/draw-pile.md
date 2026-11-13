@@ -45,3 +45,7 @@ and final validation are in the [revision checkpoint](../reviews/2026-10-21-hege
 
 Part 4ad adds the separate actual [getNCards/player draw owner](card-drawing.md)
 and [Draw phase](draw-phase.md). Single-card drawing keeps its original semantics.
+
+## Later actual pile recovery subset
+
+The [M1.3.5c.2a save contract](pile-save.md) adds four actual handler codecs and precise queued-child/abandonment checks at its own source revision. This does not complete draw-cards/movement/startup/battle profile or Room/public-v3 decoding; earlier revision-scoped claims above retain their scope.

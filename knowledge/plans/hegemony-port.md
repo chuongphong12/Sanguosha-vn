@@ -85,3 +85,7 @@ The later [M1.3.3a phase lifecycle](../engine/phase-lifecycle.md) was validated 
 ## M1.3.5c.1 progress
 
 The [shared scheduler save codec](../engine/scheduler-save.md) implements the first part of the [selected B mechanism](../specs/hegemony-match-v3-save.md). Complete actual profile codecs and aggregate decoding next, then public v3 and actual combat-to-terminal. No release scope is reduced.
+
+## M1.3.5c.2a progress
+
+The [actual pile save subset](../engine/pile-save.md) completes four handler codecs and shared queued-child context. Whole enabled profiles/Room decoding and the public v3/full-match/release gates remain open.
