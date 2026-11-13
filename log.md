@@ -184,3 +184,9 @@ Independent canonical Standards0/Spec0 reviewed the15-file draft at treeea7e3076
 - Input knowledge6b45f7f28f9e24a58d45721d0645a63719bc84ef; inspected game 9adedb305a364b00eb0e49564dc693058039e21e against c2d4e7eb5069bfcd3143ee736f6b88da9548adbd. User selected shared-scheduler B mechanism; [contract](engine/scheduler-save.md)/[checkpoint](reviews/2026-11-13-hegemony-m135c1-scheduler-save.md) record hooks, envelope checks, synthetic policies, review corrections and pending actual profile/Room/v3 work.
 - Final focused130/130, full2712/105/typecheck/build, lint42 prior warnings, source Standards0/Spec0 at455d57670cb9de476807c84a7e8a395a8a5b48cf. Three immutable sources/one page/three relations appended; old registry records preserved.
 - Canonical lint/reviews/import/remote CI are distinct delivery receipts; no core package/native full-match or release gate is closed.
+
+## [2026-11-13] ingest | M1.3.5c.2a actual pile save codecs
+
+- Input knowledge5c7f0e1; source 87df5894d23d854736fd51fb8fb5a4fe5fe95d7b, base a68e2236795d5b7d50a2b0b0e13af9528f8038d4. [Contract](engine/pile-save.md) and [checkpoint](reviews/2026-11-13-hegemony-m135c2a-pile-save.md) record four actual codecs, child/abandonment context, C1 valid-boundary correction, fixtures and remaining profile/Room/v3 dependencies.
+- Final253 focused,2749/106 full,typecheck/build,42 prior warnings; Standards0/Spec0 at eae8ac8bdc04087191b404bfdf95462c9306a221. Runtime/graph hashes and actual RED corrections retained. Five immutable sources/one scoped page/five relations append without rewriting old registry identities.
+- Source CI/canonical review/imported-head CI remain separate; no whole Room/profile/native/full-match or release gate is closed.

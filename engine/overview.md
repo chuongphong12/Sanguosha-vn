@@ -89,3 +89,7 @@ Evidence: external adapter interfaces across the modules above; absence of battl
 ## Later shared save prerequisite
 
 The [M1.3.5c.1 decoder](scheduler-save.md) adds explicit shared saved-state hooks and opt-in scheduler-envelope checks. Existing runtime/profile behavior above retains its source scope. Full enabled-profile codecs, aggregate restore and public v3 integration remain pending.
+
+## Later actual pile recovery subset
+
+The [M1.3.5c.2a save contract](pile-save.md) adds four actual handler codecs and precise queued-child/abandonment checks at its own source revision. This does not complete draw-cards/movement/startup/battle profile or Room/public-v3 decoding; earlier revision-scoped claims above retain their scope.

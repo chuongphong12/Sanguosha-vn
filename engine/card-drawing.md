@@ -51,3 +51,7 @@ the deficit once and delegates to real draw-cards. The halfmaxhp token's actual 
 body also composes real drawing with its native reason. Test request/catalogue/
 filter metadata remain explicitly private adapters. The [Draw-phase owner](draw-phase.md)
 composes this layer after its separate validation. The [global GameStart owner](game-start.md) uses actual draw-cards with registration order, four cards and empty reason; [luck redeals](luck-cards.md) use direct acquisition and their own manual transfer instead of draw-cards.
+
+## Later actual pile recovery subset
+
+The [M1.3.5c.2a save contract](pile-save.md) adds four actual handler codecs and precise queued-child/abandonment checks at its own source revision. This does not complete draw-cards/movement/startup/battle profile or Room/public-v3 decoding; earlier revision-scoped claims above retain their scope.

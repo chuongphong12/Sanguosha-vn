@@ -14,3 +14,7 @@ On 2026-11-13 the user selected B: extend shared scheduler save-validation contr
 Each part follows RED/GREEN, focused/full tests/typecheck/build, impact/change graphs, exact-byte checks, independent Standards/Spec reviews and canonical knowledge import/pin before the next. Tests distinguish real scheduler/engine behavior from synthetic package/metadata hooks and injected corrupt-save conditions. Registry hook presence alone cannot certify semantic completeness; tests and review must establish it for each enabled profile.
 
 After application integration, M1.3.5 still requires actual minimal-profile setup-to-terminal scenarios 2–10 seats and real card-play interruption/recovery. First release retains all previously agreed content, competitive bot, full art/audio, desktop online/single-player, room/session recovery and measured free-tier/load gates. C1 is neither a playable match nor a cutover.
+
+## M1.3.5c.2a progress
+
+The [actual pile save subset](../engine/pile-save.md) completes four handler codecs and shared queued-child context. Whole enabled profiles/Room decoding and the public v3/full-match/release gates remain open.

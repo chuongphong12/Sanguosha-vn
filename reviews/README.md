@@ -61,3 +61,5 @@ Original game paths and blob identities are recorded in the [migration manifest]
 - [2026-11-12 M1.3.5b startup-to-battle handoff](2026-11-12-hegemony-m135b-handoff.md):49 new cases, fullcheck2635/104; internal branch only, full v3/public play and release still pending.
 
 - [2026-11-13 M1.3.5c.1 shared scheduler save codec](2026-11-13-hegemony-m135c1-scheduler-save.md):77 new cases; opt-in shared decoder, not actual profile codecs or full match-v3.
+
+- [2026-11-13 actual pile save codecs](2026-11-13-hegemony-m135c2a-pile-save.md):37 new cases, real pile/game-over/scheduler with fixture notification/Fetch/cleanup adapters; no full profile/Room/v3 certification.
