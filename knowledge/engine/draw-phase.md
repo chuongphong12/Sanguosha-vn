@@ -39,3 +39,7 @@ whole enabled content, native unwind and production registration remain separate
 ## Later kill-player recovery
 
 The [M1.3.5c.2e contract](kill-save.md) adds actual kill-player cursor/result validation at its own source revision, preserving the live state machine. It does not certify burial/reward, free-chain, complete profiles/Room or release gates; earlier source-scoped claims retain their scope.
+
+## Later free-chain recovery
+
+The [M1.3.5c.2f contract](free-chain-save.md) supplies opt-in captured surrender/reveal recovery with actual kill composition at its own revision. Earlier source-scoped claims retain their applicability; complete profiles/Room/public-v3 and release gates remain open.

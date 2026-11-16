@@ -113,3 +113,7 @@ Publication of a knowledge revision does not establish publication of the corres
 ## Kill-player recovery subset
 
 [M1.3.5c.2e](engine/kill-save.md) adds actual kill-player save validation before free-chain/Draw-phase recovery. Complete profiles/Room/public-v3 and release gates remain pending.
+
+## Free-chain recovery subset
+
+[M1.3.5c.2f](engine/free-chain-save.md) adds captured surrender/save validation and actual reward/kill recovery for opted-in profiles. This advances Group1; remaining phase/startup/battle/Room/public-v3/release gates stay open.
