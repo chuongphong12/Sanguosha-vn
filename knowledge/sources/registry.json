@@ -1853,6 +1853,30 @@
       "checked_on": "2026-11-16",
       "author": null,
       "business_owner": null
+    },
+    {
+      "id": "web.m135c2d.handler.f904637",
+      "kind": "primary_code",
+      "repository": "https://github.com/chuongphong12/Sanguosha-vn",
+      "revision": "f9046375c483881079b853935d988fd0bd056b5e",
+      "path": "src/game/hegemony/fill-hand.ts",
+      "url": "https://github.com/chuongphong12/Sanguosha-vn/blob/f9046375c483881079b853935d988fd0bd056b5e/src/game/hegemony/fill-hand.ts",
+      "locator": "Opt-in snapshot/adapter save contract and factored immutable request parser; default legacy path retained",
+      "checked_on": "2026-11-16",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "web.m135c2d.tests.f904637",
+      "kind": "test_code",
+      "repository": "https://github.com/chuongphong12/Sanguosha-vn",
+      "revision": "f9046375c483881079b853935d988fd0bd056b5e",
+      "path": "tests/hegemony/fill-hand-save.test.ts",
+      "url": "https://github.com/chuongphong12/Sanguosha-vn/blob/f9046375c483881079b853935d988fd0bd056b5e/tests/hegemony/fill-hand-save.test.ts",
+      "locator": "30 actual recovery/legacy cases with explicit draw-validator/owner/skill/event fixtures",
+      "checked_on": "2026-11-16",
+      "author": null,
+      "business_owner": null
     }
   ],
   "pages": [
@@ -2242,6 +2266,20 @@
         "web.m135c2c.handler.86dab10",
         "web.m135c2c.tests.86dab10",
         "web.m135c2c.player-tests.86dab10"
+      ]
+    },
+    {
+      "path": "engine/fill-hand-save.md",
+      "status": "supported",
+      "reviewed_on": "2026-11-16",
+      "review_scope": "Opt-in fill-hand recovery with captured deficit and explicit draw validation; aggregate Room/profile/publicv3 remains pending",
+      "applies_to": {
+        "game_commit": "f9046375c483881079b853935d988fd0bd056b5e",
+        "native_commit": "ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f"
+      },
+      "source_ids": [
+        "web.m135c2d.handler.f904637",
+        "web.m135c2d.tests.f904637"
       ]
     }
   ],
@@ -3704,6 +3742,24 @@
         "web.m135c2c.player-tests.86dab10"
       ],
       "scope": "Actual movement save/result codec and player-draw internal movement recovery; aggregate Room/profile/publicv3 remains pending"
+    },
+    {
+      "subject": "page:engine/fill-hand-save.md",
+      "predicate": "derived_from",
+      "object": "source:web.m135c2d.handler.f904637",
+      "evidence": [
+        "web.m135c2d.handler.f904637"
+      ],
+      "scope": "Opt-in fill-hand recovery with captured deficit and explicit draw validation; aggregate Room/profile/publicv3 remains pending"
+    },
+    {
+      "subject": "page:engine/fill-hand-save.md",
+      "predicate": "derived_from",
+      "object": "source:web.m135c2d.tests.f904637",
+      "evidence": [
+        "web.m135c2d.tests.f904637"
+      ],
+      "scope": "Opt-in fill-hand recovery with captured deficit and explicit draw validation; aggregate Room/profile/publicv3 remains pending"
     }
   ]
 }

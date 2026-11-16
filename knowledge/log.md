@@ -202,3 +202,9 @@ Independent canonical Standards0/Spec0 reviewed the15-file draft at treeea7e3076
 - Input knowledge d096694db87e83da409dc588d7775ad00dc9fbb9; inspected game 86dab10c58d808db8acf6adaf45d0221702da392, base e263cf9122b440ffc14e65e2b92c225216b7b4a6. [Contract](engine/movement-save.md)/[checkpoint](reviews/2026-11-16-hegemony-m135c2c-movement-save.md) record actual codec, retained-packet review fixes, fixtures and remaining aggregate gates.
 - Baseline73/3, finalfocused153/5 (44new), finalfull2834/108/typecheck/build, lint42 prior warnings; source Standards0/Spec0 at f53bb338bd80647f0a7cd4a0369771e37a1d4e93. Existing runtime/preflight/helper/interpreter AST/hash evidence is preserved.
 - Three immutable sources/one page/three relations append without rewriting prior registry identities. Canonical lint/reviews/publication/imported-head CI remain separate delivery gates; PR33 stays draft.
+
+## [2026-11-16] ingest | M1.3.5c.2d fill-hand recovery
+
+- Knowledge input b62250fa6d044d98ddc54550d9d5ee545c9f6d4f; source f9046375c483881079b853935d988fd0bd056b5e, fixed base 51c584cc12eb9afff72ddf4b4f90a21022755219. [Contract](engine/fill-hand-save.md)/[checkpoint](reviews/2026-11-16-hegemony-m135c2d-fill-hand-save.md) record opt-in deficit snapshots, draw validation seam, unchanged legacy cursor, fixtures and pending aggregate gates.
+- Baseline231/4, finalfocused261/5 (30new), full2864/109/typecheck/build; lint42 prior warnings. Source Standards0/Spec0 at bba7b477bb0e25143e3d30edb4b845a71c8059b1. UNKNOWN factory impact is supplemented by CodeGraph and actual imports, not dismissed.
+- Two immutable sources/one page/two relations append without changing previous identities. Canonical lint/reviews/publication/imported CI remain separate; no production gate closes.

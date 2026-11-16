@@ -101,3 +101,7 @@ The [M1.3.5c.2b contract](player-draw-save.md) adds actual draw-cards cursor/res
 ## Later actual movement recovery
 
 The [M1.3.5c.2c contract](movement-save.md) adds actual movement codecs and replaces the prior player-draw test-only movement boundary with real decoding at its own source revision. This does not complete remaining profile/Room/public-v3/release gates; earlier revision-scoped evidence retains its scope.
+
+## Later fill-hand recovery
+
+The [M1.3.5c.2d contract](fill-hand-save.md) adds explicit opt-in snapshots and draw-adapter save validation at its own source revision. Earlier source-scoped evidence retains its applicability; complete profiles/Room/public-v3 and release gates remain open.
