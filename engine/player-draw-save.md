@@ -19,3 +19,7 @@ The immediate acquisition child must be get-n-cards with the captured count, slo
 Cases cover top/bottom/default directions, repeated last count, skipped/duplicate recipients, exact reform, zero/negative counts and empty recipients, changed life state after acquisition, shortage with earlier reservations and game-over unwind, corrupt cursors/child requests/transfers/results and reordered equivalent JSON. Known transcript: recipients a/b/c with counts1/2 (last repeated) and bottom only for a receive [11], [0,1], [2,3]. Decoder input remains unchanged in rejection/isolation checks. The exact source [checkpoint](../reviews/2026-11-16-hegemony-m135c2b-player-draw-save.md) records RED/GREEN, review and graph limits.
 
 Existing run/preflight callbacks and emitted scheduler interpreter match the fixed base. Old profiles do not opt into restore through these hooks. Actual movement, fill-hand, startup/battle/general/package codecs, aggregate Room/settings/catalogue/root binding, public v3 and full-match/release acceptance remain pending. PR33 stays draft.
+
+## Later actual movement recovery
+
+The [M1.3.5c.2c contract](movement-save.md) adds actual movement codecs and replaces the prior player-draw test-only movement boundary with real decoding at its own source revision. This does not complete remaining profile/Room/public-v3/release gates; earlier revision-scoped evidence retains its scope.

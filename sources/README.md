@@ -74,3 +74,5 @@ M1.3.5c.1 registers three immutable shared scheduler/decoder/test sources and on
 M1.3.5c.2a registers four implementation sources and one test_code source for the [actual pile recovery subset](../engine/pile-save.md), without certifying whole profile/Room or release parity.
 
 M1.3.5c.2b registers an immutable actual draw-cards implementation and test_code source for the [player-draw recovery contract](../engine/player-draw-save.md); active movement save decoding remains pending.
+
+M1.3.5c.2c appends one actual movement implementation and two test_code sources for [movement recovery](../engine/movement-save.md); whole-profile/Room validation remains separate.

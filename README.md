@@ -101,3 +101,7 @@ Publication of a knowledge revision does not establish publication of the corres
 ## Player-draw recovery subset
 
 [M1.3.5c.2b](engine/player-draw-save.md) adds the actual draw-cards parent codec and 41 tests. Actual movement-internal recovery, remaining profiles/Room decoding and public v3 remain pending.
+
+## Movement recovery subset
+
+[M1.3.5c.2c](engine/movement-save.md) adds actual movement cursor/result codecs; player-draw tests now decode through active movement with no bypass. Complete profile/Room/public-v3 and release gates remain pending.

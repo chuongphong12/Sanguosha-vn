@@ -1817,6 +1817,42 @@
       "checked_on": "2026-11-16",
       "author": null,
       "business_owner": null
+    },
+    {
+      "id": "web.m135c2c.handler.86dab10",
+      "kind": "primary_code",
+      "repository": "https://github.com/chuongphong12/Sanguosha-vn",
+      "revision": "86dab10c58d808db8acf6adaf45d0221702da392",
+      "path": "src/game/hegemony/movement.ts",
+      "url": "https://github.com/chuongphong12/Sanguosha-vn/blob/86dab10c58d808db8acf6adaf45d0221702da392/src/game/hegemony/movement.ts",
+      "locator": "Actual movement save/result codecs; prior runtime/preflight/helpers unchanged",
+      "checked_on": "2026-11-16",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "web.m135c2c.tests.86dab10",
+      "kind": "test_code",
+      "repository": "https://github.com/chuongphong12/Sanguosha-vn",
+      "revision": "86dab10c58d808db8acf6adaf45d0221702da392",
+      "path": "tests/hegemony/movement-save.test.ts",
+      "url": "https://github.com/chuongphong12/Sanguosha-vn/blob/86dab10c58d808db8acf6adaf45d0221702da392/tests/hegemony/movement-save.test.ts",
+      "locator": "44 actual movement recovery cases with explicit observer/filter fixtures",
+      "checked_on": "2026-11-16",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "web.m135c2c.player-tests.86dab10",
+      "kind": "test_code",
+      "repository": "https://github.com/chuongphong12/Sanguosha-vn",
+      "revision": "86dab10c58d808db8acf6adaf45d0221702da392",
+      "path": "tests/hegemony/player-draw-save.test.ts",
+      "url": "https://github.com/chuongphong12/Sanguosha-vn/blob/86dab10c58d808db8acf6adaf45d0221702da392/tests/hegemony/player-draw-save.test.ts",
+      "locator": "41 player-draw cases now decode through actual movement without fixture codec/bypass",
+      "checked_on": "2026-11-16",
+      "author": null,
+      "business_owner": null
     }
   ],
   "pages": [
@@ -2191,6 +2227,21 @@
       "source_ids": [
         "web.m135c2b.handler.13cd4a2",
         "web.m135c2b.tests.13cd4a2"
+      ]
+    },
+    {
+      "path": "engine/movement-save.md",
+      "status": "supported",
+      "reviewed_on": "2026-11-16",
+      "review_scope": "Actual movement save/result codec and player-draw internal movement recovery; aggregate Room/profile/publicv3 remains pending",
+      "applies_to": {
+        "game_commit": "86dab10c58d808db8acf6adaf45d0221702da392",
+        "native_commit": "ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f"
+      },
+      "source_ids": [
+        "web.m135c2c.handler.86dab10",
+        "web.m135c2c.tests.86dab10",
+        "web.m135c2c.player-tests.86dab10"
       ]
     }
   ],
@@ -3626,6 +3677,33 @@
         "web.m135c2b.tests.13cd4a2"
       ],
       "scope": "Actual draw-cards parent save/result validation; active movement decoder, complete profile/Room/public v3 remain pending"
+    },
+    {
+      "subject": "page:engine/movement-save.md",
+      "predicate": "derived_from",
+      "object": "source:web.m135c2c.handler.86dab10",
+      "evidence": [
+        "web.m135c2c.handler.86dab10"
+      ],
+      "scope": "Actual movement save/result codec and player-draw internal movement recovery; aggregate Room/profile/publicv3 remains pending"
+    },
+    {
+      "subject": "page:engine/movement-save.md",
+      "predicate": "derived_from",
+      "object": "source:web.m135c2c.tests.86dab10",
+      "evidence": [
+        "web.m135c2c.tests.86dab10"
+      ],
+      "scope": "Actual movement save/result codec and player-draw internal movement recovery; aggregate Room/profile/publicv3 remains pending"
+    },
+    {
+      "subject": "page:engine/movement-save.md",
+      "predicate": "derived_from",
+      "object": "source:web.m135c2c.player-tests.86dab10",
+      "evidence": [
+        "web.m135c2c.player-tests.86dab10"
+      ],
+      "scope": "Actual movement save/result codec and player-draw internal movement recovery; aggregate Room/profile/publicv3 remains pending"
     }
   ]
 }
