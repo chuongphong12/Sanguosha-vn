@@ -220,3 +220,9 @@ Independent canonical Standards0/Spec0 reviewed the15-file draft at treeea7e3076
 - Knowledge input 6164a8cccc4db4a1d58b496e4578a48e9374a9bd; source 2e1972108e11873338468a20dc28ca9a4f896a65, base 8382cd6cb5c37b2174182fc00a37a4db23133226. [Contract](engine/free-chain-save.md)/[checkpoint](reviews/2026-11-16-hegemony-m135c2f-free-chain-save.md) record opt-in captured surrender, preserved legacy format, actual reward/kill recovery and fixture/aggregate limits.
 - Baseline202/3, finalfocused271/5 (34new), full2933/111/typecheck/build; lint42 prior warnings; source Standards0/Spec0 at 544e0d23ae01b4ab894791f88ef29c7530dd3dea. Award AST/scheduler equality and matching dual-graph hashes retained; factory UNKNOWN remains explicit.
 - Two immutable sources/one page/two relations append without rewriting prior identities. Canonical lint/reviews/publication/imported CI are separate gates. Group1 remains in progress.
+
+## [2026-11-16] ingest | M1.3.5c.2g Draw-phase owner recovery
+
+- Input knowledge 7a1e41fda365f568a17d5246a98869e2cd71d857; source 2da345ba350dbcdada28d8504fcd623a86725bdc, base 70b9fb9db9472085e4c8bdfa2fcce490550e0993. [Contract](engine/draw-phase-save.md)/[checkpoint](reviews/2026-11-16-hegemony-m135c2g-draw-phase-save.md) record captured children/counts, delayed live integer validation, actual drawing/drains/death and fixture/bridge limits.
+- Baseline95/3, finalfocused174/5 (44new), full2977/112/typecheck/build; lint42 prior warnings; source reviews0/0 at d037aca25fbe37da6464aa3b70a86cc88417f26a. Preserved callback AST/scheduler and matching dual-graph hashes; factory UNKNOWN remains explicit.
+- Two immutable sources/one page/two relations append without rewriting prior identities. Canonical lint/reviews/publication/imported CI are separate gates. Group1 remains in progress.

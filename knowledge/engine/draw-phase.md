@@ -43,3 +43,7 @@ The [M1.3.5c.2e contract](kill-save.md) adds actual kill-player cursor/result va
 ## Later free-chain recovery
 
 The [M1.3.5c.2f contract](free-chain-save.md) supplies opt-in captured surrender/reveal recovery with actual kill composition at its own revision. Earlier source-scoped claims retain their applicability; complete profiles/Room/public-v3 and release gates remain open.
+
+## Later Draw-phase recovery
+
+The [M1.3.5c.2g contract](draw-phase-save.md) adds actual owner save validation, preserving captured counts and late validation timing. Earlier source-scoped claims retain their applicability; standalone/shared GameRule bridge and complete profiles/Room/public-v3 remain separate work.
