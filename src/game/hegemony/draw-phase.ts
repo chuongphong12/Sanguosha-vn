@@ -38,6 +38,91 @@ export function createDrawPhaseOperation<
   };
   return {
     name: "draw-phase",
+    validateSave: (game, frame, _interruption, prompt, state) => {
+      const input = ruleInput(game, frame.operation.data),
+        c = frame.continuation,
+        child = state?.child;
+      if (prompt || frame.answer !== null || frame.cleanup)
+        throw new Error("Invalid saved Draw-phase boundary");
+      if (c === null) {
+        phaseInput(game, frame.operation.data);
+        if (child || frame.child || frame.operationChild)
+          throw new Error("Invalid initial Draw-phase child");
+        return;
+      }
+      if (
+        !input ||
+        typeof c !== "object" ||
+        Array.isArray(c) ||
+        Object.keys(c).length !== 4 ||
+        typeof c.stage !== "number" ||
+        !Number.isInteger(c.stage) ||
+        c.stage < 1 ||
+        c.stage > 6 ||
+        c.target !== input.target ||
+        !("shared" in c)
+      )
+        throw new Error("Invalid saved Draw-phase cursor");
+      if (c.stage <= 2) {
+        if (c.count !== 0) throw new Error("Invalid uncaptured draw count");
+        if (
+          c.stage === 1 &&
+          readSlashInteger(readSlashInteger(c.shared) - 2) % 3 !== 0
+        )
+          throw new Error("Invalid initial draw count");
+      } else if (
+        readSlashInteger(c.count) !== c.shared ||
+        (c.stage === 3 && Number(c.count) <= 0)
+      )
+        throw new Error("Invalid captured draw count");
+      if (c.stage === 1 || c.stage === 5) {
+        const event =
+          child?.kind === "event" ? child.event : frame.child?.event;
+        if (
+          frame.operationChild ||
+          (child && child.kind !== "event") ||
+          (!event && !state?.abandoning) ||
+          (event &&
+            (event.name !==
+              (c.stage === 1 ? "DrawNCards" : "AfterDrawNCards") ||
+              event.target !== c.target))
+        )
+          throw new Error("Invalid Draw-phase event child");
+      } else {
+        const next =
+          child?.kind === "operation"
+            ? child.operation
+            : frame.operationChild?.operation;
+        if (
+          frame.child ||
+          (child && child.kind !== "operation") ||
+          (!next && !state?.abandoning)
+        )
+          throw new Error("Invalid Draw-phase operation child");
+        if (next && c.stage !== 3) {
+          if (next.name !== "free-chain" || next.data !== null)
+            throw new Error("Invalid Draw-phase drain");
+        } else if (next) {
+          const d = next.data;
+          if (
+            next.name !== "draw-cards" ||
+            !d ||
+            typeof d !== "object" ||
+            Array.isArray(d) ||
+            Object.keys(d).length !== 3 ||
+            JSON.stringify(d.players) !== JSON.stringify([c.target]) ||
+            JSON.stringify(d.counts) !== JSON.stringify([c.count]) ||
+            d.reason !== ""
+          )
+            throw new Error("Invalid Draw-phase transfer");
+        }
+      }
+    },
+    validateResult: (game, result) => {
+      ruleInput(game, result.operation.data);
+      if (result.value !== null)
+        throw new Error("Invalid Draw-phase completion");
+    },
     validate: (game, operation) => {
       phaseInput(game, operation.data);
     },
