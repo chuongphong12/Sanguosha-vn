@@ -63,3 +63,5 @@ Original game paths and blob identities are recorded in the [migration manifest]
 - [2026-11-13 M1.3.5c.1 shared scheduler save codec](2026-11-13-hegemony-m135c1-scheduler-save.md):77 new cases; opt-in shared decoder, not actual profile codecs or full match-v3.
 
 - [2026-11-13 actual pile save codecs](2026-11-13-hegemony-m135c2a-pile-save.md):37 new cases, real pile/game-over/scheduler with fixture notification/Fetch/cleanup adapters; no full profile/Room/v3 certification.
+
+- [2026-11-16 player-draw recovery](2026-11-16-hegemony-m135c2b-player-draw-save.md):41 new cases; actual acquisition/movement runtime with explicit boundary-only movement codec, not complete movement/Room recovery.

@@ -1793,6 +1793,30 @@
       "checked_on": "2026-11-13",
       "author": null,
       "business_owner": null
+    },
+    {
+      "id": "web.m135c2b.handler.13cd4a2",
+      "kind": "primary_code",
+      "repository": "https://github.com/chuongphong12/Sanguosha-vn",
+      "revision": "13cd4a2557a8934541d6d4d4aaa009ac63b1c604",
+      "path": "src/game/hegemony/draw-cards.ts",
+      "url": "https://github.com/chuongphong12/Sanguosha-vn/blob/13cd4a2557a8934541d6d4d4aaa009ac63b1c604/src/game/hegemony/draw-cards.ts",
+      "locator": "Actual draw-cards save/result hooks; runtime/preflight unchanged",
+      "checked_on": "2026-11-16",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "web.m135c2b.tests.13cd4a2",
+      "kind": "test_code",
+      "repository": "https://github.com/chuongphong12/Sanguosha-vn",
+      "revision": "13cd4a2557a8934541d6d4d4aaa009ac63b1c604",
+      "path": "tests/hegemony/player-draw-save.test.ts",
+      "url": "https://github.com/chuongphong12/Sanguosha-vn/blob/13cd4a2557a8934541d6d4d4aaa009ac63b1c604/tests/hegemony/player-draw-save.test.ts",
+      "locator": "41 decoder/dispatch/continue/unwind cases; explicit movement boundary-only fixture",
+      "checked_on": "2026-11-16",
+      "author": null,
+      "business_owner": null
     }
   ],
   "pages": [
@@ -2153,6 +2177,20 @@
         "web.m135c2a.hooks.87df589",
         "web.m135c2a.decoder.87df589",
         "web.m135c2a.tests.87df589"
+      ]
+    },
+    {
+      "path": "engine/player-draw-save.md",
+      "status": "supported",
+      "reviewed_on": "2026-11-16",
+      "review_scope": "Actual draw-cards parent save/result validation; active movement decoder, complete profile/Room/public v3 remain pending",
+      "applies_to": {
+        "game_commit": "13cd4a2557a8934541d6d4d4aaa009ac63b1c604",
+        "native_commit": "ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f"
+      },
+      "source_ids": [
+        "web.m135c2b.handler.13cd4a2",
+        "web.m135c2b.tests.13cd4a2"
       ]
     }
   ],
@@ -3570,6 +3608,24 @@
         "web.m135c2a.tests.87df589"
       ],
       "scope": "Four actual pile/terminal handler codecs and shared queued-child/abandonment checks; complete profile/Room/public v3 remains pending"
+    },
+    {
+      "subject": "page:engine/player-draw-save.md",
+      "predicate": "derived_from",
+      "object": "source:web.m135c2b.handler.13cd4a2",
+      "evidence": [
+        "web.m135c2b.handler.13cd4a2"
+      ],
+      "scope": "Actual draw-cards parent save/result validation; active movement decoder, complete profile/Room/public v3 remain pending"
+    },
+    {
+      "subject": "page:engine/player-draw-save.md",
+      "predicate": "derived_from",
+      "object": "source:web.m135c2b.tests.13cd4a2",
+      "evidence": [
+        "web.m135c2b.tests.13cd4a2"
+      ],
+      "scope": "Actual draw-cards parent save/result validation; active movement decoder, complete profile/Room/public v3 remain pending"
     }
   ]
 }

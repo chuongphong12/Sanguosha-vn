@@ -55,3 +55,7 @@ composes this layer after its separate validation. The [global GameStart owner](
 ## Later actual pile recovery subset
 
 The [M1.3.5c.2a save contract](pile-save.md) adds four actual handler codecs and precise queued-child/abandonment checks at its own source revision. This does not complete draw-cards/movement/startup/battle profile or Room/public-v3 decoding; earlier revision-scoped claims above retain their scope.
+
+## Later player-draw recovery slice
+
+The [M1.3.5c.2b contract](player-draw-save.md) adds actual draw-cards cursor/result and handoff validation at its own revision. Actual movement save decoding and complete profile/Room/public-v3 gates remain open; earlier source-scoped claims retain their scope.

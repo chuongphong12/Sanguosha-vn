@@ -72,3 +72,5 @@ M1.3.5b adds two immutable handoff source/test records and one native face-up de
 M1.3.5c.1 registers three immutable shared scheduler/decoder/test sources and one scoped [save-decoder page](../engine/scheduler-save.md). Handler presence is not semantic certification; actual profile/Room/public v3 integration remains pending.
 
 M1.3.5c.2a registers four implementation sources and one test_code source for the [actual pile recovery subset](../engine/pile-save.md), without certifying whole profile/Room or release parity.
+
+M1.3.5c.2b registers an immutable actual draw-cards implementation and test_code source for the [player-draw recovery contract](../engine/player-draw-save.md); active movement save decoding remains pending.

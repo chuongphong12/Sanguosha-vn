@@ -97,3 +97,7 @@ Publication of a knowledge revision does not establish publication of the corres
 ## Actual pile recovery subset
 
 [M1.3.5c.2a](engine/pile-save.md) supplies four actual pile/game-over save codecs and queued-child/abandonment validation. Complete profile/Room decoding and public v3 remain pending.
+
+## Player-draw recovery subset
+
+[M1.3.5c.2b](engine/player-draw-save.md) adds the actual draw-cards parent codec and 41 tests. Actual movement-internal recovery, remaining profiles/Room decoding and public v3 remain pending.

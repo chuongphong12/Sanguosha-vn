@@ -18,3 +18,7 @@ After application integration, M1.3.5 still requires actual minimal-profile setu
 ## M1.3.5c.2a progress
 
 The [actual pile save subset](../engine/pile-save.md) completes four handler codecs and shared queued-child context. Whole enabled profiles/Room decoding and the public v3/full-match/release gates remain open.
+
+## M1.3.5c.2b progress
+
+The [player-draw codec](../engine/player-draw-save.md) validates actual draw-cards state and acquisition/movement handoffs. It does not complete movement-internal recovery, enabled profiles/Room decoding or public v3/full-match/release gates.
