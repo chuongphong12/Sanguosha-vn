@@ -2,13 +2,13 @@
   "version": 1,
   "game": {
     "repository": "https://github.com/chuongphong12/Sanguosha-vn.git",
-    "commit": "f9046375c483881079b853935d988fd0bd056b5e",
-    "availability": "Opt-in fill-hand recovery subset; remaining profile/Room/public v3/release gates pending"
+    "commit": "9bb63cf979f7f21060c8f23225d0bf6657399c96",
+    "availability": "Actual kill-player recovery subset; free-chain/remaining profile/Room/public v3/release gates pending"
   },
   "native": {
     "repository": "https://github.com/TamQuocSat-LangKhach/QSanguosha-QuocChien.git",
     "commit": "ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f",
     "release": "2.3.43-beta2"
   },
-  "scope": "Game f9046375c483881079b853935d988fd0bd056b5e adds30 fill-hand recovery cases and opt-in captured-deficit/adapter validation; legacy boolean profiles retain no hooks. Full2864/109/typecheck/build and source reviews0. Whole Room/profile/publicv3/nativefullmatch not certified."
+  "scope": "Game 9bb63cf979f7f21060c8f23225d0bf6657399c96 adds35 kill-player recovery cases; execution AST/scheduler unchanged, request-parser factor intentional. Full2899/110/typecheck/build,source reviews0. No actual burial/whole Room/profile/publicv3/nativefullmatch certification."
 }

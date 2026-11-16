@@ -101,3 +101,7 @@ The [movement save codec](../engine/movement-save.md) validates actual physical 
 ## M1.3.5c.2d progress
 
 [Fill-hand recovery](../engine/fill-hand-save.md) now captures the original deficit for opted-in profiles while preserving legacy booleans. Remaining handlers and aggregate Room/configuration/root decoding precede public v3/full-match/release acceptance.
+
+## M1.3.5c.2e progress
+
+[Kill-player recovery](../engine/kill-save.md) now supplies the actual death-owner codec needed before free-chain/Draw-phase recovery. Remaining handlers and aggregate Room/configuration/root decoding still precede public v3/full-match/release acceptance.

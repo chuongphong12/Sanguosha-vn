@@ -109,3 +109,7 @@ Publication of a knowledge revision does not establish publication of the corres
 ## Fill-hand recovery subset
 
 [M1.3.5c.2d](engine/fill-hand-save.md) adds opt-in captured-deficit recovery and an explicit draw-adapter validation contract, preserving legacy profiles. Complete handler/Room/public-v3/release gates remain pending.
+
+## Kill-player recovery subset
+
+[M1.3.5c.2e](engine/kill-save.md) adds actual kill-player save validation before free-chain/Draw-phase recovery. Complete profiles/Room/public-v3 and release gates remain pending.

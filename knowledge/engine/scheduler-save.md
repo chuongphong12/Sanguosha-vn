@@ -39,3 +39,7 @@ The [M1.3.5c.2c contract](movement-save.md) adds actual movement codecs and repl
 ## Later fill-hand recovery
 
 The [M1.3.5c.2d contract](fill-hand-save.md) adds explicit opt-in snapshots and draw-adapter save validation at its own source revision. Earlier source-scoped evidence retains its applicability; complete profiles/Room/public-v3 and release gates remain open.
+
+## Later kill-player recovery
+
+The [M1.3.5c.2e contract](kill-save.md) adds actual kill-player cursor/result validation at its own source revision, preserving the live state machine. It does not certify burial/reward, free-chain, complete profiles/Room or release gates; earlier source-scoped claims retain their scope.
