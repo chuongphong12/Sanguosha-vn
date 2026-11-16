@@ -117,3 +117,7 @@ Publication of a knowledge revision does not establish publication of the corres
 ## Free-chain recovery subset
 
 [M1.3.5c.2f](engine/free-chain-save.md) adds captured surrender/save validation and actual reward/kill recovery for opted-in profiles. This advances Group1; remaining phase/startup/battle/Room/public-v3/release gates stay open.
+
+## Draw-phase owner recovery subset
+
+[M1.3.5c.2g](engine/draw-phase-save.md) validates the actual Draw owner and its captured children. Shared bridge/profile/Room/public-v3 and release gates remain open.

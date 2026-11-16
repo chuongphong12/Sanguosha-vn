@@ -63,3 +63,7 @@ The [M1.3.5c.2b contract](player-draw-save.md) adds actual draw-cards cursor/res
 ## Later fill-hand recovery
 
 The [M1.3.5c.2d contract](fill-hand-save.md) adds explicit opt-in snapshots and draw-adapter save validation at its own source revision. Earlier source-scoped evidence retains its applicability; complete profiles/Room/public-v3 and release gates remain open.
+
+## Later Draw-phase recovery
+
+The [M1.3.5c.2g contract](draw-phase-save.md) adds actual owner save validation, preserving captured counts and late validation timing. Earlier source-scoped claims retain their applicability; standalone/shared GameRule bridge and complete profiles/Room/public-v3 remain separate work.
