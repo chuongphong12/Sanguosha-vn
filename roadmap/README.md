@@ -51,3 +51,7 @@ The [player-draw codec](../engine/player-draw-save.md) validates actual draw-car
 ## M1.3.5c.2c progress
 
 The [movement save codec](../engine/movement-save.md) validates actual physical movement and its retained packet boundaries. Player-draw recovery now uses it internally. Remaining handlers, aggregate Room/configuration/root decoding, public v3 and full-match/release acceptance remain open.
+
+## M1.3.5c.2d progress
+
+[Fill-hand recovery](../engine/fill-hand-save.md) now captures the original deficit for opted-in profiles while preserving legacy booleans. Remaining handlers and aggregate Room/configuration/root decoding precede public v3/full-match/release acceptance.

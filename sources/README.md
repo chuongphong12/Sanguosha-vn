@@ -76,3 +76,5 @@ M1.3.5c.2a registers four implementation sources and one test_code source for th
 M1.3.5c.2b registers an immutable actual draw-cards implementation and test_code source for the [player-draw recovery contract](../engine/player-draw-save.md); active movement save decoding remains pending.
 
 M1.3.5c.2c appends one actual movement implementation and two test_code sources for [movement recovery](../engine/movement-save.md); whole-profile/Room validation remains separate.
+
+M1.3.5c.2d registers one immutable implementation and one test_code source for [fill-hand recovery](../engine/fill-hand-save.md), with explicit versioned adapter validation and legacy/profile limits.

@@ -105,3 +105,7 @@ Publication of a knowledge revision does not establish publication of the corres
 ## Movement recovery subset
 
 [M1.3.5c.2c](engine/movement-save.md) adds actual movement cursor/result codecs; player-draw tests now decode through active movement with no bypass. Complete profile/Room/public-v3 and release gates remain pending.
+
+## Fill-hand recovery subset
+
+[M1.3.5c.2d](engine/fill-hand-save.md) adds opt-in captured-deficit recovery and an explicit draw-adapter validation contract, preserving legacy profiles. Complete handler/Room/public-v3/release gates remain pending.

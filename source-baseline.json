@@ -2,13 +2,13 @@
   "version": 1,
   "game": {
     "repository": "https://github.com/chuongphong12/Sanguosha-vn.git",
-    "commit": "86dab10c58d808db8acf6adaf45d0221702da392",
-    "availability": "Actual movement save-codec subset; remaining profile/Room/public v3/release gates pending"
+    "commit": "f9046375c483881079b853935d988fd0bd056b5e",
+    "availability": "Opt-in fill-hand recovery subset; remaining profile/Room/public v3/release gates pending"
   },
   "native": {
     "repository": "https://github.com/TamQuocSat-LangKhach/QSanguosha-QuocChien.git",
     "commit": "ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f",
     "release": "2.3.43-beta2"
   },
-  "scope": "Game 86dab10c58d808db8acf6adaf45d0221702da392 adds44 movement recovery cases and replaces player-draw movement fixture/bypass with actual decoder. Finalfull2834/108/typecheck/build,source reviews0. No complete Room/profile/publicv3/nativefullmatch certification."
+  "scope": "Game f9046375c483881079b853935d988fd0bd056b5e adds30 fill-hand recovery cases and opt-in captured-deficit/adapter validation; legacy boolean profiles retain no hooks. Full2864/109/typecheck/build and source reviews0. Whole Room/profile/publicv3/nativefullmatch not certified."
 }
