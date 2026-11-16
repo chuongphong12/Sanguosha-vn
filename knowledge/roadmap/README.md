@@ -47,3 +47,7 @@ The [actual pile save subset](../engine/pile-save.md) completes four handler cod
 ## M1.3.5c.2b progress
 
 The [player-draw codec](../engine/player-draw-save.md) validates actual draw-cards state and acquisition/movement handoffs. It does not complete movement-internal recovery, enabled profiles/Room decoding or public v3/full-match/release gates.
+
+## M1.3.5c.2c progress
+
+The [movement save codec](../engine/movement-save.md) validates actual physical movement and its retained packet boundaries. Player-draw recovery now uses it internally. Remaining handlers, aggregate Room/configuration/root decoding, public v3 and full-match/release acceptance remain open.

@@ -50,3 +50,7 @@ Separated physical `cardPackets` remain in the serializable continuation; recons
 Native evidence: `room.cpp` 5733–5774 and 5987–6062; `src/core/roomstate.cpp` 40–50; `src/core/wrappedcard.cpp` 36–76. JSON wrappers store face, suit/number, skill, modified, flags and tags; they do not model real-card pointers or live subcards. `forceVisible` is independent of packet `open`. A throwing filter or invalid face leaves staged physical/wrapper storage unchanged, preserving prior children and eager rule tags.
 
 All raw zones, wrappers, package snapshots and movement payloads remain server-private. Equipment install/uninstall, delayed-trick hooks, full package semantics and per-recipient movement visibility/network notification adapters are required before this ledger can support playable content.
+
+## Later actual movement recovery
+
+The [M1.3.5c.2c contract](movement-save.md) adds actual movement codecs and replaces the prior player-draw test-only movement boundary with real decoding at its own source revision. This does not complete remaining profile/Room/public-v3/release gates; earlier revision-scoped evidence retains its scope.

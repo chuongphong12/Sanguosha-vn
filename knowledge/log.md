@@ -196,3 +196,9 @@ Independent canonical Standards0/Spec0 reviewed the15-file draft at treeea7e3076
 - Knowledge input06664b9; inspected game 13cd4a2557a8934541d6d4d4aaa009ac63b1c604, base 79c18e6d1caae00d12a9ad395c049781f0c43253. [Contract](engine/player-draw-save.md)/[checkpoint](reviews/2026-11-16-hegemony-m135c2b-player-draw-save.md) record actual parent codec, bounded movement fixture, source review correction and pending aggregate gates.
 - Baseline72/3, finalfocused190/5 (41new), full2790/107/typecheck/build, lint42 prior warnings. Source Standards0/Spec0 at a1b22d2e728909b4a66927aa504576ed2942f20a; prior callback/interpreter preservation and graph hashes verified. Initial overlapping reform RED failures are distinct from final full-suite success.
 - Two immutable source identities/one page/two relations append; prior registry records remain unchanged. Canonical lint/reviews/publication/imported-head CI are distinct gates. PR33 remains draft.
+
+## [2026-11-16] ingest | M1.3.5c.2c movement recovery
+
+- Input knowledge d096694db87e83da409dc588d7775ad00dc9fbb9; inspected game 86dab10c58d808db8acf6adaf45d0221702da392, base e263cf9122b440ffc14e65e2b92c225216b7b4a6. [Contract](engine/movement-save.md)/[checkpoint](reviews/2026-11-16-hegemony-m135c2c-movement-save.md) record actual codec, retained-packet review fixes, fixtures and remaining aggregate gates.
+- Baseline73/3, finalfocused153/5 (44new), finalfull2834/108/typecheck/build, lint42 prior warnings; source Standards0/Spec0 at f53bb338bd80647f0a7cd4a0369771e37a1d4e93. Existing runtime/preflight/helper/interpreter AST/hash evidence is preserved.
+- Three immutable sources/one page/three relations append without rewriting prior registry identities. Canonical lint/reviews/publication/imported-head CI remain separate delivery gates; PR33 stays draft.

@@ -31,3 +31,7 @@ The [M1.3.5c.2a save contract](pile-save.md) adds four actual handler codecs and
 ## Later player-draw recovery slice
 
 The [M1.3.5c.2b contract](player-draw-save.md) adds actual draw-cards cursor/result and handoff validation at its own revision. Actual movement save decoding and complete profile/Room/public-v3 gates remain open; earlier source-scoped claims retain their scope.
+
+## Later actual movement recovery
+
+The [M1.3.5c.2c contract](movement-save.md) adds actual movement codecs and replaces the prior player-draw test-only movement boundary with real decoding at its own source revision. This does not complete remaining profile/Room/public-v3/release gates; earlier revision-scoped evidence retains its scope.
