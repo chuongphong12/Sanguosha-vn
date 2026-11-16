@@ -17,9 +17,16 @@ function fixture() {
   f.policy.notify = () => null;
   f.rules.validateEvent = (_game, event) => {
     if (
-      event.name !== "FetchDrawPileCard" ||
-      event.target !== null ||
-      event.data !== null
+      event.name === "FetchDrawPileCard"
+        ? event.target !== null || event.data !== null
+        : ![
+            "BeforeCardsMove",
+            "ConfirmMoveCards",
+            "PreCardsMoveOneTime",
+            "CardsMoveOneTime",
+          ].includes(event.name) ||
+          !event.target ||
+          !f.game.seatOrder.includes(event.target)
     )
       throw Error("Unexpected acquisition event");
   };
@@ -33,23 +40,6 @@ function fixture() {
       "move-cards",
     ].includes(op.name),
   );
-  const movement = f.rules.operations.find((op) => op.name === "move-cards")!;
-  // A boundary-only test codec, not a codec for the actual movement cursor.
-  // Run the actual movement body without decoding its internal checkpoints.
-  movement.validateSave = (_game, frame) => {
-    if (frame.continuation !== null)
-      throw Error("Movement recovery is pending");
-  };
-  movement.validateResult = (_game, result) => {
-    const value = result.value;
-    if (
-      !value ||
-      typeof value !== "object" ||
-      Array.isArray(value) ||
-      typeof value.cancelled !== "boolean"
-    )
-      throw Error("Invalid fixture movement result");
-  };
   return f;
 }
 type Fixture = ReturnType<typeof fixture>;
@@ -89,7 +79,7 @@ function read(f: Fixture) {
   expect(JSON.stringify(candidate)).toBe(before);
 }
 function finish(f: Fixture) {
-  let skipped = 0;
+  let movementCheckpoints = 0;
   for (let step = 0; step < 500; step++) {
     const moving = f.scheduler.frames.some(
       (frame) =>
@@ -97,9 +87,10 @@ function finish(f: Fixture) {
         frame.operation.name === "move-cards" &&
         frame.continuation !== null,
     );
-    if (moving) skipped++;
-    else read(f);
-    if (!f.scheduler.yielded || f.scheduler.interruption) return skipped;
+    if (moving) movementCheckpoints++;
+    read(f);
+    if (!f.scheduler.yielded || f.scheduler.interruption)
+      return movementCheckpoints;
     expect(continueTriggerWork(f.scheduler, f.game, f.rules)).toBe(true);
   }
   throw Error("Draw did not finish");
@@ -269,12 +260,12 @@ describe("actual player-draw save codec", () => {
     expect(() => read(f)).toThrow();
   });
 
-  it("explicitly rejects recovery inside actual movement until that codec exists", () => {
+  it("recovers inside actual movement through its own codec", () => {
     const f = fixture();
     start(f, { players: ["a"], counts: [1] });
     seekMovement(f);
     expect(continueTriggerWork(f.scheduler, f.game, f.rules)).toBe(true);
-    expect(() => read(f)).toThrow("Movement recovery is pending");
+    read(f);
     finish(f);
     expect(f.game.cardZones.a.cards).toEqual([0]);
   });

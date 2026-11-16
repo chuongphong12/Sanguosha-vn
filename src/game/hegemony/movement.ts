@@ -585,6 +585,131 @@ function movementForceVisible(data: TriggerData): boolean {
   return value === true;
 }
 
+/** Saved packets retain historical sources; nested/post movement may move them. */
+function savedMoves(game: CardMovementGame, value: TriggerData): Move[] {
+  if (!Array.isArray(value)) throw new Error("Invalid saved movement packets");
+  const seen = new Set<number>();
+  for (const move of value) {
+    if (
+      !move ||
+      typeof move !== "object" ||
+      Array.isArray(move) ||
+      Object.keys(move).length !== 17 ||
+      !Array.isArray(move.ids) ||
+      !move.ids.length ||
+      typeof move.to !== "string" ||
+      !Object.prototype.hasOwnProperty.call(game.cardZones, move.to) ||
+      !validZone(game, game.cardZones[move.to]) ||
+      move.toPlace !== game.cardZones[move.to].place ||
+      move.toPileName !== (game.cardZones[move.to].pileName ?? "") ||
+      move.originTo !== move.to ||
+      move.originToPlace !== move.toPlace ||
+      move.originToPileName !== move.toPileName ||
+      typeof move.lastHandcard !== "boolean" ||
+      typeof move.bottom !== "boolean" ||
+      (move.bottom && move.toPlace !== "draw") ||
+      !("reason" in move)
+    )
+      throw new Error("Invalid saved movement packet");
+    for (const field of CARD_FIELDS) {
+      const items = move[field];
+      if (!Array.isArray(items) || items.length !== move.ids.length)
+        throw new Error("Invalid saved per-card metadata");
+    }
+    for (const [i, id] of move.ids.entries()) {
+      if (
+        typeof id !== "number" ||
+        !Number.isSafeInteger(id) ||
+        id < 0 ||
+        seen.has(id)
+      )
+        throw new Error("Invalid saved physical card");
+      seen.add(id);
+      if (
+        Object.values(game.cardZones).reduce(
+          (n, zone) => n + zone.cards.filter((card) => card === id).length,
+          0,
+        ) !== 1
+      )
+        throw new Error("Invalid saved physical location");
+      const source = Array.isArray(move.from) ? move.from[i] : null;
+      if (
+        typeof source !== "string" ||
+        !Object.prototype.hasOwnProperty.call(game.cardZones, source) ||
+        !validZone(game, game.cardZones[source])
+      )
+        throw new Error("Invalid saved source zone");
+      const fields = move as unknown as Move;
+      if (
+        fields.fromPlaces[i] !== game.cardZones[source].place ||
+        fields.fromPileNames[i] !== (game.cardZones[source].pileName ?? "") ||
+        fields.originFrom[i] !== source ||
+        fields.originFromPlaces[i] !== fields.fromPlaces[i] ||
+        fields.originFromPileNames[i] !== fields.fromPileNames[i] ||
+        typeof fields.open[i] !== "boolean" ||
+        (source === move.to && !move.bottom)
+      )
+        throw new Error("Invalid saved source metadata");
+    }
+  }
+  return value as Move[];
+}
+
+/** Check original request syntax without rebasing it onto post-commit storage.
+ * For initial batches, reconstruct only the historical sources recorded by the
+ * cursor (omitted no-ops were already at their destination), never run rules.
+ */
+function savedRequest(
+  game: CardMovementGame,
+  data: TriggerData,
+  initial?: Move[],
+) {
+  if (
+    !data ||
+    typeof data !== "object" ||
+    Array.isArray(data) ||
+    !Array.isArray(data.moves)
+  )
+    throw new Error("Invalid saved movement request");
+  movementForceVisible(data);
+  const zones = structuredClone(game.cardZones),
+    sources = new Map<number, string>();
+  for (const move of initial ?? [])
+    move.ids.forEach((id, i) => sources.set(id, move.from[i]));
+  for (const entry of data.moves) {
+    if (
+      !entry ||
+      typeof entry !== "object" ||
+      Array.isArray(entry) ||
+      !Array.isArray(entry.ids)
+    )
+      throw new Error("Invalid saved movement entry");
+    for (const [i, id] of entry.ids.entries()) {
+      if (typeof id !== "number" || !Number.isSafeInteger(id) || id < 0)
+        throw new Error("Invalid saved request card");
+      const locations = Object.entries(game.cardZones).flatMap(([key, zone]) =>
+        zone.cards.filter((card) => card === id).map(() => key),
+      );
+      if (locations.length !== 1)
+        throw new Error("Invalid saved request location");
+      const source = initial
+        ? (sources.get(id) ?? entry.to)
+        : Array.isArray(entry.from)
+          ? entry.from[i]
+          : locations[0];
+      if (
+        typeof source !== "string" ||
+        !Object.prototype.hasOwnProperty.call(zones, source)
+      )
+        throw new Error("Invalid historical source");
+      for (const zone of Object.values(zones))
+        zone.cards = zone.cards.filter((card) => card !== id);
+      zones[source].cards.push(id);
+    }
+  }
+  return normalizeMoves({ ...game, cardZones: zones }, data);
+}
+
 function runCardMovement<G extends CardMovementGame>(
   context: OperationContext<G>,
   scenarioRules?: ScenarioMovementRules,
@@ -673,6 +798,100 @@ export function createCardMovementOperation<G extends CardMovementGame>(
 ): OperationHandler<G> {
   return {
     name: "move-cards",
+    validateSave: (game, frame, _interruption, prompt, state) => {
+      const c = frame.continuation,
+        queued = state?.child;
+      if (
+        prompt ||
+        frame.cleanup ||
+        frame.answer !== null ||
+        frame.operationChild
+      )
+        throw new Error("Invalid saved movement boundary");
+      if (c === null) {
+        normalizeMoves(game, frame.operation.data);
+        movementForceVisible(frame.operation.data);
+        if (queued || frame.child)
+          throw new Error("Invalid initial movement child");
+        return;
+      }
+      if (
+        typeof c !== "object" ||
+        Array.isArray(c) ||
+        typeof c.stage !== "number" ||
+        !Number.isInteger(c.stage) ||
+        c.stage < 0 ||
+        c.stage >= EVENTS.length ||
+        !Array.isArray(c.actors) ||
+        !c.actors.length ||
+        typeof c.actor !== "number" ||
+        !Number.isInteger(c.actor) ||
+        c.actor < 0 ||
+        c.actor >= c.actors.length ||
+        !("data" in c)
+      )
+        throw new Error("Invalid saved movement cursor");
+      const order = actionOrder(game, frame.actors[0]);
+      let previous = -1;
+      for (const actor of c.actors) {
+        const rank = typeof actor === "string" ? order.indexOf(actor) : -1;
+        if (rank <= previous)
+          throw new Error("Invalid saved movement actor order");
+        previous = rank;
+      }
+      const moves = savedMoves(game, c.moves),
+        packets = savedMoves(game, c.cardPackets);
+      if (
+        c.stage > 0 &&
+        (packets.some(
+          (packet) =>
+            reasonKey(separateMoves(game, [packet])) !== reasonKey([packet]),
+        ) ||
+          reasonKey(
+            sortMoves(game, structuredClone(packets), frame.actors[0]),
+          ) !== reasonKey(packets))
+      )
+        throw new Error("Invalid saved physical packet boundaries");
+      const original = savedRequest(
+        game,
+        frame.operation.data,
+        c.stage === 0 ? moves : undefined,
+      );
+      if (
+        c.stage === 0
+          ? packets.length !== 0 ||
+            reasonKey(mergeMoves(game, original, frame.actors[0])) !==
+              reasonKey(moves)
+          : reasonKey(
+              mergeMoves(game, structuredClone(packets), frame.actors[0]),
+            ) !== reasonKey(moves)
+      )
+        throw new Error("Invalid saved movement batch");
+      const event =
+        queued?.kind === "event" ? queued.event : frame.child?.event;
+      if (
+        (queued && queued.kind !== "event") ||
+        (!event && !state?.abandoning) ||
+        (event &&
+          (event.name !== EVENTS[c.stage] ||
+            event.target !== c.actors[c.actor]))
+      )
+        throw new Error("Invalid saved movement event child");
+    },
+    validateResult: (game, result) => {
+      savedRequest(game, result.operation.data);
+      const value = result.value;
+      if (
+        !value ||
+        typeof value !== "object" ||
+        Array.isArray(value) ||
+        Object.keys(value).length !== 2 ||
+        (value.cancelled === true
+          ? !Array.isArray(value.moves) || value.moves.length !== 0
+          : value.cancelled !== false || !("data" in value))
+      )
+        throw new Error("Invalid saved movement completion");
+    },
     validate: (game, operation, currentActor) => {
       livingActors(game, currentActor);
       const moves = normalizeMoves(game, operation.data);
