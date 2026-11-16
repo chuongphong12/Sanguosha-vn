@@ -1877,6 +1877,30 @@
       "checked_on": "2026-11-16",
       "author": null,
       "business_owner": null
+    },
+    {
+      "id": "web.m135c2e.handler.9bb63cf",
+      "kind": "primary_code",
+      "repository": "https://github.com/chuongphong12/Sanguosha-vn",
+      "revision": "9bb63cf979f7f21060c8f23225d0bf6657399c96",
+      "path": "src/game/hegemony/death.ts",
+      "url": "https://github.com/chuongphong12/Sanguosha-vn/blob/9bb63cf979f7f21060c8f23225d0bf6657399c96/src/game/hegemony/death.ts",
+      "locator": "Actual kill-player save/result hooks and immutable request parser; execution AST preserved",
+      "checked_on": "2026-11-16",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "web.m135c2e.tests.9bb63cf",
+      "kind": "test_code",
+      "repository": "https://github.com/chuongphong12/Sanguosha-vn",
+      "revision": "9bb63cf979f7f21060c8f23225d0bf6657399c96",
+      "path": "tests/hegemony/kill-save.test.ts",
+      "url": "https://github.com/chuongphong12/Sanguosha-vn/blob/9bb63cf979f7f21060c8f23225d0bf6657399c96/tests/hegemony/kill-save.test.ts",
+      "locator": "35 recovery cases using actual kill/game-over with fixture observer/owner/event policies",
+      "checked_on": "2026-11-16",
+      "author": null,
+      "business_owner": null
     }
   ],
   "pages": [
@@ -2280,6 +2304,20 @@
       "source_ids": [
         "web.m135c2d.handler.f904637",
         "web.m135c2d.tests.f904637"
+      ]
+    },
+    {
+      "path": "engine/kill-save.md",
+      "status": "supported",
+      "reviewed_on": "2026-11-16",
+      "review_scope": "Actual kill-player recovery; burial/free-chain/whole Room/profile/publicv3 remains pending",
+      "applies_to": {
+        "game_commit": "9bb63cf979f7f21060c8f23225d0bf6657399c96",
+        "native_commit": "ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f"
+      },
+      "source_ids": [
+        "web.m135c2e.handler.9bb63cf",
+        "web.m135c2e.tests.9bb63cf"
       ]
     }
   ],
@@ -3760,6 +3798,24 @@
         "web.m135c2d.tests.f904637"
       ],
       "scope": "Opt-in fill-hand recovery with captured deficit and explicit draw validation; aggregate Room/profile/publicv3 remains pending"
+    },
+    {
+      "subject": "page:engine/kill-save.md",
+      "predicate": "derived_from",
+      "object": "source:web.m135c2e.handler.9bb63cf",
+      "evidence": [
+        "web.m135c2e.handler.9bb63cf"
+      ],
+      "scope": "Actual kill-player recovery; burial/free-chain/whole Room/profile/publicv3 remains pending"
+    },
+    {
+      "subject": "page:engine/kill-save.md",
+      "predicate": "derived_from",
+      "object": "source:web.m135c2e.tests.9bb63cf",
+      "evidence": [
+        "web.m135c2e.tests.9bb63cf"
+      ],
+      "scope": "Actual kill-player recovery; burial/free-chain/whole Room/profile/publicv3 remains pending"
     }
   ]
 }

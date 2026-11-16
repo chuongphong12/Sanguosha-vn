@@ -78,3 +78,5 @@ M1.3.5c.2b registers an immutable actual draw-cards implementation and test_code
 M1.3.5c.2c appends one actual movement implementation and two test_code sources for [movement recovery](../engine/movement-save.md); whole-profile/Room validation remains separate.
 
 M1.3.5c.2d registers one immutable implementation and one test_code source for [fill-hand recovery](../engine/fill-hand-save.md), with explicit versioned adapter validation and legacy/profile limits.
+
+M1.3.5c.2e registers an immutable actual kill-player implementation and test_code source for [kill recovery](../engine/kill-save.md), distinct from full burial/profile/Room validation.

@@ -208,3 +208,9 @@ Independent canonical Standards0/Spec0 reviewed the15-file draft at treeea7e3076
 - Knowledge input b62250fa6d044d98ddc54550d9d5ee545c9f6d4f; source f9046375c483881079b853935d988fd0bd056b5e, fixed base 51c584cc12eb9afff72ddf4b4f90a21022755219. [Contract](engine/fill-hand-save.md)/[checkpoint](reviews/2026-11-16-hegemony-m135c2d-fill-hand-save.md) record opt-in deficit snapshots, draw validation seam, unchanged legacy cursor, fixtures and pending aggregate gates.
 - Baseline231/4, finalfocused261/5 (30new), full2864/109/typecheck/build; lint42 prior warnings. Source Standards0/Spec0 at bba7b477bb0e25143e3d30edb4b845a71c8059b1. UNKNOWN factory impact is supplemented by CodeGraph and actual imports, not dismissed.
 - Two immutable sources/one page/two relations append without changing previous identities. Canonical lint/reviews/publication/imported CI remain separate; no production gate closes.
+
+## [2026-11-16] ingest | M1.3.5c.2e kill-player recovery
+
+- Knowledge input 1fa96e73453837310a507e2b606b17b5afaf272e; inspected source 9bb63cf979f7f21060c8f23225d0bf6657399c96, base 5a4ab37871eede44877705c604a277d10d24b535. [Contract](engine/kill-save.md)/[checkpoint](reviews/2026-11-16-hegemony-m135c2e-kill-save.md) record the actual owner codec, captured progress, preserved execution and fixture/aggregate limits.
+- Baseline218/3, finalfocused253/4 (35new), full2899/110/typecheck/build, lint42 prior warnings; source Standards0/Spec0 at 01f7fb5cb05eecc9751d3b1814d591fd1f169431. CRITICAL execution impact was warned; runKill AST and emitted scheduler remain equal to base.
+- Two immutable sources/one page/two relations append without rewriting earlier identities. Canonical lint/reviews/publication/imported CI remain separate; no production gate closes.

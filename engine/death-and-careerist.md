@@ -41,3 +41,7 @@ Only an original snapshot with more than two enables recruitment. Current career
 Exact yes sets private scenario_role_shown=true, writes captured group and stops that leader's recruitment loop. Every other reply fills **decliner's** hand to four then invokes real recover1; forced-no candidates also get these bonuses. Leader/acceptor do not get the refusal bonus. `fill-hand` draws only current positive shortfall for an alive target, preserving excess; physical draw/RNG/recycling remain external. Recovery independently checks current eligibility. A forced reveal keeps result true even if leader later dies or nobody accepts.
 
 Public compositions include failed rescue through actual death/burial/reward movement, successful rescue with actual death registered but bypassed, concrete show/hide/relationship use, recruitment pauses and later winner completion. All retain scheduler exact-once/eager interruption rules. Concrete catalog/pile/limitation/draw/choice/transport adapters, general removal/transformation, offline surrender/statistics/next-mode policy, exception unwind and production cutover remain incomplete. No native runtime differential or complete production E2E result is claimed.
+
+## Later kill-player recovery
+
+The [M1.3.5c.2e contract](kill-save.md) adds actual kill-player cursor/result validation at its own source revision, preserving the live state machine. It does not certify burial/reward, free-chain, complete profiles/Room or release gates; earlier source-scoped claims retain their scope.
