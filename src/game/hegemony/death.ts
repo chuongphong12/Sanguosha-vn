@@ -89,12 +89,16 @@ export function livingPlayers(game: DeathGame): string[] {
     throw new Error("Invalid living player list");
   return [...players];
 }
-function killInput(game: DeathGame, data: TriggerData) {
+function killRequest(game: DeathGame, data: TriggerData) {
   if (!data || typeof data !== "object" || Array.isArray(data))
     throw new Error("Invalid killPlayer input");
   const target = dyingPlayer(game, data.target);
   const damage: Damage | null =
     data.damage === null ? null : readDamage(game, data.damage);
+  return { target, damage };
+}
+function killInput(game: DeathGame, data: TriggerData) {
+  const { target, damage } = killRequest(game, data);
   acquired(game, target);
   readSlashAlive(game, target);
   readSlashInteger(game.hp[target]);
@@ -104,6 +108,16 @@ function killInput(game: DeathGame, data: TriggerData) {
   for (const player of players.slice(index + 1))
     readSlashInteger(readSlashInteger(game.seats?.[player]) - 1);
   return { target, damage, players, index };
+}
+
+function deathDataKey(value: TriggerData): string {
+  if (Array.isArray(value)) return `[${value.map(deathDataKey).join(",")}]`;
+  if (value !== null && typeof value === "object")
+    return `{${Object.keys(value)
+      .sort()
+      .map((key) => `${JSON.stringify(key)}:${deathDataKey(value[key])}`)
+      .join(",")}}`;
+  return JSON.stringify(value);
 }
 type Cursor = {
   stage: "before" | "hp" | "judge" | "death" | "finished";
@@ -206,6 +220,97 @@ export function createKillPlayerOperation<
 >(): OperationHandler<G> {
   return {
     name: "kill-player",
+    validateSave: (game, frame, _interruption, prompt, state) => {
+      const input = killRequest(game, frame.operation.data),
+        c = frame.continuation,
+        queued = state?.child;
+      if (
+        prompt ||
+        frame.answer !== null ||
+        frame.cleanup ||
+        frame.operationChild
+      )
+        throw new Error("Invalid saved kill boundary");
+      if (c === null) {
+        killInput(game, frame.operation.data);
+        if (queued || frame.child)
+          throw new Error("Invalid initial kill child");
+        return;
+      }
+      if (
+        typeof c !== "object" ||
+        Array.isArray(c) ||
+        Object.keys(c).length !== 5 ||
+        !["before", "hp", "judge", "death", "finished"].some(
+          (stage) => stage === c.stage,
+        ) ||
+        c.target !== input.target ||
+        !Array.isArray(c.players) ||
+        !("shared" in c) ||
+        typeof c.index !== "number" ||
+        !Number.isInteger(c.index) ||
+        c.index < 0 ||
+        c.index > c.players.length
+      )
+        throw new Error("Invalid saved kill cursor");
+      const roster = c.players.map((player) => dyingPlayer(game, player));
+      if (new Set(roster).size !== roster.length)
+        throw new Error("Invalid captured death roster");
+      if (roster.length) {
+        const start = game.seatOrder.indexOf(roster[0]),
+          order = [
+            ...game.seatOrder.slice(start),
+            ...game.seatOrder.slice(0, start),
+          ];
+        let previous = -1;
+        for (const player of roster) {
+          const rank = order.indexOf(player);
+          if (rank <= previous) throw new Error("Invalid captured death order");
+          previous = rank;
+        }
+      }
+      if (
+        (["before", "hp", "judge"].includes(String(c.stage)) &&
+          c.index !== 0) ||
+        (c.stage === "death" && c.index === 0)
+      )
+        throw new Error("Invalid death notification progress");
+      if (
+        c.stage === "before" &&
+        deathDataKey(c.shared) !==
+          deathDataKey({ who: input.target, damage: input.damage })
+      )
+        throw new Error("Invalid initial death payload");
+      const name =
+        c.stage === "before"
+          ? "BeforeGameOverJudge"
+          : c.stage === "hp"
+            ? "HpChanged"
+            : c.stage === "judge"
+              ? "GameOverJudge"
+              : c.stage === "death"
+                ? "Death"
+                : c.index === 0
+                  ? "BuryVictim"
+                  : "DeathFinished";
+      const target =
+        c.stage === "death" || (c.stage === "finished" && c.index > 0)
+          ? roster[c.index - 1]
+          : input.target;
+      const event =
+        queued?.kind === "event" ? queued.event : frame.child?.event;
+      if (
+        (queued && queued.kind !== "event") ||
+        (!event && !state?.abandoning) ||
+        (event && (event.name !== name || event.target !== target))
+      )
+        throw new Error("Invalid saved kill event child");
+    },
+    validateResult: (game, result) => {
+      killRequest(game, result.operation.data);
+      if (result.value !== null)
+        throw new Error("Invalid saved kill completion");
+    },
     validate: (game, operation) => {
       killInput(game, operation.data);
     },
