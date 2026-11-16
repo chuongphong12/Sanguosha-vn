@@ -80,3 +80,5 @@ M1.3.5c.2c appends one actual movement implementation and two test_code sources 
 M1.3.5c.2d registers one immutable implementation and one test_code source for [fill-hand recovery](../engine/fill-hand-save.md), with explicit versioned adapter validation and legacy/profile limits.
 
 M1.3.5c.2e registers an immutable actual kill-player implementation and test_code source for [kill recovery](../engine/kill-save.md), distinct from full burial/profile/Room validation.
+
+M1.3.5c.2f appends an immutable free-chain implementation and test_code source for [opt-in recovery](../engine/free-chain-save.md); full profile/Room validation remains separate.

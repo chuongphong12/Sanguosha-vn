@@ -214,3 +214,9 @@ Independent canonical Standards0/Spec0 reviewed the15-file draft at treeea7e3076
 - Knowledge input 1fa96e73453837310a507e2b606b17b5afaf272e; inspected source 9bb63cf979f7f21060c8f23225d0bf6657399c96, base 5a4ab37871eede44877705c604a277d10d24b535. [Contract](engine/kill-save.md)/[checkpoint](reviews/2026-11-16-hegemony-m135c2e-kill-save.md) record the actual owner codec, captured progress, preserved execution and fixture/aggregate limits.
 - Baseline218/3, finalfocused253/4 (35new), full2899/110/typecheck/build, lint42 prior warnings; source Standards0/Spec0 at 01f7fb5cb05eecc9751d3b1814d591fd1f169431. CRITICAL execution impact was warned; runKill AST and emitted scheduler remain equal to base.
 - Two immutable sources/one page/two relations append without rewriting earlier identities. Canonical lint/reviews/publication/imported CI remain separate; no production gate closes.
+
+## [2026-11-16] ingest | M1.3.5c.2f free-chain recovery
+
+- Knowledge input 6164a8cccc4db4a1d58b496e4578a48e9374a9bd; source 2e1972108e11873338468a20dc28ca9a4f896a65, base 8382cd6cb5c37b2174182fc00a37a4db23133226. [Contract](engine/free-chain-save.md)/[checkpoint](reviews/2026-11-16-hegemony-m135c2f-free-chain-save.md) record opt-in captured surrender, preserved legacy format, actual reward/kill recovery and fixture/aggregate limits.
+- Baseline202/3, finalfocused271/5 (34new), full2933/111/typecheck/build; lint42 prior warnings; source Standards0/Spec0 at 544e0d23ae01b4ab894791f88ef29c7530dd3dea. Award AST/scheduler equality and matching dual-graph hashes retained; factory UNKNOWN remains explicit.
+- Two immutable sources/one page/two relations append without rewriting prior identities. Canonical lint/reviews/publication/imported CI are separate gates. Group1 remains in progress.

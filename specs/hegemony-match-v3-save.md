@@ -34,3 +34,7 @@ The [movement save codec](../engine/movement-save.md) validates actual physical 
 ## M1.3.5c.2e progress
 
 [Kill-player recovery](../engine/kill-save.md) now supplies the actual death-owner codec needed before free-chain/Draw-phase recovery. Remaining handlers and aggregate Room/configuration/root decoding still precede public v3/full-match/release acceptance.
+
+## M1.3.5c.2f progress
+
+[Free-chain recovery](../engine/free-chain-save.md) now validates captured reveals and surrender-to-kill handoffs for opted-in profiles. Draw-phase and remaining startup/battle codecs, aggregate Room/configuration/root decoding and public v3 remain Group1 work. No playable-release gate closes.

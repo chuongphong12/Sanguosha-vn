@@ -71,3 +71,5 @@ Original game paths and blob identities are recorded in the [migration manifest]
 - [2026-11-16 fill-hand recovery](2026-11-16-hegemony-m135c2d-fill-hand-save.md):30 new cases; explicit snapshot/adapter opt-in, real draw/movement runtime and preserved legacy path; whole Room/profile/release pending.
 
 - [2026-11-16 kill-player recovery](2026-11-16-hegemony-m135c2e-kill-save.md):35 new cases, preserved execution AST, actual nested kills/game-over with fixture event policies; burial/Room/release pending.
+
+- [2026-11-16 free-chain recovery](2026-11-16-hegemony-m135c2f-free-chain-save.md):34 new cases; actual drain/kill and legacy preservation, explicit mapper/predicate/event fixtures; Group1/Room/release pending.
