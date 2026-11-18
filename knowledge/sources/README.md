@@ -84,3 +84,5 @@ M1.3.5c.2e registers an immutable actual kill-player implementation and test_cod
 M1.3.5c.2f appends an immutable free-chain implementation and test_code source for [opt-in recovery](../engine/free-chain-save.md); full profile/Room validation remains separate.
 
 M1.3.5c.2g appends immutable implementation/test sources for [Draw-phase owner recovery](../engine/draw-phase-save.md); bridge/complete profile/Room acceptance remains separate.
+
+M1.3.5c.2h appends immutable implementation/new-test/strengthened-test sources for [GameRule bridge recovery](../engine/game-rule-save.md). Complete child-handler/Room/profile acceptance remains separate.

@@ -1,0 +1,23 @@
+# Shared GameRule bridge recovery
+
+M1.3.5c.2h at game [d2e6a6d279b74f4f5d3a47ca6046bf2f86356511](https://github.com/chuongphong12/Sanguosha-vn/blob/d2e6a6d279b74f4f5d3a47ca6046bf2f86356511/src/game/hegemony/damage-rule.ts), fixed base 1cb2d5ecc1050127dbac0fe76ce715f40617dc8d, follows [approved C2](../specs/hegemony-match-v3-save.md). Native authority remains ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f/2.3.43-beta2. See [damage/recovery](damage-and-rescue.md), [Draw owner](draw-phase-save.md), [scheduler decoder](scheduler-save.md) and [checkpoint](../reviews/2026-11-18-hegemony-m135c2h-game-rule-save.md).
+
+## Bridge validation
+
+The shared damageRule factory now supplies a pure skill save hook. It validates its candidates as fixed rule occurrences: null actor/owner/slot, occurrence rule, no order or occurrence flags. At reconciled recorded/unselected boundaries, candidate target must equal the event target. While another skill/record is active, a previously collected target may legitimately be stale until reconciliation. A forged unselected target/key otherwise lets the scheduler consume one key and recollect another, delegating twice; the decoder now rejects that save before execution.
+
+Only when this rule is selected does the hook validate its cursor: cost/effect only, null continuation, no own prompt/answer/event result, known target or null, selected target equal to the event target. Other selected skills retain their own continuation/prompt contract. The bridge never inspects or consumes SkipGameRule, reruns effect, or invokes child preflight during read.
+
+Queued/retained operation children require effect stage, the factory's original event name, nonnull captured target, the fixed operation name and exactly target/data input keys. Nested JSON data is compared by value with sorted object keys, preserving arrays and ignoring object insertion order. DamageDone retained results must be a non-array object containing data, matching the live projection guard; child handler result semantics remain that handler's responsibility. Childless null cursors are valid before delegation and during actual abandonment; this is structural recovery validation, not historical authenticity of all prior work.
+
+Inherited wrappers keep their live behavior: GeneralShown returns the child boolean and DFDebut has a no-operation branch; a forged DFDebut operation rejects. GameOverJudge's boolean result projection remains unchanged. Their full owner/result codecs still must be supplied by an enabled profile. Hook presence alone does not certify those profiles.
+
+## Evidence and limits
+
+[33 new cases](https://github.com/chuongphong12/Sanguosha-vn/blob/d2e6a6d279b74f4f5d3a47ca6046bf2f86356511/tests/hegemony/game-rule-save.test.ts) exercise actual scheduler/decoder plus Draw-phase/drawing/movement/free-chain recovery at budgets1/2/7/10000. The [existing standalone Draw recovery case](https://github.com/chuongphong12/Sanguosha-vn/blob/d2e6a6d279b74f4f5d3a47ca6046bf2f86356511/tests/hegemony/draw-phase-save.test.ts) now executes the actual bridge rather than asserting missing coverage. The fixtures register pile recycling/terminal dependencies without exercising those branches. Queue/kill-validator/predicate/event policies remain fixtures; no full package/Room/native full-match claim follows.
+
+Bridge-specific cases cover null/SkipGameRule, changed late tags after a child result, captured JSON key order, corrupt inputs/cursors/results, another skill's prompt, interruption/abandonment and rule occurrence forgeries. A same-band active skill may retarget and prompt before reconciliation. DamageDone result projection and GeneralShown/GameOverJudge boolean/no-operation wrapper tests use an explicitly labeled result-producing operation fixture; they do not execute those native owners.
+
+Baseline476/7; finalfocused509/8; full3010/113, typecheck/build pass, lint0 errors/42 prior warnings. Initial Spec finding on candidate target was reproduced through the public decoder and real scheduler (duplicate delegation), fixed with RED/GREEN regression and positive retarget coverage. Final source Standards0/Spec0 at d01eb24f52838b9f7a2696ced7d4ecd4fb492122; Spec independently ran77/77 bridge/Draw tests. All pre-existing run/validate/unwind/effect callback AST and the emitted scheduler remain equal to base; ruleInput is unchanged.
+
+This closes the missing shared skill-hook subset, not the complete composed phase profile. One shared Proceeding bridge still replaces the standalone Draw rule; never register both. Phase-proceeding/remaining startup/battle owner codecs, aggregate Room/configuration/root decoding, public match v3 and all full-match/release gates remain open. Group1 stays in progress; PR33 stays draft.

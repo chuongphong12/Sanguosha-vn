@@ -226,3 +226,9 @@ Independent canonical Standards0/Spec0 reviewed the15-file draft at treeea7e3076
 - Input knowledge 7a1e41fda365f568a17d5246a98869e2cd71d857; source 2da345ba350dbcdada28d8504fcd623a86725bdc, base 70b9fb9db9472085e4c8bdfa2fcce490550e0993. [Contract](engine/draw-phase-save.md)/[checkpoint](reviews/2026-11-16-hegemony-m135c2g-draw-phase-save.md) record captured children/counts, delayed live integer validation, actual drawing/drains/death and fixture/bridge limits.
 - Baseline95/3, finalfocused174/5 (44new), full2977/112/typecheck/build; lint42 prior warnings; source reviews0/0 at d037aca25fbe37da6464aa3b70a86cc88417f26a. Preserved callback AST/scheduler and matching dual-graph hashes; factory UNKNOWN remains explicit.
 - Two immutable sources/one page/two relations append without rewriting prior identities. Canonical lint/reviews/publication/imported CI are separate gates. Group1 remains in progress.
+
+## [2026-11-18] ingest | M1.3.5c.2h shared GameRule bridge recovery
+
+- Input knowledge a1f89db44a5e9c2ef2fb65516e8d8b8d1b92cc0f; source d2e6a6d279b74f4f5d3a47ca6046bf2f86356511, base 1cb2d5ecc1050127dbac0fe76ce715f40617dc8d. [Contract](engine/game-rule-save.md)/[checkpoint](reviews/2026-11-18-hegemony-m135c2h-game-rule-save.md) record pure occurrence/child validation and actual Draw recovery, with explicit wrapper fixture/aggregate limits.
+- Baseline476/7, finalfocused509/8 (33new), full3010/113/typecheck/build; lint42 prior warnings. Source Spec candidate-target finding was RED-confirmed/fixed; final reviews0/0 at d01eb24f52838b9f7a2696ced7d4ecd4fb492122. Callback AST/scheduler equality and matching dual-graph hashes retained.
+- Three immutable sources/one page/three relations append; prior identities remain unchanged. Canonical lint/reviews/publication/imported CI are separate gates. Group1 remains in progress.

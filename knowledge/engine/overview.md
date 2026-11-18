@@ -117,3 +117,7 @@ The [M1.3.5c.2f contract](free-chain-save.md) supplies opt-in captured surrender
 ## Later Draw-phase recovery
 
 The [M1.3.5c.2g contract](draw-phase-save.md) adds actual owner save validation, preserving captured counts and late validation timing. Earlier source-scoped claims retain their applicability; standalone/shared GameRule bridge and complete profiles/Room/public-v3 remain separate work.
+
+## Later shared GameRule bridge recovery
+
+The [M1.3.5c.2h contract](game-rule-save.md) adds pure bridge skill validation and closes a forged candidate-target replay gap. Earlier missing-bridge claims apply to their pinned revision; complete owner/profile/Room/public-v3 and release gates remain separate. Keep one shared Proceeding bridge in composed profiles.

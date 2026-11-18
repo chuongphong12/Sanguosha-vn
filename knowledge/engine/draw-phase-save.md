@@ -17,3 +17,7 @@ Stages1/5 require queued/completed DrawNCards/AfterDrawNCards with the captured 
 Cases cover budgets1/2/7/10000, event and movement/reveal prompts, signed/nonpositive counts, phase/mark/flag changes after capture, surrender death before hand transfer, AfterDrawNCards rewrites, late invalid count after an earlier reward, interruptions and malformed cursors/children/results. Baseline95/3, finalfocused174/5, full2977/112; typecheck/build pass, lint0 errors/42 prior warnings. Source Standards0/Spec0; Spec independently ran64 Draw-phase cases. All pre-existing run/validate/unwind callback AST and the complete emitted scheduler remain equal to base.
 
 The standalone createDrawPhaseRule uses a separate GameRule bridge without a skill codec; coverage rejection is tested explicitly. This checkpoint does not add its codec or modify the common bridge. Composed profiles must retain a single shared Proceeding bridge, without also registering the standalone Draw rule. Remaining startup/battle/bridge coverage, aggregate Room/configuration/root decoding, public match v3 and all release gates remain open. This advances Group1; it does not complete Group1 or enable production. PR33 stays draft.
+
+## Later shared GameRule bridge recovery
+
+The [M1.3.5c.2h contract](game-rule-save.md) adds pure bridge skill validation and closes a forged candidate-target replay gap. Earlier missing-bridge claims apply to their pinned revision; complete owner/profile/Room/public-v3 and release gates remain separate. Keep one shared Proceeding bridge in composed profiles.

@@ -121,3 +121,7 @@ Publication of a knowledge revision does not establish publication of the corres
 ## Draw-phase owner recovery subset
 
 [M1.3.5c.2g](engine/draw-phase-save.md) validates the actual Draw owner and its captured children. Shared bridge/profile/Room/public-v3 and release gates remain open.
+
+## Shared GameRule bridge recovery subset
+
+[M1.3.5c.2h](engine/game-rule-save.md) validates bridge occurrences and captured operation handoffs. Remaining owner/profile/Room/public-v3 and release gates stay open.
