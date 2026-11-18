@@ -75,3 +75,5 @@ Original game paths and blob identities are recorded in the [migration manifest]
 - [2026-11-16 free-chain recovery](2026-11-16-hegemony-m135c2f-free-chain-save.md):34 new cases; actual drain/kill and legacy preservation, explicit mapper/predicate/event fixtures; Group1/Room/release pending.
 
 - [2026-11-16 Draw-phase owner recovery](2026-11-16-hegemony-m135c2g-draw-phase-save.md):44 new cases; actual drawing/movement/drains, captured count and late-validation behavior; bridge/Room/release pending.
+
+- [2026-11-18 GameRule bridge recovery](2026-11-18-hegemony-m135c2h-game-rule-save.md):33 new cases; actual Draw composition, forged-candidate replay regression and explicit result-producing wrapper fixtures; Group1/Room/release pending.

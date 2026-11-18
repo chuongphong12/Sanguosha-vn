@@ -43,3 +43,7 @@ Raw HP metadata, CurrentDying, damage stacks and private response properties are
 ## Later protected interruption ownership
 
 The [M1.3.2 core cleanup contract](core-interruption-cleanup.md) adds source-scoped opt-in catches at its named revision. Its native protected regions, cleanup continuations, original Engine flags and physical/RNG sweep are distinct from normal completion or default freeze behavior described above. Existing application profiles have not opted in; this does not establish full-turn/production readiness.
+
+## Later shared GameRule bridge recovery
+
+The [M1.3.5c.2h contract](game-rule-save.md) adds pure bridge skill validation and closes a forged candidate-target replay gap. Earlier missing-bridge claims apply to their pinned revision; complete owner/profile/Room/public-v3 and release gates remain separate. Keep one shared Proceeding bridge in composed profiles.

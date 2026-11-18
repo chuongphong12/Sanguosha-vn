@@ -1949,6 +1949,42 @@
       "checked_on": "2026-11-16",
       "author": null,
       "business_owner": null
+    },
+    {
+      "id": "web.m135c2h.handler.d2e6a6d",
+      "kind": "primary_code",
+      "repository": "https://github.com/chuongphong12/Sanguosha-vn",
+      "revision": "d2e6a6d279b74f4f5d3a47ca6046bf2f86356511",
+      "path": "src/game/hegemony/damage-rule.ts",
+      "url": "https://github.com/chuongphong12/Sanguosha-vn/blob/d2e6a6d279b74f4f5d3a47ca6046bf2f86356511/src/game/hegemony/damage-rule.ts",
+      "locator": "Pure shared GameRule occurrence/cursor/child validation; live callbacks unchanged",
+      "checked_on": "2026-11-18",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "web.m135c2h.tests.d2e6a6d",
+      "kind": "test_code",
+      "repository": "https://github.com/chuongphong12/Sanguosha-vn",
+      "revision": "d2e6a6d279b74f4f5d3a47ca6046bf2f86356511",
+      "path": "tests/hegemony/game-rule-save.test.ts",
+      "url": "https://github.com/chuongphong12/Sanguosha-vn/blob/d2e6a6d279b74f4f5d3a47ca6046bf2f86356511/tests/hegemony/game-rule-save.test.ts",
+      "locator": "33 bridge recovery/forgery cases; actual Draw composition and explicit result-producing wrapper fixtures",
+      "checked_on": "2026-11-18",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "web.m135c2h.draw-test.d2e6a6d",
+      "kind": "test_code",
+      "repository": "https://github.com/chuongphong12/Sanguosha-vn",
+      "revision": "d2e6a6d279b74f4f5d3a47ca6046bf2f86356511",
+      "path": "tests/hegemony/draw-phase-save.test.ts",
+      "url": "https://github.com/chuongphong12/Sanguosha-vn/blob/d2e6a6d279b74f4f5d3a47ca6046bf2f86356511/tests/hegemony/draw-phase-save.test.ts",
+      "locator": "Existing standalone Draw case strengthened to actual bridge/owner recovery",
+      "checked_on": "2026-11-18",
+      "author": null,
+      "business_owner": null
     }
   ],
   "pages": [
@@ -2394,6 +2430,21 @@
       "source_ids": [
         "web.m135c2g.handler.2da345b",
         "web.m135c2g.tests.2da345b"
+      ]
+    },
+    {
+      "path": "engine/game-rule-save.md",
+      "status": "supported",
+      "reviewed_on": "2026-11-18",
+      "review_scope": "Shared GameRule bridge recovery; remaining actual owners and Group1/Room/profile/publicv3 pending",
+      "applies_to": {
+        "game_commit": "d2e6a6d279b74f4f5d3a47ca6046bf2f86356511",
+        "native_commit": "ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f"
+      },
+      "source_ids": [
+        "web.m135c2h.handler.d2e6a6d",
+        "web.m135c2h.tests.d2e6a6d",
+        "web.m135c2h.draw-test.d2e6a6d"
       ]
     }
   ],
@@ -3928,6 +3979,33 @@
         "web.m135c2g.tests.2da345b"
       ],
       "scope": "Draw-phase owner recovery; shared/standalone bridge and remaining Group1/Room/profile/publicv3 pending"
+    },
+    {
+      "subject": "page:engine/game-rule-save.md",
+      "predicate": "derived_from",
+      "object": "source:web.m135c2h.handler.d2e6a6d",
+      "evidence": [
+        "web.m135c2h.handler.d2e6a6d"
+      ],
+      "scope": "Shared GameRule bridge recovery; remaining actual owners and Group1/Room/profile/publicv3 pending"
+    },
+    {
+      "subject": "page:engine/game-rule-save.md",
+      "predicate": "derived_from",
+      "object": "source:web.m135c2h.tests.d2e6a6d",
+      "evidence": [
+        "web.m135c2h.tests.d2e6a6d"
+      ],
+      "scope": "Shared GameRule bridge recovery; remaining actual owners and Group1/Room/profile/publicv3 pending"
+    },
+    {
+      "subject": "page:engine/game-rule-save.md",
+      "predicate": "derived_from",
+      "object": "source:web.m135c2h.draw-test.d2e6a6d",
+      "evidence": [
+        "web.m135c2h.draw-test.d2e6a6d"
+      ],
+      "scope": "Shared GameRule bridge recovery; remaining actual owners and Group1/Room/profile/publicv3 pending"
     }
   ]
 }
