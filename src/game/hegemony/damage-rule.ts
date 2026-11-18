@@ -80,6 +80,15 @@ export function createSlashHitOperation<
     },
   };
 }
+function ruleDataKey(value: TriggerData): string {
+  if (Array.isArray(value)) return `[${value.map(ruleDataKey).join(",")}]`;
+  if (value !== null && typeof value === "object")
+    return `{${Object.keys(value)
+      .sort()
+      .map((key) => `${JSON.stringify(key)}:${ruleDataKey(value[key])}`)
+      .join(",")}}`;
+  return JSON.stringify(value);
+}
 export function damageRule<G extends DamageGame>(
   event: string,
   operation: string,
@@ -89,6 +98,75 @@ export function damageRule<G extends DamageGame>(
     events: [event],
     priority: 0,
     rule: true,
+    validateSave: (game, frame, prompt, state) => {
+      for (const candidate of frame.candidates) {
+        if (candidate.skill !== `game-rule-${operation}`) continue;
+        if (
+          candidate.actor !== null ||
+          candidate.owner !== null ||
+          candidate.slot !== null ||
+          candidate.occurrence !== "rule" ||
+          candidate.order !== undefined ||
+          (frame.recorded &&
+            frame.selected === null &&
+            candidate.target !== frame.event.target) ||
+          [
+            candidate.compulsory,
+            candidate.wake,
+            candidate.global,
+            candidate.shown,
+            candidate.equipment,
+            candidate.cardSkill,
+          ].some((value) => value !== undefined)
+        )
+          throw Error("Invalid GameRule occurrence");
+      }
+      if (frame.selected?.skill !== `game-rule-${operation}`) return;
+      const selected = frame.selected;
+      if (
+        selected.target !== frame.event.target ||
+        !["cost", "effect"].includes(frame.stage) ||
+        frame.continuation !== null ||
+        frame.answer ||
+        frame.child ||
+        prompt ||
+        (frame.event.target !== null &&
+          !game.seatOrder.includes(frame.event.target))
+      )
+        throw Error("Invalid GameRule save");
+      const child = state?.child;
+      const pending =
+        child?.kind === "operation"
+          ? child.operation
+          : frame.operationChild?.operation;
+      if (child?.kind === "event") throw Error("Invalid GameRule child");
+      if (!pending) return;
+      const data = pending.data;
+      if (
+        frame.stage !== "effect" ||
+        frame.event.name !== event ||
+        frame.event.target === null ||
+        pending.name !== operation ||
+        !data ||
+        typeof data !== "object" ||
+        Array.isArray(data) ||
+        Object.keys(data).length !== 2 ||
+        data.target !== frame.event.target ||
+        !("data" in data) ||
+        ruleDataKey(data.data) !== ruleDataKey(frame.event.data)
+      )
+        throw Error("Invalid GameRule operation");
+      if (frame.event.name === "DamageDone" && frame.operationChild) {
+        const value = frame.operationChild.value;
+        if (
+          !value ||
+          typeof value !== "object" ||
+          Array.isArray(value) ||
+          !("data" in value)
+        )
+          throw Error("Invalid DamageDone result");
+      }
+    },
     effect: ({ game, event, operationChild }) => {
       if (operationChild) {
         if (event.name === "DamageDone") {

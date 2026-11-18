@@ -9,6 +9,7 @@ import { createTriggerSaveCodec } from "../../src/game/hegemony/scheduler-save";
 import {
   createTriggerScheduler,
   dispatchTriggerOperation,
+  dispatchTriggerEvent,
   continueTriggerWork,
   resumeTriggerPrompt,
   unwindTriggerInterruption,
@@ -16,6 +17,7 @@ import {
 } from "../../src/game/hegemony/scheduler";
 
 const events = [
+  "EventPhaseProceeding",
   "DrawNCards",
   "AfterDrawNCards",
   "GeneralShowed",
@@ -467,12 +469,21 @@ describe("actual Draw-phase recovery", () => {
     },
   );
 
-  it("does not imply codec coverage for the separate standalone GameRule bridge", () => {
+  it("restores the standalone GameRule bridge through its actual Draw owner", () => {
     const f = fixture();
     f.rules.skills.push(createDrawPhaseRule());
-    expect(() => createTriggerSaveCodec(f.rules)).toThrow(
-      "skill codec coverage",
-    );
+    expect(
+      dispatchTriggerEvent(
+        f.scheduler,
+        f.game,
+        f.rules,
+        { name: "EventPhaseProceeding", target: "a", data: null },
+        "a",
+      ),
+    ).toBe(true);
+    finish(f);
+    expect(f.game.cardZones.a.cards).toEqual([0, 1]);
+    expect(f.scheduler.completion?.consumed).toBe(false);
   });
   it.each([1, 2, 7, 10000])(
     "restores actual draw/drain/movement at budget %i",
