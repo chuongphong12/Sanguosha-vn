@@ -121,3 +121,7 @@ The [movement save codec](../engine/movement-save.md) validates actual physical 
 ## M1.3.5c.2i progress
 
 [Shared Proceeding owner recovery](../engine/phase-proceeding-save.md) now validates captured dispatch and composes actual Draw recovery for opted-in profiles. Remaining phase/startup/battle codecs, aggregate Room/configuration/root decoding and public v3 remain Group1 work. No playable-release gate closes.
+
+## M1.3.5c.2j progress
+
+[RoundStart owner recovery](../engine/round-start-save.md) now validates captured acquisition requests for opted-in profiles. Actual ask-general-show/reveal/lord/notification codecs, Judge/remaining owners, aggregate Room/configuration/root decoding and public v3 remain Group1 work. No playable-release gate closes.

@@ -45,3 +45,7 @@ Private continuations retain captured choices/lord eligibility/accepted answers,
 ## Later Proceeding owner recovery
 
 The [M1.3.5c.2i contract](phase-proceeding-save.md) captures dispatch choice for opted-in profiles while keeping legacy boolean/no-hook behavior. Earlier missing-owner claims apply to their pinned revision; remaining phase/startup/battle bodies, full profiles/Room/public-v3 and release gates stay separate.
+
+## Later RoundStart owner recovery
+
+The [M1.3.5c.2j contract](round-start-save.md) captures the request change decision independently of Proceeding recovery and preserves legacy behavior. Earlier missing-owner statements apply to their pinned revision; actual acquisition/reveal and remaining body/profile/Room/public-v3/release acceptance stay separate.

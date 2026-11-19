@@ -17,3 +17,7 @@ The decoder never selects a branch from current playerPhases, resolves card meta
 Baseline115/3, finalfocused147/4, full3042/114, typecheck/build pass; lint0 errors/42 prior warnings. Source Standards0/Spec0 at a047ac6e0cdc82d5c0471bcc4aea7a67e15c93b3; Spec independently ran147/147 related cases. Default callback AST preservation is checked after folding saveProceeding=false; opt-in metadata intentionally differs. The complete emitted scheduler interpreter is unchanged.
 
 One shared Proceeding bridge still replaces standalone Draw in a composed profile. Remaining RoundStart/Judge/Play/Discard/startup/battle owner codecs, aggregate Room/configuration/root decoding, public match v3 and full-match/release gates stay open. This advances Group1 without completing it. PR33 remains draft; no main merge/cutover occurs.
+
+## Later RoundStart owner recovery
+
+The [M1.3.5c.2j contract](round-start-save.md) captures the request change decision independently of Proceeding recovery and preserves legacy behavior. Earlier missing-owner statements apply to their pinned revision; actual acquisition/reveal and remaining body/profile/Room/public-v3/release acceptance stay separate.
