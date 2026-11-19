@@ -15,6 +15,8 @@ export type PhaseBodyGame = GeneralGame & PhaseGame;
 export interface PhaseBodyRules<G extends PhaseBodyGame> {
   /** Opt-in captured dispatch cursor; profiles must version this save contract. */
   saveProceeding?: true;
+  /** Opt-in captured reveal-request decision, independent of Proceeding recovery. */
+  saveRoundStart?: true;
   tableZone: string;
   card: (game: Readonly<G>, id: number) => CardEffect["card"];
   onNullified: (target: string, id: number) => TriggerOperation;
@@ -28,13 +30,15 @@ export function createPhaseBodyRule<
 export function createPhaseBodyOperations<G extends PhaseBodyGame>(
   rules: PhaseBodyRules<G>,
 ): OperationHandler<G>[] {
-  const { tableZone, card, onNullified, saveProceeding } = rules;
+  const { tableZone, card, onNullified, saveProceeding, saveRoundStart } =
+    rules;
   if (
     typeof tableZone !== "string" ||
     !tableZone ||
     typeof card !== "function" ||
     typeof onNullified !== "function" ||
-    (saveProceeding !== undefined && saveProceeding !== true)
+    (saveProceeding !== undefined && saveProceeding !== true) ||
+    (saveRoundStart !== undefined && saveRoundStart !== true)
   )
     throw Error("Invalid phase body rules");
   const proceedingSave: Pick<
@@ -92,6 +96,58 @@ export function createPhaseBodyOperations<G extends PhaseBodyGame>(
         validateResult: (game, result) => {
           ruleInput(game, result.operation.data);
           if (result.value !== null) throw Error("Invalid Proceeding result");
+        },
+      }
+    : {};
+  const roundStartSave: Pick<
+    OperationHandler<G>,
+    "validateSave" | "validateResult"
+  > = saveRoundStart
+    ? {
+        validateSave: (game, frame, _interruption, prompt, state) => {
+          const input = ruleInput(game, frame.operation.data),
+            c = frame.continuation;
+          if (prompt || frame.answer || frame.child || frame.cleanup)
+            throw Error("Invalid RoundStart save");
+          const queued = state?.child;
+          if (queued?.kind === "event") throw Error("Invalid RoundStart child");
+          const pending =
+            queued?.kind === "operation"
+              ? queued.operation
+              : frame.operationChild?.operation;
+          if (c === null) {
+            if (pending) throw Error("Invalid initial RoundStart child");
+            return;
+          }
+          if (
+            !input ||
+            !c ||
+            typeof c !== "object" ||
+            Array.isArray(c) ||
+            Object.keys(c).length !== 1 ||
+            typeof c.change !== "boolean"
+          )
+            throw Error("Invalid RoundStart cursor");
+          if (!pending) {
+            if (!state?.abandoning) throw Error("Missing RoundStart child");
+            return;
+          }
+          const data = pending.data;
+          if (
+            pending.name !== "ask-general-show" ||
+            !data ||
+            typeof data !== "object" ||
+            Array.isArray(data) ||
+            Object.keys(data).length !== 3 ||
+            data.target !== input.target ||
+            data.reason !== "GameRule_AskForGeneralShow" ||
+            data.change !== c.change
+          )
+            throw Error("Invalid RoundStart operation");
+        },
+        validateResult: (game, result) => {
+          ruleInput(game, result.operation.data);
+          if (result.value !== null) throw Error("Invalid RoundStart result");
         },
       }
     : {};
@@ -160,6 +216,7 @@ export function createPhaseBodyOperations<G extends PhaseBodyGame>(
     },
     {
       name: "round-start-phase",
+      ...roundStartSave,
       validate: (game, op) => {
         ruleInput(game, op.data);
       },
@@ -180,7 +237,7 @@ export function createPhaseBodyOperations<G extends PhaseBodyGame>(
               change,
             },
           },
-          continuation: true,
+          continuation: saveRoundStart ? { change } : true,
         };
       },
     },
