@@ -1,0 +1,60 @@
+# M1.3.5c — shared scheduler recovery contract
+
+On 2026-11-13 the user selected B: extend shared scheduler save-validation contracts, rather than keep all validation in match-v3. The accepted [M1.3 B scope](hegemony-turn-unwind.md) and [release destination](../plans/hegemony-release.md) remain unchanged. No automatic main merge or production enablement is authorized by this internal checkpoint.
+
+## Ordered checkpoints
+
+1. C1 shared opt-in scheduler decoder and explicit operation/skill/event/result hooks. Validate envelope before profile codecs, require coverage, return detached state without running the interpreter; preserve existing profiles. The [implemented contract](../engine/scheduler-save.md) and [checkpoint](../reviews/2026-11-13-hegemony-m135c1-scheduler-save.md) record this bounded part.
+2. Supply complete codecs for the actual enabled startup/battle registries and application Room/configuration/root decoding. Missing/unknown handlers or continuations fail closed before execution. Bind schema/rules/content/registry/startup globals/settings/battle budget/catalogue/profile identity; no v1/v2/M0 migration by inference.
+3. Public v3 create/apply/view/restore plus trusted continueWork. Transfer setup to one Room once, then consume startup completion with the [handoff](../engine/match-handoff.md). Restore pauses actor prompts and resumes only validated bounded internal work. Candidate clones preserve caller input on rejection. Keep turn-root completion consumption separate from starting the next root.
+4. Route Play/Discard and other specialized prompts through actual admissions, never raw-resume fallback after rejection. Route nested prompts by their current responder. Rebuild detached public/owner-private projections from Room and admission views; no frames/caught data/RNG/tags/other hands/hidden identities. Trusted continue/unwind is not a player command.
+
+## Acceptance and limits
+
+Each part follows RED/GREEN, focused/full tests/typecheck/build, impact/change graphs, exact-byte checks, independent Standards/Spec reviews and canonical knowledge import/pin before the next. Tests distinguish real scheduler/engine behavior from synthetic package/metadata hooks and injected corrupt-save conditions. Registry hook presence alone cannot certify semantic completeness; tests and review must establish it for each enabled profile.
+
+After application integration, M1.3.5 still requires actual minimal-profile setup-to-terminal scenarios 2–10 seats and real card-play interruption/recovery. First release retains all previously agreed content, competitive bot, full art/audio, desktop online/single-player, room/session recovery and measured free-tier/load gates. C1 is neither a playable match nor a cutover.
+
+## M1.3.5c.2a progress
+
+The [actual pile save subset](../engine/pile-save.md) completes four handler codecs and shared queued-child context. Whole enabled profiles/Room decoding and the public v3/full-match/release gates remain open.
+
+## M1.3.5c.2b progress
+
+The [player-draw codec](../engine/player-draw-save.md) validates actual draw-cards state and acquisition/movement handoffs. It does not complete movement-internal recovery, enabled profiles/Room decoding or public v3/full-match/release gates.
+
+## M1.3.5c.2c progress
+
+The [movement save codec](../engine/movement-save.md) validates actual physical movement and its retained packet boundaries. Player-draw recovery now uses it internally. Remaining handlers, aggregate Room/configuration/root decoding, public v3 and full-match/release acceptance remain open.
+
+## M1.3.5c.2d progress
+
+[Fill-hand recovery](../engine/fill-hand-save.md) now captures the original deficit for opted-in profiles while preserving legacy booleans. Remaining handlers and aggregate Room/configuration/root decoding precede public v3/full-match/release acceptance.
+
+## M1.3.5c.2e progress
+
+[Kill-player recovery](../engine/kill-save.md) now supplies the actual death-owner codec needed before free-chain/Draw-phase recovery. Remaining handlers and aggregate Room/configuration/root decoding still precede public v3/full-match/release acceptance.
+
+## M1.3.5c.2f progress
+
+[Free-chain recovery](../engine/free-chain-save.md) now validates captured reveals and surrender-to-kill handoffs for opted-in profiles. Draw-phase and remaining startup/battle codecs, aggregate Room/configuration/root decoding and public v3 remain Group1 work. No playable-release gate closes.
+
+## M1.3.5c.2g progress
+
+[Draw-phase owner recovery](../engine/draw-phase-save.md) now validates the actual owner and its child handoffs. Remaining startup/battle/bridge codecs, aggregate Room/configuration/root decoding and public v3 remain Group1 work. No playable-release gate closes.
+
+## M1.3.5c.2h progress
+
+[Shared GameRule bridge recovery](../engine/game-rule-save.md) now validates actual bridge occurrences/captured children and rejects forged stable target keys. Remaining startup/battle/phase owners, aggregate Room/configuration/root decoding and public v3 remain Group1 work. No playable-release gate closes.
+
+## M1.3.5c.2i progress
+
+[Shared Proceeding owner recovery](../engine/phase-proceeding-save.md) now validates captured dispatch and composes actual Draw recovery for opted-in profiles. Remaining phase/startup/battle codecs, aggregate Room/configuration/root decoding and public v3 remain Group1 work. No playable-release gate closes.
+
+## M1.3.5c.2j progress
+
+[RoundStart owner recovery](../engine/round-start-save.md) now validates captured acquisition requests for opted-in profiles. Actual ask-general-show/reveal/lord/notification codecs, Judge/remaining owners, aggregate Room/configuration/root decoding and public v3 remain Group1 work. No playable-release gate closes.
+
+## M1.3.5c.2k progress
+
+[General-show question recovery](../engine/ask-general-show-save.md) now validates saved prompts/decisions/ChoiceMade/mapped children and composes actual shared owners. Actual show/lord/notification codecs, Judge/remaining owners, aggregate Room/configuration/root decoding and public v3 remain Group1 work. No playable-release gate closes.

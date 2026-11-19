@@ -1,0 +1,69 @@
+{
+  "scope": "staged local prototype before commit; not production risk clearance",
+  "rawSummary": {
+    "changed_count": 149,
+    "affected_count": 87,
+    "changed_files": 15,
+    "risk_level": "critical"
+  },
+  "affectedFlows": 87,
+  "flowsMatchingEmptyIDVersion": 54,
+  "changedVersion": [
+    {
+      "id": "",
+      "name": "version",
+      "type": "Property",
+      "filePath": "server/prototypes/hegemony-m0/benchmark.ts",
+      "change_type": "touched"
+    }
+  ],
+  "sampleLegacyProcess": [
+    {
+      "id": "",
+      "name": "onStart",
+      "path": "src/app/screens/main/WaitingRoomScene.ts"
+    },
+    {
+      "id": "Method:src/app/screens/main/WaitingRoomScene.ts:WaitingRoomScene.sync#1",
+      "name": "sync",
+      "path": "src/app/screens/main/WaitingRoomScene.ts"
+    },
+    {
+      "id": "Method:src/app/screens/main/WaitingRoomScene.ts:WaitingRoomScene.start#1",
+      "name": "start",
+      "path": "src/app/screens/main/WaitingRoomScene.ts"
+    },
+    {
+      "id": "Method:src/app/screens/main/MainScreen.ts:MainScreen.render#0",
+      "name": "render",
+      "path": "src/app/screens/main/MainScreen.ts"
+    },
+    {
+      "id": "Method:src/app/screens/main/MainScreen.ts:MainScreen.toggleLog#0",
+      "name": "toggleLog",
+      "path": "src/app/screens/main/MainScreen.ts"
+    },
+    {
+      "id": "Method:src/app/screens/main/MainScreen.ts:MainScreen.drawLog#1",
+      "name": "drawLog",
+      "path": "src/app/screens/main/MainScreen.ts"
+    }
+  ],
+  "productionInboundGraphRows": [],
+  "scopedImpact": {
+    "createPrototype": {
+      "risk": "LOW",
+      "count": 4
+    },
+    "startProofServer": {
+      "risk": "LOW",
+      "count": 2
+    }
+  },
+  "limits": [
+    "benchmark.version and legacy WaitingRoomScene onStart both have empty graph IDs; cross-flow identity matching is unreliable",
+    "capped extracted processes and dynamic calls require source checks",
+    "existing src/ and server/server.ts unchanged; no prototype imports or prototype markers in built production JS found",
+    "CRITICAL raw label retained; this is a throwaway branch with targeted tests and reviews, not production approval"
+  ]
+}
