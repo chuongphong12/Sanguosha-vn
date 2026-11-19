@@ -79,3 +79,5 @@ Original game paths and blob identities are recorded in the [migration manifest]
 - [2026-11-18 GameRule bridge recovery](2026-11-18-hegemony-m135c2h-game-rule-save.md):33 new cases; actual Draw composition, forged-candidate replay regression and explicit result-producing wrapper fixtures; Group1/Room/release pending.
 
 - [2026-11-19 shared Proceeding owner recovery](2026-11-19-hegemony-m135c2i-phase-proceeding-save.md):32 new cases; actual shared bridge/Draw recovery, captured dispatch, legacy JSON and explicit other-body fixtures; Group1/Room/release pending.
+
+- [2026-11-19 RoundStart owner recovery](2026-11-19-hegemony-m135c2j-round-start-save.md):34 new cases; actual shared owners with explicitly fixture acquisition; captured mark decision/legacy JSON/standalone opt-in, actual reveal/Room/release pending.

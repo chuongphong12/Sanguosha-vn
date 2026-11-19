@@ -238,3 +238,9 @@ Independent canonical Standards0/Spec0 reviewed the15-file draft at treeea7e3076
 - Knowledge input 5ec0ec46112c02d34c4438757d99fabb5b907863; source cba5e7dfcb6906b4eb679942c1542aee2dd3693b, base b4b82bcac5e535179764260a3b47a99e1ef73812. [Contract](engine/phase-proceeding-save.md)/[checkpoint](reviews/2026-11-19-hegemony-m135c2i-phase-proceeding-save.md) record opt-in captured dispatch, exact child validation, unchanged legacy format and actual shared bridge/Draw recovery, with explicit other-body fixture limits.
 - Baseline115/3, finalfocused147/4 (32new), full3042/114/typecheck/build; lint42 prior warnings; source reviews0/0 at a047ac6e0cdc82d5c0471bcc4aea7a67e15c93b3. Default callback/scheduler preservation and matching dual-graph hashes retained; factory UNKNOWN remains explicit.
 - Two immutable sources/one page/two relations append without rewriting previous records. Canonical lint/reviews/publication/imported CI are separate gates. Group1 remains in progress.
+
+## [2026-11-19] ingest | M1.3.5c.2j RoundStart owner recovery
+
+- Input knowledge 96065f5876057323dff988a47218ac97784427a2; source 590c161c2d540f87abd1e1319c2f49fc805f6c80, base a39b50b5201bd5c1f98988f69cf15f82dfb65534. [Contract](engine/round-start-save.md)/[checkpoint](reviews/2026-11-19-hegemony-m135c2j-round-start-save.md) record independent opt-in/captured decision/exact acquisition request, unchanged legacy format and explicitly fixture acquisition boundaries.
+- Baseline70/2, finalfocused104/3 (34new), full3076/115/typecheck/build; lint42 prior warnings; source reviews0/0 at 7503c9dc946aaa2be33cdea7eb9389da91940654. Default callback/scheduler preservation and matching dual-graph hashes retained; factory UNKNOWN stays explicit.
+- Two immutable sources/one page/two relations append without rewriting prior identities. Canonical lint/reviews/publication/imported CI are separate gates. Group1 remains in progress.

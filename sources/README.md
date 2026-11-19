@@ -88,3 +88,5 @@ M1.3.5c.2g appends immutable implementation/test sources for [Draw-phase owner r
 M1.3.5c.2h appends immutable implementation/new-test/strengthened-test sources for [GameRule bridge recovery](../engine/game-rule-save.md). Complete child-handler/Room/profile acceptance remains separate.
 
 M1.3.5c.2i appends immutable implementation/test sources for [opt-in shared Proceeding recovery](../engine/phase-proceeding-save.md); complete factory/body/profile/Room acceptance remains separate.
+
+M1.3.5c.2j appends immutable implementation/test sources for [opt-in RoundStart owner recovery](../engine/round-start-save.md); actual acquisition/reveal and full factory/profile/Room acceptance remain separate.
