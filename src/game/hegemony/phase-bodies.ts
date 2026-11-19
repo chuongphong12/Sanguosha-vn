@@ -13,6 +13,8 @@ import type {
 
 export type PhaseBodyGame = GeneralGame & PhaseGame;
 export interface PhaseBodyRules<G extends PhaseBodyGame> {
+  /** Opt-in captured dispatch cursor; profiles must version this save contract. */
+  saveProceeding?: true;
   tableZone: string;
   card: (game: Readonly<G>, id: number) => CardEffect["card"];
   onNullified: (target: string, id: number) => TriggerOperation;
@@ -26,14 +28,73 @@ export function createPhaseBodyRule<
 export function createPhaseBodyOperations<G extends PhaseBodyGame>(
   rules: PhaseBodyRules<G>,
 ): OperationHandler<G>[] {
-  const { tableZone, card, onNullified } = rules;
+  const { tableZone, card, onNullified, saveProceeding } = rules;
   if (
     typeof tableZone !== "string" ||
     !tableZone ||
     typeof card !== "function" ||
-    typeof onNullified !== "function"
+    typeof onNullified !== "function" ||
+    (saveProceeding !== undefined && saveProceeding !== true)
   )
     throw Error("Invalid phase body rules");
+  const proceedingSave: Pick<
+    OperationHandler<G>,
+    "validateSave" | "validateResult"
+  > = saveProceeding
+    ? {
+        validateSave: (game, frame, _interruption, prompt, state) => {
+          const input = ruleInput(game, frame.operation.data),
+            c = frame.continuation;
+          if (prompt || frame.answer || frame.child || frame.cleanup)
+            throw Error("Invalid Proceeding save");
+          const queued = state?.child;
+          if (queued?.kind === "event") throw Error("Invalid Proceeding child");
+          const pending =
+            queued?.kind === "operation"
+              ? queued.operation
+              : frame.operationChild?.operation;
+          if (c === null) {
+            if (pending) throw Error("Invalid initial Proceeding child");
+            return;
+          }
+          if (
+            !input ||
+            !c ||
+            typeof c !== "object" ||
+            Array.isArray(c) ||
+            Object.keys(c).length !== 1 ||
+            typeof c.child !== "string" ||
+            ![
+              "round-start-phase",
+              "judge-phase",
+              "draw-phase",
+              "play-phase",
+              "discard-phase",
+            ].includes(c.child)
+          )
+            throw Error("Invalid Proceeding cursor");
+          if (!pending) {
+            if (!state?.abandoning) throw Error("Missing Proceeding child");
+            return;
+          }
+          const data = pending.data;
+          if (
+            pending.name !== c.child ||
+            !data ||
+            typeof data !== "object" ||
+            Array.isArray(data) ||
+            Object.keys(data).length !== 2 ||
+            data.target !== input.target ||
+            data.data !== null
+          )
+            throw Error("Invalid Proceeding operation");
+        },
+        validateResult: (game, result) => {
+          ruleInput(game, result.operation.data);
+          if (result.value !== null) throw Error("Invalid Proceeding result");
+        },
+      }
+    : {};
   function judgeInput(game: G, data: Parameters<typeof ruleInput>[1]) {
     const input = ruleInput(game, data);
     if (!input) return null;
@@ -66,6 +127,7 @@ export function createPhaseBodyOperations<G extends PhaseBodyGame>(
   return [
     {
       name: "phase-proceeding",
+      ...proceedingSave,
       validate: (game, op) => {
         ruleInput(game, op.data);
       },
@@ -91,7 +153,7 @@ export function createPhaseBodyOperations<G extends PhaseBodyGame>(
           ? {
               kind: "operation",
               operation: { name, data: { target: input.target, data: null } },
-              continuation: true,
+              continuation: saveProceeding ? { child: name } : true,
             }
           : { kind: "return", value: null };
       },
