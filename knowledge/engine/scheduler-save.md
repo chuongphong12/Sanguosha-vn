@@ -55,3 +55,7 @@ The [M1.3.5c.2g contract](draw-phase-save.md) adds actual owner save validation,
 ## Later shared GameRule bridge recovery
 
 The [M1.3.5c.2h contract](game-rule-save.md) adds pure bridge skill validation and closes a forged candidate-target replay gap. Earlier missing-bridge claims apply to their pinned revision; complete owner/profile/Room/public-v3 and release gates remain separate. Keep one shared Proceeding bridge in composed profiles.
+
+## Later Proceeding owner recovery
+
+The [M1.3.5c.2i contract](phase-proceeding-save.md) captures dispatch choice for opted-in profiles while keeping legacy boolean/no-hook behavior. Earlier missing-owner claims apply to their pinned revision; remaining phase/startup/battle bodies, full profiles/Room/public-v3 and release gates stay separate.
