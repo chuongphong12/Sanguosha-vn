@@ -63,3 +63,7 @@ The [M1.3.5c.2i contract](phase-proceeding-save.md) captures dispatch choice for
 ## Later RoundStart owner recovery
 
 The [M1.3.5c.2j contract](round-start-save.md) captures the request change decision independently of Proceeding recovery and preserves legacy behavior. Earlier missing-owner statements apply to their pinned revision; actual acquisition/reveal and remaining body/profile/Room/public-v3/release acceptance stay separate.
+
+## Later general-show question recovery
+
+The [M1.3.5c.2k contract](ask-general-show-save.md) now composes actual question/ChoiceMade recovery with shared owners. Earlier acquisition-fixture claims apply to their pinned revision; show/lord/notification children still use fixtures in the new tests, and complete profiles/Room/public-v3/release acceptance remains separate.
