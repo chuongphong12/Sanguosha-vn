@@ -21,3 +21,7 @@ Bridge-specific cases cover null/SkipGameRule, changed late tags after a child r
 Baseline476/7; finalfocused509/8; full3010/113, typecheck/build pass, lint0 errors/42 prior warnings. Initial Spec finding on candidate target was reproduced through the public decoder and real scheduler (duplicate delegation), fixed with RED/GREEN regression and positive retarget coverage. Final source Standards0/Spec0 at d01eb24f52838b9f7a2696ced7d4ecd4fb492122; Spec independently ran77/77 bridge/Draw tests. All pre-existing run/validate/unwind/effect callback AST and the emitted scheduler remain equal to base; ruleInput is unchanged.
 
 This closes the missing shared skill-hook subset, not the complete composed phase profile. One shared Proceeding bridge still replaces the standalone Draw rule; never register both. Phase-proceeding/remaining startup/battle owner codecs, aggregate Room/configuration/root decoding, public match v3 and all full-match/release gates remain open. Group1 stays in progress; PR33 stays draft.
+
+## Later Proceeding owner recovery
+
+The [M1.3.5c.2i contract](phase-proceeding-save.md) captures dispatch choice for opted-in profiles while keeping legacy boolean/no-hook behavior. Earlier missing-owner claims apply to their pinned revision; remaining phase/startup/battle bodies, full profiles/Room/public-v3 and release gates stay separate.

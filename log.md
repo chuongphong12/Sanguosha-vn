@@ -232,3 +232,9 @@ Independent canonical Standards0/Spec0 reviewed the15-file draft at treeea7e3076
 - Input knowledge a1f89db44a5e9c2ef2fb65516e8d8b8d1b92cc0f; source d2e6a6d279b74f4f5d3a47ca6046bf2f86356511, base 1cb2d5ecc1050127dbac0fe76ce715f40617dc8d. [Contract](engine/game-rule-save.md)/[checkpoint](reviews/2026-11-18-hegemony-m135c2h-game-rule-save.md) record pure occurrence/child validation and actual Draw recovery, with explicit wrapper fixture/aggregate limits.
 - Baseline476/7, finalfocused509/8 (33new), full3010/113/typecheck/build; lint42 prior warnings. Source Spec candidate-target finding was RED-confirmed/fixed; final reviews0/0 at d01eb24f52838b9f7a2696ced7d4ecd4fb492122. Callback AST/scheduler equality and matching dual-graph hashes retained.
 - Three immutable sources/one page/three relations append; prior identities remain unchanged. Canonical lint/reviews/publication/imported CI are separate gates. Group1 remains in progress.
+
+## [2026-11-19] ingest | M1.3.5c.2i shared Proceeding owner recovery
+
+- Knowledge input 5ec0ec46112c02d34c4438757d99fabb5b907863; source cba5e7dfcb6906b4eb679942c1542aee2dd3693b, base b4b82bcac5e535179764260a3b47a99e1ef73812. [Contract](engine/phase-proceeding-save.md)/[checkpoint](reviews/2026-11-19-hegemony-m135c2i-phase-proceeding-save.md) record opt-in captured dispatch, exact child validation, unchanged legacy format and actual shared bridge/Draw recovery, with explicit other-body fixture limits.
+- Baseline115/3, finalfocused147/4 (32new), full3042/114/typecheck/build; lint42 prior warnings; source reviews0/0 at a047ac6e0cdc82d5c0471bcc4aea7a67e15c93b3. Default callback/scheduler preservation and matching dual-graph hashes retained; factory UNKNOWN remains explicit.
+- Two immutable sources/one page/two relations append without rewriting previous records. Canonical lint/reviews/publication/imported CI are separate gates. Group1 remains in progress.

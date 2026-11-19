@@ -117,3 +117,7 @@ The [movement save codec](../engine/movement-save.md) validates actual physical 
 ## M1.3.5c.2h progress
 
 [Shared GameRule bridge recovery](../engine/game-rule-save.md) now validates actual bridge occurrences/captured children and rejects forged stable target keys. Remaining startup/battle/phase owners, aggregate Room/configuration/root decoding and public v3 remain Group1 work. No playable-release gate closes.
+
+## M1.3.5c.2i progress
+
+[Shared Proceeding owner recovery](../engine/phase-proceeding-save.md) now validates captured dispatch and composes actual Draw recovery for opted-in profiles. Remaining phase/startup/battle codecs, aggregate Room/configuration/root decoding and public v3 remain Group1 work. No playable-release gate closes.

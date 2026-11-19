@@ -2,13 +2,13 @@
   "version": 1,
   "game": {
     "repository": "https://github.com/chuongphong12/Sanguosha-vn.git",
-    "commit": "d2e6a6d279b74f4f5d3a47ca6046bf2f86356511",
-    "availability": "Shared GameRule bridge recovery subset; Group1/remaining owner/profile/Room/public v3/release gates pending"
+    "commit": "cba5e7dfcb6906b4eb679942c1542aee2dd3693b",
+    "availability": "Opt-in shared Proceeding owner recovery subset; Group1/remaining bodies/profile/Room/public v3/release gates pending"
   },
   "native": {
     "repository": "https://github.com/TamQuocSat-LangKhach/QSanguosha-QuocChien.git",
     "commit": "ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f",
     "release": "2.3.43-beta2"
   },
-  "scope": "Game d2e6a6d279b74f4f5d3a47ca6046bf2f86356511 adds33 shared GameRule recovery cases and strengthens actual standalone Draw recovery. Full3010/113/typecheck/build, source reviews0/0. Group1 and complete Room/profile/publicv3/nativefullmatch remain unclosed."
+  "scope": "Game cba5e7dfcb6906b4eb679942c1542aee2dd3693b adds32 Proceeding recovery cases with captured dispatch and preserved legacy JSON behavior. Full3042/114/typecheck/build, source reviews0/0. Group1 and complete Room/profile/publicv3/nativefullmatch remain unclosed."
 }

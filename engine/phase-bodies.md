@@ -41,3 +41,7 @@ Private continuations retain captured choices/lord eligibility/accepted answers,
 ## Later Discard slice
 
 [M1.3.4b.3](discard-phase.md) supplies the required discard-phase and mandatory hand-discard operations at its own inspected revision. Earlier missing-Discard statements refer to their historical inputs. The complete composed match and match-v3 owner are still pending.
+
+## Later Proceeding owner recovery
+
+The [M1.3.5c.2i contract](phase-proceeding-save.md) captures dispatch choice for opted-in profiles while keeping legacy boolean/no-hook behavior. Earlier missing-owner claims apply to their pinned revision; remaining phase/startup/battle bodies, full profiles/Room/public-v3 and release gates stay separate.

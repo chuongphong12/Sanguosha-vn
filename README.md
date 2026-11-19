@@ -125,3 +125,7 @@ Publication of a knowledge revision does not establish publication of the corres
 ## Shared GameRule bridge recovery subset
 
 [M1.3.5c.2h](engine/game-rule-save.md) validates bridge occurrences and captured operation handoffs. Remaining owner/profile/Room/public-v3 and release gates stay open.
+
+## Shared Proceeding owner recovery subset
+
+[M1.3.5c.2i](engine/phase-proceeding-save.md) captures the selected body for opted-in profiles and composes actual shared-bridge/Draw recovery. Remaining owner/profile/Room/public-v3 and release gates remain open.
