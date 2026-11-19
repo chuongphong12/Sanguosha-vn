@@ -8,17 +8,28 @@ import type {
   TriggerOperation,
 } from "./scheduler";
 
+export type GeneralRevealNotice = {
+  kind: "reveal";
+  target: string;
+  head: string;
+  deputy: string;
+};
+export interface GeneralShowSaveRules {
+  /** Pure contracts for the profile's mapped child operations; never invoke live adapters. */
+  validateLord: (target: string, operation: Readonly<TriggerOperation>) => void;
+  validateNotice: (
+    notice: Readonly<GeneralRevealNotice>,
+    operation: Readonly<TriggerOperation>,
+  ) => void;
+}
 export interface GeneralShowRules<G extends GeneralGame> {
+  /** Opt-in saved question contract; the profile must version its policy semantics. */
+  save?: GeneralShowSaveRules;
   enableLordConversion: boolean;
   canShow: (game: G, target: string, head: boolean) => boolean;
   lordAvailable: (game: Readonly<G>, target: string, name: string) => boolean;
   changeToLord: (target: string) => TriggerOperation;
-  notify: (notice: {
-    kind: "reveal";
-    target: string;
-    head: string;
-    deputy: string;
-  }) => TriggerOperation | null;
+  notify: (notice: GeneralRevealNotice) => TriggerOperation | null;
 }
 function input(game: GeneralGame, data: TriggerData) {
   if (
@@ -52,15 +63,34 @@ function shown(game: GeneralGame, target: string) {
 export function createAskGeneralShowOperation<G extends GeneralGame>(
   rules: GeneralShowRules<G>,
 ): OperationHandler<G> {
-  const { enableLordConversion, canShow, lordAvailable, changeToLord, notify } =
-    rules;
+  const {
+    enableLordConversion,
+    canShow,
+    lordAvailable,
+    changeToLord,
+    notify,
+    save,
+  } = rules;
   if (
     typeof enableLordConversion !== "boolean" ||
     [canShow, lordAvailable, changeToLord, notify].some(
       (fn) => typeof fn !== "function",
-    )
+    ) ||
+    (save !== undefined &&
+      (!save ||
+        typeof save !== "object" ||
+        Array.isArray(save) ||
+        typeof save.validateLord !== "function" ||
+        typeof save.validateNotice !== "function"))
   )
     throw Error("Invalid general-show rules");
+  const recovery =
+    save === undefined
+      ? null
+      : {
+          validateLord: save.validateLord,
+          validateNotice: save.validateNotice,
+        };
   type Cursor = {
     target: string;
     reason: string;
@@ -70,9 +100,190 @@ export function createAskGeneralShowOperation<G extends GeneralGame>(
     choice: string | null;
     changeLord: boolean;
     lordChoice: string | null;
+    notice?: GeneralRevealNotice;
   };
+  const saveHooks: Pick<
+    OperationHandler<G>,
+    "validateSave" | "validateResult"
+  > = recovery
+    ? {
+        validateSave: (game, frame, _interruption, prompt, state) => {
+          const request = input(game, frame.operation.data),
+            c = frame.continuation;
+          if (frame.cleanup) throw Error("Invalid general-show cleanup");
+          if (c === null) {
+            if (
+              prompt ||
+              frame.answer ||
+              frame.child ||
+              frame.operationChild ||
+              state?.child
+            )
+              throw Error("Invalid initial general-show work");
+            return;
+          }
+          if (
+            !c ||
+            typeof c !== "object" ||
+            Array.isArray(c) ||
+            c.target !== request.target ||
+            c.reason !== request.reason ||
+            c.change !== request.change ||
+            typeof c.stage !== "number" ||
+            ![1, 2, 3, 4, 5, 7, 8, 9].includes(c.stage) ||
+            Object.keys(c).length !== (c.stage === 5 ? 9 : 8) ||
+            !Array.isArray(c.choices) ||
+            ![
+              ["cancel"],
+              ["show_head_general", "cancel"],
+              ["show_deputy_general", "cancel"],
+              ["show_head_general", "show_both_generals", "cancel"],
+              ["show_deputy_general", "show_both_generals", "cancel"],
+              [
+                "show_head_general",
+                "show_deputy_general",
+                "show_both_generals",
+                "cancel",
+              ],
+            ].some(
+              (choices) =>
+                JSON.stringify(choices) === JSON.stringify(c.choices),
+            ) ||
+            (c.choice !== null &&
+              (typeof c.choice !== "string" ||
+                !c.choices.includes(c.choice))) ||
+            typeof c.changeLord !== "boolean" ||
+            (c.changeLord && (!request.change || !enableLordConversion)) ||
+            (c.changeLord &&
+              c.choices.includes("show_both_generals") &&
+              !c.choices.includes("show_head_general")) ||
+            (c.lordChoice !== null &&
+              c.lordChoice !== "yes" &&
+              c.lordChoice !== "no")
+          )
+            throw Error("Invalid general-show cursor");
+          const head =
+            c.choice === "show_head_general" ||
+            c.choice === "show_both_generals";
+          const deputy =
+            c.choice === "show_deputy_general" ||
+            c.choice === "show_both_generals";
+          if (
+            (c.lordChoice !== null && (!c.changeLord || !head)) ||
+            (c.stage === 1
+              ? c.choice !== null || c.lordChoice !== null
+              : c.choice === null) ||
+            (c.stage === 2 && c.lordChoice !== null) ||
+            (![1, 2].includes(c.stage) && c.choice === "cancel") ||
+            ([7, 8, 9].includes(c.stage) && (!head || !c.changeLord)) ||
+            (c.stage === 7 && c.lordChoice !== null) ||
+            (c.stage === 8 && c.lordChoice === null) ||
+            (c.stage === 9 && c.lordChoice !== "yes") ||
+            (c.stage === 3 &&
+              (!head || (c.changeLord && c.lordChoice === null))) ||
+            (c.stage === 4 && !deputy)
+          )
+            throw Error("Invalid general-show decision");
+          let notice: GeneralRevealNotice | null = null;
+          if (c.stage === 5) {
+            const n = c.notice;
+            if (
+              !n ||
+              typeof n !== "object" ||
+              Array.isArray(n) ||
+              Object.keys(n).length !== 4 ||
+              n.kind !== "reveal" ||
+              n.target !== request.target ||
+              typeof n.head !== "string" ||
+              typeof n.deputy !== "string"
+            )
+              throw Error("Invalid captured reveal notice");
+            notice = {
+              kind: "reveal",
+              target: request.target,
+              head: n.head,
+              deputy: n.deputy,
+            };
+          }
+          if (c.stage === 1 || c.stage === 7) {
+            const choices = c.stage === 1 ? c.choices : ["yes", "no"];
+            if (
+              frame.child ||
+              frame.operationChild ||
+              state?.child ||
+              (prompt &&
+                (prompt.actor !== request.target ||
+                  prompt.canCancel ||
+                  JSON.stringify(prompt.choices.map((choice) => choice.id)) !==
+                    JSON.stringify(choices))) ||
+              (frame.answer && !choices.includes(frame.answer.choice)) ||
+              (!prompt && !frame.answer && !state?.abandoning)
+            )
+              throw Error("Invalid general-show prompt");
+            return;
+          }
+          if (prompt || frame.answer)
+            throw Error("Unexpected general-show answer");
+          const queued = state?.child;
+          if (c.stage === 2 || c.stage === 8) {
+            if (frame.operationChild || (queued && queued.kind !== "event"))
+              throw Error("Invalid general-show event child");
+            const event =
+              queued?.kind === "event" ? queued.event : frame.child?.event;
+            if (!event) {
+              if (!state?.abandoning) throw Error("Missing ChoiceMade child");
+            } else if (
+              event.name !== "ChoiceMade" ||
+              event.target !== request.target
+            )
+              throw Error("Invalid ChoiceMade child");
+            return;
+          }
+          if (frame.child || (queued && queued.kind !== "operation"))
+            throw Error("Invalid general-show operation child");
+          const pending =
+            queued?.kind === "operation"
+              ? queued.operation
+              : frame.operationChild?.operation;
+          if (!pending) {
+            if (!state?.abandoning)
+              throw Error("Missing general-show operation");
+            return;
+          }
+          if (c.stage === 9)
+            recovery.validateLord(request.target, structuredClone(pending));
+          else if (c.stage === 5 && notice)
+            recovery.validateNotice(
+              structuredClone(notice),
+              structuredClone(pending),
+            );
+          else {
+            const d = pending.data;
+            if (
+              pending.name !== "show-general" ||
+              !d ||
+              typeof d !== "object" ||
+              Array.isArray(d) ||
+              Object.keys(d).length !== 5 ||
+              d.target !== request.target ||
+              d.head !== (c.stage === 3) ||
+              d.triggerEvent !== true ||
+              d.sendLog !== false ||
+              d.ignoreRule !== true
+            )
+              throw Error("Invalid show-general child");
+          }
+        },
+        validateResult: (game, result) => {
+          input(game, result.operation.data);
+          if (typeof result.value !== "boolean")
+            throw Error("Invalid general-show result");
+        },
+      }
+    : {};
   return {
     name: "ask-general-show",
+    ...saveHooks,
     validate: (game, op) => {
       input(game, op.data);
     },
@@ -179,14 +390,18 @@ export function createAskGeneralShowOperation<G extends GeneralGame>(
             break;
           case 4: {
             const names = game.displayedGenerals[c.target];
-            const operation = notify({
+            const notice: GeneralRevealNotice = {
               kind: "reveal",
               target: c.target,
               head: names.head,
               deputy: names.deputy,
-            });
-            if (operation)
+            };
+            const captured = recovery ? structuredClone(notice) : null;
+            const operation = notify(notice);
+            if (operation) {
+              if (captured) c.notice = captured;
               return { kind: "operation", operation, continuation: c };
+            }
             break;
           }
           case 5:
