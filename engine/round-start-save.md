@@ -19,3 +19,7 @@ Cases cover native literal mark vectors, captured true/false after mark/phase mu
 Baseline70/2, finalfocused104/3, full3076/115; typecheck/build pass; lint0 errors/42 prior warnings. Source Standards0/Spec0 at 7503c9dc946aaa2be33cdea7eb9389da91940654; Spec independently ran104/104 related cases. Existing callbacks match base after folding saveRoundStart=false, including unchanged existing Proceeding behavior; the opt-in request metadata intentionally differs. The complete emitted scheduler interpreter is unchanged.
 
 Actual acquisition/reveal/lord/notification codecs, Judge/remaining phase/startup/battle owners, aggregate Room/configuration/root decoding, public match v3 and full-match/release gates remain open. Keep one shared Proceeding bridge. This advances Group1 without completing it; PR33 remains draft and no main merge/cutover occurs.
+
+## Later general-show question recovery
+
+The [M1.3.5c.2k contract](ask-general-show-save.md) now composes actual question/ChoiceMade recovery with shared owners. Earlier acquisition-fixture claims apply to their pinned revision; show/lord/notification children still use fixtures in the new tests, and complete profiles/Room/public-v3/release acceptance remains separate.

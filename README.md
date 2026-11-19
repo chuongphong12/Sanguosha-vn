@@ -133,3 +133,7 @@ Publication of a knowledge revision does not establish publication of the corres
 ## RoundStart owner recovery subset
 
 [M1.3.5c.2j](engine/round-start-save.md) captures the reveal-request decision for opted-in profiles. Actual acquisition/reveal codecs, remaining owners/Room/public-v3 and release gates remain open.
+
+## General-show question recovery subset
+
+[M1.3.5c.2k](engine/ask-general-show-save.md) adds actual question/ChoiceMade recovery with pure child contracts and captured notice metadata. Actual show/lord/notification codecs, remaining owners/Room/public-v3 and release gates remain open.

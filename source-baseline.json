@@ -2,13 +2,13 @@
   "version": 1,
   "game": {
     "repository": "https://github.com/chuongphong12/Sanguosha-vn.git",
-    "commit": "590c161c2d540f87abd1e1319c2f49fc805f6c80",
-    "availability": "Opt-in RoundStart owner recovery subset; actual acquisition/reveal and Group1/remaining owners/Room/public v3/release gates pending"
+    "commit": "d7b6cb0c3ba1a62a880aedbedccb6ec51cec8e89",
+    "availability": "Opt-in actual general-show question/ChoiceMade recovery subset; actual child codecs and remaining owners/Room/public v3/release gates pending"
   },
   "native": {
     "repository": "https://github.com/TamQuocSat-LangKhach/QSanguosha-QuocChien.git",
     "commit": "ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f",
     "release": "2.3.43-beta2"
   },
-  "scope": "Game 590c161c2d540f87abd1e1319c2f49fc805f6c80 adds34 RoundStart owner recovery cases with captured decision, fixture acquisition and preserved legacy JSON. Full3076/115/typecheck/build, source reviews0/0. Actual reveal and complete Room/profile/publicv3/nativefullmatch remain unclosed."
+  "scope": "Game d7b6cb0c3ba1a62a880aedbedccb6ec51cec8e89 adds92 question recovery cases with actual shared owners and explicit show/lord/notification fixtures. Full3168/116/typecheck/build, source reviews0/0. Full raw callback AST equivalence, actual child recovery and complete Room/profile/publicv3/nativefullmatch are not certified."
 }

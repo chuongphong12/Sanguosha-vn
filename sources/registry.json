@@ -2033,6 +2033,30 @@
       "checked_on": "2026-11-19",
       "author": null,
       "business_owner": null
+    },
+    {
+      "id": "web.m135c2k.handler.d7b6cb0",
+      "kind": "primary_code",
+      "repository": "https://github.com/chuongphong12/Sanguosha-vn",
+      "revision": "d7b6cb0c3ba1a62a880aedbedccb6ec51cec8e89",
+      "path": "src/game/hegemony/ask-general-show.ts",
+      "url": "https://github.com/chuongphong12/Sanguosha-vn/blob/d7b6cb0c3ba1a62a880aedbedccb6ec51cec8e89/src/game/hegemony/ask-general-show.ts",
+      "locator": "Opt-in question cursor/prompt/ChoiceMade/mapped-child validation and captured notice; legacy format preserved",
+      "checked_on": "2026-11-19",
+      "author": null,
+      "business_owner": null
+    },
+    {
+      "id": "web.m135c2k.tests.d7b6cb0",
+      "kind": "test_code",
+      "repository": "https://github.com/chuongphong12/Sanguosha-vn",
+      "revision": "d7b6cb0c3ba1a62a880aedbedccb6ec51cec8e89",
+      "path": "tests/hegemony/ask-general-show-save.test.ts",
+      "url": "https://github.com/chuongphong12/Sanguosha-vn/blob/d7b6cb0c3ba1a62a880aedbedccb6ec51cec8e89/tests/hegemony/ask-general-show-save.test.ts",
+      "locator": "92 question/ChoiceMade/shared-owner recovery cases with explicit child fixtures, legacy JSON and cross-field RED regression",
+      "checked_on": "2026-11-19",
+      "author": null,
+      "business_owner": null
     }
   ],
   "pages": [
@@ -2521,6 +2545,20 @@
       "source_ids": [
         "web.m135c2j.handler.590c161",
         "web.m135c2j.tests.590c161"
+      ]
+    },
+    {
+      "path": "engine/ask-general-show-save.md",
+      "status": "supported",
+      "reviewed_on": "2026-11-19",
+      "review_scope": "Actual question/ChoiceMade recovery; actual show/lord/notice children and remaining Group1/Room/profile/publicv3 pending",
+      "applies_to": {
+        "game_commit": "d7b6cb0c3ba1a62a880aedbedccb6ec51cec8e89",
+        "native_commit": "ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f"
+      },
+      "source_ids": [
+        "web.m135c2k.handler.d7b6cb0",
+        "web.m135c2k.tests.d7b6cb0"
       ]
     }
   ],
@@ -4118,6 +4156,24 @@
         "web.m135c2j.tests.590c161"
       ],
       "scope": "Opt-in RoundStart owner recovery; actual acquisition/reveal and remaining Group1/Room/profile/publicv3 pending"
+    },
+    {
+      "subject": "page:engine/ask-general-show-save.md",
+      "predicate": "derived_from",
+      "object": "source:web.m135c2k.handler.d7b6cb0",
+      "evidence": [
+        "web.m135c2k.handler.d7b6cb0"
+      ],
+      "scope": "Actual question/ChoiceMade recovery; actual show/lord/notice children and remaining Group1/Room/profile/publicv3 pending"
+    },
+    {
+      "subject": "page:engine/ask-general-show-save.md",
+      "predicate": "derived_from",
+      "object": "source:web.m135c2k.tests.d7b6cb0",
+      "evidence": [
+        "web.m135c2k.tests.d7b6cb0"
+      ],
+      "scope": "Actual question/ChoiceMade recovery; actual show/lord/notice children and remaining Group1/Room/profile/publicv3 pending"
     }
   ]
 }
