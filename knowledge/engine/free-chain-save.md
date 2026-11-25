@@ -1,0 +1,19 @@
+# Opt-in free-chain recovery
+
+M1.3.5c.2f at game [2e1972108e11873338468a20dc28ca9a4f896a65](https://github.com/chuongphong12/Sanguosha-vn/blob/2e1972108e11873338468a20dc28ca9a4f896a65/src/game/hegemony/general-rewards.ts), fixed base 8382cd6cb5c37b2174182fc00a37a4db23133226, follows [approved C2](../specs/hegemony-match-v3-save.md). Native authority remains ce4e62b31c4d1a65de79188be11ccdd4f0ac6f9f/2.3.43-beta2. See [live rewards](reveal-rewards-and-tokens.md), [actual kill recovery](kill-save.md) and [checkpoint](../reviews/2026-11-16-hegemony-m135c2f-free-chain-save.md).
+
+## Cursor and adapter contract
+
+Optional FreeChainRules.validateKillSave(target,operation) enables save hooks and capture of the original living surrender in killed.killTarget. The validator is captured at factory construction; the live mapper is never called by decoding. A profile must version its opt-in and adapter/predicate semantics. Legacy profiles keep their original four-field cursors and no save hooks; incomplete codec coverage rejects rather than inventing a kill target from current surrender state.
+
+Only killed/showed persist. Killed has five keys: stage/players/target/shown plus killTarget. Its prior-reveal fields are either the initial empty triplet or a complete captured reveal cursor. Showed has four keys and no killTarget. Before scanning/queuing a reveal, opted-in runtime clears the pending-kill metadata. A prior reveal may already have been awarded before a later surrender begins; stale reveal metadata is retained in killed exactly as the live owner does.
+
+A captured reveal uses the raw registered roster, its known recipient and head/deputy slots in native order (head, deputy, or both). Active showed work requires a queued/completed GeneralShowed with matching target; event consumption/rewrites do not replace the captured slots. Killed work requires a known captured killTarget and queued/completed operation accepted by the explicit pure mapper validator. Current surrender/life/marks are not substituted for historical decisions. Missing children are allowed only for genuinely abandoned unwind frames. Direct prompt/answer/cleanup and mismatched child kinds reject; retained results must be null. The operation's own input remains ignored, matching live behavior.
+
+The decoder never runs award, companion or maxHp predicates. Award still reads current identity/pair metadata on live resume; this is intentionally distinct from the captured recipient/slots. The optional metadata path changes runFree intentionally; legacy default behavior is regression-tested. The award function AST and complete emitted scheduler interpreter remain equal to base. There is no implicit old-profile migration or production activation.
+
+## Evidence and limits
+
+[34 new cases](https://github.com/chuongphong12/Sanguosha-vn/blob/2e1972108e11873338468a20dc28ca9a4f896a65/tests/hegemony/free-chain-save.test.ts) compose actual free-chain and kill-player/scheduler/unwind through JSON/read/resume/continue. With a fully shown pair and sum HP3+4, the fixture grants firstshow/companion/halfmaxhp once. Predicate counters stay zero on read, then run once per actual grant. Cases cover a changed surrender during real kill, nested drains, requeue, rewritten/consumed reveal data, prompt, recipient killed during reveal, dead/empty queues, legacy formats, malformed cursors/children/results and interrupted reward/kill paths at budgets1/2/7/10000.
+
+Fixture companion/maxHP/mapping and observer/event/owner policies are explicit. Actual death GameRule/burial/reward package registration, complete general/package discovery, Draw-phase/startup/battle profile codecs, aggregate Room/configuration/root decoding, public v3 and release gates remain open. This checkpoint advances Group1; it does not complete Group1 or certify a playable release. PR33 stays draft.
