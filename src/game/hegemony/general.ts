@@ -17,6 +17,13 @@ import type {
 } from "./scheduler";
 
 export interface GeneralRules<G extends GeneralGame> {
+  /** Opt-in reveal recovery; profiles must version their mapped child semantics. */
+  saveShow?: {
+    validateChild: (
+      reveal: Readonly<ShowGeneralContinuation>,
+      operation: Readonly<TriggerOperation>,
+    ) => void;
+  };
   canShow: (game: G, target: string, head: boolean) => boolean;
   preshow: (
     target: string,
@@ -73,6 +80,9 @@ type Cursor = ReturnType<typeof input> & {
     | "finished";
   name: string;
   first: boolean;
+};
+export type ShowGeneralContinuation = Omit<Cursor, "stage"> & {
+  stage: Exclude<Cursor["stage"], "finished">;
 };
 function runShow<G extends GeneralGame>(
   { game, operation, continuation }: OperationContext<G>,
@@ -170,8 +180,98 @@ function runShow<G extends GeneralGame>(
 export function createShowGeneralOperation<G extends GeneralGame>(
   rules: GeneralRules<G>,
 ): OperationHandler<G> {
+  const save = rules.saveShow;
+  if (
+    save !== undefined &&
+    (!save ||
+      typeof save !== "object" ||
+      Array.isArray(save) ||
+      typeof save.validateChild !== "function")
+  )
+    throw Error("Invalid show-general save rules");
+  const validateChild = save?.validateChild;
+  const saveHooks: Pick<
+    OperationHandler<G>,
+    "validateSave" | "validateResult"
+  > = validateChild
+    ? {
+        validateSave: (game, frame, _interruption, prompt, state) => {
+          const request = input(game, frame.operation.data),
+            c = frame.continuation;
+          if (frame.cleanup || prompt || frame.answer)
+            throw Error("Invalid show-general work");
+          if (c === null) {
+            if (frame.child || frame.operationChild || state?.child)
+              throw Error("Invalid initial show-general child");
+            return;
+          }
+          if (
+            !c ||
+            typeof c !== "object" ||
+            Array.isArray(c) ||
+            Object.keys(c).length !== 8 ||
+            c.target !== request.target ||
+            c.head !== request.head ||
+            c.triggerEvent !== request.triggerEvent ||
+            c.sendLog !== request.sendLog ||
+            c.ignoreRule !== request.ignoreRule ||
+            typeof c.first !== "boolean" ||
+            typeof c.name !== "string" ||
+            typeof c.stage !== "string" ||
+            ![
+              "preshown",
+              "changed",
+              "skills",
+              "notified",
+              "event",
+              "filtered",
+            ].includes(c.stage)
+          )
+            throw Error("Invalid show-general cursor");
+          // Catalogue identity is profile-bound; mutable displayed/actual names and
+          // shown flags can already have changed inside a child or event hook.
+          generalDefinition(game, c.name);
+          const queued = state?.child;
+          if (c.stage === "event") {
+            if (frame.operationChild || (queued && queued.kind !== "event"))
+              throw Error("Invalid show-general event work");
+            const event =
+              queued?.kind === "event" ? queued.event : frame.child?.event;
+            if (!event) {
+              if (!state?.abandoning) throw Error("Missing show-general event");
+            } else if (
+              event.name !==
+                (request.triggerEvent ? "GeneralShown" : "DFDebut") ||
+              event.target !== request.target
+            )
+              throw Error("Invalid show-general event");
+            // Event data can be rewritten/consumed by native trigger handlers.
+            return;
+          }
+          if (frame.child || (queued && queued.kind !== "operation"))
+            throw Error("Invalid show-general child kind");
+          const pending =
+            queued?.kind === "operation"
+              ? queued.operation
+              : frame.operationChild?.operation;
+          if (!pending) {
+            if (!state?.abandoning) throw Error("Missing show-general child");
+            return;
+          }
+          validateChild(
+            structuredClone(c) as ShowGeneralContinuation,
+            structuredClone(pending),
+          );
+        },
+        validateResult: (game, result) => {
+          input(game, result.operation.data);
+          if (result.value !== null) throw Error("Invalid show-general result");
+        },
+      }
+    : {};
   return {
     name: "show-general",
+    ...saveHooks,
     validate: (game, operation) => {
       input(game, operation.data);
     },
