@@ -92,3 +92,5 @@ M1.3.5c.2i appends immutable implementation/test sources for [opt-in shared Proc
 M1.3.5c.2j appends immutable implementation/test sources for [opt-in RoundStart owner recovery](../engine/round-start-save.md); actual acquisition/reveal and full factory/profile/Room acceptance remain separate.
 
 M1.3.5c.2k appends immutable implementation/test sources for [general-show question recovery](../engine/ask-general-show-save.md); actual show/lord/notification and full profile/Room acceptance remain separate.
+
+C2l appends immutable implementation/test sources for [actual general reveal recovery](../engine/show-general-save.md); mapped package/presentation and full profile/Room acceptance remain separate.

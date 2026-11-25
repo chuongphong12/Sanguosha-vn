@@ -32,3 +32,7 @@ Show-general, lord-conversion and notification child bodies/codecs are explicitl
 Baseline72/2; finalfocused164/3; full3168/116, typecheck/build pass; lint0 errors/42 prior warnings. Initial Spec finding on contradictory offer/lord eligibility was RED-confirmed and fixed; final source Standards0/Spec0 at 2e6ae78dbf3b48f75079c1e9ee70cff9f9664021. Spec independently ran164/164 related tests. Legacy JSON behavior is compared across primary paths plus positive lord conversion/notification, preserving eight-field format. Notification case4 extraction/capture intentionally changes its AST; preservation proofs exclude that case and rely on paired behavior tests there. The complete emitted scheduler is unchanged.
 
 Actual show/lord/notification codecs, Judge/remaining phase/startup/battle owners, aggregate Room/configuration/root decoding, public match v3 and full-match/release gates remain open. Keep one shared Proceeding bridge. Group1 remains in progress; PR33 stays draft, with no main merge/cutover.
+
+## Later actual general reveal owner recovery
+
+The [C2l contract](show-general-save.md) adds opt-in actual show-general recovery. Earlier fixture claims retain their pinned revision; the new composed test uses real reveal owners while mapped package/presentation children remain fixtures. Complete profiles/Room/public-v3/release acceptance remains pending.

@@ -250,3 +250,11 @@ Independent canonical Standards0/Spec0 reviewed the15-file draft at treeea7e3076
 - Input knowledge 791f7216fe2447d23a58fa1dc06ca485666cddf9; source d7b6cb0c3ba1a62a880aedbedccb6ec51cec8e89, base e147e4c4156835dfec25ad163e23d3e54f8445d7. [Contract](engine/ask-general-show-save.md)/[checkpoint](reviews/2026-11-19-hegemony-m135c2k-ask-general-show-save.md) record pure mapped-child contracts, saved prompts/decisions/notice and actual question/ChoiceMade composition, with explicit child-fixture limits.
 - Baseline72/2, finalfocused164/3 (92new), full3168/116/typecheck/build; lint42 prior warnings. Initial cross-field finding was RED-confirmed/fixed; final source reviews0/0 at 2e6ae78dbf3b48f75079c1e9ee70cff9f9664021. Bounded AST/scheduler receipts and matching dual-graph hashes retained; full raw AST equivalence not claimed and factory UNKNOWN remains explicit.
 - Two immutable sources/one page/two relations append without rewriting prior identities. Canonical lint/reviews/publication/imported CI are separate gates. Group1 remains in progress.
+
+## [2026-11-25] ingest | M1.3.5c.2l general reveal owner recovery
+
+- Input knowledge de2a8655cc3df481acd54b3c08ed6167946db4ac; source 4b9a78541c82f36a1348a962fb1567800a708db5, base 9f376b752d95a5e4c4d7fba12747a153d601cdf5. [Contract](engine/show-general-save.md)/[checkpoint](reviews/2026-11-25-hegemony-m135c2l-show-general-save.md) distinguish actual identity/reveal owners from mapped package/presentation fixtures.
+- Baseline204/3, focused260/4 (56new), full3224/117/typecheck/build; lint42 prior warnings; source reviews0/0 at e4168748a98afa34ee846038b8afb2dabf33b1bc. Runtime AST/scheduler preservation and matching graph hashes retained; factory UNKNOWN remains explicit.
+- Appended2immutable sources/1page/2relations; prior identities preserved. Publication/import/remote CI are separate receipts. Group1 remains in progress.
+
+C2l delivery receipt: source CI45534713885 passed; canonical reference checks0errors (163Markdown/1033relative links/630pinned citations), registry171/27/179 preserved. Draft Standards0/Spec0; receipt-only final delta is reviewed separately before publication/import.
