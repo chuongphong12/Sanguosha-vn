@@ -137,3 +137,7 @@ Publication of a knowledge revision does not establish publication of the corres
 ## General-show question recovery subset
 
 [M1.3.5c.2k](engine/ask-general-show-save.md) adds actual question/ChoiceMade recovery with pure child contracts and captured notice metadata. Actual show/lord/notification codecs, remaining owners/Room/public-v3 and release gates remain open.
+
+## General reveal owner recovery subset
+
+[M1.3.5c.2l](engine/show-general-save.md) adds actual show-general recovery and composes the real question/reveal owners. Package/presentation child codecs, remaining owners/Room/public-v3 and release gates remain open.

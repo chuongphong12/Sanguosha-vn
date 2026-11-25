@@ -83,3 +83,5 @@ Original game paths and blob identities are recorded in the [migration manifest]
 - [2026-11-19 RoundStart owner recovery](2026-11-19-hegemony-m135c2j-round-start-save.md):34 new cases; actual shared owners with explicitly fixture acquisition; captured mark decision/legacy JSON/standalone opt-in, actual reveal/Room/release pending.
 
 - [2026-11-19 general-show question recovery](2026-11-19-hegemony-m135c2k-ask-general-show-save.md):92 new cases; actual question/ChoiceMade/shared owners, captured eligibility/notice, explicit child fixtures and legacy JSON; child/Room/release gates pending.
+
+- [2026-11-25 actual general reveal owner recovery](2026-11-25-hegemony-m135c2l-show-general-save.md):56 new tests; actual identity/reveal lifecycle and composed question owners, with explicit mapped-child fixtures and remaining Group1 gates.

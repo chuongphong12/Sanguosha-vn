@@ -129,3 +129,7 @@ The [movement save codec](../engine/movement-save.md) validates actual physical 
 ## M1.3.5c.2k progress
 
 [General-show question recovery](../engine/ask-general-show-save.md) now validates saved prompts/decisions/ChoiceMade/mapped children and composes actual shared owners. Actual show/lord/notification codecs, Judge/remaining owners, aggregate Room/configuration/root decoding and public v3 remain Group1 work. No playable-release gate closes.
+
+## M1.3.5c.2l progress
+
+[General reveal owner recovery](../engine/show-general-save.md) adds the actual show-general codec and real composed question/reveal ownership. Mapped package/presentation, lord/notice/hide and remaining handlers/Room/public-v3/release acceptance remain open.

@@ -67,3 +67,7 @@ The [M1.3.5c.2j contract](round-start-save.md) captures the request change decis
 ## Later general-show question recovery
 
 The [M1.3.5c.2k contract](ask-general-show-save.md) now composes actual question/ChoiceMade recovery with shared owners. Earlier acquisition-fixture claims apply to their pinned revision; show/lord/notification children still use fixtures in the new tests, and complete profiles/Room/public-v3/release acceptance remains separate.
+
+## Later actual general reveal owner recovery
+
+The [C2l contract](show-general-save.md) adds opt-in actual show-general recovery. Earlier fixture claims retain their pinned revision; the new composed test uses real reveal owners while mapped package/presentation children remain fixtures. Complete profiles/Room/public-v3/release acceptance remains pending.

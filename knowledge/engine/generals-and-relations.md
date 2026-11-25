@@ -35,3 +35,7 @@ Initial and final refilters are separate adapter calls over current resources. D
 `generalRoomLord` implements Room::getLord: first displayed-head lord in raw registration with current kingdom and requested dead inclusion. It does not return actual-hidden lord self merely because Player::getLord does. Keep Room lookup, Player lookup and resolved isLord distinct.
 
 Death winner/reward, post-burial lord conversion and careerist seeming identity consume pure copied-state hasShown callbacks, bound to this authority in general fixtures. A recruited player may keep both slots hidden while scenario identity enables ally punishment and group victory. Slot-specific forced reveal remains slot-specific. These corrections resolve the earlier slot-only authority gap for the implemented private consumers; they do not supply production synchronization, public projection, executable package content, remove/transform-general or transport.
+
+## Later actual general reveal owner recovery
+
+The [C2l contract](show-general-save.md) adds opt-in actual show-general recovery. Earlier fixture claims retain their pinned revision; the new composed test uses real reveal owners while mapped package/presentation children remain fixtures. Complete profiles/Room/public-v3/release acceptance remains pending.
